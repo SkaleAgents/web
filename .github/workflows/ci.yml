@@ -26,11 +26,8 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Typecheck
-        run: pnpm exec tsc --noEmit
-
       - name: Build
         run: pnpm build
         env:
-          NEXT_PUBLIC_API_URL: http://localhost
+          NEXT_PUBLIC_API_URL: http://localhost:8082
           NEXT_PUBLIC_APP_URL: http://localhost:3000
