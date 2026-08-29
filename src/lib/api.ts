@@ -63,3 +63,33 @@ export type AuthSession = {
   token: string;
   user: ApiUser;
 };
+
+export type Specialty =
+  | "devops"
+  | "devsecops"
+  | "sre"
+  | "mlops"
+  | "scaling"
+  | "general";
+
+export type Bot = {
+  id: string;
+  ownerUserId: string;
+  name: string;
+  description: string;
+  specialty: Specialty;
+  promptBody: string;
+  visibility: "public" | "private";
+  status: "draft" | "published";
+  createdAt: string;
+  updatedAt: string;
+};
+
+export const SPECIALTIES: Specialty[] = [
+  "devops",
+  "devsecops",
+  "sre",
+  "mlops",
+  "scaling",
+  "general",
+];
