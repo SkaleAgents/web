@@ -40,6 +40,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       await ensureCsrfCookie();
       await apiFetch("/api/auth/logout", { method: "POST", body: "{}" });
       queryClient.setQueryData(["user"], null);
+      void queryClient.removeQueries({ queryKey: ["prompts"] });
       toast.success("Signed out");
       router.push("/app/login");
     } catch (e) {

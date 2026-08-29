@@ -39,7 +39,7 @@ export default function PromptsPage() {
   });
 
   const promptsQuery = useQuery({
-    queryKey: ["prompts"],
+    queryKey: ["prompts", userQuery.data?.id ?? "guest"],
     queryFn: async () => {
       const data = await apiFetch<{ prompts: Prompt[] }>("/api/prompts");
       return data.prompts;
