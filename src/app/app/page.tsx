@@ -1,17 +1,27 @@
+import Link from "next/link";
+
 export default function AppHome() {
   return (
-    <main className="mx-auto flex min-h-full max-w-3xl flex-col gap-4 px-6 py-12">
-      <p className="text-sm text-zinc-500">app</p>
-      <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">
-        SkaleAgents
-      </h1>
-      <p className="text-zinc-600">
-        Product shell scaffold. Auth and bot directory come next — API at{" "}
-        <code className="rounded bg-zinc-100 px-1 text-sm">
-          {process.env.NEXT_PUBLIC_API_URL ?? "http://localhost"}
-        </code>
-        .
+    <main className="space-y-4">
+      <h1 className="text-3xl font-semibold tracking-tight">Home</h1>
+      <p className="text-zinc-600 dark:text-zinc-400">
+        Soft client navigation + TanStack Query cache (Q25–Q26). Auth is mock
+        Grok via Laravel Sanctum cookies.
       </p>
+      <div className="flex gap-3 text-sm">
+        <Link
+          href="/app/login"
+          className="rounded-md bg-zinc-900 px-3 py-2 text-white dark:bg-zinc-100 dark:text-zinc-900"
+        >
+          Sign in
+        </Link>
+        <Link
+          href="/app/bots"
+          className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-600"
+        >
+          Bots (placeholder)
+        </Link>
+      </div>
     </main>
   );
 }
