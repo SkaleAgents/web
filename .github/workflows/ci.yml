@@ -24,8 +24,21 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Unit tests
+        run: pnpm test
+
       - name: Build
         run: pnpm build
         env:
           NEXT_PUBLIC_API_URL: http://localhost:8082
           NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: E2E smokes
+        run: pnpm test:e2e
+        env:
+          CI: "true"
+          NEXT_PUBLIC_API_URL: http://localhost:8082
+          NEXT_PUBLIC_APP_URL: http://127.0.0.1:3100

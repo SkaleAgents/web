@@ -12,6 +12,7 @@ import {
   type ApiUser,
   type Prompt,
 } from "@/lib/api";
+import { parsePromptTags } from "@/lib/tags";
 
 const schema = z.object({
   title: z.string().min(1, "Title required"),
@@ -54,10 +55,7 @@ export default function PromptsPage() {
   const create = useMutation({
     mutationFn: async (values: FormValues) => {
       await ensureCsrfCookie();
-      const tags = values.tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean);
+      const tags = parsePromptTags(values.tags);
       return apiFetch<Prompt>("/api/prompts", {
         method: "POST",
         body: JSON.stringify({
