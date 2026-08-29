@@ -23,6 +23,13 @@ With Sail API on `:8082` and `NEXT_PUBLIC_API_URL=http://localhost:8082`:
 2. Submit mock code + display name → CSRF cookie + `POST /api/auth/grok/callback`
 3. Shell loads `GET /api/user` via TanStack Query (~45s `staleTime`, refetch on focus)
 
+## Tests
+
+```bash
+pnpm test          # Vitest unit
+pnpm build && pnpm test:e2e   # Playwright page smokes (needs Chromium once: pnpm exec playwright install chromium)
+```
+
 ## Stack
 
 - Next.js App Router + TanStack Query + react-hook-form/Zod + sonner + next-themes
