@@ -8,7 +8,8 @@ import { apiFetch, type ApiUser, ensureCsrfCookie } from "@/lib/api";
 
 const nav = [
   { href: "/app", label: "Home" },
-  { href: "/app/bots", label: "Bots" },
+  { href: "/app/bots", label: "Directory" },
+  { href: "/app/studio", label: "Studio" },
   { href: "/app/login", label: "Sign in" },
 ];
 
