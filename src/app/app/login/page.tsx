@@ -11,6 +11,7 @@ import {
   ensureCsrfCookie,
   type AuthSession,
 } from "@/lib/api";
+import { Button, FieldLabel, TextInput } from "@/components/ui";
 
 const schema = z.object({
   code: z.string().min(1, "Enter a mock code"),
@@ -48,10 +49,10 @@ export default function LoginPage() {
   return (
     <main className="mx-auto max-w-md space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-ink">
           Sign in with Grok Bot
         </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-1 text-sm text-ink-muted">
           Phase 1 mock OAuth — any non-empty code works.
         </p>
       </div>
@@ -59,37 +60,27 @@ export default function LoginPage() {
         className="space-y-4"
         onSubmit={form.handleSubmit((values) => login.mutate(values))}
       >
-        <label className="block space-y-1 text-sm">
-          <span>Mock code</span>
-          <input
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-            {...form.register("code")}
-          />
+        <label className="block space-y-1">
+          <FieldLabel>Mock code</FieldLabel>
+          <TextInput {...form.register("code")} />
           {form.formState.errors.code && (
-            <span className="text-red-600">
+            <span className="text-sm text-danger">
               {form.formState.errors.code.message}
             </span>
           )}
         </label>
-        <label className="block space-y-1 text-sm">
-          <span>Display name</span>
-          <input
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-            {...form.register("displayName")}
-          />
+        <label className="block space-y-1">
+          <FieldLabel>Display name</FieldLabel>
+          <TextInput {...form.register("displayName")} />
           {form.formState.errors.displayName && (
-            <span className="text-red-600">
+            <span className="text-sm text-danger">
               {form.formState.errors.displayName.message}
             </span>
           )}
         </label>
-        <button
-          type="submit"
-          disabled={login.isPending}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900"
-        >
+        <Button type="submit" disabled={login.isPending}>
           {login.isPending ? "Signing in…" : "Continue"}
-        </button>
+        </Button>
       </form>
     </main>
   );

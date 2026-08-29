@@ -1,26 +1,23 @@
-import Link from "next/link";
+import { LinkButton } from "@/components/ui";
 
 export default function AppHome() {
   return (
     <main className="space-y-4">
-      <h1 className="text-3xl font-semibold tracking-tight">Home</h1>
-      <p className="text-zinc-600 dark:text-zinc-400">
-        Soft client navigation + TanStack Query cache (Q25–Q26). Auth is mock
-        Grok via Laravel Sanctum cookies.
+      <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
+        Home
+      </h1>
+      <p className="max-w-xl text-ink-muted">
+        Soft client navigation + TanStack Query cache. Auth is mock Grok via
+        Laravel Sanctum cookies on the API (no separate UI there).
       </p>
-      <div className="flex gap-3 text-sm">
-        <Link
-          href="/app/login"
-          className="rounded-md bg-zinc-900 px-3 py-2 text-white dark:bg-zinc-100 dark:text-zinc-900"
-        >
-          Sign in
-        </Link>
-        <Link
-          href="/app/bots"
-          className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-600"
-        >
+      <div className="flex flex-wrap gap-3">
+        <LinkButton href="/app/login">Sign in</LinkButton>
+        <LinkButton href="/app/bots" variant="secondary">
           Bot directory
-        </Link>
+        </LinkButton>
+        <LinkButton href="/app/studio" variant="secondary">
+          Studio
+        </LinkButton>
       </div>
     </main>
   );

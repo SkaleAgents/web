@@ -111,14 +111,14 @@ export default function StudioEditPage() {
   });
 
   if (botQuery.isPending) {
-    return <p className="text-sm text-zinc-500">Loading…</p>;
+    return <p className="text-sm text-ink-muted">Loading…</p>;
   }
 
   if (botQuery.isError) {
     return (
       <main className="space-y-2">
-        <h1 className="text-2xl font-semibold">Couldn’t load bot</h1>
-        <p className="text-sm text-red-600">
+        <h1 className="font-display text-2xl font-bold text-ink">Couldn’t load bot</h1>
+        <p className="text-sm text-danger">
           {botQuery.error instanceof Error
             ? botQuery.error.message
             : "Request failed"}
@@ -130,8 +130,8 @@ export default function StudioEditPage() {
   if (!bot) {
     return (
       <main className="space-y-2">
-        <h1 className="text-2xl font-semibold">Bot not found</h1>
-        <p className="text-sm text-zinc-600">
+        <h1 className="font-display text-2xl font-bold text-ink">Bot not found</h1>
+        <p className="text-sm text-ink-muted">
           It may be private to another user, or the id is wrong.
         </p>
       </main>
@@ -141,8 +141,8 @@ export default function StudioEditPage() {
   return (
     <main className="mx-auto max-w-xl space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">{bot.name}</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-ink">{bot.name}</h1>
+        <p className="mt-1 text-sm text-ink-muted">
           {bot.status} · {bot.visibility} · {bot.specialty}
         </p>
       </div>
@@ -153,11 +153,11 @@ export default function StudioEditPage() {
         <label className="block space-y-1 text-sm">
           <span>Name</span>
           <input
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-full rounded-md border border-line bg-canvas-elevated px-3 py-2"
             {...form.register("name")}
           />
           {form.formState.errors.name && (
-            <span className="text-red-600">
+            <span className="text-danger">
               {form.formState.errors.name.message}
             </span>
           )}
@@ -165,14 +165,14 @@ export default function StudioEditPage() {
         <label className="block space-y-1 text-sm">
           <span>Description</span>
           <input
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-full rounded-md border border-line bg-canvas-elevated px-3 py-2"
             {...form.register("description")}
           />
         </label>
         <label className="block space-y-1 text-sm">
           <span>Specialty</span>
           <select
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-full rounded-md border border-line bg-canvas-elevated px-3 py-2"
             {...form.register("specialty")}
           >
             {SPECIALTIES.map((s) => (
@@ -186,11 +186,11 @@ export default function StudioEditPage() {
           <span>Prompt body</span>
           <textarea
             rows={6}
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 font-mono text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-full rounded-md border border-line bg-canvas-elevated px-3 py-2 font-mono text-sm"
             {...form.register("promptBody")}
           />
           {form.formState.errors.promptBody && (
-            <span className="text-red-600">
+            <span className="text-danger">
               {form.formState.errors.promptBody.message}
             </span>
           )}
@@ -198,7 +198,7 @@ export default function StudioEditPage() {
         <label className="block space-y-1 text-sm">
           <span>Visibility</span>
           <select
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-full rounded-md border border-line bg-canvas-elevated px-3 py-2"
             {...form.register("visibility")}
           >
             <option value="private">private</option>
@@ -209,7 +209,7 @@ export default function StudioEditPage() {
           <button
             type="submit"
             disabled={save.isPending}
-            className="rounded-md border border-zinc-300 px-4 py-2 text-sm dark:border-zinc-600"
+            className="rounded-[10px] border border-line px-4 py-2 text-sm"
           >
             {save.isPending ? "Saving…" : "Save"}
           </button>
@@ -218,7 +218,7 @@ export default function StudioEditPage() {
               type="button"
               disabled={publish.isPending}
               onClick={() => publish.mutate()}
-              className="rounded-md bg-zinc-900 px-4 py-2 text-sm text-white dark:bg-zinc-100 dark:text-zinc-900"
+              className="rounded-[10px] bg-accent px-4 py-2 text-sm font-semibold text-accent-fg"
             >
               {publish.isPending ? "Publishing…" : "Publish"}
             </button>
