@@ -93,3 +93,12 @@ export const SPECIALTIES: Specialty[] = [
   "scaling",
   "general",
 ];
+
+export type Prompt = {
+  id: string;
+  ownerUserId: string | null;
+  title: string;
+  body: string;
+  tags: string[];
+  createdAt: string;
+};
