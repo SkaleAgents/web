@@ -76,26 +76,26 @@ export default function PromptsPage() {
   return (
     <main className="space-y-8">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Prompt library</h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-ink">Prompt library</h1>
+        <p className="mt-1 text-sm text-ink-muted">
           Community prompts for everyone; your own prompts when signed in.
         </p>
       </div>
 
       {userQuery.data ? (
         <form
-          className="max-w-xl space-y-3 border-b border-zinc-200 pb-8 dark:border-zinc-800"
+          className="max-w-xl space-y-3 border-b border-line pb-8"
           onSubmit={form.handleSubmit((v) => create.mutate(v))}
         >
           <h2 className="text-lg font-medium">Add a prompt</h2>
           <label className="block space-y-1 text-sm">
             <span>Title</span>
             <input
-              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="w-full rounded-md border border-line bg-canvas-elevated px-3 py-2"
               {...form.register("title")}
             />
             {form.formState.errors.title && (
-              <span className="text-red-600">
+              <span className="text-danger">
                 {form.formState.errors.title.message}
               </span>
             )}
@@ -104,11 +104,11 @@ export default function PromptsPage() {
             <span>Body</span>
             <textarea
               rows={4}
-              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 font-mono text-sm dark:border-zinc-700 dark:bg-zinc-900"
+              className="w-full rounded-md border border-line bg-canvas-elevated px-3 py-2 font-mono text-sm"
               {...form.register("body")}
             />
             {form.formState.errors.body && (
-              <span className="text-red-600">
+              <span className="text-danger">
                 {form.formState.errors.body.message}
               </span>
             )}
@@ -116,7 +116,7 @@ export default function PromptsPage() {
           <label className="block space-y-1 text-sm">
             <span>Tags (comma-separated)</span>
             <input
-              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="w-full rounded-md border border-line bg-canvas-elevated px-3 py-2"
               placeholder="sre, ops"
               {...form.register("tags")}
             />
@@ -124,13 +124,13 @@ export default function PromptsPage() {
           <button
             type="submit"
             disabled={create.isPending}
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm text-white disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900"
+            className="rounded-[10px] bg-accent px-4 py-2 text-sm font-semibold text-accent-fg disabled:opacity-60"
           >
             {create.isPending ? "Saving…" : "Save prompt"}
           </button>
         </form>
       ) : (
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="text-sm text-ink-muted">
           <Link href="/app/login" className="underline">
             Sign in
           </Link>{" "}
@@ -139,30 +139,30 @@ export default function PromptsPage() {
       )}
 
       {promptsQuery.isPending && (
-        <p className="text-sm text-zinc-500">Loading prompts…</p>
+        <p className="text-sm text-ink-muted">Loading prompts…</p>
       )}
       {promptsQuery.isError && (
-        <p className="text-sm text-red-600">
+        <p className="text-sm text-danger">
           {promptsQuery.error instanceof Error
             ? promptsQuery.error.message
             : "Failed to load"}
         </p>
       )}
 
-      <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+      <ul className="divide-y divide-line">
         {promptsQuery.data?.map((prompt) => (
           <li key={prompt.id} className="space-y-2 py-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="text-lg font-medium">{prompt.title}</h2>
-              <span className="text-xs uppercase tracking-wide text-zinc-500">
+              <span className="text-xs uppercase tracking-wide text-ink-muted">
                 {prompt.ownerUserId ? "yours" : "community"}
               </span>
             </div>
-            <pre className="whitespace-pre-wrap font-mono text-sm text-zinc-700 dark:text-zinc-300">
+            <pre className="whitespace-pre-wrap font-mono text-sm text-ink">
               {prompt.body}
             </pre>
             {prompt.tags.length > 0 && (
-              <p className="text-xs text-zinc-500">{prompt.tags.join(" · ")}</p>
+              <p className="text-xs text-ink-muted">{prompt.tags.join(" · ")}</p>
             )}
           </li>
         ))}

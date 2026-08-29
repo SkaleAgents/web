@@ -12,6 +12,13 @@ import {
   SPECIALTIES,
   type Bot,
 } from "@/lib/api";
+import {
+  Button,
+  FieldLabel,
+  Select,
+  TextArea,
+  TextInput,
+} from "@/components/ui";
 
 const schema = z.object({
   name: z.string().min(1, "Name required"),
@@ -63,8 +70,10 @@ export default function StudioCreatePage() {
   return (
     <main className="mx-auto max-w-xl space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Creator Studio</h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
+          Creator Studio
+        </h1>
+        <p className="mt-1 text-sm text-ink-muted">
           Create a draft bot, then publish it to the directory.
         </p>
       </div>
@@ -72,75 +81,49 @@ export default function StudioCreatePage() {
         className="space-y-4"
         onSubmit={form.handleSubmit((v) => create.mutate(v))}
       >
-        <Field label="Name" error={form.formState.errors.name?.message}>
-          <input
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-            {...form.register("name")}
-          />
-        </Field>
-        <Field label="Description">
-          <input
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-            {...form.register("description")}
-          />
-        </Field>
-        <Field label="Specialty">
-          <select
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-            {...form.register("specialty")}
-          >
+        <label className="block space-y-1">
+          <FieldLabel>Name</FieldLabel>
+          <TextInput {...form.register("name")} />
+          {form.formState.errors.name && (
+            <span className="text-sm text-danger">
+              {form.formState.errors.name.message}
+            </span>
+          )}
+        </label>
+        <label className="block space-y-1">
+          <FieldLabel>Description</FieldLabel>
+          <TextInput {...form.register("description")} />
+        </label>
+        <label className="block space-y-1">
+          <FieldLabel>Specialty</FieldLabel>
+          <Select {...form.register("specialty")}>
             {SPECIALTIES.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
             ))}
-          </select>
-        </Field>
-        <Field
-          label="Prompt body"
-          error={form.formState.errors.promptBody?.message}
-        >
-          <textarea
-            rows={6}
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 font-mono text-sm dark:border-zinc-700 dark:bg-zinc-900"
-            {...form.register("promptBody")}
-          />
-        </Field>
-        <Field label="Visibility">
-          <select
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-            {...form.register("visibility")}
-          >
+          </Select>
+        </label>
+        <label className="block space-y-1">
+          <FieldLabel>Prompt body</FieldLabel>
+          <TextArea rows={6} {...form.register("promptBody")} />
+          {form.formState.errors.promptBody && (
+            <span className="text-sm text-danger">
+              {form.formState.errors.promptBody.message}
+            </span>
+          )}
+        </label>
+        <label className="block space-y-1">
+          <FieldLabel>Visibility</FieldLabel>
+          <Select {...form.register("visibility")}>
             <option value="private">private</option>
             <option value="public">public</option>
-          </select>
-        </Field>
-        <button
-          type="submit"
-          disabled={create.isPending}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900"
-        >
+          </Select>
+        </label>
+        <Button type="submit" disabled={create.isPending}>
           {create.isPending ? "Saving…" : "Save draft"}
-        </button>
+        </Button>
       </form>
     </main>
-  );
-}
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block space-y-1 text-sm">
-      <span>{label}</span>
-      {children}
-      {error && <span className="text-red-600">{error}</span>}
-    </label>
   );
 }
