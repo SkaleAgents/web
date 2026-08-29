@@ -25,8 +25,12 @@ test.describe("Phase 1 page smokes", () => {
     await expect(page.getByText(/Sign in/i).first()).toBeVisible();
   });
 
-  test("marketing surface responds", async ({ page }) => {
+  test("marketing landing shows Signal Deck brand hero", async ({ page }) => {
     await page.goto("/marketing");
-    await expect(page.locator("body")).toBeVisible();
+    await expect(page.getByText("SkaleAgents").first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Control plane for AI DevOps agents/i }),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Open app" })).toBeVisible();
   });
 });

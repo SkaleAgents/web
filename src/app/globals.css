@@ -1,30 +1,81 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --canvas: #f4f6f8;
+  --canvas-elevated: #ffffff;
+  --ink: #0e1518;
+  --ink-muted: #4a5c64;
+  --line: #d5dee4;
+  --accent: #00a892;
+  --accent-fg: #04201c;
+  --accent-soft: rgba(0, 168, 146, 0.12);
+  --danger: #c23b2e;
+  --focus-ring: #00a892;
+  --background: var(--canvas);
+  --foreground: var(--ink);
 }
 
 html.dark {
   color-scheme: dark;
+  --canvas: #0b1114;
+  --canvas-elevated: #121a1f;
+  --ink: #e8eef0;
+  --ink-muted: #8a9aa3;
+  --line: #243038;
+  --accent: #00c2a8;
+  --accent-fg: #04201c;
+  --accent-soft: rgba(0, 194, 168, 0.16);
+  --danger: #f07167;
+  --focus-ring: #00c2a8;
+  --background: var(--canvas);
+  --foreground: var(--ink);
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-canvas-elevated: var(--canvas-elevated);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-source-sans);
+  --font-display: var(--font-syne);
+  --font-mono: var(--font-plex-mono);
+}
+
+body {
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-enter {
+    animation: none !important;
+  }
+}
+
+@keyframes signal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.motion-enter {
+  animation: signal-enter 240ms ease-out both;
 }
