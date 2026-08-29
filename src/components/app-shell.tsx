@@ -10,6 +10,7 @@ const nav = [
   { href: "/app", label: "Home" },
   { href: "/app/bots", label: "Directory" },
   { href: "/app/studio", label: "Studio" },
+  { href: "/app/prompts", label: "Prompts" },
   { href: "/app/login", label: "Sign in" },
 ];
 
