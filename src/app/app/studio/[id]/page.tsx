@@ -15,7 +15,7 @@ import {
 } from "@/lib/api";
 
 const schema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(1, "Name required"),
   description: z.string(),
   specialty: z.enum([
     "devops",
@@ -25,7 +25,7 @@ const schema = z.object({
     "scaling",
     "general",
   ]),
-  promptBody: z.string().min(1),
+  promptBody: z.string().min(1, "Prompt required"),
   visibility: z.enum(["public", "private"]),
 });
 
@@ -37,15 +37,13 @@ export default function StudioEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const botsQuery = useQuery({
-    queryKey: ["bots"],
-    queryFn: async () => {
-      const data = await apiFetch<{ bots: Bot[] }>("/api/bots");
-      return data.bots;
-    },
+  const botQuery = useQuery({
+    queryKey: ["bot", id],
+    queryFn: () => apiFetch<Bot>(`/api/bots/${id}`),
+    enabled: Boolean(id),
   });
 
-  const bot = botsQuery.data?.find((b) => b.id === id);
+  const bot = botQuery.data;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -78,7 +76,8 @@ export default function StudioEditPage() {
         body: JSON.stringify(values),
       });
     },
-    onSuccess: () => {
+    onSuccess: (updated) => {
+      queryClient.setQueryData(["bot", id], updated);
       void queryClient.invalidateQueries({ queryKey: ["bots"] });
       toast.success("Saved");
     },
@@ -87,7 +86,16 @@ export default function StudioEditPage() {
 
   const publish = useMutation({
     mutationFn: async () => {
+      const values = form.getValues();
+      const parsed = schema.safeParse(values);
+      if (!parsed.success) {
+        throw new Error(parsed.error.issues[0]?.message ?? "Invalid form");
+      }
       await ensureCsrfCookie();
+      await apiFetch<Bot>(`/api/bots/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(parsed.data),
+      });
       return apiFetch<Bot>(`/api/bots/${id}/publish`, {
         method: "POST",
         body: "{}",
@@ -95,14 +103,28 @@ export default function StudioEditPage() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["bots"] });
+      void queryClient.invalidateQueries({ queryKey: ["bot", id] });
       toast.success("Published");
       router.push("/app/bots");
     },
     onError: (err: Error) => toast.error(err.message),
   });
 
-  if (botsQuery.isPending) {
+  if (botQuery.isPending) {
     return <p className="text-sm text-zinc-500">Loading…</p>;
+  }
+
+  if (botQuery.isError) {
+    return (
+      <main className="space-y-2">
+        <h1 className="text-2xl font-semibold">Couldn’t load bot</h1>
+        <p className="text-sm text-red-600">
+          {botQuery.error instanceof Error
+            ? botQuery.error.message
+            : "Request failed"}
+        </p>
+      </main>
+    );
   }
 
   if (!bot) {
@@ -134,6 +156,11 @@ export default function StudioEditPage() {
             className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
             {...form.register("name")}
           />
+          {form.formState.errors.name && (
+            <span className="text-red-600">
+              {form.formState.errors.name.message}
+            </span>
+          )}
         </label>
         <label className="block space-y-1 text-sm">
           <span>Description</span>
@@ -162,6 +189,11 @@ export default function StudioEditPage() {
             className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 font-mono text-sm dark:border-zinc-700 dark:bg-zinc-900"
             {...form.register("promptBody")}
           />
+          {form.formState.errors.promptBody && (
+            <span className="text-red-600">
+              {form.formState.errors.promptBody.message}
+            </span>
+          )}
         </label>
         <label className="block space-y-1 text-sm">
           <span>Visibility</span>
