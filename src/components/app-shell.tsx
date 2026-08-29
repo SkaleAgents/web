@@ -72,7 +72,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            {userQuery.data ? (
+            {userQuery.isPending ? (
+              <span className="text-zinc-400">…</span>
+            ) : userQuery.data ? (
               <>
                 <span className="text-zinc-600 dark:text-zinc-300">
                   {userQuery.data.displayName}
