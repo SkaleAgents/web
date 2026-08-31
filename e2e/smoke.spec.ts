@@ -1,19 +1,23 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Phase 1 page smokes", () => {
-  test("login page shows mock Grok sign-in", async ({ page }) => {
+  test("login page shows Google sign-in", async ({ page }) => {
     await page.goto("/app/login");
     await expect(
-      page.getByRole("heading", { name: /Sign in with Grok Bot/i }),
+      page.getByRole("heading", { name: /Sign in to your control plane/i }),
     ).toBeVisible();
-    await expect(page.getByLabel("Mock code")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Continue with Google/i }),
+    ).toBeVisible();
   });
 
   test("directory page renders shell", async ({ page }) => {
     await page.goto("/app/bots");
     await expect(
       page.getByRole("heading", { name: /Bot directory/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Grok Bot/i }),
     ).toBeVisible();
   });
 
@@ -31,7 +35,7 @@ test.describe("Phase 1 page smokes", () => {
     await expect(
       page.getByRole("heading", { name: /Control plane for AI DevOps agents/i }),
     ).toBeVisible();
-    await expect(page.getByRole("link", { name: "Open app" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
   });
 
   test("settings page explains api tokens", async ({ page }) => {

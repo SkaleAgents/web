@@ -56,7 +56,9 @@ export type ApiUser = {
   id: string;
   email: string | null;
   displayName: string;
+  googleSubject?: string | null;
   grokSubject: string | null;
+  grokLinked?: boolean;
 };
 
 export type AuthSession = {

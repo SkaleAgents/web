@@ -28,21 +28,21 @@ export default function MarketingHome() {
           Control plane for AI DevOps agents
         </h1>
         <p className="mt-3 max-w-md text-base leading-relaxed text-ink-muted">
-          Sign in with Grok Bot, publish specialist bots, connect MCP from your
-          IDE.
+          Sign in with Google, publish specialist agents, connect MCP from your
+          IDE — one control plane for AI DevOps work.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <a
-            href={appUrl}
+            href={`${appUrl}/app/login`}
             className="inline-flex items-center rounded-[10px] bg-accent px-4 py-2.5 text-sm font-semibold text-accent-fg transition hover:brightness-110"
           >
-            Open app
+            Sign in
           </a>
           <a
             href={`${appUrl}/app/bots`}
             className="inline-flex items-center rounded-[10px] border border-line bg-transparent px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-accent-soft"
           >
-            Browse bots
+            Browse directory
           </a>
         </div>
       </div>
