@@ -102,3 +102,15 @@ export type Prompt = {
   tags: string[];
   createdAt: string;
 };
+
+export type ApiToken = {
+  id: string;
+  name: string;
+  lastUsedAt: string | null;
+  createdAt: string;
+};
+
+export type ApiTokenCreated = {
+  token: string;
+  apiToken: ApiToken;
+};
