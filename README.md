@@ -31,6 +31,14 @@ pnpm test
 pnpm build && pnpm test:e2e
 ```
 
+## Railway
+
+See hub [railway-deploy.md](https://github.com/SkaleAgents/workspace/blob/main/docs/tech-spec/railway-deploy.md).
+
+- `railway.toml` — `pnpm build` / `pnpm start`
+- Variable template: `.env.railway.example` (`NEXT_PUBLIC_*` require redeploy when changed)
+- Point `NEXT_PUBLIC_API_URL` at the Railway `api` public URL
+
 ## Stack
 
 - Signal Deck tokens (Syne / Source Sans 3 / IBM Plex Mono + teal accent)
