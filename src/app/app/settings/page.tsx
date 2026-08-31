@@ -46,7 +46,7 @@ export default function SettingsPage() {
   });
 
   const tokensQuery = useQuery({
-    queryKey: ["api-tokens"],
+    queryKey: ["api-tokens", userQuery.data?.id ?? "guest"],
     enabled: Boolean(userQuery.data),
     queryFn: async () => {
       const data = await apiFetch<{ tokens: ApiToken[] }>("/api/tokens");
@@ -69,7 +69,9 @@ export default function SettingsPage() {
     },
     onSuccess: (data) => {
       setRevealedToken(data.token);
-      void queryClient.invalidateQueries({ queryKey: ["api-tokens"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["api-tokens", userQuery.data?.id],
+      });
       form.reset({ name: "Cursor MCP" });
       toast.success("API token created — copy it now");
     },
@@ -82,7 +84,9 @@ export default function SettingsPage() {
       return apiFetch<{ ok: true }>(`/api/tokens/${id}`, { method: "DELETE" });
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["api-tokens"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["api-tokens", userQuery.data?.id],
+      });
       toast.success("Token revoked");
     },
     onError: (err: Error) => toast.error(err.message),

@@ -42,6 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       await apiFetch("/api/auth/logout", { method: "POST", body: "{}" });
       queryClient.setQueryData(["user"], null);
       void queryClient.removeQueries({ queryKey: ["prompts"] });
+      void queryClient.removeQueries({ queryKey: ["api-tokens"] });
       toast.success("Signed out");
       router.push("/app/login");
     } catch (e) {
