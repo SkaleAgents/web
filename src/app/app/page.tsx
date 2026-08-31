@@ -18,6 +18,9 @@ export default function AppHome() {
         <LinkButton href="/app/studio" variant="secondary">
           Studio
         </LinkButton>
+        <LinkButton href="/app/settings" variant="secondary">
+          API tokens
+        </LinkButton>
       </div>
     </main>
   );

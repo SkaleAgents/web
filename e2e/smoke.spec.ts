@@ -33,4 +33,12 @@ test.describe("Phase 1 page smokes", () => {
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "Open app" })).toBeVisible();
   });
+
+  test("settings page explains api tokens", async ({ page }) => {
+    await page.goto("/app/settings");
+    await expect(
+      page.getByRole("heading", { name: /API tokens/i }),
+    ).toBeVisible();
+    await expect(page.getByText(/Sign in to mint bearer tokens/i)).toBeVisible();
+  });
 });
