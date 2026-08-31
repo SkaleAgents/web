@@ -48,54 +48,69 @@ export default function LoginPage() {
   });
 
   return (
-    <main className="relative -mx-6 -my-8 flex min-h-[calc(100vh-4rem)] flex-col overflow-hidden px-6 py-12">
+    <main className="relative flex flex-1 flex-col overflow-hidden">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage: `
-            radial-gradient(720px 360px at 18% -8%, var(--accent-soft), transparent 58%),
+            radial-gradient(900px 480px at 8% 0%, var(--accent-soft), transparent 55%),
+            radial-gradient(640px 360px at 100% 80%, color-mix(in srgb, var(--accent-soft) 55%, transparent), transparent 50%),
             repeating-linear-gradient(
               -18deg,
               transparent,
-              transparent 11px,
-              color-mix(in srgb, var(--line) 55%, transparent) 11px,
-              color-mix(in srgb, var(--line) 55%, transparent) 12px
+              transparent 14px,
+              color-mix(in srgb, var(--line) 40%, transparent) 14px,
+              color-mix(in srgb, var(--line) 40%, transparent) 15px
             )
           `,
         }}
       />
 
-      <div className="motion-enter relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
-        <p className="font-display text-sm font-semibold tracking-[0.14em] text-accent uppercase">
-          SkaleAgents
-        </p>
-        <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-          Sign in with Grok Bot
-        </h1>
-        <p className="mt-3 text-base leading-relaxed text-ink-muted">
-          Link your session to publish bots, manage prompts, and mint API tokens
-          for MCP.
-        </p>
+      <div className="relative z-10 mx-auto grid w-full max-w-5xl flex-1 items-center gap-12 px-6 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:py-20">
+        <div className="motion-enter max-w-lg">
+          <h1 className="font-display text-[clamp(2.5rem,6vw,3.75rem)] font-bold leading-[0.95] tracking-tight text-ink">
+            Sign in with
+            <br />
+            Grok Bot
+          </h1>
+          <p className="mt-5 text-lg leading-relaxed text-ink-muted">
+            One session for the studio, prompt library, and MCP API tokens.
+          </p>
+          <p className="mt-8 hidden text-sm text-ink-muted lg:block">
+            Prefer to look around first?{" "}
+            <Link
+              href="/app/bots"
+              className="font-medium text-ink underline-offset-4 hover:underline"
+            >
+              Browse public bots
+            </Link>
+          </p>
+        </div>
 
         <form
-          className="mt-8 space-y-5 rounded-[10px] border border-line bg-canvas-elevated/90 p-6 backdrop-blur-sm"
-          style={{
-            boxShadow:
-              "0 1px 0 color-mix(in srgb, var(--line) 80%, transparent)",
-          }}
+          className="motion-enter relative space-y-5 rounded-[10px] border border-line bg-canvas-elevated p-7 sm:p-8"
+          style={{ animationDelay: "60ms" }}
           onSubmit={form.handleSubmit((values) => login.mutate(values))}
         >
-          <p className="font-mono text-xs tracking-wide text-ink-muted uppercase">
-            Mock provider · any non-empty code
-          </p>
+          <div
+            aria-hidden
+            className="absolute inset-y-0 left-0 w-[3px] rounded-l-[10px] bg-accent"
+          />
+
+          <div>
+            <h2 className="text-lg font-semibold text-ink">Continue</h2>
+            <p className="mt-1 text-sm text-ink-muted">
+              Mock Grok for Phase 1 — any non-empty code works.
+            </p>
+          </div>
 
           <label className="block space-y-1.5">
             <FieldLabel>Mock code</FieldLabel>
             <TextInput
               autoComplete="off"
               spellCheck={false}
-              className="font-mono"
+              className="font-mono text-[15px]"
               {...form.register("code")}
             />
             {form.formState.errors.code && (
@@ -107,7 +122,11 @@ export default function LoginPage() {
 
           <label className="block space-y-1.5">
             <FieldLabel>Display name</FieldLabel>
-            <TextInput autoComplete="nickname" {...form.register("displayName")} />
+            <TextInput
+              autoComplete="nickname"
+              className="text-[15px]"
+              {...form.register("displayName")}
+            />
             {form.formState.errors.displayName && (
               <span className="text-sm text-danger">
                 {form.formState.errors.displayName.message}
@@ -118,19 +137,17 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={login.isPending}
-            className="w-full py-2.5"
+            className="w-full py-2.5 text-[15px]"
           >
             {login.isPending ? "Signing in…" : "Continue"}
           </Button>
-        </form>
 
-        <p className="mt-6 text-sm text-ink-muted">
-          Just browsing?{" "}
-          <Link href="/app/bots" className="font-medium text-ink underline-offset-2 hover:underline">
-            Open the bot directory
-          </Link>
-          .
-        </p>
+          <p className="text-center text-sm text-ink-muted lg:hidden">
+            <Link href="/app/bots" className="underline-offset-4 hover:underline">
+              Browse public bots
+            </Link>
+          </p>
+        </form>
       </div>
     </main>
   );
