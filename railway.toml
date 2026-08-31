@@ -1,0 +1,11 @@
+# Railway service config for SkaleAgents web (one Next.js app).
+# Hub: docs/tech-spec/railway-deploy.md
+
+[build]
+builder = "RAILPACK"
+buildCommand = "pnpm install --frozen-lockfile && pnpm build"
+
+[deploy]
+startCommand = "pnpm start"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
