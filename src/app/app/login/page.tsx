@@ -1,13 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { apiFetch, ensureCsrfCookie, type AuthSession } from "@/lib/api";
 import { Button } from "@/components/ui";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
+const MOCK_AUTH_ENABLED = process.env.NEXT_PUBLIC_MOCK_AUTH_ENABLED === "true";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     const error = new URLSearchParams(window.location.search).get("error");
     if (!error) return;
@@ -19,6 +26,26 @@ export default function LoginPage() {
     );
     window.history.replaceState({}, "", "/app/login");
   }, []);
+
+  const googleLogin = useMutation({
+    mutationFn: async () => {
+      await ensureCsrfCookie();
+      return apiFetch<AuthSession>("/api/auth/google/callback", {
+        method: "POST",
+        body: JSON.stringify({
+          code: "demo-google",
+          displayName: "Rayhan",
+          email: "rayhan@example.com",
+        }),
+      });
+    },
+    onSuccess: (session) => {
+      queryClient.setQueryData(["user"], session.user);
+      toast.success(`Signed in as ${session.user.displayName}`);
+      router.push("/app");
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
 
   return (
     <main className="relative flex flex-1 flex-col overflow-hidden">
@@ -79,14 +106,27 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form action={`${API_URL}/api/auth/google/redirect`} method="get">
-            <Button type="submit" className="w-full py-2.5 text-[15px]">
-              Continue with Google
+          {MOCK_AUTH_ENABLED ? (
+            <Button
+              type="button"
+              disabled={googleLogin.isPending}
+              className="w-full py-2.5 text-[15px]"
+              onClick={() => googleLogin.mutate()}
+            >
+              {googleLogin.isPending ? "Signing in…" : "Continue with Google"}
             </Button>
-          </form>
+          ) : (
+            <form action={`${API_URL}/api/auth/google/redirect`} method="get">
+              <Button type="submit" className="w-full py-2.5 text-[15px]">
+                Continue with Google
+              </Button>
+            </form>
+          )}
 
           <p className="text-xs text-ink-muted">
-            You&apos;ll return here after Google confirms your identity.
+            {MOCK_AUTH_ENABLED
+              ? "Local preview uses the mock callback."
+              : "You&apos;ll return here after Google confirms your identity."}
           </p>
 
           <p className="text-center text-sm text-ink-muted lg:hidden">
