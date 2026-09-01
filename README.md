@@ -1,6 +1,6 @@
 # SkaleAgents Web
 
-**One** Next.js App Router app for marketing + product (host / path routing). Not two frontends.
+**One** Next.js App Router app for marketing + product routes. Not two frontends.
 
 The Laravel **api** repo is JSON-only (no web UI). Browser and MCP talk to it over HTTP.
 
@@ -12,8 +12,8 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-- `localhost:3000` → product (`/app…`)
-- `/marketing` or a marketing host → landing
+- `localhost:3000/` → landing
+- `localhost:3000/app/*` → product UI
 - API: Sail on `:8082` (`NEXT_PUBLIC_API_URL`)
 
 Tailscale: `tailscale serve --service=skaleagents-web --bg http://127.0.0.1:3000`
@@ -21,7 +21,7 @@ Tailscale: `tailscale serve --service=skaleagents-web --bg http://127.0.0.1:3000
 ## Auth (Phase 1 mock)
 
 1. Open `/app/login`
-2. Mock code + display name → CSRF + `POST /api/auth/grok/callback`
+2. Mock Google code + display name → CSRF + `POST /api/auth/google/callback`
 3. Shell loads `GET /api/user` via TanStack Query
 
 ## Tests

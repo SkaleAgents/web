@@ -30,7 +30,7 @@ test.describe("Phase 1 page smokes", () => {
   });
 
   test("marketing landing shows Signal Deck brand hero", async ({ page }) => {
-    await page.goto("/marketing");
+    await page.goto("/");
     await expect(page.getByText("SkaleAgents").first()).toBeVisible();
     await expect(
       page.getByRole("heading", { name: /Control plane for AI DevOps agents/i }),
