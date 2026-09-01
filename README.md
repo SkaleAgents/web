@@ -18,11 +18,14 @@ pnpm dev
 
 Tailscale: `tailscale serve --service=skaleagents-web --bg http://127.0.0.1:3000`
 
-## Auth (Phase 1 mock)
+## Auth
 
 1. Open `/app/login`
-2. Mock Google code + display name → CSRF + `POST /api/auth/google/callback`
+2. Continue with Google → API redirect → Google → API callback
 3. Shell loads `GET /api/user` via TanStack Query
+
+The local API test suite still has a mock callback. Production uses the configured
+Google OAuth client.
 
 ## Tests
 

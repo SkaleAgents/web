@@ -1,22 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import {
-  apiFetch,
-  ensureCsrfCookie,
-  type ApiUser,
-  type AuthSession,
-  type Bot,
-} from "@/lib/api";
-import { Button, FieldLabel, LinkButton, TextInput } from "@/components/ui";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch, type ApiUser, type Bot } from "@/lib/api";
+import { LinkButton } from "@/components/ui";
 
 export default function BotsDirectoryPage() {
-  const queryClient = useQueryClient();
-  const [grokCode, setGrokCode] = useState("demo");
-
   const userQuery = useQuery({
     queryKey: ["user"],
     queryFn: async (): Promise<ApiUser | null> => {
@@ -37,40 +26,6 @@ export default function BotsDirectoryPage() {
       const data = await apiFetch<{ bots: Bot[] }>("/api/bots");
       return data.bots;
     },
-  });
-
-  const grokSignIn = useMutation({
-    mutationFn: async () => {
-      await ensureCsrfCookie();
-      return apiFetch<AuthSession>("/api/auth/grok/callback", {
-        method: "POST",
-        body: JSON.stringify({
-          code: grokCode,
-          displayName: "Grok User",
-        }),
-      });
-    },
-    onSuccess: (session) => {
-      queryClient.setQueryData(["user"], session.user);
-      void queryClient.invalidateQueries({ queryKey: ["bots"] });
-      toast.success("Signed in with Grok Bot");
-    },
-    onError: (err: Error) => toast.error(err.message),
-  });
-
-  const grokLink = useMutation({
-    mutationFn: async () => {
-      await ensureCsrfCookie();
-      return apiFetch<ApiUser>("/api/auth/grok/link", {
-        method: "POST",
-        body: JSON.stringify({ code: grokCode }),
-      });
-    },
-    onSuccess: (user) => {
-      queryClient.setQueryData(["user"], user);
-      toast.success("Grok Bot linked");
-    },
-    onError: (err: Error) => toast.error(err.message),
   });
 
   const signedIn = Boolean(userQuery.data);
@@ -103,9 +58,7 @@ export default function BotsDirectoryPage() {
             <p className="mt-1 text-sm text-ink-muted">
               {grokLinked
                 ? "This account is linked to a Grok Bot session for agent-assisted reviews."
-                : signedIn
-                  ? "Link Grok Bot to this Google account so directory and studio actions can use your AI session."
-                  : "Sign in with Grok Bot here to try agent-linked browsing, or use Google from the main sign-in for a full account."}
+                : "Grok Bot linking is on hold until an official provider integration is available. Google sign-in and the rest of the control plane are ready to use."}
             </p>
           </div>
           {grokLinked ? (
@@ -113,44 +66,9 @@ export default function BotsDirectoryPage() {
               Linked
             </p>
           ) : (
-            <div className="flex w-full max-w-sm flex-col gap-2 sm:w-auto">
-              <label className="block space-y-1">
-                <FieldLabel>Mock Grok code</FieldLabel>
-                <TextInput
-                  value={grokCode}
-                  onChange={(e) => setGrokCode(e.target.value)}
-                  className="font-mono"
-                />
-              </label>
-              <Button
-                type="button"
-                variant={signedIn ? "secondary" : "primary"}
-                disabled={
-                  grokCode.trim() === "" ||
-                  grokSignIn.isPending ||
-                  grokLink.isPending
-                }
-                onClick={() =>
-                  signedIn ? grokLink.mutate() : grokSignIn.mutate()
-                }
-              >
-                {signedIn
-                  ? grokLink.isPending
-                    ? "Linking…"
-                    : "Link Grok Bot"
-                  : grokSignIn.isPending
-                    ? "Signing in…"
-                    : "Sign in with Grok Bot"}
-              </Button>
-              {!signedIn && (
-                <p className="text-xs text-ink-muted">
-                  Prefer a full account?{" "}
-                  <Link href="/app/login" className="underline-offset-2 hover:underline">
-                    Continue with Google
-                  </Link>
-                </p>
-              )}
-            </div>
+            <p className="font-mono text-xs uppercase tracking-wide text-ink-muted">
+              Deferred
+            </p>
           )}
         </div>
       </section>
