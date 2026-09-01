@@ -89,7 +89,11 @@ export default function BotsDirectoryPage() {
             MCP tokens live alongside it.
           </p>
         </div>
-        <LinkButton href="/app/studio">Create bot</LinkButton>
+        {signedIn ? (
+          <LinkButton href="/app/studio">Create bot</LinkButton>
+        ) : (
+          <LinkButton href="/app/login">Sign in to create</LinkButton>
+        )}
       </div>
 
       <section className="rounded-[10px] border border-line bg-canvas-elevated p-5">
@@ -169,12 +173,16 @@ export default function BotsDirectoryPage() {
         {botsQuery.data?.map((bot) => (
           <li key={bot.id} className="py-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <Link
-                href={`/app/studio/${bot.id}`}
-                className="text-lg font-medium text-ink hover:underline"
-              >
-                {bot.name}
-              </Link>
+              {userQuery.data?.id === bot.ownerUserId ? (
+                <Link
+                  href={`/app/studio/${bot.id}`}
+                  className="text-lg font-medium text-ink hover:underline"
+                >
+                  {bot.name}
+                </Link>
+              ) : (
+                <span className="text-lg font-medium text-ink">{bot.name}</span>
+              )}
               <div className="flex gap-2 font-mono text-xs uppercase tracking-wide text-ink-muted">
                 <span>{bot.specialty}</span>
                 <span>{bot.visibility}</span>

@@ -19,6 +19,9 @@ test.describe("Phase 1 page smokes", () => {
     await expect(
       page.getByRole("heading", { name: /Grok Bot/i }),
     ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /Sign in to create/i }),
+    ).toBeVisible();
   });
 
   test("prompts page is readable without auth", async ({ page }) => {
