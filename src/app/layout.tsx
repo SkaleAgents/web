@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   description: "AI DevOps control plane",
 };
 
+const showDevelopmentWarning =
+  process.env.NEXT_PUBLIC_SHOW_DEV_WARNING === "true";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -38,6 +41,15 @@ export default function RootLayout({
       className={`${syne.variable} ${sourceSans.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-canvas text-ink">
+        {showDevelopmentWarning ? (
+          <div
+            role="status"
+            className="border-b border-line bg-accent-soft px-4 py-2 text-center text-xs font-semibold text-ink"
+          >
+            Development preview: SkaleAgents is still being built. Do not use it
+            for production work.
+          </div>
+        ) : null}
         <Providers>{children}</Providers>
       </body>
     </html>
