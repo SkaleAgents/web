@@ -1,41 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { toast } from "sonner";
-import {
-  apiFetch,
-  ensureCsrfCookie,
-  type AuthSession,
-} from "@/lib/api";
 import { Button } from "@/components/ui";
 
-export default function LoginPage() {
-  const router = useRouter();
-  const queryClient = useQueryClient();
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
 
-  const googleLogin = useMutation({
-    mutationFn: async () => {
-      await ensureCsrfCookie();
-      return apiFetch<AuthSession>("/api/auth/google/callback", {
-        method: "POST",
-        body: JSON.stringify({
-          code: "demo-google",
-          displayName: "Rayhan",
-          email: "rayhan@example.com",
-        }),
-      });
-    },
-    onSuccess: (session) => {
-      queryClient.setQueryData(["user"], session.user);
-      toast.success(`Signed in as ${session.user.displayName}`);
-      router.push("/app");
-    },
-    onError: (err: Error) => {
-      toast.error(err.message);
-    },
-  });
+export default function LoginPage() {
+  useEffect(() => {
+    const error = new URLSearchParams(window.location.search).get("error");
+    if (!error) return;
+
+    toast.error(
+      error === "invalid_state"
+        ? "Your Google sign-in expired. Please try again."
+        : "Google sign-in failed. Please try again.",
+    );
+    window.history.replaceState({}, "", "/app/login");
+  }, []);
 
   return (
     <main className="relative flex flex-1 flex-col overflow-hidden">
@@ -91,25 +74,19 @@ export default function LoginPage() {
           <div>
             <h2 className="text-lg font-semibold text-ink">Continue</h2>
             <p className="mt-1 text-sm text-ink-muted">
-              Use Google for your SkaleAgents account. Connect Grok Bot later
-              from the directory when you want IDE-linked sessions.
+              Use Google for your SkaleAgents account. Grok Bot linking is
+              deferred until official provider support is available.
             </p>
           </div>
 
-          <Button
-            type="button"
-            disabled={googleLogin.isPending}
-            className="w-full py-2.5 text-[15px]"
-            onClick={() => googleLogin.mutate()}
-          >
-            {googleLogin.isPending
-              ? "Signing in…"
-              : "Continue with Google"}
-          </Button>
+          <form action={`${API_URL}/api/auth/google/redirect`} method="get">
+            <Button type="submit" className="w-full py-2.5 text-[15px]">
+              Continue with Google
+            </Button>
+          </form>
 
           <p className="text-xs text-ink-muted">
-            Phase 1 uses a mock Google callback. Production will use real Google
-            OAuth.
+            You&apos;ll return here after Google confirms your identity.
           </p>
 
           <p className="text-center text-sm text-ink-muted lg:hidden">
