@@ -73,7 +73,7 @@ export default function SettingsPage() {
         queryKey: ["api-tokens", userQuery.data?.id],
       });
       form.reset({ name: "Cursor MCP" });
-      toast.success("API token created — copy it now");
+      toast.success("API token created. Copy it now");
     },
     onError: (err: Error) => toast.error(err.message),
   });
@@ -98,7 +98,7 @@ export default function SettingsPage() {
       await navigator.clipboard.writeText(revealedToken);
       toast.success("Copied to clipboard");
     } catch {
-      toast.error("Could not copy — select the token manually");
+      toast.error("Could not copy. Select the token manually");
     }
   }
 
@@ -116,7 +116,7 @@ export default function SettingsPage() {
           Sign in to mint bearer tokens for Cursor, Claude Code, or other MCP
           clients.
         </p>
-        <Link href="/app/login" className="text-sm text-accent underline">
+        <Link href="/login" className="text-sm text-accent underline">
           Sign in
         </Link>
       </main>
@@ -139,7 +139,7 @@ export default function SettingsPage() {
 
       {revealedToken && (
         <section className="max-w-2xl space-y-3 rounded-[10px] border border-accent/40 bg-accent-soft p-4">
-          <h2 className="text-sm font-semibold text-ink">New token — copy now</h2>
+          <h2 className="text-sm font-semibold text-ink">New token, copy now</h2>
           <p className="text-sm text-ink-muted">
             This value is shown once. Store it as{" "}
             <code className="font-mono text-ink">SKALEAGENTS_API_TOKEN</code>.

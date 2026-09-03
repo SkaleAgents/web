@@ -131,7 +131,7 @@ export default function PromptsPage() {
         </form>
       ) : (
         <p className="text-sm text-ink-muted">
-          <Link href="/app/login" className="underline">
+          <Link href="/login" className="underline">
             Sign in
           </Link>{" "}
           to add your own prompts. Community prompts stay readable for free.

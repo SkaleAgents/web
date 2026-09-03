@@ -29,17 +29,17 @@ export default function MarketingHome() {
         </h1>
         <p className="mt-3 max-w-md text-base leading-relaxed text-ink-muted">
           Sign in with Google, publish specialist agents, connect MCP from your
-          IDE — one control plane for AI DevOps work.
+          IDE, one control plane for AI DevOps work.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
-            href="/app/login"
+            href="/login"
             className="inline-flex items-center rounded-[10px] bg-accent px-4 py-2.5 text-sm font-semibold text-accent-fg transition hover:brightness-110"
           >
             Sign in
           </Link>
           <Link
-            href="/app/bots"
+            href="/bots"
             className="inline-flex items-center rounded-[10px] border border-line bg-transparent px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-accent-soft"
           >
             Browse directory

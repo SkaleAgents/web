@@ -105,7 +105,7 @@ export default function StudioEditPage() {
       void queryClient.invalidateQueries({ queryKey: ["bots"] });
       void queryClient.invalidateQueries({ queryKey: ["bot", id] });
       toast.success("Published");
-      router.push("/app/bots");
+      router.push("/bots");
     },
     onError: (err: Error) => toast.error(err.message),
   });
