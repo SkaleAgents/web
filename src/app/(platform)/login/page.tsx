@@ -24,7 +24,7 @@ export default function LoginPage() {
         ? "Your Google sign-in expired. Please try again."
         : "Google sign-in failed. Please try again.",
     );
-    window.history.replaceState({}, "", "/app/login");
+    window.history.replaceState({}, "", "/login");
   }, []);
 
   const googleLogin = useMutation({
@@ -42,7 +42,7 @@ export default function LoginPage() {
     onSuccess: (session) => {
       queryClient.setQueryData(["user"], session.user);
       toast.success(`Signed in as ${session.user.displayName}`);
-      router.push("/app");
+      router.push("/");
     },
     onError: (err: Error) => toast.error(err.message),
   });
@@ -76,12 +76,12 @@ export default function LoginPage() {
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-ink-muted">
             Manage specialist agents, prompt libraries, and MCP access from one
-            place — not just a bot list.
+            place, not just a bot list.
           </p>
           <p className="mt-8 hidden text-sm text-ink-muted lg:block">
             Prefer to look around first?{" "}
             <Link
-              href="/app/bots"
+              href="/bots"
               className="font-medium text-ink underline-offset-4 hover:underline"
             >
               Browse the directory
@@ -130,7 +130,7 @@ export default function LoginPage() {
           </p>
 
           <p className="text-center text-sm text-ink-muted lg:hidden">
-            <Link href="/app/bots" className="underline-offset-4 hover:underline">
+            <Link href="/bots" className="underline-offset-4 hover:underline">
               Browse the directory
             </Link>
           </p>

@@ -40,14 +40,14 @@ export default function BotsDirectoryPage() {
           </h1>
           <p className="mt-1 max-w-xl text-sm text-ink-muted">
             Discover specialist agents for DevOps, security, and scaling. The
-            directory is one surface of the control plane — studio, prompts, and
+            directory is one surface of the control plane. Studio, prompts, and
             MCP tokens live alongside it.
           </p>
         </div>
         {signedIn ? (
-          <LinkButton href="/app/studio">Create bot</LinkButton>
+          <LinkButton href="/studio">Create bot</LinkButton>
         ) : (
-          <LinkButton href="/app/login">Sign in to create</LinkButton>
+          <LinkButton href="/login">Sign in to create</LinkButton>
         )}
       </div>
 
@@ -93,7 +93,7 @@ export default function BotsDirectoryPage() {
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               {userQuery.data?.id === bot.ownerUserId ? (
                 <Link
-                  href={`/app/studio/${bot.id}`}
+                  href={`/studio/${bot.id}`}
                   className="text-lg font-medium text-ink hover:underline"
                 >
                   {bot.name}

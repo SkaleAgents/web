@@ -62,7 +62,7 @@ export default function StudioCreatePage() {
     onSuccess: (bot) => {
       void queryClient.invalidateQueries({ queryKey: ["bots"] });
       toast.success("Draft created");
-      router.push(`/app/studio/${bot.id}`);
+      router.push(`/studio/${bot.id}`);
     },
     onError: (err: Error) => toast.error(err.message),
   });

@@ -13,14 +13,14 @@ pnpm dev
 ```
 
 - `localhost:3000/` → landing
-- `localhost:3000/app/*` → product UI
+- Product routes: `/login`, `/bots`, `/studio`, `/prompts`, and `/settings`
 - API: Sail on `:8082` (`NEXT_PUBLIC_API_URL`)
 
 Tailscale: `tailscale serve --service=skaleagents-web --bg http://127.0.0.1:3000`
 
 ## Auth
 
-1. Open `/app/login`
+1. Open `/login`
 2. Continue with Google → API redirect → Google → API callback
 3. Shell loads `GET /api/user` via TanStack Query
 
@@ -38,7 +38,7 @@ pnpm build && pnpm test:e2e
 
 See hub [railway-deploy.md](https://github.com/SkaleAgents/workspace/blob/main/docs/tech-spec/railway-deploy.md).
 
-- `railway.toml` — `pnpm build` / `pnpm start`
+- `railway.toml`: `pnpm build` / `pnpm start`
 - Variable template: `.env.railway.example` (`NEXT_PUBLIC_*` require redeploy when changed)
 - Point `NEXT_PUBLIC_API_URL` at the Railway `api` public URL
 

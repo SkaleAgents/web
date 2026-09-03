@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Phase 1 page smokes", () => {
   test("login page shows Google sign-in", async ({ page }) => {
-    await page.goto("/app/login");
+    await page.goto("/login");
     await expect(
       page.getByRole("heading", { name: /Sign in to your control plane/i }),
     ).toBeVisible();
@@ -12,7 +12,7 @@ test.describe("Phase 1 page smokes", () => {
   });
 
   test("directory page renders shell", async ({ page }) => {
-    await page.goto("/app/bots");
+    await page.goto("/bots");
     await expect(
       page.getByRole("heading", { name: /Bot directory/i }),
     ).toBeVisible();
@@ -25,7 +25,7 @@ test.describe("Phase 1 page smokes", () => {
   });
 
   test("prompts page is readable without auth", async ({ page }) => {
-    await page.goto("/app/prompts");
+    await page.goto("/prompts");
     await expect(
       page.getByRole("heading", { name: /Prompt library/i }),
     ).toBeVisible();
@@ -42,7 +42,7 @@ test.describe("Phase 1 page smokes", () => {
   });
 
   test("settings page explains api tokens", async ({ page }) => {
-    await page.goto("/app/settings");
+    await page.goto("/settings");
     await expect(
       page.getByRole("heading", { name: /API tokens/i }),
     ).toBeVisible();

@@ -8,18 +8,18 @@ import { apiFetch, type ApiUser, ensureCsrfCookie } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
 
 const nav = [
-  { href: "/app", label: "Home" },
-  { href: "/app/bots", label: "Directory" },
-  { href: "/app/studio", label: "Studio" },
-  { href: "/app/prompts", label: "Prompts" },
-  { href: "/app/settings", label: "API tokens" },
+  { href: "/", label: "Home" },
+  { href: "/bots", label: "Directory" },
+  { href: "/studio", label: "Studio" },
+  { href: "/prompts", label: "Prompts" },
+  { href: "/settings", label: "API tokens" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const isLogin = pathname === "/app/login";
+  const isLogin = pathname === "/login";
 
   const userQuery = useQuery({
     queryKey: ["user"],
@@ -45,7 +45,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       void queryClient.removeQueries({ queryKey: ["prompts"] });
       void queryClient.removeQueries({ queryKey: ["api-tokens"] });
       toast.success("Signed out");
-      router.push("/app/login");
+      router.push("/login");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Sign out failed");
     }
@@ -63,7 +63,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               SkaleAgents
             </Link>
             <Link
-              href="/app/bots"
+              href="/bots"
               className="text-sm text-ink-muted transition hover:text-ink"
             >
               Browse directory
@@ -90,7 +90,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {nav.map((item) => {
                 const active =
                   pathname === item.href ||
-                  (item.href !== "/app" &&
+                  (item.href !== "/" &&
                     pathname.startsWith(`${item.href}/`));
                 return (
                   <Link
@@ -126,7 +126,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Button>
               </>
             ) : (
-              <LinkButton href="/app/login" className="px-3 py-1.5">
+              <LinkButton href="/login" className="px-3 py-1.5">
                 Sign in
               </LinkButton>
             )}
