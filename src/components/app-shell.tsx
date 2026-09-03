@@ -57,7 +57,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <header className="border-b border-line border-t-2 border-t-accent">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4">
             <Link
-              href="/app"
+              href="/"
               className="font-display text-lg font-bold tracking-tight text-ink"
             >
               SkaleAgents
@@ -81,7 +81,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-center gap-6">
             <Link
-              href="/app"
+              href="/"
               className="font-display text-lg font-bold tracking-tight text-ink"
             >
               SkaleAgents
