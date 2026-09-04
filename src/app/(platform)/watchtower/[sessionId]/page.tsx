@@ -46,6 +46,7 @@ export default function WatchtowerPage() {
           <p className="font-mono text-xs uppercase tracking-wide text-accent">Watchtower review</p>
           <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink">Live audit session</h1>
           <p className="mt-1 text-sm text-ink-muted">{job.data?.summary ?? "Specialists are working"}</p>
+          <p className="mt-2 text-xs text-ink-muted">Participants: {session.data?.participants.length ?? 0}</p>
         </div>
         <LinkButton href="/jobs" className="bg-transparent">Back to audits</LinkButton>
       </div>

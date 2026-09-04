@@ -64,4 +64,75 @@ test.describe("Phase 1 page smokes", () => {
       await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toBeVisible();
     }
   });
+
+  test("two isolated users share one Watchtower session", async ({ browser }) => {
+    const jobId = "00000000-0000-4000-8000-000000000001";
+    const sessionId = "00000000-0000-4000-8000-000000000002";
+    const users = [
+      { id: "00000000-0000-4000-8000-000000000011", displayName: "User One" },
+      { id: "00000000-0000-4000-8000-000000000012", displayName: "User Two" },
+    ];
+    const participants: Array<{ userId: string; joinedAt: string }> = [];
+    const job = {
+      id: jobId,
+      status: "completed",
+      requestedBy: users[0].id,
+      scope: { content: 'cidr_blocks = ["0.0.0.0/0"]' },
+      specialists: ["devsecops"],
+      partial: false,
+      findings: [],
+      steps: [],
+      summary: "Audit complete.",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    async function setup(context: Awaited<ReturnType<typeof browser.newContext>>, user: (typeof users)[number]) {
+      await context.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
+      await context.route("**/api/user", (route) => route.fulfill({ json: user }));
+      await context.route("**/api/jobs", (route) => route.fulfill({ json: { jobs: [job] } }));
+      await context.route(`**/api/jobs/${jobId}`, (route) => route.fulfill({ json: job }));
+      await context.route("**/api/watchtower/**", async (route) => {
+        const request = route.request();
+        const url = new URL(request.url());
+        if (url.pathname.endsWith("/sessions") && request.method() === "POST") {
+          if (!participants.some((item) => item.userId === user.id)) {
+            participants.push({ userId: user.id, joinedAt: new Date().toISOString() });
+          }
+          await route.fulfill({ status: 201, json: { id: sessionId, jobId, status: "open", participants, createdAt: new Date().toISOString() } });
+          return;
+        }
+        if (url.pathname.endsWith(`/sessions/${sessionId}/stream`)) {
+          await route.fulfill({ status: 200, headers: { "content-type": "text/event-stream" }, body: ": connected\n\n" });
+          return;
+        }
+        if (url.pathname.endsWith(`/sessions/${sessionId}`)) {
+          await route.fulfill({ status: 200, json: { id: sessionId, jobId, status: "open", participants, createdAt: new Date().toISOString() } });
+          return;
+        }
+        await route.fulfill({ status: 404, json: { error: "Not found" } });
+      });
+    }
+
+    const contextOne = await browser.newContext();
+    const contextTwo = await browser.newContext();
+    try {
+      await setup(contextOne, users[0]);
+      await setup(contextTwo, users[1]);
+      const pageOne = await contextOne.newPage();
+      const pageTwo = await contextTwo.newPage();
+      await pageOne.goto("/jobs");
+      await pageOne.getByRole("button", { name: "Open Watchtower" }).click();
+      await expect(pageOne).toHaveURL(new RegExp(`/watchtower/${sessionId}$`));
+      await pageTwo.goto("/jobs");
+      await pageTwo.getByRole("button", { name: "Open Watchtower" }).click();
+      await expect(pageTwo).toHaveURL(new RegExp(`/watchtower/${sessionId}$`));
+      await expect(pageTwo.getByText("Participants: 2")).toBeVisible();
+      await pageOne.reload();
+      await expect(pageOne.getByText("Participants: 2")).toBeVisible();
+    } finally {
+      await contextOne.close();
+      await contextTwo.close();
+    }
+  });
 });
