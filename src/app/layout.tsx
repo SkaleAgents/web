@@ -24,7 +24,22 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "SkaleAgents",
-  description: "AI DevOps control plane",
+  description: "The control plane for AI DevOps agents, audits, and collaborative remediation.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://skaleagents.com"),
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "SkaleAgents",
+    title: "SkaleAgents | AI DevOps control plane",
+    description: "Run AI DevOps audits and review remediation with your team.",
+    url: "/",
+  },
+  twitter: {
+    card: "summary",
+    title: "SkaleAgents | AI DevOps control plane",
+    description: "Run AI DevOps audits and review remediation with your team.",
+  },
+  robots: { index: true, follow: true },
 };
 
 const showDevelopmentWarning =
@@ -51,9 +66,11 @@ export default function RootLayout({
             for production work.
           </div>
         ) : null}
-        <Providers>
-          <AppShell>{children}</AppShell>
-        </Providers>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <Providers>
+            <AppShell>{children}</AppShell>
+          </Providers>
+        </div>
         <footer className="border-t border-line bg-canvas-elevated">
           <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-5 text-xs text-ink-muted">
             <span>© 2026 SkaleAgents</span>

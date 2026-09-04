@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiFetch, type ApiUser, ensureCsrfCookie, googleSignInHref } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
+import { BrandLogo } from "@/components/brand";
 
 const nav = [
   { href: "/", label: "Home" },
@@ -52,16 +53,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       <header className="border-b border-line border-t-2 border-t-accent bg-canvas-elevated">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-center gap-6">
-            <Link
-              href="/"
-              className="font-display text-lg font-bold tracking-tight text-ink"
-            >
-              SkaleAgents
-            </Link>
+            <BrandLogo />
             <nav className="flex gap-3 text-sm">
               {nav.map((item) => {
                 const active =
