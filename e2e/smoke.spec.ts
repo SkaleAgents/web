@@ -55,4 +55,13 @@ test.describe("Phase 1 page smokes", () => {
     await expect(page.getByRole("heading", { name: /Audit jobs/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Start an IaC audit/i })).toBeVisible();
   });
+
+  test("every public route uses the shared menu and sign-in action", async ({ page }) => {
+    for (const path of ["/", "/login", "/bots", "/jobs", "/studio", "/prompts", "/settings"]) {
+      await page.goto(path);
+      await expect(page.getByRole("navigation")).toBeVisible();
+      await expect(page.getByRole("navigation").getByRole("link")).toHaveCount(6);
+      await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toBeVisible();
+    }
+  });
 });
