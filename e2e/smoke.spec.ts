@@ -49,4 +49,10 @@ test.describe("Phase 1 page smokes", () => {
     ).toBeVisible();
     await expect(page.getByText(/Sign in to mint bearer tokens/i)).toBeVisible();
   });
+
+  test("audit page explains the signed-in workflow", async ({ page }) => {
+    await page.goto("/jobs");
+    await expect(page.getByRole("heading", { name: /Audit jobs/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Start an IaC audit/i })).toBeVisible();
+  });
 });
