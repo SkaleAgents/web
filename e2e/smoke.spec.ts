@@ -39,6 +39,7 @@ test.describe("Phase 1 page smokes", () => {
       page.getByRole("heading", { name: /Control plane for AI DevOps agents/i }),
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
+    await expect(page.getByRole("contentinfo")).toContainText("SkaleAgents");
   });
 
   test("settings page explains api tokens", async ({ page }) => {
