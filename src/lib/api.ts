@@ -69,7 +69,7 @@ export async function watchtowerFetch<T>(
   if (!headers.has("Content-Type") && init.body) {
     headers.set("Content-Type", "application/json");
   }
-  const res = await fetch(`/api/watchtower${path}`, {
+  const res = await fetch(`${API_URL}/api/watchtower${path}`, {
     ...init,
     credentials: "include",
     headers,
