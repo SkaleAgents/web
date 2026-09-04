@@ -60,6 +60,85 @@ export async function apiFetch<T>(
   return res.json() as Promise<T>;
 }
 
+export async function watchtowerFetch<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const headers = new Headers(init.headers);
+  headers.set("Accept", "application/json");
+  if (!headers.has("Content-Type") && init.body) {
+    headers.set("Content-Type", "application/json");
+  }
+  const res = await fetch(`/api/watchtower${path}`, {
+    ...init,
+    credentials: "include",
+    headers,
+  });
+  if (!res.ok) {
+    let message = res.statusText;
+    try {
+      const data = (await res.json()) as { error?: string; message?: string };
+      message = data.error ?? data.message ?? message;
+    } catch {
+      /* ignore */
+    }
+    throw new Error(message);
+  }
+  return res.json() as Promise<T>;
+}
+
+export type SwarmFinding = {
+  severity: "info" | "low" | "medium" | "high" | "critical";
+  title: string;
+  detail: string;
+  resource: string;
+  remediation: string;
+  specialist: "devsecops" | "sre" | "mlops" | "scaling";
+};
+
+export type SwarmJob = {
+  id: string;
+  status: "queued" | "running" | "completed" | "failed";
+  requestedBy: string;
+  scope: Record<string, unknown>;
+  specialists: string[];
+  partial: boolean;
+  summary?: string;
+  error?: string;
+  createdAt: string;
+  updatedAt: string;
+  findings?: SwarmFinding[];
+  tasks?: Array<{ specialist: string; status: string; skipReason?: string }>;
+  steps?: SwarmStep[];
+};
+
+export type SwarmStep = {
+  jobId: string;
+  stepId: string;
+  agent: string;
+  message: string;
+  ts: string;
+};
+
+export type WatchtowerSession = {
+  id: string;
+  jobId: string;
+  status: "open" | "closed";
+  participants: Array<{ userId: string; joinedAt: string }>;
+  createdAt: string;
+  closedAt?: string;
+};
+
+export type PatchProposal = {
+  id: string;
+  sessionId: string;
+  jobId: string;
+  finding: SwarmFinding;
+  diff: string;
+  status: "pending" | "approved" | "modified" | "rejected";
+  history: Array<{ action: string; userId: string; at: string; reason?: string }>;
+};
+
 export type ApiUser = {
   id: string;
   email: string | null;

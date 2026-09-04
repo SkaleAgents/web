@@ -10,6 +10,7 @@ import { Button, LinkButton } from "@/components/ui";
 const nav = [
   { href: "/", label: "Home" },
   { href: "/bots", label: "Directory" },
+  { href: "/jobs", label: "Audits" },
   { href: "/studio", label: "Studio" },
   { href: "/prompts", label: "Prompts" },
   { href: "/settings", label: "API tokens" },
