@@ -114,6 +114,11 @@ test.describe("Phase 1 page smokes", () => {
           await route.fulfill({ status: 200, json: { id: sessionId, jobId, status: sessionStatus, participants, closedAt: new Date().toISOString() } });
           return;
         }
+        if (url.pathname.endsWith(`/sessions/${sessionId}/redirect`) && request.method() === "POST") {
+          const body = JSON.parse(request.postData() ?? "{}");
+          await route.fulfill({ status: 201, json: { id: "00000000-0000-4000-8000-000000000003", sessionId, jobId, userId: user.id, instruction: body.instruction, createdAt: new Date().toISOString() } });
+          return;
+        }
         if (url.pathname.endsWith(`/sessions/${sessionId}`)) {
           await route.fulfill({ status: 200, json: { id: sessionId, jobId, status: sessionStatus, participants, createdAt: new Date().toISOString() } });
           return;
@@ -138,6 +143,9 @@ test.describe("Phase 1 page smokes", () => {
       await expect(pageTwo.getByText("Participants: 2")).toBeVisible();
       await pageOne.reload();
       await expect(pageOne.getByText("Participants: 2")).toBeVisible();
+      await pageOne.getByRole("textbox", { name: "Redirect instruction" }).fill("Prioritize recovery.");
+      await pageOne.getByRole("button", { name: "Send redirect" }).click();
+      await expect(pageOne.getByText("Prioritize recovery.")).toBeVisible();
       await pageOne.getByRole("button", { name: "Close session" }).click();
       await expect(pageOne.getByRole("button", { name: "Close session" })).toBeHidden();
     } finally {
