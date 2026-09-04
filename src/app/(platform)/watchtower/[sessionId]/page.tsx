@@ -10,6 +10,10 @@ export default function WatchtowerPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const queryClient = useQueryClient();
   const [steps, setSteps] = useState<SwarmStep[]>([]);
+  const close = useMutation({
+    mutationFn: () => watchtowerFetch<WatchtowerSession & { proposals?: PatchProposal[] }>(`/sessions/${sessionId}/close`, { method: "POST" }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId] }),
+  });
   const session = useQuery({
     queryKey: ["watchtower-session", sessionId],
     queryFn: () => watchtowerFetch<WatchtowerSession & { proposals?: PatchProposal[] }>(`/sessions/${sessionId}`),
@@ -48,7 +52,19 @@ export default function WatchtowerPage() {
           <p className="mt-1 text-sm text-ink-muted">{job.data?.summary ?? "Specialists are working"}</p>
           <p className="mt-2 text-xs text-ink-muted">Participants: {session.data?.participants.length ?? 0}</p>
         </div>
-        <LinkButton href="/jobs" className="bg-transparent">Back to audits</LinkButton>
+        <div className="flex flex-wrap items-center gap-3">
+          {session.data?.status === "open" && (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={close.isPending || proposals.some((proposal) => proposal.status === "pending")}
+              onClick={() => close.mutate()}
+            >
+              {close.isPending ? "Closing…" : "Close session"}
+            </Button>
+          )}
+          <LinkButton href="/jobs" className="bg-transparent">Back to audits</LinkButton>
+        </div>
       </div>
 
       <section className="grid gap-5 md:grid-cols-2">
@@ -86,6 +102,7 @@ export default function WatchtowerPage() {
         content={content}
         onUpdated={() => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId] })}
       />
+      {close.isError && <p className="text-sm text-danger">{close.error.message}</p>}
     </main>
   );
 }
