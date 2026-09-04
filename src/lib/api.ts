@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
 
 const MOCK_AUTH_ENABLED =
   process.env.NEXT_PUBLIC_MOCK_AUTH_ENABLED === "true";
@@ -145,6 +145,11 @@ export type PatchProposal = {
   diff: string;
   status: "pending" | "approved" | "modified" | "rejected";
   history: Array<{ action: string; userId: string; at: string; reason?: string }>;
+};
+
+export type ProposalGenerationResult = {
+  proposals: PatchProposal[];
+  skipped: Array<{ title: string; resource: string; reason: string }>;
 };
 
 export type ApiUser = {
