@@ -73,6 +73,7 @@ test.describe("Phase 1 page smokes", () => {
       { id: "00000000-0000-4000-8000-000000000012", displayName: "User Two" },
     ];
     const participants: Array<{ userId: string; joinedAt: string }> = [];
+    let sessionStatus: "open" | "closed" = "open";
     const job = {
       id: jobId,
       status: "completed",
@@ -106,8 +107,13 @@ test.describe("Phase 1 page smokes", () => {
           await route.fulfill({ status: 200, headers: { "content-type": "text/event-stream" }, body: ": connected\n\n" });
           return;
         }
+        if (url.pathname.endsWith(`/sessions/${sessionId}/close`) && request.method() === "POST") {
+          sessionStatus = "closed";
+          await route.fulfill({ status: 200, json: { id: sessionId, jobId, status: sessionStatus, participants, closedAt: new Date().toISOString() } });
+          return;
+        }
         if (url.pathname.endsWith(`/sessions/${sessionId}`)) {
-          await route.fulfill({ status: 200, json: { id: sessionId, jobId, status: "open", participants, createdAt: new Date().toISOString() } });
+          await route.fulfill({ status: 200, json: { id: sessionId, jobId, status: sessionStatus, participants, createdAt: new Date().toISOString() } });
           return;
         }
         await route.fulfill({ status: 404, json: { error: "Not found" } });
@@ -130,6 +136,8 @@ test.describe("Phase 1 page smokes", () => {
       await expect(pageTwo.getByText("Participants: 2")).toBeVisible();
       await pageOne.reload();
       await expect(pageOne.getByText("Participants: 2")).toBeVisible();
+      await pageOne.getByRole("button", { name: "Close session" }).click();
+      await expect(pageOne.getByRole("button", { name: "Close session" })).toBeHidden();
     } finally {
       await contextOne.close();
       await contextTwo.close();
