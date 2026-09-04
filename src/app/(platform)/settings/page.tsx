@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import {
   apiFetch,
   ensureCsrfCookie,
+  googleSignInHref,
   type ApiToken,
   type ApiTokenCreated,
   type ApiUser,
@@ -116,7 +117,7 @@ export default function SettingsPage() {
           Sign in to mint bearer tokens for Cursor, Claude Code, or other MCP
           clients.
         </p>
-        <Link href="/login" className="text-sm text-accent underline">
+        <Link href={googleSignInHref()} className="text-sm text-accent underline">
           Sign in
         </Link>
       </main>

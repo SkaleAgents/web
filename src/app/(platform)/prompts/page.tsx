@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import {
   apiFetch,
   ensureCsrfCookie,
+  googleSignInHref,
   type ApiUser,
   type Prompt,
 } from "@/lib/api";
@@ -131,7 +132,7 @@ export default function PromptsPage() {
         </form>
       ) : (
         <p className="text-sm text-ink-muted">
-          <Link href="/login" className="underline">
+          <Link href={googleSignInHref()} className="underline">
             Sign in
           </Link>{" "}
           to add your own prompts. Community prompts stay readable for free.
