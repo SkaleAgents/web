@@ -6,23 +6,46 @@ import { useState } from "react";
 import { apiFetch, googleSignInHref, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
 
+const AUDIT_SPECIALISTS = ["devsecops", "sre", "mlops", "scaling"] as const;
+type AuditSpecialist = (typeof AUDIT_SPECIALISTS)[number];
+
 export default function JobsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
+  const [telemetry, setTelemetry] = useState("");
+  const [specialists, setSpecialists] = useState<AuditSpecialist[]>(["devsecops", "sre"]);
   const jobs = useQuery({
     queryKey: ["swarm-jobs"],
     queryFn: async () => (await apiFetch<{ jobs: SwarmJob[] }>("/api/jobs")).jobs,
   });
   const create = useMutation({
-    mutationFn: () => apiFetch<SwarmJob>("/api/jobs", {
-      method: "POST",
-      body: JSON.stringify({
-        scope: { kind: "iac_text", format: "auto", content },
-      }),
-    }),
+    mutationFn: () => {
+      let parsedTelemetry: Record<string, unknown> | undefined;
+      if (telemetry.trim()) {
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(telemetry);
+        } catch {
+          throw new Error("Telemetry must be valid JSON");
+        }
+        if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+          throw new Error("Telemetry must be a JSON object");
+        }
+        parsedTelemetry = parsed as Record<string, unknown>;
+      }
+      return apiFetch<SwarmJob>("/api/jobs", {
+        method: "POST",
+        body: JSON.stringify({
+          scope: { kind: "iac_text", format: "auto", content },
+          specialists,
+          ...(parsedTelemetry ? { telemetry: parsedTelemetry } : {}),
+        }),
+      });
+    },
     onSuccess: () => {
       setContent("");
+      setTelemetry("");
       void queryClient.invalidateQueries({ queryKey: ["swarm-jobs"] });
     },
   });
@@ -52,8 +75,34 @@ export default function JobsPage() {
           placeholder={'resource "aws_security_group" "web" {}'}
           aria-label="IaC content"
         />
+        <label className="mt-4 block text-sm font-medium text-ink" htmlFor="audit-telemetry">Telemetry JSON (optional)</label>
+        <textarea
+          id="audit-telemetry"
+          value={telemetry}
+          onChange={(event) => setTelemetry(event.target.value)}
+          className="mt-2 min-h-24 w-full rounded-[10px] border border-line bg-canvas px-3 py-2 font-mono text-sm text-ink outline-none focus:border-accent"
+          placeholder={'{ "retryCount": 4, "logs": ["request timeout"] }'}
+          aria-label="Telemetry JSON"
+        />
+        <fieldset className="mt-4">
+          <legend className="text-sm font-medium text-ink">Specialists</legend>
+          <div className="mt-2 flex flex-wrap gap-4">
+            {AUDIT_SPECIALISTS.map((specialist) => (
+              <label key={specialist} className="inline-flex items-center gap-2 text-sm text-ink-muted">
+                <input
+                  type="checkbox"
+                  checked={specialists.includes(specialist)}
+                  onChange={(event) => setSpecialists((current) => event.target.checked
+                    ? [...current, specialist]
+                    : current.filter((item) => item !== specialist))}
+                />
+                {specialist}
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <div className="mt-3 flex items-center gap-3">
-          <Button type="button" disabled={!content.trim() || create.isPending} onClick={() => create.mutate()}>
+          <Button type="button" disabled={!content.trim() || specialists.length === 0 || create.isPending} onClick={() => create.mutate()}>
             {create.isPending ? "Queueing…" : "Queue audit"}
           </Button>
           {create.isError && <p className="text-sm text-danger">{create.error.message}</p>}
