@@ -40,6 +40,12 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${syne.variable} ${sourceSans.variable} ${plexMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          async
+          src="https://news.google.com/swg/js/v1/publisher.js"
+        />
+      </head>
       <body className="flex min-h-screen flex-col bg-canvas text-ink">
         {showDevelopmentWarning ? (
           <div
@@ -55,6 +61,12 @@ export default function RootLayout({
           <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-5 text-xs text-ink-muted">
             <span>© 2026 SkaleAgents</span>
             <span>AI DevOps control plane</span>
+          </div>
+          <div className="mx-auto w-full max-w-5xl px-6 pb-5">
+            <div
+              className="google-add-preferred-source-btn"
+              google-add-preferred-source-btn=""
+            />
           </div>
         </footer>
       </body>
