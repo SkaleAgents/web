@@ -31,8 +31,11 @@ export default function WatchtowerPage() {
       const payload = JSON.parse((event as MessageEvent).data) as { step: SwarmStep };
       setSteps((current) => current.some((step) => step.stepId === payload.step.stepId) ? current : [...current, payload.step]);
     });
+    const refresh = () => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId] });
+    events.addEventListener("proposal", refresh);
+    events.addEventListener("closed", refresh);
     return () => events.close();
-  }, [session.data, sessionId]);
+  }, [queryClient, session.data, sessionId]);
 
   if (session.isPending || job.isPending) return <p className="text-sm text-ink-muted">Loading Watchtower…</p>;
   if (session.isError || job.isError) {
