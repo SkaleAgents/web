@@ -64,10 +64,18 @@ export async function watchtowerFetch<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
+  const method = (init.method ?? "GET").toUpperCase();
+  if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
+    await ensureCsrfCookie();
+  }
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
   if (!headers.has("Content-Type") && init.body) {
     headers.set("Content-Type", "application/json");
+  }
+  const xsrf = readCookie("XSRF-TOKEN");
+  if (xsrf) {
+    headers.set("X-XSRF-TOKEN", xsrf);
   }
   const res = await fetch(`${API_URL}/api/watchtower${path}`, {
     ...init,
