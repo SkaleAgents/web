@@ -42,7 +42,7 @@ export default function LoginPage() {
     onSuccess: (session) => {
       queryClient.setQueryData(["user"], session.user);
       toast.success(`Signed in as ${session.user.displayName}`);
-      router.push("/");
+      router.push("/bots");
     },
     onError: (err: Error) => toast.error(err.message),
   });

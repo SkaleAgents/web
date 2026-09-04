@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { apiFetch, type ApiUser, ensureCsrfCookie } from "@/lib/api";
+import { apiFetch, type ApiUser, ensureCsrfCookie, googleSignInHref } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
 
 const nav = [
@@ -126,7 +126,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Button>
               </>
             ) : (
-              <LinkButton href="/login" className="px-3 py-1.5">
+              <LinkButton href={googleSignInHref()} className="px-3 py-1.5">
                 Sign in
               </LinkButton>
             )}

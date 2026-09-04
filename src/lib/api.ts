@@ -1,5 +1,13 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
 
+const MOCK_AUTH_ENABLED =
+  process.env.NEXT_PUBLIC_MOCK_AUTH_ENABLED === "true";
+
+export function googleSignInHref(): string {
+  if (MOCK_AUTH_ENABLED) return "/login";
+  return `${API_URL}/api/auth/google/redirect`;
+}
+
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));

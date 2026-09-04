@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, type ApiUser, type Bot } from "@/lib/api";
+import { apiFetch, type ApiUser, type Bot, googleSignInHref } from "@/lib/api";
 import { LinkButton } from "@/components/ui";
 
 export default function BotsDirectoryPage() {
@@ -47,7 +47,7 @@ export default function BotsDirectoryPage() {
         {signedIn ? (
           <LinkButton href="/studio">Create bot</LinkButton>
         ) : (
-          <LinkButton href="/login">Sign in to create</LinkButton>
+          <LinkButton href={googleSignInHref()}>Sign in to create</LinkButton>
         )}
       </div>
 
