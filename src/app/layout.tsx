@@ -40,7 +40,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${syne.variable} ${sourceSans.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-canvas text-ink">
+      <body className="flex min-h-screen flex-col bg-canvas text-ink">
         {showDevelopmentWarning ? (
           <div
             role="status"
@@ -51,6 +51,12 @@ export default function RootLayout({
           </div>
         ) : null}
         <Providers>{children}</Providers>
+        <footer className="border-t border-line bg-canvas-elevated">
+          <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-5 text-xs text-ink-muted">
+            <span>© 2026 SkaleAgents</span>
+            <span>AI DevOps control plane</span>
+          </div>
+        </footer>
       </body>
     </html>
   );
