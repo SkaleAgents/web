@@ -3,16 +3,27 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, API_URL, type PatchProposal, type ProposalGenerationResult, type SwarmFinding, type SwarmJob, type SwarmStep, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
+import { apiFetch, API_URL, type PatchProposal, type ProposalGenerationResult, type SwarmFinding, type SwarmJob, type SwarmStep, type WatchtowerRedirect, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
 
 export default function WatchtowerPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const queryClient = useQueryClient();
   const [steps, setSteps] = useState<SwarmStep[]>([]);
+  const [instruction, setInstruction] = useState("");
   const close = useMutation({
     mutationFn: () => watchtowerFetch<WatchtowerSession & { proposals?: PatchProposal[] }>(`/sessions/${sessionId}/close`, { method: "POST" }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId] }),
+  });
+  const redirect = useMutation({
+    mutationFn: () => watchtowerFetch<WatchtowerRedirect>(`/sessions/${sessionId}/redirect`, {
+      method: "POST",
+      body: JSON.stringify({ instruction }),
+    }),
+    onSuccess: () => {
+      setInstruction("");
+      void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId] });
+    },
   });
   const session = useQuery({
     queryKey: ["watchtower-session", sessionId],
@@ -43,6 +54,7 @@ export default function WatchtowerPage() {
     return <p className="text-sm text-danger">{error instanceof Error ? error.message : "Watchtower unavailable"}</p>;
   }
   const proposals = session.data?.proposals ?? [];
+  const redirects = session.data?.redirects ?? [];
   const content = typeof job.data?.scope.content === "string" ? job.data.scope.content : "";
   const allSteps = [...(job.data?.steps ?? []), ...steps].filter((step, index, all) => all.findIndex((item) => item.stepId === step.stepId) === index);
 
@@ -69,6 +81,31 @@ export default function WatchtowerPage() {
           <LinkButton href="/jobs" className="bg-transparent">Back to audits</LinkButton>
         </div>
       </div>
+
+      <section className="rounded-[10px] border border-line bg-canvas-elevated p-5">
+        <h2 className="text-lg font-semibold text-ink">Redirect the swarm</h2>
+        <p className="mt-1 text-sm text-ink-muted">Send a review instruction to the next queued swarm task. It never auto-approves a patch.</p>
+        {session.data?.status === "open" && (
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start">
+            <textarea
+              value={instruction}
+              onChange={(event) => setInstruction(event.target.value)}
+              className="min-h-20 flex-1 rounded border border-line bg-canvas p-2 text-sm text-ink"
+              placeholder="Focus on the least-privilege remediation"
+              aria-label="Redirect instruction"
+            />
+            <Button type="button" disabled={redirect.isPending || !instruction.trim()} onClick={() => redirect.mutate()}>
+              {redirect.isPending ? "Sending…" : "Send redirect"}
+            </Button>
+          </div>
+        )}
+        {redirect.isError && <p className="mt-3 text-sm text-danger">{redirect.error.message}</p>}
+        {redirects.length > 0 && (
+          <ul className="mt-4 space-y-2 border-t border-line pt-3 text-sm text-ink-muted">
+            {redirects.map((item) => <li key={item.id}>{item.instruction}</li>)}
+          </ul>
+        )}
+      </section>
 
       <section className="grid gap-5 md:grid-cols-2">
         <div className="rounded-[10px] border border-line bg-canvas-elevated p-5">

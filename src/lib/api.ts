@@ -135,6 +135,16 @@ export type WatchtowerSession = {
   participants: Array<{ userId: string; joinedAt: string }>;
   createdAt: string;
   closedAt?: string;
+  redirects?: WatchtowerRedirect[];
+};
+
+export type WatchtowerRedirect = {
+  id: string;
+  sessionId: string;
+  jobId: string;
+  userId: string;
+  instruction: string;
+  createdAt: string;
 };
 
 export type PatchProposal = {
