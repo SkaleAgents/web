@@ -20,7 +20,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const isLogin = pathname === "/login";
 
   const userQuery = useQuery({
     queryKey: ["user"],
@@ -50,30 +49,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Sign out failed");
     }
-  }
-
-  if (isLogin) {
-    return (
-      <div className="flex min-h-full flex-col bg-canvas">
-        <header className="border-b border-line border-t-2 border-t-accent">
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4">
-            <Link
-              href="/"
-              className="font-display text-lg font-bold tracking-tight text-ink"
-            >
-              SkaleAgents
-            </Link>
-            <Link
-              href="/bots"
-              className="text-sm text-ink-muted transition hover:text-ink"
-            >
-              Browse directory
-            </Link>
-          </div>
-        </header>
-        <div className="flex flex-1 flex-col">{children}</div>
-      </div>
-    );
   }
 
   return (
@@ -134,7 +109,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
-      <div className="motion-enter mx-auto w-full max-w-5xl flex-1 px-6 py-8">
+      <div className={
+        pathname === "/login"
+          ? "flex flex-1 flex-col"
+          : "motion-enter mx-auto w-full max-w-5xl flex-1 px-6 py-8"
+      }>
         {children}
       </div>
     </div>
