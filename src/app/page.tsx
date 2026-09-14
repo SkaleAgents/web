@@ -58,10 +58,10 @@ export default function MarketingHome() {
         <div className="mt-8 flex flex-wrap gap-3">
           {signedIn ? (
             <Link
-              href="/bots"
+              href="/settings"
               className="inline-flex items-center rounded-[10px] bg-accent px-4 py-2.5 text-sm font-semibold text-accent-fg transition hover:brightness-110"
             >
-              Open control plane
+              Connect MCP
             </Link>
           ) : (
             <Link
@@ -72,10 +72,10 @@ export default function MarketingHome() {
             </Link>
           )}
           <Link
-            href="/bots"
+            href={signedIn ? "/bots" : "/settings"}
             className="inline-flex items-center rounded-[10px] border border-line bg-transparent px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-accent-soft"
           >
-            Browse directory
+            {signedIn ? "Browse directory" : "See MCP setup"}
           </Link>
         </div>
       </div>

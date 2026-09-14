@@ -88,7 +88,7 @@ export default function BotsDirectoryPage() {
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <LinkButton href={`/bots/${bot.id}`} variant="secondary">
-                Open bot
+                View prompt
               </LinkButton>
               {userQuery.data?.id === bot.ownerUserId && (
                 <Link

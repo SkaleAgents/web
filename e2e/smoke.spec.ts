@@ -42,12 +42,12 @@ test.describe("Phase 1 page smokes", () => {
     await expect(page.getByRole("contentinfo")).toContainText("SkaleAgents");
   });
 
-  test("settings page explains api tokens", async ({ page }) => {
+  test("settings page explains the MCP connection", async ({ page }) => {
     await page.goto("/settings");
     await expect(
-      page.getByRole("heading", { name: /API tokens/i }),
+      page.getByRole("heading", { name: /Connect MCP/i }),
     ).toBeVisible();
-    await expect(page.getByText(/Sign in to mint bearer tokens/i)).toBeVisible();
+    await expect(page.getByText(/Sign in to connect/i)).toBeVisible();
   });
 
   test("audit page explains the signed-in workflow", async ({ page }) => {

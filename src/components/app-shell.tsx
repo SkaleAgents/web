@@ -14,7 +14,7 @@ const nav = [
   { href: "/jobs", label: "Audits" },
   { href: "/studio", label: "Studio" },
   { href: "/prompts", label: "Prompts" },
-  { href: "/settings", label: "API tokens" },
+  { href: "/settings", label: "MCP" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
