@@ -16,11 +16,16 @@ import {
   type ApiUser,
 } from "@/lib/api";
 import { GoogleSignInLabel } from "@/components/google-mark";
+import { McpConnectionGuide } from "@/components/mcp-connection-guide";
 import { Button, FieldLabel, TextInput } from "@/components/ui";
 
 const schema = z.object({
   name: z.string().min(1, "Name required").max(255, "Name is too long"),
 });
+
+const MCP_API_URL = (
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082"
+).replace(/\/$/, "");
 
 type FormValues = z.infer<typeof schema>;
 
@@ -112,11 +117,11 @@ export default function SettingsPage() {
     return (
       <main className="space-y-4">
         <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
-          API tokens
+          Connect MCP
         </h1>
         <p className="text-sm text-ink-muted">
-          Sign in to mint bearer tokens for Cursor, Claude Code, or other MCP
-          clients.
+          Sign in to connect Cursor, Claude Code, or another AI client to the
+          SkaleAgents MCP server.
         </p>
         <Link href={googleSignInHref()} className="text-sm text-accent underline">
           <GoogleSignInLabel>Sign in</GoogleSignInLabel>
@@ -129,15 +134,17 @@ export default function SettingsPage() {
     <main className="space-y-8">
       <div>
         <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
-          API tokens
+          Connect MCP
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-          Create a bearer token for{" "}
-          <code className="font-mono text-ink">@skaleagents/swarm</code> in your
-          IDE. Tokens stay valid after you sign out of the web app until you
-          revoke them here.
+          Connect your AI model to your app and infrastructure review workflow.
+          The <code className="font-mono text-ink">@skaleagents/swarm</code>{" "}
+          server runs locally in your AI client. Tokens stay valid after you
+          sign out of the web app until you revoke them here.
         </p>
       </div>
+
+      <McpConnectionGuide token={revealedToken} apiUrl={MCP_API_URL} />
 
       {revealedToken && (
         <section className="max-w-2xl space-y-3 rounded-[10px] border border-accent/40 bg-accent-soft p-4">
