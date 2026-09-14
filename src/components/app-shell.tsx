@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiFetch, type ApiUser, ensureCsrfCookie, googleSignInHref } from "@/lib/api";
+import { GoogleSignInLabel } from "@/components/google-mark";
 import { Button, LinkButton } from "@/components/ui";
 
 const nav = [
@@ -103,7 +104,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </>
             ) : (
               <LinkButton href={googleSignInHref()} className="px-3 py-1.5">
-                Sign in
+                <GoogleSignInLabel>Sign in</GoogleSignInLabel>
               </LinkButton>
             )}
           </div>

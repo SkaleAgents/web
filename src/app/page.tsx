@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiUser } from "@/lib/api";
 import { googleSignInHref } from "@/lib/api";
+import { GoogleSignInLabel } from "@/components/google-mark";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
 
@@ -67,7 +68,7 @@ export default function MarketingHome() {
               href={googleSignInHref()}
               className="inline-flex items-center rounded-[10px] bg-accent px-4 py-2.5 text-sm font-semibold text-accent-fg transition hover:brightness-110"
             >
-              Sign in
+              <GoogleSignInLabel>Sign in</GoogleSignInLabel>
             </Link>
           )}
           <Link
