@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch, type ApiUser, type Bot, googleSignInHref } from "@/lib/api";
+import { BotPromptActions } from "@/components/bot-prompt-actions";
 import { LinkButton } from "@/components/ui";
 
 export default function BotsDirectoryPage() {
@@ -110,6 +111,7 @@ export default function BotsDirectoryPage() {
             <p className="mt-1 text-sm text-ink-muted">
               {bot.description || "No description"}
             </p>
+            <BotPromptActions prompt={bot.promptBody} />
           </li>
         ))}
       </ul>
