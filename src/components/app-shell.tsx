@@ -13,6 +13,7 @@ const nav = [
   { href: "/", label: "Home" },
   { href: "/bots", label: "Directory" },
   { href: "/jobs", label: "Audits" },
+  { href: "/schedules", label: "Schedules" },
   { href: "/studio", label: "Studio" },
   { href: "/prompts", label: "Prompts" },
   { href: "/settings", label: "MCP" },
