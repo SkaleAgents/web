@@ -108,6 +108,7 @@ export type SwarmJob = {
   id: string;
   status: "queued" | "running" | "completed" | "failed";
   requestedBy: string;
+  scheduleId?: string | null;
   scope: Record<string, unknown>;
   specialists: string[];
   partial: boolean;
@@ -118,6 +119,25 @@ export type SwarmJob = {
   findings?: SwarmFinding[];
   tasks?: Array<{ specialist: string; status: string; skipReason?: string }>;
   steps?: SwarmStep[];
+};
+
+export type SwarmSchedule = {
+  id: string;
+  name: string;
+  cronExpression: string;
+  timezone: string;
+  scope: Record<string, unknown>;
+  specialists: string[];
+  telemetry?: Record<string, unknown> | null;
+  webhookConfigured: boolean;
+  enabled: boolean;
+  nextRunAt: string | null;
+  lastRunAt: string | null;
+  lastJobId: string | null;
+  lastNotifiedJobId: string | null;
+  lastError: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type SwarmStep = {
