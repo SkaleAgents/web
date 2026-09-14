@@ -36,3 +36,21 @@ describe("buildGrokPromptUrl", () => {
     expect(url.searchParams.get("q")).toBe(prompt);
   });
 });
+
+describe("buildAssistantPromptUrl", () => {
+  it("keeps provider options in the directory action order", async () => {
+    const { ASSISTANT_OPTIONS, buildAssistantPromptUrl } = await import("./bot-links");
+    const prompt = "Review the deployment and explain the safest next step.";
+
+    expect(ASSISTANT_OPTIONS.map((option) => option.label)).toEqual([
+      "Grok",
+      "SuperGrok",
+      "Claude",
+      "Codex",
+    ]);
+    expect(new URL(buildAssistantPromptUrl("grok", prompt)).searchParams.get("q")).toBe(prompt);
+    expect(new URL(buildAssistantPromptUrl("supergrok", prompt)).searchParams.get("q")).toBe(prompt);
+    expect(new URL(buildAssistantPromptUrl("claude", prompt)).searchParams.get("q")).toBe(prompt);
+    expect(buildAssistantPromptUrl("codex", prompt)).toBe("https://chatgpt.com/codex");
+  });
+});

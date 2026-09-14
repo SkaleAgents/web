@@ -97,15 +97,20 @@ test("a signed-in creator can publish a bot into the directory", async ({ page }
   await expect(page).toHaveURL(new RegExp(`/bots/${botId}$`));
   await expect(page.getByRole("heading", { name: botName })).toBeVisible();
   await expect(page.getByText(prompt)).toBeVisible();
-  await expect(page.getByRole("link", { name: "Open in Grok" })).toHaveAttribute(
-    "target",
-    "_blank",
-  );
-  const grokHref = await page.getByRole("link", { name: "Open in Grok" }).getAttribute("href");
-  expect(grokHref).toBeTruthy();
+  await page.getByRole("button", { name: /Open with/ }).click();
+  const menu = page.getByRole("menu");
+  const providers = menu.locator("a");
+  await expect(providers).toHaveCount(4);
+  const grokHref = await providers.nth(0).getAttribute("href");
   expect(new URL(grokHref ?? "").searchParams.get("q")).toBe(prompt);
-  await page.getByRole("button", { name: "Copy prompt" }).click();
-  await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
+  expect(new URL(await providers.nth(1).getAttribute("href") ?? "").searchParams.get("q")).toBe(prompt);
+  expect(new URL(await providers.nth(2).getAttribute("href") ?? "").searchParams.get("q")).toBe(prompt);
+  await expect(providers.nth(3)).toHaveAttribute("href", "https://chatgpt.com/codex");
+  await expect(menu.locator("button", { hasText: "Copy prompt" })).toBeVisible();
+  await menu.locator("button", { hasText: "Copy prompt" }).click();
+  await expect(
+    page.getByText("Paste it into Codex, Claude, ChatGPT, or another assistant."),
+  ).toBeVisible();
   expect(
     await page.evaluate(() => (window as unknown as { copiedPrompt?: string }).copiedPrompt),
   ).toBe(prompt);
