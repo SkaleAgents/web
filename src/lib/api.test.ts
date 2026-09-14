@@ -24,3 +24,15 @@ describe("parsePromptTags", () => {
     ]);
   });
 });
+
+describe("buildGrokPromptUrl", () => {
+  it("encodes the bot prompt in the Grok handoff URL", async () => {
+    const { buildGrokPromptUrl } = await import("./bot-links");
+    const prompt = "Review secure defaults.\nExplain the highest-impact fix.";
+    const url = new URL(buildGrokPromptUrl(prompt));
+
+    expect(url.origin).toBe("https://grok.com");
+    expect(url.pathname).toBe("/");
+    expect(url.searchParams.get("q")).toBe(prompt);
+  });
+});

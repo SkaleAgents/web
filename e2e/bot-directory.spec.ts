@@ -10,8 +10,19 @@ test("a signed-in creator can publish a bot into the directory", async ({ page }
   const botId = "00000000-0000-4000-8000-000000000021";
   const botName = "Directory Acceptance Bot";
   const description = "Finds risky defaults before they reach production.";
+  const prompt = "Review secure defaults and explain the highest-impact remediation.";
   let bot: Record<string, unknown> | null = null;
 
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (text: string) => {
+          (window as unknown as { copiedPrompt?: string }).copiedPrompt = text;
+        },
+      },
+    });
+  });
   await page.route("**/api/user", (route) => route.fulfill({ json: user }));
   await page.route("**/sanctum/csrf-cookie", (route) =>
     route.fulfill({ status: 204 }),
@@ -64,9 +75,7 @@ test("a signed-in creator can publish a bot into the directory", async ({ page }
   await page.getByRole("textbox", { name: "Name" }).fill(botName);
   await page.getByRole("textbox", { name: "Description" }).fill(description);
   await page.getByRole("combobox", { name: "Specialty" }).selectOption("devsecops");
-  await page
-    .getByRole("textbox", { name: "Prompt body" })
-    .fill("Review secure defaults and explain the highest-impact remediation.");
+  await page.getByRole("textbox", { name: "Prompt body" }).fill(prompt);
   await page.getByRole("combobox", { name: "Visibility" }).selectOption("public");
   await page.getByRole("button", { name: "Save draft" }).click();
 
@@ -79,4 +88,16 @@ test("a signed-in creator can publish a bot into the directory", async ({ page }
   await expect(page.getByText("public", { exact: true })).toBeVisible();
   await expect(page.getByText("published", { exact: true })).toBeVisible();
   await expect(page.getByText(description)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open in Grok" })).toHaveAttribute(
+    "target",
+    "_blank",
+  );
+  const grokHref = await page.getByRole("link", { name: "Open in Grok" }).getAttribute("href");
+  expect(grokHref).toBeTruthy();
+  expect(new URL(grokHref ?? "").searchParams.get("q")).toBe(prompt);
+  await page.getByRole("button", { name: "Copy prompt" }).click();
+  await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
+  expect(
+    await page.evaluate(() => (window as unknown as { copiedPrompt?: string }).copiedPrompt),
+  ).toBe(prompt);
 });
