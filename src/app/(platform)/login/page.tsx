@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiFetch, ensureCsrfCookie, type AuthSession } from "@/lib/api";
+import { GoogleSignInLabel } from "@/components/google-mark";
 import { Button } from "@/components/ui";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
@@ -113,12 +114,14 @@ export default function LoginPage() {
               className="w-full py-2.5 text-[15px]"
               onClick={() => googleLogin.mutate()}
             >
-              {googleLogin.isPending ? "Signing in…" : "Continue with Google"}
+              <GoogleSignInLabel>
+                {googleLogin.isPending ? "Signing in…" : "Continue with Google"}
+              </GoogleSignInLabel>
             </Button>
           ) : (
             <form action={`${API_URL}/api/auth/google/redirect`} method="get">
               <Button type="submit" className="w-full py-2.5 text-[15px]">
-                Continue with Google
+                <GoogleSignInLabel>Continue with Google</GoogleSignInLabel>
               </Button>
             </form>
           )}

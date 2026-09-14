@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { apiFetch, googleSignInHref, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
+import { GoogleSignInLabel } from "@/components/google-mark";
 import { Button, LinkButton } from "@/components/ui";
 
 const AUDIT_SPECIALISTS = ["devsecops", "sre", "mlops", "scaling"] as const;
@@ -115,7 +116,9 @@ export default function JobsPage() {
         {jobs.isError && (
           <div className="rounded-[10px] border border-line p-4">
             <p className="text-sm text-danger">{jobs.error.message}</p>
-            <LinkButton href={googleSignInHref()} className="mt-3">Sign in</LinkButton>
+            <LinkButton href={googleSignInHref()} className="mt-3">
+              <GoogleSignInLabel>Sign in</GoogleSignInLabel>
+            </LinkButton>
           </div>
         )}
         {jobs.data?.length === 0 && <p className="text-sm text-ink-muted">No audits yet.</p>}

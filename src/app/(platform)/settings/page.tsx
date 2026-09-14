@@ -15,6 +15,7 @@ import {
   type ApiTokenCreated,
   type ApiUser,
 } from "@/lib/api";
+import { GoogleSignInLabel } from "@/components/google-mark";
 import { Button, FieldLabel, TextInput } from "@/components/ui";
 
 const schema = z.object({
@@ -118,7 +119,7 @@ export default function SettingsPage() {
           clients.
         </p>
         <Link href={googleSignInHref()} className="text-sm text-accent underline">
-          Sign in
+          <GoogleSignInLabel>Sign in</GoogleSignInLabel>
         </Link>
       </main>
     );

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch, type ApiUser, type Bot, googleSignInHref } from "@/lib/api";
 import { LinkButton } from "@/components/ui";
+import { GoogleSignInLabel } from "@/components/google-mark";
 
 export default function BotsDirectoryPage() {
   const userQuery = useQuery({
@@ -46,7 +47,9 @@ export default function BotsDirectoryPage() {
         {signedIn ? (
           <LinkButton href="/studio">Create bot</LinkButton>
         ) : (
-          <LinkButton href={googleSignInHref()}>Sign in to create</LinkButton>
+          <LinkButton href={googleSignInHref()}>
+            <GoogleSignInLabel>Sign in to create</GoogleSignInLabel>
+          </LinkButton>
         )}
       </div>
 

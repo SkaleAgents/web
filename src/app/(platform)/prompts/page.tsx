@@ -13,6 +13,7 @@ import {
   type ApiUser,
   type Prompt,
 } from "@/lib/api";
+import { GoogleSignInLabel } from "@/components/google-mark";
 import { parsePromptTags } from "@/lib/tags";
 
 const schema = z.object({
@@ -133,7 +134,7 @@ export default function PromptsPage() {
       ) : (
         <p className="text-sm text-ink-muted">
           <Link href={googleSignInHref()} className="underline">
-            Sign in
+            <GoogleSignInLabel>Sign in</GoogleSignInLabel>
           </Link>{" "}
           to add your own prompts. Community prompts stay readable for free.
         </p>
