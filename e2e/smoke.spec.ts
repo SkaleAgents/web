@@ -17,11 +17,9 @@ test.describe("Phase 1 page smokes", () => {
       page.getByRole("heading", { name: /Bot directory/i }),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: /Grok Bot/i }),
-    ).toBeVisible();
-    await expect(
       page.getByRole("link", { name: /Sign in to create/i }),
     ).toBeVisible();
+    await expect(page.getByText("Deferred", { exact: true })).not.toBeVisible();
   });
 
   test("prompts page is readable without auth", async ({ page }) => {
@@ -38,7 +36,9 @@ test.describe("Phase 1 page smokes", () => {
     await expect(
       page.getByRole("heading", { name: /Control plane for AI DevOps agents/i }),
     ).toBeVisible();
-    await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
+    await expect(
+      page.getByRole("banner").getByRole("link", { name: "Sign in" }),
+    ).toBeVisible();
     await expect(page.getByRole("contentinfo")).toContainText("SkaleAgents");
   });
 

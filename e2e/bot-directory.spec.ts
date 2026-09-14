@@ -88,6 +88,15 @@ test("a signed-in creator can publish a bot into the directory", async ({ page }
   await expect(page.getByText("public", { exact: true })).toBeVisible();
   await expect(page.getByText("published", { exact: true })).toBeVisible();
   await expect(page.getByText(description)).toBeVisible();
+  await expect(page.getByText(prompt)).not.toBeVisible();
+  await expect(page.getByRole("link", { name: botName })).toHaveAttribute(
+    "href",
+    `/bots/${botId}`,
+  );
+  await page.getByRole("link", { name: botName }).click();
+  await expect(page).toHaveURL(new RegExp(`/bots/${botId}$`));
+  await expect(page.getByRole("heading", { name: botName })).toBeVisible();
+  await expect(page.getByText(prompt)).toBeVisible();
   await expect(page.getByRole("link", { name: "Open in Grok" })).toHaveAttribute(
     "target",
     "_blank",
