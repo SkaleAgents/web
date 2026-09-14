@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch, type ApiUser, type Bot, googleSignInHref } from "@/lib/api";
-import { BotPromptActions } from "@/components/bot-prompt-actions";
 import { LinkButton } from "@/components/ui";
 
 export default function BotsDirectoryPage() {
@@ -30,7 +29,6 @@ export default function BotsDirectoryPage() {
   });
 
   const signedIn = Boolean(userQuery.data);
-  const grokLinked = Boolean(userQuery.data?.grokLinked);
 
   return (
     <main className="space-y-8">
@@ -52,28 +50,6 @@ export default function BotsDirectoryPage() {
         )}
       </div>
 
-      <section className="rounded-[10px] border border-line bg-canvas-elevated p-5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="max-w-xl">
-            <h2 className="text-lg font-semibold text-ink">Grok Bot</h2>
-            <p className="mt-1 text-sm text-ink-muted">
-              {grokLinked
-                ? "This account is linked to a Grok Bot session for agent-assisted reviews."
-                : "Grok Bot linking is on hold until an official provider integration is available. Google sign-in and the rest of the control plane are ready to use."}
-            </p>
-          </div>
-          {grokLinked ? (
-            <p className="font-mono text-xs uppercase tracking-wide text-accent">
-              Linked
-            </p>
-          ) : (
-            <p className="font-mono text-xs uppercase tracking-wide text-ink-muted">
-              Deferred
-            </p>
-          )}
-        </div>
-      </section>
-
       {botsQuery.isPending && (
         <p className="text-sm text-ink-muted">Loading bots…</p>
       )}
@@ -92,16 +68,12 @@ export default function BotsDirectoryPage() {
         {botsQuery.data?.map((bot) => (
           <li key={bot.id} className="py-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              {userQuery.data?.id === bot.ownerUserId ? (
-                <Link
-                  href={`/studio/${bot.id}`}
-                  className="text-lg font-medium text-ink hover:underline"
-                >
-                  {bot.name}
-                </Link>
-              ) : (
-                <span className="text-lg font-medium text-ink">{bot.name}</span>
-              )}
+              <Link
+                href={`/bots/${bot.id}`}
+                className="text-lg font-medium text-ink hover:underline"
+              >
+                {bot.name}
+              </Link>
               <div className="flex gap-2 font-mono text-xs uppercase tracking-wide text-ink-muted">
                 <span>{bot.specialty}</span>
                 <span>{bot.visibility}</span>
@@ -111,7 +83,19 @@ export default function BotsDirectoryPage() {
             <p className="mt-1 text-sm text-ink-muted">
               {bot.description || "No description"}
             </p>
-            <BotPromptActions prompt={bot.promptBody} />
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <LinkButton href={`/bots/${bot.id}`} variant="secondary">
+                Open bot
+              </LinkButton>
+              {userQuery.data?.id === bot.ownerUserId && (
+                <Link
+                  href={`/studio/${bot.id}`}
+                  className="text-sm font-semibold text-ink-muted hover:text-ink"
+                >
+                  Edit in Studio
+                </Link>
+              )}
+            </div>
           </li>
         ))}
       </ul>
