@@ -67,9 +67,12 @@ export default function BotDetailPage() {
             {bot.description || "No description"}
           </p>
         </div>
-        <LinkButton href="/bots" variant="secondary">
-          Back to directory
-        </LinkButton>
+        <div className="flex items-start gap-2">
+          <LinkButton href="/bots" variant="secondary">
+            Back to directory
+          </LinkButton>
+          <BotPromptActions prompt={bot.promptBody} />
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 font-mono text-xs uppercase tracking-wide text-ink-muted">
@@ -88,7 +91,6 @@ export default function BotDetailPage() {
         <pre className="mt-5 whitespace-pre-wrap rounded-[10px] border border-line bg-canvas px-4 py-4 font-mono text-sm leading-6 text-ink">
           {bot.promptBody}
         </pre>
-        <BotPromptActions prompt={bot.promptBody} />
       </section>
     </main>
   );
