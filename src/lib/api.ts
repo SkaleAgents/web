@@ -110,6 +110,7 @@ export type SwarmJob = {
   requestedBy: string;
   scheduleId?: string | null;
   scope: Record<string, unknown>;
+  sourcePurged: boolean;
   specialists: string[];
   partial: boolean;
   summary?: string;
@@ -155,6 +156,31 @@ export type WatchtowerSession = {
   participants: Array<{ userId: string; joinedAt: string }>;
   createdAt: string;
   closedAt?: string;
+};
+
+export type AdvisoryBookingSourceType = "audit_job" | "watchtower_session";
+
+export type AdvisoryBooking = {
+  id: string;
+  source: {
+    type: AdvisoryBookingSourceType;
+    id: string;
+  };
+  status: "requested" | "accepted" | "scheduled" | "in_progress" | "completed" | "cancelled";
+  scope: string;
+  urgency: "routine" | "soon" | "urgent" | "emergency";
+  preferredWindow: {
+    startAt: string;
+    endAt: string;
+  };
+  notes: string | null;
+  billing: {
+    billableMinutes: number | null;
+    feeCents: number | null;
+    currency: string;
+  };
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type PatchProposal = {

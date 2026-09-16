@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { apiFetch, googleSignInHref, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { GoogleSignInLabel } from "@/components/google-mark";
+import { AdvisoryBookingRequest } from "@/components/advisory-booking-request";
 import { Button, LinkButton } from "@/components/ui";
 
 export default function JobsPage() {
@@ -81,9 +82,14 @@ export default function JobsPage() {
                 <p className="mt-1 text-sm text-ink">{job.summary ?? "Waiting for specialist results"}</p>
                 <p className="mt-1 text-xs text-ink-muted">{new Date(job.createdAt).toLocaleString()}</p>
               </div>
-              <Button type="button" variant="secondary" disabled={openReview.isPending} onClick={() => openReview.mutate(job.id)}>
-                Open Watchtower
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                {(job.status === "completed" || job.status === "failed") && (
+                  <AdvisoryBookingRequest source={{ type: "audit_job", id: job.id }} />
+                )}
+                <Button type="button" variant="secondary" disabled={openReview.isPending} onClick={() => openReview.mutate(job.id)}>
+                  Open Watchtower
+                </Button>
+              </div>
             </li>
           ))}
         </ul>
