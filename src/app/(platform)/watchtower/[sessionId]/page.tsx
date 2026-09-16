@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, API_URL, type PatchProposal, type ProposalGenerationResult, type SwarmFinding, type SwarmJob, type SwarmStep, type WatchtowerRedirect, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
+import { AdvisoryBookingRequest } from "@/components/advisory-booking-request";
 
 export default function WatchtowerPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -78,6 +79,7 @@ export default function WatchtowerPage() {
               {close.isPending ? "Closing…" : "Close session"}
             </Button>
           )}
+          <AdvisoryBookingRequest source={{ type: "watchtower_session", id: sessionId }} />
           <LinkButton href="/jobs" className="bg-transparent">Back to audits</LinkButton>
         </div>
       </div>
