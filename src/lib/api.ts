@@ -272,3 +272,18 @@ export type ApiTokenCreated = {
   token: string;
   apiToken: ApiToken;
 };
+
+export type SubscriptionEntitlements = {
+  plan: "free" | "team" | "enterprise";
+  planLabel: string;
+  mcpSeats: {
+    used: number;
+    limit: number;
+    available: number;
+  };
+  upgrade: {
+    required: boolean;
+    path: string;
+    message: string | null;
+  };
+};
