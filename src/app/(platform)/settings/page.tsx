@@ -14,6 +14,7 @@ import {
   type ApiToken,
   type ApiTokenCreated,
   type ApiUser,
+  type SubscriptionEntitlements,
 } from "@/lib/api";
 import { GoogleSignInLabel } from "@/components/google-mark";
 import { McpConnectionGuide } from "@/components/mcp-connection-guide";
@@ -61,6 +62,12 @@ export default function SettingsPage() {
     },
   });
 
+  const entitlementsQuery = useQuery({
+    queryKey: ["account-entitlements", userQuery.data?.id ?? "guest"],
+    enabled: Boolean(userQuery.data),
+    queryFn: () => apiFetch<SubscriptionEntitlements>("/api/account/entitlements"),
+  });
+
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { name: "Cursor MCP" },
@@ -79,6 +86,9 @@ export default function SettingsPage() {
       void queryClient.invalidateQueries({
         queryKey: ["api-tokens", userQuery.data?.id],
       });
+      void queryClient.invalidateQueries({
+        queryKey: ["account-entitlements", userQuery.data?.id],
+      });
       form.reset({ name: "Cursor MCP" });
       toast.success("API token created. Copy it now");
     },
@@ -93,6 +103,9 @@ export default function SettingsPage() {
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ["api-tokens", userQuery.data?.id],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["account-entitlements", userQuery.data?.id],
       });
       toast.success("Token revoked");
     },
@@ -143,6 +156,30 @@ export default function SettingsPage() {
           sign out of the web app until you revoke them here.
         </p>
       </div>
+
+      {entitlementsQuery.data && (
+        <section className="max-w-2xl rounded-[10px] border border-line bg-canvas-elevated p-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-wide text-accent">Plan</p>
+              <h2 className="mt-1 text-lg font-semibold text-ink">{entitlementsQuery.data.planLabel}</h2>
+            </div>
+            <p className="text-sm text-ink-muted">
+              {entitlementsQuery.data.mcpSeats.used} of {entitlementsQuery.data.mcpSeats.limit} MCP seats used
+            </p>
+          </div>
+          {entitlementsQuery.data.upgrade.required ? (
+            <div className="mt-3 space-y-1 text-sm text-danger">
+              <p>{entitlementsQuery.data.upgrade.message}</p>
+              <Link href={entitlementsQuery.data.upgrade.path} className="underline">Review plan settings</Link>
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-ink-muted">
+              {entitlementsQuery.data.mcpSeats.available} MCP seat{entitlementsQuery.data.mcpSeats.available === 1 ? "" : "s"} available.
+            </p>
+          )}
+        </section>
+      )}
 
       <McpConnectionGuide token={revealedToken} apiUrl={MCP_API_URL} />
 
