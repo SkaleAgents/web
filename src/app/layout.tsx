@@ -92,6 +92,11 @@ export default function RootLayout({
                   <img src="https://earlyhunt.com/badges/earlyhunt-badge-light.svg" alt="Featured on EarlyHunt" width="265" height="58" />
                 </a>
               </span>
+              <span className="inline-block align-middle">
+                <a href="https://saascity.io" target="_blank" rel="noopener">
+                  <img src="https://saascity.io/badges/featured-dark.svg" alt="Featured on SaaSCity" width="150" height="54" />
+                </a>
+              </span>
             </div>
           </div>
           <div className="mx-auto w-full max-w-5xl px-6 pb-5">
