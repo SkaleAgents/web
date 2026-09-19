@@ -81,11 +81,18 @@ export default function RootLayout({
           <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-5 text-xs text-ink-muted">
             <span>© 2026 SkaleAgents</span>
             <span>AI DevOps control plane</span>
-            <span className="inline-block align-middle">
-              <a href="https://launchigniter.com/product/skaleagents?ref=badge-skaleagents" target="_blank" rel="noopener noreferrer">
-                <img src="https://launchigniter.com/api/badge/skaleagents?theme=light" alt="Featured on LaunchIgniter" width="212" height="55" />
-              </a>
-            </span>
+            <div className="flex flex-wrap items-center gap-4">
+              <span className="inline-block align-middle">
+                <a href="https://launchigniter.com/product/skaleagents?ref=badge-skaleagents" target="_blank" rel="noopener noreferrer">
+                  <img src="https://launchigniter.com/api/badge/skaleagents?theme=light" alt="Featured on LaunchIgniter" width="212" height="55" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://earlyhunt.com/project/skaleagents" target="_blank" rel="noopener">
+                  <img src="https://earlyhunt.com/badges/earlyhunt-badge-light.svg" alt="Featured on EarlyHunt" width="265" height="58" />
+                </a>
+              </span>
+            </div>
           </div>
           <div className="mx-auto w-full max-w-5xl px-6 pb-5">
             <div
