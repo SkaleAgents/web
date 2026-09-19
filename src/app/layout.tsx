@@ -97,6 +97,11 @@ export default function RootLayout({
                   <img src="https://saascity.io/badges/featured-dark.svg" alt="Featured on SaaSCity" width="150" height="54" />
                 </a>
               </span>
+              <span className="inline-block align-middle">
+                <a href="https://confettisaas.com/saas/skaleagents-com?ref=badge" target="_blank" rel="noopener" aria-label="View SkaleAgents on ConfettiSaaS">
+                  <img src="https://confettisaas.com/badge-light.svg" width="250" height="54" alt="SkaleAgents on ConfettiSaaS" loading="lazy" style={{ display: "block" }} />
+                </a>
+              </span>
             </div>
           </div>
           <div className="mx-auto w-full max-w-5xl px-6 pb-5">
