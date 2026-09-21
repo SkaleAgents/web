@@ -103,6 +103,9 @@ export default function RootLayout({
                 </a>
               </span>
               <span className="inline-block align-middle">
+                <a href="https://www.topaitools4u.site" data-topaitools4u-badge="verified-listing" target="_blank" rel="noopener">Featured on TopAITools4U</a>
+              </span>
+              <span className="inline-block align-middle">
                 <a href="https://aitooltrek.com">AI Tool Trek</a>
               </span>
               <span className="inline-block align-middle">
