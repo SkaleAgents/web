@@ -103,7 +103,13 @@ export default function RootLayout({
                 </a>
               </span>
               <span className="inline-block align-middle">
-                <a href="https://www.topaitools4u.site" data-topaitools4u-badge="verified-listing" target="_blank" rel="noopener">Featured on TopAITools4U</a>
+                <a data-topaitools4u-badge="verified-listing" href="https://www.topaitools4u.site" target="_blank" rel="noopener" aria-label="Listed on TopAITools4U" style={{ display: "inline-flex", alignItems: "center", gap: "10px", padding: "10px 14px", border: "1px solid #d9d9d9", borderRadius: "12px", background: "#ffffff", color: "#111111", fontFamily: "Inter,Arial,sans-serif", textDecoration: "none" }}>
+                  <img src="https://www.topaitools4u.site/logo.svg" alt="TopAITools4U" width="32" height="32" style={{ display: "block", width: "32px", height: "32px", borderRadius: "9px" }} />
+                  <span style={{ display: "flex", flexDirection: "column", lineHeight: "1.15" }}>
+                    <span style={{ fontSize: "10px", letterSpacing: ".08em", textTransform: "uppercase", color: "#6b7280" }}>Listed on</span>
+                    <span style={{ fontSize: "15px", fontWeight: 700 }}>TopAITools4U</span>
+                  </span>
+                </a>
               </span>
               <span className="inline-block align-middle">
                 <a href="https://aitooltrek.com">AI Tool Trek</a>
