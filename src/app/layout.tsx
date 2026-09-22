@@ -183,6 +183,114 @@ export default function RootLayout({
                   <img src="https://smollaunch.com/badges/featured.svg" alt="SkaleAgents - Featured on Smol Launch" loading="lazy" width="250" height="60" />
                 </a>
               </span>
+              <span className="inline-block align-middle">
+                <a href="https://fazier.com/launches/skaleagents.com" target="_blank">
+                  <img src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=launched&theme=light" width="120" alt="Fazier badge" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://aiagentsdirectory.com/agent/skaleagents" target="_blank" rel="noopener" title="Discover SkaleAgents on AI Agents Directory">
+                  <img src="https://aiagentsdirectory.com/featured-badge.svg?v=2024" alt="SkaleAgents - Featured on AI Agents Directory" width="200" height="50" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://www.seewhatnewai.com" target="_blank">[backlink description]</a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://aihustle.tools" target="_blank" rel="noopener">AI Hustle</a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://www.aitoolsaver.com" target="_blank">Featured on AiToolSaver</a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://showmebest.ai" target="_blank">
+                  <img src="https://showmebest.ai/badge/feature-badge-white.webp" alt="Featured on ShowMeBestAI" width="220" height="60" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://www.launchpact.io/startups?utm_source=badge&utm_medium=embed&utm_campaign=directory-badge" target="_blank" rel="noopener noreferrer">
+                  <img src="https://www.launchpact.io/badge-listed.png" alt="Listed on LaunchPact" width="180" height="60" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://dokeyai.com/" title="Dokey AI Tools Directory">DokeyAI</a>
+              </span>
+              <span className="inline-block align-middle">
+                <a title="All The Best AI Tools" href="https://allinai.tools">All in AI Tools</a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://deeplaunch.io" target="_blank" rel="noopener noreferrer">
+                  <img alt="Featured on DeepLaunch.io" width="200" height="54" src="https://deeplaunch.io/badge/badge_light.svg" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://www.verifiedtools.info/tools/skaleagents" target="_blank" rel="noopener noreferrer">
+                  <img src="https://www.verifiedtools.info/badge.svg" alt="SkaleAgents on Verified Tools - AI & SaaS tools directory" width="200" height="54" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://saasfame.com/item/skaleagents" target="_blank" rel="noopener noreferrer">
+                  <img src="https://saasfame.com/badge-light.svg" alt="Featured on saasfame.com" style={{ height: "54px", width: "auto" }} />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://vantaige.io/ai-tool/skaleagents?utm_source=badge&utm_medium=embed" target="_blank" rel="noopener">
+                  <img src="https://vantaige.io/badges/vantaige-badge-dark.svg" alt="Featured on Vantaige.io" width="200" height="56" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://productfame.com" target="_blank" rel="noopener noreferrer">
+                  <img src="https://productfame.com/badges/featured-light.svg" alt="Featured on ProductFame" width="245" height="54" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://www.toolpilot.ai" target="_blank">
+                  <img src="https://www.toolpilot.ai/cdn/shop/files/f-b_20x4_crop_center.png?v=1695882701" alt="Featured on ToolPilot.ai" width="454" height="100" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://wired.business" target="_blank">
+                  <img src="https://wired.business/badge0-white.svg" alt="Featured on Wired Business" width="200" height="54" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://sidehunt.io/project/skaleagents" target="_blank" rel="noopener" title="View project on Sidehunt">
+                  <img src="https://sidehunt.io/badges/sidehunt-badge-light.svg" alt="Featured on Sidehunt" width="200" height="60" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://auraplusplus.com/projects/skaleagents" target="_blank" rel="noopener" title="View this project on Aura++">
+                  <img src="https://auraplusplus.com/images/badges/featured-on-light.svg" alt="Featured on Aura++" width="265" height="58" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://whatsthebigdata.com/ai-tools/" target="_blank" rel="noopener" title="Whatsthebigdata AI Tools Directory">
+                  <img src="https://whatsthebigdata.com/badges/featured-on-whatsthebigdata-dark.png" alt="Featured on Whatsthebigdata" width="240" style={{ maxWidth: "100%", height: "auto" }} />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://uno.directory" target="_blank" rel="noopener">
+                  <img src="https://uno.directory/uno-directory.svg" alt="Listed on Uno Directory" width="120" height="30" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://mydentify.com/" aria-label="Listed on Mydentify">
+                  <img src="https://mydentify.com/badges/listed-on-mydentify.svg" alt="Listed on Mydentify" width="176" height="32" />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://webspot.app" target="_blank" rel="noopener noreferrer">
+                  <img src="https://webspot.app/featured-list.svg" alt="Featured on Webspot" style={{ height: "54px", width: "auto" }} />
+                </a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://bestaitools.me/" title="Best AI Tools">Best AI Tools</a>
+              </span>
+              <span className="inline-block align-middle">
+                <a href="https://tooldirs.com" target="_blank">
+                  <img src="https://tooldirs.com/badge/badge_dark.svg" alt="Featured on ToolDirs.com" width="200" height="54" />
+                </a>
+              </span>
             </div>
           </div>
           <div className="mx-auto w-full max-w-5xl px-6 pb-5">
