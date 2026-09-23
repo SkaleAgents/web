@@ -86,7 +86,7 @@ export function FooterBadges() {
           {[false, true].map((duplicate) => (
             <div key={String(duplicate)} className="footer-badge-group" aria-hidden={duplicate ? true : undefined}>
               {directoryBadges.map(([name, href, src, width, height]) => (
-                <a key={href} href={href} target="_blank" rel="noopener noreferrer" title={name} tabIndex={duplicate ? -1 : undefined} data-topaitools4u-badge={name === "TopAITools4U" ? "verified-listing" : undefined}>
+                <a key={href} href={href} target="_blank" rel="noopener noreferrer" title={name} tabIndex={duplicate ? -1 : undefined} style={{ width: Math.min(153.6, width / height * 38.4) }} data-topaitools4u-badge={name === "TopAITools4U" ? "verified-listing" : undefined}>
                   <BadgeImage name={name} src={src} width={width} height={height} />
                 </a>
               ))}

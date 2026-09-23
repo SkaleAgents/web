@@ -34,6 +34,11 @@ The current web app includes audit jobs, Watchtower sessions, and scheduled audi
 - Add an animated workflow diagram and a slow background wash to the hero, one-time section entrances, and small hover responses.
 - Keep the content readable without JavaScript. Respect reduced-motion preferences with a static badge strip and no decorative animation.
 
+## Hands-on entry points
+
+- Expand an example's prompt to add project context and choose an answer format. Update the preview locally, pause auto-rotation while editing, and copy the customized prompt. Reset restores the original prompt.
+- Replace the final static CTA with a two-choice workflow picker. Recommend the directory, prompts, MCP, audits, schedules, or Studio based on the visitor's answers. Explain account requirements before linking to the destination.
+
 ## Acceptance checks
 
 - Visitors can read the core information without authentication or a working API.

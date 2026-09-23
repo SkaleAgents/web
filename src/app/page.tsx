@@ -3,7 +3,7 @@ import Link from "next/link";
 import { HeroActions } from "@/components/marketing/hero-actions";
 import { ExampleExplorer } from "@/components/marketing/example-explorer";
 import { WorkflowExplorer } from "@/components/marketing/workflow-explorer";
-import { LinkButton } from "@/components/ui";
+import { StartPicker } from "@/components/marketing/start-picker";
 import { MarketingMotion } from "@/components/marketing/marketing-motion";
 import { HeroSignal } from "@/components/marketing/hero-signal";
 
@@ -100,12 +100,7 @@ export default function MarketingHome() {
       </div>
 
       <section className="marketing-section" aria-labelledby="next-step-heading">
-        <div className="relative overflow-hidden rounded-[10px] border border-line bg-accent-soft px-6 py-10 sm:px-10 sm:py-14">
-          <p className="marketing-eyebrow">A smaller first step</p>
-          <h2 id="next-step-heading" className="marketing-heading max-w-xl">Bring one question.<br />Find your starting point.</h2>
-          <p className="mt-4 max-w-lg leading-relaxed text-ink-muted">Explore a bot before signing up. When you want reviews inside your editor, create a token and connect MCP.</p>
-          <div className="mt-7 flex flex-wrap gap-3"><LinkButton href="/bots" className="px-5 py-3">Explore the directory <span aria-hidden="true" className="ml-3">↗</span></LinkButton><LinkButton href="/settings" variant="secondary" className="px-5 py-3">See MCP setup</LinkButton></div>
-        </div>
+        <StartPicker />
       </section>
     </MarketingMotion>
   );

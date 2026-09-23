@@ -69,7 +69,15 @@ export function ExampleExplorer() {
   const [focused, setFocused] = useState(false);
   const [readingPrompt, setReadingPrompt] = useState(false);
   const [cycle, setCycle] = useState(0);
+  const [projectContext, setProjectContext] = useState("");
+  const [responseFormat, setResponseFormat] = useState("Prioritized findings");
   const example = examples[selected];
+  const customized = Boolean(projectContext.trim()) || responseFormat !== "Prioritized findings";
+  const prompt = [
+    example.prompt,
+    ...(projectContext.trim() ? [`Project context:\n${projectContext.trim()}`] : []),
+    ...(customized ? [`Response format: ${responseFormat}.`] : []),
+  ].join("\n\n");
   const playing = inView && pageVisible && !paused && !hovered && !focused && !readingPrompt;
 
   useEffect(() => {
@@ -93,7 +101,7 @@ export function ExampleExplorer() {
 
   async function copyPrompt() {
     try {
-      await navigator.clipboard.writeText(example.prompt);
+      await navigator.clipboard.writeText(prompt);
       setCopyState("copied");
     } catch {
       setCopyState("failed");
@@ -165,14 +173,35 @@ export function ExampleExplorer() {
         <div className="border-t border-line p-6 sm:px-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="max-w-md text-sm text-ink-muted">Try this approach with your own context. These examples are not live audit results.</p>
-            <Button type="button" variant="secondary" onClick={() => void copyPrompt()}>Copy starter prompt</Button>
+            <Button type="button" variant="secondary" onClick={() => void copyPrompt()}>{customized ? "Copy custom prompt" : "Copy starter prompt"}</Button>
           </div>
           <p role="status" className="mt-2 text-sm text-ink-muted">
             {copyState === "copied" ? "Prompt copied. Paste it into your AI assistant." : copyState === "failed" ? "Clipboard unavailable. Select and copy the starter prompt below." : ""}
           </p>
           <details className="mt-2 text-sm" key={example.id} open={copyState === "failed" ? true : undefined} onToggle={(event) => setReadingPrompt(event.currentTarget.open)}>
-            <summary className="w-fit cursor-pointer py-2 font-semibold underline decoration-line underline-offset-4">Read the starter prompt</summary>
-            <p className="mt-2 select-text rounded-md bg-canvas p-4 leading-relaxed text-ink-muted">{example.prompt}</p>
+            <summary className="w-fit cursor-pointer py-2 font-semibold underline decoration-line underline-offset-4">Read or customize the prompt</summary>
+            <div className="mt-4 grid gap-4">
+              <label className="grid gap-2 font-semibold" htmlFor="example-project-context">
+                What are you working on?
+                <textarea id="example-project-context" value={projectContext} maxLength={1000} rows={3} placeholder="For example: a Node.js API on Kubernetes, preparing for our first production release." className="w-full resize-y rounded-md border border-line bg-canvas px-3 py-2 text-sm font-normal text-ink" onChange={(event) => { setProjectContext(event.target.value); setCopyState("idle"); setPaused(true); }} />
+              </label>
+              <div className="flex flex-wrap items-end gap-4">
+                <label className="grid flex-1 gap-2 font-semibold" htmlFor="example-response-format">
+                  How should the answer look?
+                  <select id="example-response-format" value={responseFormat} className="rounded-md border border-line bg-canvas px-3 py-2 font-normal text-ink" onChange={(event) => { setResponseFormat(event.target.value); setCopyState("idle"); setPaused(true); }}>
+                    <option>Prioritized findings</option>
+                    <option>Pull request checklist</option>
+                    <option>Step-by-step plan</option>
+                  </select>
+                </label>
+                <Button type="button" variant="ghost" onClick={() => { setProjectContext(""); setResponseFormat("Prioritized findings"); setCopyState("idle"); }}>Reset prompt</Button>
+              </div>
+              <p className="text-xs text-ink-muted">The preview updates as you type. Your text stays in this page until you copy it into an assistant.</p>
+              <div>
+                <p className="marketing-eyebrow mb-2">Your prompt preview</p>
+                <p className="select-text whitespace-pre-wrap break-words rounded-md bg-canvas p-4 leading-relaxed text-ink-muted" data-prompt-preview>{prompt}</p>
+              </div>
+            </div>
           </details>
         </div>
       </div>
