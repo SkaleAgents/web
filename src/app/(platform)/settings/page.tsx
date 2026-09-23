@@ -1,282 +1,61 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  apiFetch,
-  ensureCsrfCookie,
-  googleSignInHref,
-  type ApiToken,
-  type ApiTokenCreated,
-  type ApiUser,
-  type SubscriptionEntitlements,
-} from "@/lib/api";
-import { GoogleSignInLabel } from "@/components/google-mark";
+import { apiFetch, ensureCsrfCookie, type ApiUser, type McpConnection } from "@/lib/api";
 import { McpConnectionGuide } from "@/components/mcp-connection-guide";
-import { Button, FieldLabel, TextInput } from "@/components/ui";
-
-const schema = z.object({
-  name: z.string().min(1, "Name required").max(255, "Name is too long"),
-});
-
-const MCP_API_URL = (
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082"
-).replace(/\/$/, "");
-
-type FormValues = z.infer<typeof schema>;
-
-function formatWhen(iso: string | null): string {
-  if (!iso) return "Never";
-  return new Date(iso).toLocaleString();
-}
+import { Button } from "@/components/ui";
 
 export default function SettingsPage() {
   const queryClient = useQueryClient();
-  const [revealedToken, setRevealedToken] = useState<string | null>(null);
-
-  const userQuery = useQuery({
+  const user = useQuery({
     queryKey: ["user"],
     queryFn: async (): Promise<ApiUser | null> => {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
-      const res = await fetch(`${API_URL}/api/user`, {
-        credentials: "include",
-        headers: { Accept: "application/json" },
-      });
-      if (res.status === 401) return null;
-      if (!res.ok) throw new Error(res.statusText);
-      return res.json() as Promise<ApiUser>;
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082"}/api/user`, { credentials: "include", headers: { Accept: "application/json" } });
+      if (response.status === 401) return null;
+      if (!response.ok) throw new Error("Could not load your account");
+      return response.json();
     },
   });
-
-  const tokensQuery = useQuery({
-    queryKey: ["api-tokens", userQuery.data?.id ?? "guest"],
-    enabled: Boolean(userQuery.data),
-    queryFn: async () => {
-      const data = await apiFetch<{ tokens: ApiToken[] }>("/api/tokens");
-      return data.tokens;
-    },
+  const connections = useQuery({
+    queryKey: ["mcp-connections", user.data?.id ?? "guest"],
+    enabled: Boolean(user.data),
+    queryFn: async () => (await apiFetch<{ connections: McpConnection[] }>("/api/oauth/connections")).connections,
+    refetchInterval: user.data ? 15_000 : false,
   });
-
-  const entitlementsQuery = useQuery({
-    queryKey: ["account-entitlements", userQuery.data?.id ?? "guest"],
-    enabled: Boolean(userQuery.data),
-    queryFn: () => apiFetch<SubscriptionEntitlements>("/api/account/entitlements"),
-  });
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { name: "Cursor MCP" },
-  });
-
-  const create = useMutation({
-    mutationFn: async (values: FormValues) => {
-      await ensureCsrfCookie();
-      return apiFetch<ApiTokenCreated>("/api/tokens", {
-        method: "POST",
-        body: JSON.stringify(values),
-      });
-    },
-    onSuccess: (data) => {
-      setRevealedToken(data.token);
-      void queryClient.invalidateQueries({
-        queryKey: ["api-tokens", userQuery.data?.id],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ["account-entitlements", userQuery.data?.id],
-      });
-      form.reset({ name: "Cursor MCP" });
-      toast.success("API token created. Copy it now");
-    },
-    onError: (err: Error) => toast.error(err.message),
-  });
-
-  const revoke = useMutation({
+  const disconnect = useMutation({
     mutationFn: async (id: string) => {
       await ensureCsrfCookie();
-      return apiFetch<{ ok: true }>(`/api/tokens/${id}`, { method: "DELETE" });
+      return apiFetch(`/api/oauth/connections/${id}`, { method: "DELETE" });
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: ["api-tokens", userQuery.data?.id],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ["account-entitlements", userQuery.data?.id],
-      });
-      toast.success("Token revoked");
+      void queryClient.invalidateQueries({ queryKey: ["mcp-connections"] });
+      toast.success("Client disconnected");
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (error: Error) => toast.error(error.message),
   });
-
-  async function copyToken() {
-    if (!revealedToken) return;
-    try {
-      await navigator.clipboard.writeText(revealedToken);
-      toast.success("Copied to clipboard");
-    } catch {
-      toast.error("Could not copy. Select the token manually");
-    }
-  }
-
-  if (userQuery.isPending) {
-    return <p className="text-sm text-ink-muted">Loading…</p>;
-  }
-
-  if (!userQuery.data) {
-    return (
-      <main className="space-y-8">
-        <div className="workspace-intro">
-        <p className="workspace-kicker">Connect / Bring reviews into your editor</p>
-        <h1 className="workspace-heading">
-          Connect MCP
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm text-ink-muted">
-          Configure Cursor, Claude Code, or another compatible client to call SkaleAgents tools.
-          Explore the setup below. Sign in to create the API token your client will use.
-        </p>
-        <Link href={googleSignInHref()} className="text-sm text-accent underline">
-          <GoogleSignInLabel>Sign in</GoogleSignInLabel>
-        </Link>
-        </div>
-        <McpConnectionGuide token={null} apiUrl={MCP_API_URL} />
-      </main>
-    );
-  }
 
   return (
     <main className="space-y-8">
       <div className="workspace-intro">
-        <p className="workspace-kicker">Connect / Bring reviews into your editor</p>
-        <h1 className="workspace-heading">
-          Connect MCP
-        </h1>
-        <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-          Request code and infrastructure reviews from the editor where you work.
-          The <code className="font-mono text-ink">@skaleagents/swarm</code>{" "}
-          server runs locally in your AI client. Tokens stay valid after you
-          sign out of the web app until you revoke them here.
-        </p>
+        <p className="workspace-kicker">MCP / The connection behind your workflow</p>
+        <h1 className="workspace-heading">Connect MCP</h1>
+        <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-muted">Bring SkaleAgents tools into Cursor, Claude Code, or another MCP client. Add the configuration, authorize through Google in your browser, and return to your code. Credentials are handled automatically.</p>
       </div>
-
-      {entitlementsQuery.data && (
-        <section className="max-w-2xl rounded-[10px] border border-line bg-canvas-elevated p-5">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <div>
-              <p className="font-mono text-xs uppercase tracking-wide text-accent">Plan</p>
-              <h2 className="mt-1 text-lg font-semibold text-ink">{entitlementsQuery.data.planLabel}</h2>
-            </div>
-            <p className="text-sm text-ink-muted">
-              {entitlementsQuery.data.mcpSeats.used} of {entitlementsQuery.data.mcpSeats.limit} MCP seats used
-            </p>
-          </div>
-          {entitlementsQuery.data.upgrade.required ? (
-            <div className="mt-3 space-y-1 text-sm text-danger">
-              <p>{entitlementsQuery.data.upgrade.message}</p>
-              <Link href={entitlementsQuery.data.upgrade.path} className="underline">Review plan settings</Link>
-            </div>
-          ) : (
-            <p className="mt-3 text-sm text-ink-muted">
-              {entitlementsQuery.data.mcpSeats.available} MCP seat{entitlementsQuery.data.mcpSeats.available === 1 ? "" : "s"} available.
-            </p>
-          )}
-        </section>
-      )}
-
-      <McpConnectionGuide token={revealedToken} apiUrl={MCP_API_URL} />
-
-      {revealedToken && (
-        <section className="max-w-2xl space-y-3 rounded-[10px] border border-accent/40 bg-accent-soft p-4">
-          <h2 className="text-sm font-semibold text-ink">New token, copy now</h2>
-          <p className="text-sm text-ink-muted">
-            This value is shown once. Store it as{" "}
-            <code className="font-mono text-ink">SKALEAGENTS_API_TOKEN</code>.
-          </p>
-          <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded-[10px] border border-line bg-canvas-elevated p-3 font-mono text-sm text-ink">
-            {revealedToken}
-          </pre>
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" onClick={() => void copyToken()}>
-              Copy token
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setRevealedToken(null)}
-            >
-              Dismiss
-            </Button>
-          </div>
-        </section>
-      )}
-
-      <form
-        className="max-w-xl space-y-3 border-b border-line pb-8"
-        onSubmit={form.handleSubmit((values) => create.mutate(values))}
-      >
-        <h2 className="text-lg font-medium text-ink">Create token</h2>
-        <label className="block space-y-1">
-          <FieldLabel>Label</FieldLabel>
-          <TextInput
-            placeholder="Cursor MCP"
-            {...form.register("name")}
-          />
-          {form.formState.errors.name && (
-            <span className="text-sm text-danger">
-              {form.formState.errors.name.message}
-            </span>
-          )}
-        </label>
-        <Button type="submit" disabled={create.isPending}>
-          {create.isPending ? "Creating…" : "Create token"}
-        </Button>
-      </form>
-
-      {tokensQuery.isPending && (
-        <p className="text-sm text-ink-muted">Loading tokens…</p>
-      )}
-      {tokensQuery.isError && (
-        <p className="text-sm text-danger">
-          {tokensQuery.error instanceof Error
-            ? tokensQuery.error.message
-            : "Failed to load tokens"}
-        </p>
-      )}
-
-      {tokensQuery.data && tokensQuery.data.length === 0 && (
-        <p className="text-sm text-ink-muted">No tokens yet.</p>
-      )}
-
-      {tokensQuery.data && tokensQuery.data.length > 0 && (
-        <ul className="divide-y divide-line">
-          {tokensQuery.data.map((token) => (
-            <li
-              key={token.id}
-              className="flex flex-wrap items-center justify-between gap-3 py-4"
-            >
-              <div>
-                <p className="font-medium text-ink">{token.name}</p>
-                <p className="text-xs text-ink-muted">
-                  Created {formatWhen(token.createdAt)} · Last used{" "}
-                  {formatWhen(token.lastUsedAt)}
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="secondary"
-                className="px-2 py-1"
-                disabled={revoke.isPending}
-                onClick={() => revoke.mutate(token.id)}
-              >
-                Revoke
-              </Button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <McpConnectionGuide />
+      <section aria-labelledby="connections-heading" className="rounded-xl border border-line bg-canvas-elevated p-5">
+        <h2 id="connections-heading" className="text-xl font-semibold">Connected clients</h2>
+        <p className="mt-2 text-sm text-ink-muted">Connections appear after OAuth authorization. Disconnecting a client removes its access. Web sign-out does not disconnect your editor.</p>
+        {user.isPending ? <p className="mt-4 text-sm text-ink-muted">Loading account…</p> : user.isError ? <p className="mt-4 text-sm text-danger">Could not load your account. Refresh to try again.</p> : !user.data ? <p className="mt-4 text-sm text-ink-muted">Use Google sign-in in the header to see your connected clients. You can read and copy the setup above without signing in here.</p> : <>
+          {connections.isPending && <p className="mt-4 text-sm text-ink-muted">Loading connections…</p>}
+          {connections.isError && <p className="mt-4 text-sm text-danger">{connections.error.message}</p>}
+          {connections.data?.length === 0 && <p className="mt-4 text-sm text-ink-muted">No clients connected yet. Request a review from your MCP client and approve the browser request.</p>}
+          <ul className="mt-4 divide-y divide-line">{connections.data?.map((connection) => <li key={connection.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
+            <div><p className="font-semibold">{connection.clientId === "skaleagents-mcp" ? "SkaleAgents MCP" : connection.clientId}</p><p className="mt-1 text-xs text-ink-muted">Connected {new Date(connection.createdAt).toLocaleDateString()} · Last used {connection.lastUsedAt ? new Date(connection.lastUsedAt).toLocaleString() : "Not yet"}</p></div>
+            <Button type="button" variant="secondary" disabled={disconnect.isPending} onClick={() => disconnect.mutate(connection.id)}>Disconnect</Button>
+          </li>)}</ul>
+        </>}
+      </section>
     </main>
   );
 }

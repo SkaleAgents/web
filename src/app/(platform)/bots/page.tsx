@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, type ApiUser, type Bot, googleSignInHref } from "@/lib/api";
+import { apiFetch, type ApiUser, type Bot } from "@/lib/api";
 import { Button, LinkButton, TextInput } from "@/components/ui";
-import { GoogleSignInLabel } from "@/components/google-mark";
 
 export default function BotsDirectoryPage() {
   const [search, setSearch] = useState("");
@@ -52,12 +51,8 @@ export default function BotsDirectoryPage() {
             then take it to Grok, Claude, Codex, or your preferred assistant.
           </p>
         </div>
-        {signedIn ? (
+        {signedIn && (
           <LinkButton href="/studio">Create bot</LinkButton>
-        ) : (
-          <LinkButton href={googleSignInHref()}>
-            <GoogleSignInLabel>Sign in to create</GoogleSignInLabel>
-          </LinkButton>
         )}
       </div>
 

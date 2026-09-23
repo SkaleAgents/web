@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, ensureCsrfCookie, googleSignInHref, type SwarmSchedule } from "@/lib/api";
-import { GoogleSignInLabel } from "@/components/google-mark";
+import { apiFetch, ensureCsrfCookie, type SwarmSchedule } from "@/lib/api";
 import { Button, FieldLabel, LinkButton, Select, TextArea, TextInput } from "@/components/ui";
 
 const timezones = ["UTC", "America/Los_Angeles", "America/New_York", "Europe/London", "Europe/Berlin", "Asia/Dhaka", "Asia/Kolkata", "Asia/Singapore", "Asia/Tokyo", "Australia/Sydney"];
@@ -124,9 +123,7 @@ export default function SchedulesPage() {
         {schedules.isError && (
           <div className="rounded-[10px] border border-line p-4">
             <p className="text-sm text-danger">{schedules.error.message}</p>
-            <LinkButton href={googleSignInHref()} className="mt-3">
-              <GoogleSignInLabel>Sign in</GoogleSignInLabel>
-            </LinkButton>
+            <p className="mt-2 text-sm text-ink-muted">Use Google sign-in in the header to manage your schedules.</p>
           </div>
         )}
         {schedules.data?.length === 0 && <p className="rounded-xl border border-dashed border-line p-6 text-sm text-ink-muted">No recurring reviews yet. Pick a cadence above and save the infrastructure text you want to revisit.</p>}

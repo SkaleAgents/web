@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { apiFetch, ensureCsrfCookie, googleSignInHref, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
-import { GoogleSignInLabel } from "@/components/google-mark";
+import { apiFetch, ensureCsrfCookie, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { AdvisoryBookingRequest } from "@/components/advisory-booking-request";
 import { Button, LinkButton } from "@/components/ui";
 
@@ -131,9 +130,7 @@ export default function JobsPage() {
         {jobs.isError && (
           <div className="rounded-[10px] border border-line p-4">
             <p className="text-sm text-danger">{jobs.error.message}</p>
-            <LinkButton href={googleSignInHref()} className="mt-3">
-              <GoogleSignInLabel>Sign in</GoogleSignInLabel>
-            </LinkButton>
+            <p className="mt-2 text-sm text-ink-muted">Use Google sign-in in the header to access your audit jobs.</p>
           </div>
         )}
         {jobs.data?.length === 0 && <p className="rounded-xl border border-dashed border-line p-6 text-sm text-ink-muted">Your first review starts above. Paste a configuration, select at least one specialist, and queue the audit.</p>}

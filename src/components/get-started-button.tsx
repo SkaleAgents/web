@@ -1,8 +1,6 @@
 "use client";
 
 import { useId, useRef, type ComponentProps } from "react";
-import { googleSignInHref } from "@/lib/api";
-import { GoogleSignInLabel } from "@/components/google-mark";
 import { Button, LinkButton } from "@/components/ui";
 
 export function GetStartedButton({ variant = "primary", className }: Pick<ComponentProps<typeof Button>, "variant" | "className">) {
@@ -44,12 +42,9 @@ export function GetStartedButton({ variant = "primary", className }: Pick<Compon
         </div>
 
         <div className="mt-6 border-t border-line pt-6">
-          <h3 className="text-base font-semibold">Ready to use your account?</h3>
-          <p className="mt-2 text-sm leading-relaxed text-ink-muted">Create bots, save prompts, issue an MCP token, and manage your audit jobs.</p>
-          <LinkButton href={googleSignInHref()} className="mt-4 w-full py-3" onClick={close}>
-            <GoogleSignInLabel>Continue with Google</GoogleSignInLabel>
-          </LinkButton>
-          <p className="mt-3 text-xs leading-relaxed text-ink-muted">Google sign-in opens next. You&apos;ll return to SkaleAgents after signing in.</p>
+          <h3 className="text-base font-semibold">Bring SkaleAgents into your editor</h3>
+          <p className="mt-2 text-sm leading-relaxed text-ink-muted">Connect through MCP to review your own code and infrastructure. Your client handles authorization through the browser.</p>
+          <LinkButton href="/settings" className="mt-4 w-full py-3" onClick={close}>Set up MCP</LinkButton>
         </div>
       </dialog>
     </>

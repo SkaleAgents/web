@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -10,11 +9,9 @@ import { toast } from "sonner";
 import {
   apiFetch,
   ensureCsrfCookie,
-  googleSignInHref,
   type ApiUser,
   type Prompt,
 } from "@/lib/api";
-import { GoogleSignInLabel } from "@/components/google-mark";
 import { parsePromptTags } from "@/lib/tags";
 import { Button, TextInput } from "@/components/ui";
 
@@ -163,10 +160,7 @@ export default function PromptsPage() {
         </details>
       ) : (
         <p className="text-sm text-ink-muted">
-          <Link href={googleSignInHref()} className="underline">
-            <GoogleSignInLabel>Sign in</GoogleSignInLabel>
-          </Link>{" "}
-          to add your own prompts. Community prompts stay readable for free.
+          Community prompts are free to use. To save your own, use Google sign-in in the header.
         </p>
       )}
 

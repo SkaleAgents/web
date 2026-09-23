@@ -15,7 +15,7 @@ const groups = [
   ] },
   { label: "Build & connect", items: [
     { href: "/studio", label: "Creator Studio", detail: "Turn your review process into a reusable bot.", icon: "studio" },
-    { href: "/settings", label: "Connect MCP", detail: "Set up your editor and manage API tokens.", icon: "plug" },
+    { href: "/settings", label: "Connect MCP", detail: "Authorize your editor through Google OAuth.", icon: "plug" },
   ] },
 ] as const;
 

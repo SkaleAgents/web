@@ -19,18 +19,18 @@ const features = [
   { number: "03", title: "Find it. Copy it. Get to work.", label: "Prompt library", description: "Search prompt text, narrow by topic, and copy the full instructions in one click. Sign in to save your own reusable prompts.", href: "/prompts", cta: "Browse prompts" },
   { number: "04", title: "Choose your review team", label: "Audits & Watchtower", description: "Select specialists for your infrastructure audit and track jobs by status. Open Watchtower to inspect findings and redirect the review.", href: "/jobs", cta: "Explore audits" },
   { number: "05", title: "Set a review rhythm", label: "Scheduled audits", description: "Pick an hourly, daily, weekday, or weekly cadence for saved infrastructure text. Set the timezone and send completion or failure alerts to a webhook.", href: "/schedules", cta: "View schedules" },
-  { number: "06", title: "Stay in your editor", label: "MCP connection", description: "Follow setup instructions for Cursor or Claude Code, copy the server configuration, and create a revocable token for architecture reviews.", href: "/settings", cta: "Connect MCP" },
+  { number: "06", title: "Stay in your editor", label: "MCP connection", description: "Connect Cursor or Claude Code through browser OAuth. Your assistant can call architecture review tools while you work, with credentials handled automatically.", href: "/settings", cta: "Connect MCP" },
 ];
 
 const faqs = [
   { question: "What is SkaleAgents, in plain English?", answer: <>SkaleAgents gives developers reusable specialist prompts and tools for reviewing code and infrastructure. You can take a bot into an AI assistant, call review tools from your editor with MCP, or submit an audit in the web app. It is designed for engineers and small teams who want a more structured DevOps review.</> },
   { question: "How is this different from asking an AI chatbot?", answer: <>You can still use your own AI assistant. SkaleAgents adds reusable specialist instructions, a prompt library, and a tool connection for architecture reviews. The web workflow keeps audit jobs and shared Watchtower reviews in one place. A bot is a set of instructions, not a separately trained model.</> },
-  { question: "Can I try it without an account?", answer: <>Yes. Browse the <Link href="/bots">public bot directory</Link> and <Link href="/prompts">community prompts</Link> without signing in. Google sign-in is needed to create or manage your own bots and prompts, issue API tokens, and use account-owned audit workflows.</> },
+  { question: "Can I try it without an account?", answer: <>Yes. Browse the <Link href="/bots">public bot directory</Link> and <Link href="/prompts">community prompts</Link> without signing in. Google sign-in is needed to create or manage your own bots and prompts, authorize an MCP connection, and use account-owned audit workflows.</> },
   { question: "What does it cost?", answer: <>Public bots and community prompts are free to browse. This site does not currently publish paid plan prices. Using a prompt in another AI assistant is subject to that provider&apos;s pricing and usage limits; SkaleAgents does not include a subscription to those services.</> },
   { question: "Which AI assistants and editors can I use?", answer: <>Bot pages offer handoffs to Grok, SuperGrok, and Claude. Codex opens separately, and Copy prompt lets you paste the instructions into any assistant. For tool calls, use Cursor, Claude Code, or another MCP client that supports local stdio servers. See <Link href="/settings">MCP settings</Link> for the configuration. Opening a prompt in Grok does not link your Grok account.</> },
   { question: "Do I need to connect my cloud account or repository?", answer: <>Not for the text-based workflows shown here. You supply code, infrastructure text, and optional telemetry. The MCP client sends the content included in its tool calls; the web audit uses the text you submit. Review what you share and remove credentials before sending it. A review can only assess the context it receives.</> },
   { question: "Will an agent change my production infrastructure?", answer: <>These workflows produce findings and recommendations for you to review. Submitting an audit or opening a Watchtower session does not itself deploy a change. Validate proposed fixes and apply them through your own development and deployment process.</> },
-  { question: "Can I keep my bots private and revoke tool access?", answer: <>Yes. Creator Studio supports public and private bots, with drafts kept out of the public directory. API tokens are tied to your user account and can be revoked in <Link href="/settings">settings</Link>. Workspace-wide roles and enterprise identity should not be assumed from user-scoped access.</> },
+  { question: "Can I keep my bots private and revoke tool access?", answer: <>Yes. Creator Studio supports public and private bots, with drafts kept out of the public directory. MCP clients are authorized through OAuth and tied to your Google-backed account. Disconnect a client from the <Link href="/settings">MCP page</Link> to remove its access.</> },
   { question: "What are the current limits?", answer: <>Reviews depend on the supplied code and context; they are not a guarantee that an application is secure or compliant. Scheduled audits rerun supplied infrastructure text rather than automatically syncing a repository. Cloudploy deployment handoff, Crontinel telemetry integration, and enterprise compliance certification are not promised by the workflows on this page.</> },
 ];
 
@@ -45,13 +45,22 @@ export default function MarketingHome() {
           <div className="mt-6 grid items-center gap-10 md:grid-cols-[1.6fr_1fr]">
             <div>
               <h1 id="hero-heading" className="max-w-xl text-2xl font-medium leading-snug sm:text-3xl">Control plane for AI DevOps agents</h1>
-              <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-muted">Find a specialist bot. Review the code and infrastructure behind your app. Bring the findings into your editor or a shared team review.</p>
+              <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-muted">Connect your editor through MCP to review code and infrastructure where you work. Explore specialist bots, reuse prompts, or bring findings into a shared team review.</p>
               <HeroActions />
               <a href="#examples" className="mt-10 inline-flex items-center gap-3 text-sm font-semibold text-ink-muted hover:text-ink">See what a review looks like <span className="hero-scroll-cue" aria-hidden="true">↓</span></a>
             </div>
             <HeroSignal />
           </div>
         </div>
+      </section>
+
+      <section id="mcp" className="marketing-section grid gap-8 border-b border-line lg:grid-cols-[1.2fr_1fr]" aria-labelledby="mcp-heading">
+        <div><p className="marketing-eyebrow">Built on MCP / Connected to your workflow</p><h2 id="mcp-heading" className="marketing-heading">Your editor is the starting point.</h2><p className="mt-4 max-w-xl leading-relaxed text-ink-muted">MCP is how your AI assistant works with SkaleAgents. Give it the code you want reviewed, call a review tool, and get findings back in the same conversation.</p><Link href="/settings" className="mt-6 inline-flex items-center gap-3 rounded-[10px] bg-accent px-5 py-3 text-sm font-semibold text-accent-fg">Set up your MCP connection <span aria-hidden="true">↗</span></Link><p className="mt-3 text-sm text-ink-muted">Cursor · Claude Code · Compatible stdio clients</p></div>
+        <ol className="divide-y divide-line rounded-xl border border-line bg-canvas-elevated px-6">
+          <li className="py-5"><p className="marketing-eyebrow">01 / Configure</p><h3 className="mt-2 font-semibold">Add SkaleAgents to your client</h3><p className="mt-1 text-sm text-ink-muted">Choose your editor on the MCP page and copy its configuration.</p></li>
+          <li className="py-5"><p className="marketing-eyebrow">02 / Authorize</p><h3 className="mt-2 font-semibold">Connect through Google OAuth</h3><p className="mt-1 text-sm text-ink-muted">Your first tool call opens browser authorization. Approve access; your credentials are issued automatically.</p></li>
+          <li className="py-5"><p className="marketing-eyebrow">03 / Review</p><h3 className="mt-2 font-semibold">Ask for an architecture review</h3><p className="mt-1 text-sm text-ink-muted">Have your assistant call <code className="break-all">review_architecture</code> with relevant source or infrastructure.</p></li>
+        </ol>
       </section>
 
       <section id="examples" className="marketing-section" aria-labelledby="examples-heading">

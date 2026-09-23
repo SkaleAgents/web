@@ -3,9 +3,9 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { apiFetch, type ApiUser, ensureCsrfCookie } from "@/lib/api";
-import { GetStartedButton } from "@/components/get-started-button";
-import { Button } from "@/components/ui";
+import { apiFetch, type ApiUser, ensureCsrfCookie, googleSignInHref } from "@/lib/api";
+import { GoogleSignInLabel } from "@/components/google-mark";
+import { Button, LinkButton } from "@/components/ui";
 import { BrandLogo } from "@/components/brand";
 import { ProductNavigation } from "@/components/product-navigation";
 
@@ -37,6 +37,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       queryClient.setQueryData(["user"], null);
       void queryClient.removeQueries({ queryKey: ["prompts"] });
       void queryClient.removeQueries({ queryKey: ["api-tokens"] });
+      void queryClient.removeQueries({ queryKey: ["mcp-connections"] });
       toast.success("Signed out");
       router.push("/login");
     } catch (e) {
@@ -70,7 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Button>
               </>
             ) : (
-              <GetStartedButton className="px-3 py-1.5" />
+              <LinkButton href={googleSignInHref()} className="px-3 py-1.5"><GoogleSignInLabel>Sign in with Google</GoogleSignInLabel></LinkButton>
             )}
           </div>
         </div>

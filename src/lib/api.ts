@@ -1,5 +1,13 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
 
+export type McpConnection = {
+  id: string;
+  clientId: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+  expiresAt: string;
+};
+
 const MOCK_AUTH_ENABLED =
   process.env.NEXT_PUBLIC_MOCK_AUTH_ENABLED === "true";
 

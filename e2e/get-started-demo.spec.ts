@@ -7,12 +7,12 @@ test.beforeEach(async ({ page }) => {
 
 test("Get started stays on the page and restores focus when dismissed", async ({ page }) => {
   await page.goto("/");
-  const trigger = page.getByRole("banner").getByRole("button", { name: "Get started" });
+  const trigger = page.getByRole("region", { name: "Control plane for AI DevOps agents" }).getByRole("button", { name: "Get started" });
   await trigger.click();
   const panel = page.getByRole("dialog", { name: "Choose how to get started." });
   await expect(panel).toBeVisible();
   await expect(page).toHaveURL(/\/$/);
-  await expect(panel.getByRole("link", { name: "Continue with Google" })).toHaveAttribute("href", /\/api\/auth\/google\/redirect$|\/login$/);
+  await expect(panel.getByRole("link", { name: "Set up MCP" })).toHaveAttribute("href", "/settings");
   await page.keyboard.press("Escape");
   await expect(panel).toBeHidden();
   await expect(trigger).toBeFocused();
@@ -55,16 +55,15 @@ test("sample findings respond to edits, reject invalid settings, and reset", asy
   await expect(page.getByRole("heading", { name: "0 of 3 sample checks configured" })).toBeVisible();
 });
 
-test("Google authentication only starts after the explicit Continue action", async ({ page }) => {
+test("Google authentication starts from the explicit header sign-in action", async ({ page }) => {
   let authRequests = 0;
   await page.route("**/api/auth/google/redirect", (route) => {
     authRequests++;
     return route.fulfill({ contentType: "text/html", body: "Google sign-in handoff" });
   });
   await page.goto("/");
-  await page.getByRole("banner").getByRole("button", { name: "Get started" }).click();
   expect(authRequests).toBe(0);
-  await page.getByRole("dialog").getByRole("link", { name: "Continue with Google" }).click();
+  await page.getByRole("banner").getByRole("link", { name: "Sign in with Google" }).click();
   await expect(page.getByText("Google sign-in handoff")).toBeVisible();
   expect(authRequests).toBe(1);
 });
