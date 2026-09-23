@@ -27,8 +27,8 @@ const workflows = [
     description: "MCP (Model Context Protocol) lets a compatible AI client call SkaleAgents tools. Connect from Cursor, Claude Code, or another client with local stdio support.",
     steps: [
       ["Add your client configuration", "Copy the setup from the MCP page. Your client starts @skaleagents/swarm locally with npx; Node.js 20 or newer is required."],
-      ["Authorize through Google", "The first tool call opens your browser. Sign in if needed and approve MCP access. Credentials are saved and refreshed automatically."],
-      ["Ask for a review", "Have your assistant call review_architecture with relevant source or IaC and a security, reliability, cost, or general focus."],
+      ["Ask for a review", "Have your assistant call review_architecture with relevant source or IaC and a security, reliability, cost, or general focus. The first call opens browser authorization."],
+      ["Authorize through Google", "Sign in if needed and approve MCP access. Return to your editor to continue the review. Credentials are saved and refreshed automatically."],
     ],
     note: "Your client sends the content you include in tool calls. Manage connected clients from the MCP page.",
     href: "/settings",

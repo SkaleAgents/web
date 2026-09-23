@@ -32,13 +32,14 @@ test("MCP configuration needs no manual key and connected clients can be disconn
 
 test("Google sign-in appears only in the header on product pages and MCP is prominent on home", async ({ page }) => {
   await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
-  for (const path of ["/", "/bots", "/prompts", "/jobs", "/schedules", "/studio", "/settings"]) {
+  for (const path of ["/", "/bots", "/prompts", "/jobs", "/schedules", "/studio", "/settings", "/login", "/login?oauth=1"]) {
     await page.goto(path);
     const signIn = page.getByRole("link", { name: "Sign in with Google", exact: true });
     await expect(signIn).toHaveCount(1);
     await expect(page.getByRole("banner").getByRole("link", { name: "Sign in with Google" })).toBeVisible();
     await expect(signIn.locator("svg")).toBeVisible();
     await expect(page.getByRole("main").getByRole("link", { name: /Sign in|Continue with Google/ })).toHaveCount(0);
+    await expect(page.getByRole("main").getByRole("button", { name: /Sign in|Continue with Google/ })).toHaveCount(0);
   }
   await page.goto("/");
   const section = page.getByRole("region", { name: "Your editor is the starting point." });

@@ -11,8 +11,9 @@ Touch and keyboard activation toggle them. Escape closes the menu and returns fo
 to its trigger. Moving the pointer away, leaving keyboard focus, clicking outside,
 or choosing a destination closes it. The same groups fit a 320px mobile viewport.
 Destination icons describe their tools; SVG chevrons align with the trigger labels.
-The header has a Google-branded sign-in action. Product pages refer to that action
-instead of adding their own sign-in buttons.
+The header has a Google-branded sign-in action, including on `/login` and the MCP
+OAuth login handoff. Pages refer to that action instead of adding their own
+sign-in buttons. Local mock sign-in uses the same header location.
 
 ## What each page does
 

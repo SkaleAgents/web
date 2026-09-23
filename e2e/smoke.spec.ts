@@ -7,7 +7,7 @@ test.describe("Phase 1 page smokes", () => {
       page.getByRole("heading", { name: /Sign in to your control plane/i }),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /Continue with Google/i }),
+      page.getByRole("banner").getByRole("link", { name: "Sign in with Google" }),
     ).toBeVisible();
   });
 
