@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 
-const wideBadges = [
+const directoryBadges = [
+  ["TopAITools4U", "https://www.topaitools4u.site", "https://www.topaitools4u.site/logo.svg", 64, 64],
   ["LaunchIgniter", "https://launchigniter.com/product/skaleagents?ref=badge-skaleagents", "https://launchigniter.com/api/badge/skaleagents?theme=light", 212, 55],
   ["EarlyHunt", "https://earlyhunt.com/project/skaleagents", "https://earlyhunt.com/badges/earlyhunt-badge-light.svg", 190, 58],
   ["SaaSCity", "https://saascity.io", "https://saascity.io/badges/featured-dark.svg", 210, 80],
@@ -63,23 +64,36 @@ function BadgeImage({ name, src, width, height }: { name: string; src: string; w
 }
 
 export function FooterBadges() {
+  const [paused, setPaused] = useState(false);
+  const [manual, setManual] = useState(false);
+  const stopped = paused || manual;
+
+  function toggleMotion() {
+    setPaused(!stopped);
+    setManual(false);
+  }
+
   return (
     <div className="min-w-0 border-t border-line py-5">
       <div className="mb-3 flex items-center justify-between gap-4 text-xs text-ink-muted">
         <p className="font-medium">Find us on</p>
-        <span id="footer-badge-hint">Scroll to explore</span>
+        <button type="button" className="footer-motion-toggle rounded px-2 py-1 hover:bg-accent-soft hover:text-ink" onClick={toggleMotion} aria-pressed={stopped}>
+          <span aria-hidden="true" className="mr-2">{stopped ? "▷" : "Ⅱ"}</span>
+          {stopped ? "Resume badges" : "Pause badges"}
+        </button>
       </div>
-      <div className="footer-badge-row footer-square-badges" role="group" aria-label="Square directory logos">
-        <a data-topaitools4u-badge="verified-listing" href="https://www.topaitools4u.site" target="_blank" rel="noopener noreferrer" aria-label="Listed on TopAITools4U" title="TopAITools4U">
-          <BadgeImage name="TopAITools4U" src="https://www.topaitools4u.site/logo.svg" width={64} height={64} />
-        </a>
-      </div>
-      <div className="footer-badge-row footer-wide-badges" role="region" aria-label="Wide directory badges" aria-describedby="footer-badge-hint" tabIndex={0}>
-        {wideBadges.map(([name, href, src, width, height]) => (
-          <a key={href} href={href} target="_blank" rel="noopener noreferrer" title={name}>
-            <BadgeImage name={name} src={src} width={width} height={height} />
-          </a>
-        ))}
+      <div className="footer-badge-slider" role="region" aria-label="Directory badges" tabIndex={0} data-paused={paused} data-manual={manual} onTouchStart={() => setManual(true)} onWheel={(event) => { if (event.deltaX !== 0) setManual(true); }}>
+        <div className="footer-badge-track">
+          {[false, true].map((duplicate) => (
+            <div key={String(duplicate)} className="footer-badge-group" aria-hidden={duplicate ? true : undefined}>
+              {directoryBadges.map(([name, href, src, width, height]) => (
+                <a key={href} href={href} target="_blank" rel="noopener noreferrer" title={name} tabIndex={duplicate ? -1 : undefined} data-topaitools4u-badge={name === "TopAITools4U" ? "verified-listing" : undefined}>
+                  <BadgeImage name={name} src={src} width={width} height={height} />
+                </a>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
       <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-ink-muted">
         {directoryLinks.map(([name, href]) => <a key={href} href={href} target="_blank" rel="noopener noreferrer" className="hover:text-ink hover:underline">{name}</a>)}

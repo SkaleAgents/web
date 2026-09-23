@@ -84,11 +84,11 @@ export default function RootLayout({
               <span>© 2026 SkaleAgents</span>
               <span>AI DevOps control plane</span>
             </div>
-            <FooterBadges />
             <div
-              className="google-add-preferred-source-btn"
+              className="google-add-preferred-source-btn mb-5"
               google-add-preferred-source-btn=""
             />
+            <FooterBadges />
           </div>
         </footer>
       </body>

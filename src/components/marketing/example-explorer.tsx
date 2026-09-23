@@ -95,7 +95,7 @@ export function ExampleExplorer() {
         </div>
       </fieldset>
 
-      <div className="mt-6 overflow-hidden rounded-[10px] border border-line bg-canvas-elevated" role="region" aria-label={`${example.label} example`}>
+      <div key={example.id} className="motion-enter mt-6 overflow-hidden rounded-[10px] border border-line bg-canvas-elevated" role="region" aria-label={`${example.label} example`}>
         <div className="border-b border-line p-6 sm:p-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="marketing-eyebrow">{example.specialty} / review brief</p>

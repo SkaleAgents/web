@@ -4,6 +4,8 @@ import { HeroActions } from "@/components/marketing/hero-actions";
 import { ExampleExplorer } from "@/components/marketing/example-explorer";
 import { WorkflowExplorer } from "@/components/marketing/workflow-explorer";
 import { LinkButton } from "@/components/ui";
+import { MarketingMotion } from "@/components/marketing/marketing-motion";
+import { HeroSignal } from "@/components/marketing/hero-signal";
 
 export const metadata: Metadata = {
   title: "SkaleAgents | DevOps bots and infrastructure reviews",
@@ -33,15 +35,21 @@ const faqs = [
 
 export default function MarketingHome() {
   return (
-    <main className="marketing-home">
+    <MarketingMotion>
       <section className="marketing-hero relative border-b border-line" aria-labelledby="hero-heading">
+        <div className="hero-ambient" aria-hidden="true" />
         <div className="motion-enter relative mx-auto w-full max-w-5xl px-6 py-24 sm:py-32">
           <p className="marketing-eyebrow mb-8 flex items-center gap-2"><span aria-hidden="true" className="size-1.5 rounded-full bg-accent" /> Built for the work behind the deploy</p>
           <p className="font-display text-[clamp(2.75rem,8vw,5.5rem)] font-bold leading-[0.95] tracking-tight">SkaleAgents</p>
-          <h1 id="hero-heading" className="mt-6 max-w-xl text-2xl font-medium leading-snug sm:text-3xl">Control plane for AI DevOps agents</h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-muted">Find a specialist bot. Review the code and infrastructure behind your app. Bring the findings into your editor or a shared team review.</p>
-          <HeroActions />
-          <a href="#examples" className="mt-14 inline-flex items-center gap-3 text-sm font-semibold text-ink-muted hover:text-ink">See what a review looks like <span aria-hidden="true">↓</span></a>
+          <div className="mt-6 grid items-center gap-10 md:grid-cols-[1.6fr_1fr]">
+            <div>
+              <h1 id="hero-heading" className="max-w-xl text-2xl font-medium leading-snug sm:text-3xl">Control plane for AI DevOps agents</h1>
+              <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-muted">Find a specialist bot. Review the code and infrastructure behind your app. Bring the findings into your editor or a shared team review.</p>
+              <HeroActions />
+              <a href="#examples" className="mt-10 inline-flex items-center gap-3 text-sm font-semibold text-ink-muted hover:text-ink">See what a review looks like <span className="hero-scroll-cue" aria-hidden="true">↓</span></a>
+            </div>
+            <HeroSignal />
+          </div>
         </div>
       </section>
 
@@ -67,7 +75,7 @@ export default function MarketingHome() {
         <h2 id="toolkit-heading" className="marketing-heading">From the first question<br className="hidden sm:block" /> to a repeatable review.</h2>
         <div className="mt-10 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
-            <article key={feature.href} className="flex flex-col border-t border-line py-7">
+            <article key={feature.href} className="marketing-feature flex flex-col border-t border-line py-7">
               <p className="marketing-eyebrow flex justify-between gap-3"><span>{feature.label}</span><span className="opacity-60">{feature.number}</span></p>
               <h3 className="mt-5 text-lg font-semibold">{feature.title}</h3>
               <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-muted">{feature.description}</p>
@@ -99,6 +107,6 @@ export default function MarketingHome() {
           <div className="mt-7 flex flex-wrap gap-3"><LinkButton href="/bots" className="px-5 py-3">Explore the directory <span aria-hidden="true" className="ml-3">↗</span></LinkButton><LinkButton href="/settings" variant="secondary" className="px-5 py-3">See MCP setup</LinkButton></div>
         </div>
       </section>
-    </main>
+    </MarketingMotion>
   );
 }

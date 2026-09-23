@@ -123,42 +123,63 @@ body {
   text-underline-offset: 3px;
 }
 
-.footer-badge-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.footer-badge-slider {
   overflow-x: auto;
-  padding: 0.25rem 0.25rem 0.75rem;
+  padding: 0.25rem 0 0.75rem;
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;
 }
 
-.footer-badge-row a {
+.footer-badge-track {
+  display: flex;
+  width: max-content;
+  animation: badge-drift 160s linear infinite;
+}
+
+.footer-badge-group {
+  display: flex;
+  flex-shrink: 0;
+  gap: 1rem;
+  padding: 0.25rem 1rem 0.25rem 0;
+}
+
+.footer-badge-group a {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-}
-
-.footer-square-badges img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  border-radius: 6px;
-}
-
-.footer-wide-badges a {
   width: 128px;
   height: 36px;
 }
 
-.footer-wide-badges img {
+.footer-badge-group img {
   width: auto;
   height: auto;
   max-width: 128px;
   max-height: 32px;
   object-fit: contain;
+}
+
+.footer-badge-slider:hover .footer-badge-track,
+.footer-badge-slider:focus-within .footer-badge-track,
+.footer-badge-slider[data-paused="true"] .footer-badge-track {
+  animation-play-state: paused;
+}
+
+/* Reset the track for native keyboard scrolling through the original links. */
+.footer-badge-slider:focus-visible .footer-badge-track,
+.footer-badge-slider:has(:focus-visible) .footer-badge-track,
+.footer-badge-slider[data-manual="true"] .footer-badge-track {
+  animation: none;
+}
+
+.footer-badge-slider[data-manual="true"] .footer-badge-group[aria-hidden="true"] {
+  display: none;
+}
+
+@keyframes badge-drift {
+  to { transform: translateX(-50%); }
 }
 
 .footer-badge-fallback {
@@ -172,4 +193,124 @@ body {
   color: var(--ink-muted);
   font-size: 0.6875rem;
   text-align: center;
+}
+
+.marketing-hero {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero-ambient {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  right: -10%;
+  width: 65%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(ellipse, var(--accent-soft), transparent 65%);
+  animation: ambient-drift 14s ease-in-out infinite alternate;
+}
+
+.hero-signal {
+  max-width: 320px;
+  justify-self: end;
+  width: 100%;
+}
+
+.hero-orbit {
+  stroke: var(--line);
+  stroke-dasharray: 3 12;
+  transform-origin: 160px 164px;
+  animation: orbit-turn 90s linear infinite;
+}
+
+.hero-orbit-inner {
+  opacity: 0.55;
+  stroke-dasharray: 1 8;
+  animation-direction: reverse;
+  animation-duration: 60s;
+}
+
+.hero-signal-line { stroke: var(--line); }
+.hero-signal-flow {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 6 24;
+  animation: signal-flow 3s linear infinite;
+}
+
+.hero-signal-node {
+  fill: var(--canvas-elevated);
+  stroke: var(--line);
+}
+
+.hero-signal-core {
+  fill: var(--canvas-elevated);
+  stroke: var(--accent);
+}
+
+.hero-signal-label { fill: var(--ink); font-size: 12px; }
+.hero-signal-caption {
+  fill: var(--ink-muted);
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.hero-signal-pulse {
+  fill: var(--accent);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: signal-pulse 3s ease-in-out infinite;
+}
+
+.hero-signal-pulse-delayed { animation-delay: 1.5s; }
+.hero-scroll-cue { animation: scroll-nudge 2.5s ease-in-out infinite; }
+
+.marketing-feature {
+  transition: transform 220ms ease, border-color 220ms ease;
+}
+
+.marketing-feature:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+}
+
+.marketing-home a[class*="bg-accent"] {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.marketing-home a[class*="bg-accent"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px var(--accent-soft);
+}
+
+@keyframes ambient-drift {
+  to { transform: translate(-20%, 10%) scale(1.15); }
+}
+@keyframes orbit-turn { to { transform: rotate(360deg); } }
+@keyframes signal-flow { to { stroke-dashoffset: -60; } }
+@keyframes signal-pulse {
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+@keyframes scroll-nudge {
+  50% { transform: translateY(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-badge-track,
+  .hero-ambient,
+  .hero-orbit,
+  .hero-signal-flow,
+  .hero-signal-pulse,
+  .hero-scroll-cue {
+    animation: none;
+  }
+  .footer-badge-group[aria-hidden="true"],
+  .footer-motion-toggle { display: none; }
+  .marketing-feature,
+  .marketing-home a[class*="bg-accent"] { transition: none; }
+  .marketing-feature:hover,
+  .marketing-home a[class*="bg-accent"]:hover { transform: none; }
 }

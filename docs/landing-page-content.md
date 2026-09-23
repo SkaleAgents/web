@@ -25,6 +25,14 @@ Use the existing Signal Deck colors, typography, and button primitives. Render e
 
 The current web app includes audit jobs, Watchtower sessions, and scheduled audits. Describe those routes as implemented workflows. Don't claim verified compliance, autonomous deployment, or working Crontinel/Cloudploy integrations.
 
+## Motion and footer refinements
+
+- Keep one header menu. The hero links directly to the examples.
+- Place the Preferred Source button above a single, compact badge strip, including the square logo.
+- Loop badges automatically. Pause on hover and keyboard focus; provide a pause/resume button. Touch or horizontal wheel input switches to manual scrolling.
+- Add an animated workflow diagram and a slow background wash to the hero, one-time section entrances, and small hover responses.
+- Keep the content readable without JavaScript. Respect reduced-motion preferences with a static badge strip and no decorative animation.
+
 ## Acceptance checks
 
 - Visitors can read the core information without authentication or a working API.

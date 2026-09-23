@@ -71,7 +71,7 @@ export function WorkflowExplorer() {
           ))}
         </div>
       </fieldset>
-      <div className="mt-8 grid gap-10 lg:grid-cols-[1.3fr_1fr]" role="region" aria-label={workflow.label}>
+      <div key={workflow.id} className="motion-enter mt-8 grid gap-10 lg:grid-cols-[1.3fr_1fr]" role="region" aria-label={workflow.label}>
         <div>
           <h3 className="font-display text-2xl font-semibold tracking-tight">{workflow.heading}</h3>
           <p className="mt-3 leading-relaxed text-ink-muted">{workflow.description}</p>
