@@ -38,6 +38,8 @@ The current web app includes audit jobs, Watchtower sessions, and scheduled audi
 
 - Expand an example's prompt to add project context and choose an answer format. Update the preview locally, pause auto-rotation while editing, and copy the customized prompt. Reset restores the original prompt.
 - Replace the final static CTA with a two-choice workflow picker. Recommend the directory, prompts, MCP, audits, schedules, or Studio based on the visitor's answers. Explain account requirements before linking to the destination.
+- Header and hero Get started buttons open an accessible on-page dialog. Visitors can try the demo or browse bots without an account. Only the explicit Continue with Google action starts authentication. Escape, backdrop click, and the close button dismiss the panel.
+- An editable JSON demo illustrates three local deployment checks: replica count, readiness-probe enablement, and a memory limit. Findings update locally. Clearly label the simplified settings as a teaching example, not an AI audit or a deployment manifest. Reject malformed or unsupported inputs rather than showing successful checks.
 
 ## Acceptance checks
 

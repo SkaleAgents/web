@@ -59,8 +59,22 @@ body {
   outline-offset: 2px;
 }
 
+body:has(.get-started-dialog[open]) {
+  overflow: hidden;
+}
+
+.get-started-dialog::backdrop {
+  background: rgb(3 12 16 / 55%);
+  backdrop-filter: blur(4px);
+}
+
+.get-started-dialog[open] {
+  animation: signal-enter 180ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .motion-enter {
+  .motion-enter,
+  .get-started-dialog[open] {
     animation: none !important;
   }
 }

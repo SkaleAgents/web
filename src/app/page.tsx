@@ -6,6 +6,7 @@ import { WorkflowExplorer } from "@/components/marketing/workflow-explorer";
 import { StartPicker } from "@/components/marketing/start-picker";
 import { MarketingMotion } from "@/components/marketing/marketing-motion";
 import { HeroSignal } from "@/components/marketing/hero-signal";
+import { SampleReviewDemo } from "@/components/marketing/sample-review-demo";
 
 export const metadata: Metadata = {
   title: "SkaleAgents | DevOps bots and infrastructure reviews",
@@ -59,6 +60,10 @@ export default function MarketingHome() {
           <p className="max-w-sm leading-relaxed text-ink-muted">A useful review connects a finding to the code behind it. Pick a focus to see the input, the concern, and a practical next step.</p>
         </div>
         <ExampleExplorer />
+      </section>
+
+      <section id="sample-demo" className="marketing-section border-t border-line" aria-labelledby="sample-demo-heading">
+        <SampleReviewDemo />
       </section>
 
       <div className="border-y border-line bg-accent-soft/30">

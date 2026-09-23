@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { apiFetch, type ApiUser, ensureCsrfCookie, googleSignInHref } from "@/lib/api";
-import { GoogleSignInLabel } from "@/components/google-mark";
-import { Button, LinkButton } from "@/components/ui";
+import { apiFetch, type ApiUser, ensureCsrfCookie } from "@/lib/api";
+import { GetStartedButton } from "@/components/get-started-button";
+import { Button } from "@/components/ui";
 import { BrandLogo } from "@/components/brand";
 
 const nav = [
@@ -100,9 +100,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Button>
               </>
             ) : (
-              <LinkButton href={googleSignInHref()} className="px-3 py-1.5">
-                <GoogleSignInLabel>Get started</GoogleSignInLabel>
-              </LinkButton>
+              <GetStartedButton className="px-3 py-1.5" />
             )}
           </div>
         </div>
