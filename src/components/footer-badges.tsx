@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const directoryBadges = [
   ["TopAITools4U", "https://www.topaitools4u.site", "https://www.topaitools4u.site/logo.svg", 64, 64],
@@ -64,25 +64,24 @@ function BadgeImage({ name, src, width, height }: { name: string; src: string; w
 }
 
 export function FooterBadges() {
-  const [paused, setPaused] = useState(false);
+  const slider = useRef<HTMLDivElement>(null);
   const [manual, setManual] = useState(false);
-  const stopped = paused || manual;
 
-  function toggleMotion() {
-    setPaused(!stopped);
-    setManual(false);
-  }
+  useEffect(() => {
+    if (!manual) return;
+    const resumeOutside = (event: PointerEvent) => {
+      if (!slider.current?.contains(event.target as Node)) setManual(false);
+    };
+    document.addEventListener("pointerdown", resumeOutside);
+    return () => document.removeEventListener("pointerdown", resumeOutside);
+  }, [manual]);
 
   return (
     <div className="min-w-0 border-t border-line py-5">
-      <div className="mb-3 flex items-center justify-between gap-4 text-xs text-ink-muted">
+      <div className="mb-3 text-xs text-ink-muted">
         <p className="font-medium">Find us on</p>
-        <button type="button" className="footer-motion-toggle rounded px-2 py-1 hover:bg-accent-soft hover:text-ink" onClick={toggleMotion} aria-pressed={stopped}>
-          <span aria-hidden="true" className="mr-2">{stopped ? "▷" : "Ⅱ"}</span>
-          {stopped ? "Resume badges" : "Pause badges"}
-        </button>
       </div>
-      <div className="footer-badge-slider" role="region" aria-label="Directory badges" tabIndex={0} data-paused={paused} data-manual={manual} onTouchStart={() => setManual(true)} onWheel={(event) => { if (event.deltaX !== 0) setManual(true); }}>
+      <div ref={slider} className="footer-badge-slider" role="region" aria-label="Directory badges" tabIndex={0} data-manual={manual} onMouseLeave={() => setManual(false)} onTouchStart={() => setManual(true)} onWheel={(event) => { if (event.deltaX !== 0) setManual(true); }}>
         <div className="footer-badge-track">
           {[false, true].map((duplicate) => (
             <div key={String(duplicate)} className="footer-badge-group" aria-hidden={duplicate ? true : undefined}>

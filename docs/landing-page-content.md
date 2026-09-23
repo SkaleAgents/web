@@ -29,7 +29,8 @@ The current web app includes audit jobs, Watchtower sessions, and scheduled audi
 
 - Keep one header menu. The hero links directly to the examples.
 - Place the Preferred Source button above a single, compact badge strip, including the square logo.
-- Loop badges automatically. Pause on hover and keyboard focus; provide a pause/resume button. Touch or horizontal wheel input switches to manual scrolling.
+- Loop badges automatically and pause on hover or keyboard focus, without a visible pause button. Touch or horizontal wheel input switches to manual scrolling. Use intrinsic badge widths, a consistent 16px gap, and a 38.4px image height.
+- Cycle the example explorer every nine seconds with a left-side topic selector and a progress bar. Pause when offscreen, in a hidden tab, hovered, focused, or reading an expanded prompt. Keep a manual pause control and disable cycling for reduced-motion preferences.
 - Add an animated workflow diagram and a slow background wash to the hero, one-time section entrances, and small hover responses.
 - Keep the content readable without JavaScript. Respect reduced-motion preferences with a static badge strip and no decorative animation.
 
