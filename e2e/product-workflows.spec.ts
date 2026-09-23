@@ -4,6 +4,52 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
 });
 
+test("desktop menus open on hover, bridge the panel gap, and dismiss on exit", async ({ page }) => {
+  await page.goto("/studio");
+  const nav = page.getByRole("navigation", { name: "Main navigation" });
+  const explore = nav.getByRole("button", { name: "Explore", exact: true });
+  await explore.hover();
+  await expect(explore).toHaveAttribute("aria-expanded", "true");
+  // A click following pointer entry must not immediately collapse the hovered menu.
+  await explore.click();
+  await expect(explore).toHaveAttribute("aria-expanded", "true");
+  const trigger = await explore.boundingBox();
+  await page.mouse.move(trigger!.x + trigger!.width / 2, trigger!.y + trigger!.height + 6);
+  await page.waitForTimeout(250);
+  await expect(nav.getByRole("link", { name: /Bot directory/ })).toBeVisible();
+  await nav.getByRole("link", { name: /Bot directory/ }).hover();
+  await expect(explore).toHaveAttribute("aria-expanded", "true");
+  const review = nav.getByRole("button", { name: "Review", exact: true });
+  await review.hover();
+  await expect(explore).toHaveAttribute("aria-expanded", "false");
+  await expect(review).toHaveAttribute("aria-expanded", "true");
+  await page.getByRole("link", { name: "SkaleAgents home" }).hover();
+  await expect(review).toHaveAttribute("aria-expanded", "false");
+  const chevron = await explore.locator("svg").boundingBox();
+  const label = await explore.locator("span").boundingBox();
+  expect(Math.abs(chevron!.y + chevron!.height / 2 - label!.y - label!.height / 2)).toBeLessThan(1);
+});
+
+test("touch menus toggle without hover and destination taps navigate", async ({ browser }) => {
+  const context = await browser.newContext({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
+  try {
+    await page.goto("/studio");
+    const nav = page.getByRole("navigation", { name: "Main navigation" });
+    const explore = nav.getByRole("button", { name: "Explore", exact: true });
+    await explore.tap();
+    await expect(explore).toHaveAttribute("aria-expanded", "true");
+    await explore.tap();
+    await expect(explore).toHaveAttribute("aria-expanded", "false");
+    await explore.tap();
+    await nav.getByRole("link", { name: /Prompt library/ }).tap();
+    await expect(page).toHaveURL(/\/prompts$/);
+  } finally {
+    await context.close();
+  }
+});
+
 test("grouped navigation supports keyboard dismissal, active routes, and mobile", async ({ page }) => {
   await page.goto("/studio");
   const nav = page.getByRole("navigation", { name: "Main navigation" });

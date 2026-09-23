@@ -6,9 +6,11 @@ The logo links to `/`. Three disclosure groups replace the flat seven-link menu:
 - **Review:** Audit jobs and Scheduled audits. Watchtower keeps Review active.
 - **Build & connect:** Creator Studio and Connect MCP.
 
-Menus open by click or keyboard. Escape closes the menu and returns focus to its
-trigger. Leaving the navigation, clicking outside, or choosing a destination closes
-it. The same groups fit a 320px mobile viewport.
+Desktop menus open on hover and stay open while the pointer moves into the panel.
+Touch and keyboard activation toggle them. Escape closes the menu and returns focus
+to its trigger. Moving the pointer away, leaving keyboard focus, clicking outside,
+or choosing a destination closes it. The same groups fit a 320px mobile viewport.
+Destination icons describe their tools; SVG chevrons align with the trigger labels.
 
 ## What each page does
 

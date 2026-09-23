@@ -14,7 +14,7 @@ export function GetStartedButton({ variant = "primary", className }: Pick<Compon
   return (
     <>
       <Button type="button" variant={variant} className={className} aria-haspopup="dialog" onClick={() => dialog.current?.showModal()}>
-        <GoogleSignInLabel>Get started</GoogleSignInLabel>
+        <span className="inline-flex items-center gap-2">Get started<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h16m-6-6 6 6-6 6" /></svg></span>
       </Button>
       <dialog
         ref={dialog}
