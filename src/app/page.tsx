@@ -14,12 +14,12 @@ export const metadata: Metadata = {
 };
 
 const features = [
-  { number: "01", title: "Find your specialist", label: "Bot directory", description: "Browse reusable bots for DevOps, security, and scaling. Read the instructions before bringing one into your assistant.", href: "/bots", cta: "Explore bots" },
-  { number: "02", title: "Make the workflow yours", label: "Creator Studio", description: "Write a bot's instructions, choose its specialty, and publish it publicly or keep it private. Start as a draft and refine it.", href: "/studio", cta: "Open Studio" },
-  { number: "03", title: "Skip the blank prompt", label: "Prompt library", description: "Reuse community prompts for common engineering tasks. Sign in to save your own prompts for the next review.", href: "/prompts", cta: "Browse prompts" },
-  { number: "04", title: "Review with context", label: "Audits & Watchtower", description: "Submit infrastructure text to selected specialists. Open a shared review session to inspect findings and redirect the work.", href: "/jobs", cta: "Explore audits" },
-  { number: "05", title: "Put reviews on a schedule", label: "Scheduled audits", description: "Rerun a supplied infrastructure scope on a cron schedule. Choose a timezone and an optional webhook for completion or failure alerts.", href: "/schedules", cta: "View schedules" },
-  { number: "06", title: "Stay in your editor", label: "MCP connection", description: "Create a revocable API token and connect a compatible client. Request architecture reviews without switching to a browser for each call.", href: "/settings", cta: "Connect MCP" },
+  { number: "01", title: "Find your specialist", label: "Bot directory", description: "Search by task and filter by specialty. Read a bot's instructions, then open them in your assistant with your own project context.", href: "/bots", cta: "Explore bots" },
+  { number: "02", title: "Write a review playbook", label: "Creator Studio", description: "Start with a security, reliability, or capacity template. Customize the instructions, save a draft, and publish publicly or keep it private.", href: "/studio", cta: "Open Studio" },
+  { number: "03", title: "Find it. Copy it. Get to work.", label: "Prompt library", description: "Search prompt text, narrow by topic, and copy the full instructions in one click. Sign in to save your own reusable prompts.", href: "/prompts", cta: "Browse prompts" },
+  { number: "04", title: "Choose your review team", label: "Audits & Watchtower", description: "Select specialists for your infrastructure audit and track jobs by status. Open Watchtower to inspect findings and redirect the review.", href: "/jobs", cta: "Explore audits" },
+  { number: "05", title: "Set a review rhythm", label: "Scheduled audits", description: "Pick an hourly, daily, weekday, or weekly cadence for saved infrastructure text. Set the timezone and send completion or failure alerts to a webhook.", href: "/schedules", cta: "View schedules" },
+  { number: "06", title: "Stay in your editor", label: "MCP connection", description: "Follow setup instructions for Cursor or Claude Code, copy the server configuration, and create a revocable token for architecture reviews.", href: "/settings", cta: "Connect MCP" },
 ];
 
 const faqs = [

@@ -47,7 +47,7 @@ test.describe("Phase 1 page smokes", () => {
     await expect(
       page.getByRole("heading", { name: /Connect MCP/i }),
     ).toBeVisible();
-    await expect(page.getByText(/Sign in to connect/i)).toBeVisible();
+    await expect(page.getByText(/Sign in to create the API token/i)).toBeVisible();
   });
 
   test("audit page explains the signed-in workflow", async ({ page }) => {
@@ -68,7 +68,9 @@ test.describe("Phase 1 page smokes", () => {
     for (const path of ["/", "/login", "/bots", "/jobs", "/schedules", "/studio", "/prompts", "/settings"]) {
       await page.goto(path);
       await expect(page.getByRole("navigation")).toBeVisible();
-      await expect(page.getByRole("navigation").getByRole("link")).toHaveCount(7);
+      await expect(page.getByRole("navigation").getByRole("button")).toHaveCount(3);
+      await expect(page.getByRole("navigation").getByRole("link", { name: "Home", exact: true })).toHaveCount(0);
+      await expect(page.getByRole("link", { name: "SkaleAgents home" })).toHaveAttribute("href", "/");
       await expect(page.getByRole("banner").getByRole("button", { name: "Get started" })).toBeVisible();
     }
   });

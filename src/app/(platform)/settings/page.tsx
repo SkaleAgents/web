@@ -128,29 +128,34 @@ export default function SettingsPage() {
 
   if (!userQuery.data) {
     return (
-      <main className="space-y-4">
-        <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
+      <main className="space-y-8">
+        <div className="workspace-intro">
+        <p className="workspace-kicker">Connect / Bring reviews into your editor</p>
+        <h1 className="workspace-heading">
           Connect MCP
         </h1>
-        <p className="text-sm text-ink-muted">
-          Sign in to connect Cursor, Claude Code, or another AI client to the
-          SkaleAgents MCP server.
+        <p className="mt-3 max-w-2xl text-sm text-ink-muted">
+          Configure Cursor, Claude Code, or another compatible client to call SkaleAgents tools.
+          Explore the setup below. Sign in to create the API token your client will use.
         </p>
         <Link href={googleSignInHref()} className="text-sm text-accent underline">
           <GoogleSignInLabel>Sign in</GoogleSignInLabel>
         </Link>
+        </div>
+        <McpConnectionGuide token={null} apiUrl={MCP_API_URL} />
       </main>
     );
   }
 
   return (
     <main className="space-y-8">
-      <div>
-        <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
+      <div className="workspace-intro">
+        <p className="workspace-kicker">Connect / Bring reviews into your editor</p>
+        <h1 className="workspace-heading">
           Connect MCP
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-          Connect your AI model to your app and infrastructure review workflow.
+          Request code and infrastructure reviews from the editor where you work.
           The <code className="font-mono text-ink">@skaleagents/swarm</code>{" "}
           server runs locally in your AI client. Tokens stay valid after you
           sign out of the web app until you revoke them here.
