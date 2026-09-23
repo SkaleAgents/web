@@ -11,3 +11,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Project rule
 
 - Do not use em dash punctuation in code, comments, documentation, or commit messages.
+
+## Delivery default
+
+- The owner reviews changes on the live site. After implementing and verifying a requested change, commit it, ship it to `main`, and deploy production without a separate approval step unless the owner explicitly asks otherwise.
+- Verify the deployment at `https://skaleagents.com` before reporting completion. Report blockers if deployment or live verification fails.

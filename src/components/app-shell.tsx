@@ -57,10 +57,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <header className="border-b border-line border-t-2 border-t-accent bg-canvas-elevated">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
-          <div className="flex items-center gap-6">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-6 gap-y-4">
             <BrandLogo />
-            <nav className="flex gap-3 text-sm">
+            <nav aria-label="Main navigation" className="flex flex-wrap gap-3 text-sm">
               {nav.map((item) => {
                 const active =
                   pathname === item.href ||
@@ -108,7 +108,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <div className={
-        pathname === "/login"
+        pathname === "/login" || pathname === "/"
           ? "flex flex-1 flex-col"
           : "motion-enter mx-auto w-full max-w-5xl flex-1 px-6 py-8"
       }>
