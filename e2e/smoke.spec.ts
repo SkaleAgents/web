@@ -47,7 +47,7 @@ test.describe("Phase 1 page smokes", () => {
     await expect(
       page.getByRole("heading", { name: /Connect MCP/i }),
     ).toBeVisible();
-    await expect(page.getByText(/Credentials are handled automatically/i)).toBeVisible();
+    await expect(page.getByText(/Your client handles credentials automatically/i)).toBeVisible();
   });
 
   test("audit page explains the signed-in workflow", async ({ page }) => {
