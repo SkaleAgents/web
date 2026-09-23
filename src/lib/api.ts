@@ -3,6 +3,7 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082
 export type McpConnection = {
   id: string;
   clientId: string;
+  clientName?: string;
   createdAt: string;
   lastUsedAt: string | null;
   expiresAt: string;

@@ -167,9 +167,8 @@ test("MCP setup is readable before sign-in and changes with the selected editor"
   await page.goto("/settings");
   await expect(page.getByText(".cursor/mcp.json", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Claude Code", exact: true }).click();
-  await expect(page.getByText(".mcp.json", { exact: true })).toBeVisible();
   await expect(page.getByText("/mcp", { exact: true })).toBeVisible();
-  await expect(page.locator("pre").first()).toContainText("@skaleagents/swarm@0.3.1");
+  await expect(page.locator("pre").first()).toContainText("claude mcp add --transport http skaleagents https://skaleagents.com/mcp");
   await expect(page.locator("pre").first()).not.toContainText("SKALEAGENTS_API_TOKEN");
   await expect(page.getByRole("button", { name: "Create token", exact: true })).toHaveCount(0);
 });

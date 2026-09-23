@@ -81,7 +81,7 @@ export default function LoginPage() {
             <h3 className="font-semibold text-ink">Connecting an MCP client?</h3>
             <p className="mt-2 text-sm leading-relaxed text-ink-muted">
               After Google sign-in, approve the MCP access request and return to
-              your editor. The client handles credentials automatically.
+              your MCP client. The client handles credentials automatically.
             </p>
           </div>
 
