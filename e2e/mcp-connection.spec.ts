@@ -21,9 +21,7 @@ test("MCP configuration needs no manual key and connected clients can be disconn
   await expect(page.getByRole("button", { name: "Create token" })).toHaveCount(0);
   await page.getByRole("button", { name: "Copy MCP config" }).click();
   const config = JSON.parse(await page.evaluate(() => navigator.clipboard.readText()));
-  expect(config.mcpServers.skaleagents.args).toEqual(["-y", "@skaleagents/swarm@0.3.0"]);
-  expect(config.mcpServers.skaleagents.env.PLATFORM_API_URL).toMatch(/^https?:\/\//);
-  expect(config.mcpServers.skaleagents.env).not.toHaveProperty("SKALEAGENTS_API_TOKEN");
+  expect(config.mcpServers.skaleagents).toEqual({ command: "npx", args: ["-y", "@skaleagents/swarm@0.3.1"] });
   await expect(page.getByText("SkaleAgents MCP", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Disconnect", exact: true }).click();
   await expect(page.getByText(/No clients connected yet/)).toBeVisible();

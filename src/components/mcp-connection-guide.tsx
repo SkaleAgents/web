@@ -6,7 +6,7 @@ import { Button } from "@/components/ui";
 
 export function McpConnectionGuide() {
   const [client, setClient] = useState("Cursor");
-  const config = JSON.stringify({ mcpServers: { skaleagents: { command: "npx", args: ["-y", "@skaleagents/swarm@0.3.0"], env: { PLATFORM_API_URL: process.env.NEXT_PUBLIC_API_URL ?? "https://api.skaleagents.com" } } } }, null, 2);
+  const config = JSON.stringify({ mcpServers: { skaleagents: { command: "npx", args: ["-y", "@skaleagents/swarm@0.3.1"] } } }, null, 2);
   async function copy(text: string) {
     try { await navigator.clipboard.writeText(text); toast.success("Copied to clipboard"); }
     catch { toast.error("Could not copy. Select the configuration text manually."); }
