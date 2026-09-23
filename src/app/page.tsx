@@ -45,16 +45,6 @@ export default function MarketingHome() {
         </div>
       </section>
 
-      <div className="border-b border-line bg-canvas-elevated">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-8 gap-y-3 px-6 py-5 text-sm">
-          <span className="marketing-eyebrow mr-auto">A closer look</span>
-          <a className="hover:underline" href="#examples">Use cases</a>
-          <a className="hover:underline" href="#how-it-works">How it works</a>
-          <a className="hover:underline" href="#toolkit">The toolkit</a>
-          <a className="hover:underline" href="#questions">Common questions</a>
-        </div>
-      </div>
-
       <section id="examples" className="marketing-section" aria-labelledby="examples-heading">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div><p className="marketing-eyebrow">01 / Put it to work</p><h2 id="examples-heading" className="marketing-heading">What would you like<br className="hidden sm:block" /> a second pair of eyes on?</h2></div>

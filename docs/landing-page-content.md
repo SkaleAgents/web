@@ -12,7 +12,7 @@
 ## Page order
 
 1. Existing Signal Deck hero, with concrete supporting copy and an accessible public entry point.
-2. Section links for readers who already know what they need.
+2. Direct transition from the hero into the examples, with a single main navigation in the header.
 3. Interactive example explorer with sample input, finding, recommendation, and a copyable starter prompt.
 4. Workflow selector: assistant, editor, or team review. Each path has setup steps and a working destination.
 5. Product map linking to the directory, Studio, prompts, audits, schedules, and MCP settings.

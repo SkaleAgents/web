@@ -122,3 +122,54 @@ body {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+.footer-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.25rem 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.footer-badge-row a {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.footer-square-badges img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.footer-wide-badges a {
+  width: 128px;
+  height: 36px;
+}
+
+.footer-wide-badges img {
+  width: auto;
+  height: auto;
+  max-width: 128px;
+  max-height: 32px;
+  object-fit: contain;
+}
+
+.footer-badge-fallback {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  color: var(--ink-muted);
+  font-size: 0.6875rem;
+  text-align: center;
+}

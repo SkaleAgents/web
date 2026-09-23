@@ -53,8 +53,8 @@ test("workflow choices lead to their matching product entry points", async ({ pa
 test("questions expand by keyboard and public content survives an API outage", async ({ page }) => {
   await page.route("**/api/user", (route) => route.abort());
   await page.goto("/");
-  await page.getByRole("link", { name: "Common questions", exact: true }).click();
   const question = page.locator("summary").filter({ hasText: "What does it cost?" });
+  await question.scrollIntoViewIfNeeded();
   await question.focus();
   await page.keyboard.press("Enter");
   await expect(page.getByText(/This site does not currently publish paid plan prices/)).toBeVisible();
@@ -79,7 +79,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     await expect(page.locator("html")).toHaveClass(new RegExp(colorScheme));
     await page.getByText("Scaling & cost", { exact: true }).click();
     await page.getByText("In your editor", { exact: true }).click();
-    await expect(page.getByRole("link", { name: "Common questions", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Good questions.*Straight answers/ })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
     await expect(page.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
   });
