@@ -27,7 +27,7 @@ export function HeroActions() {
           Explore the directory <span aria-hidden="true" className="ml-3">↗</span>
         </LinkButton>
         <LinkButton href={user ? "/settings" : googleSignInHref()} variant="secondary" className="px-5 py-3">
-          {user ? "Connect MCP" : <GoogleSignInLabel>Sign in</GoogleSignInLabel>}
+          {user ? "Connect MCP" : <GoogleSignInLabel>Get started</GoogleSignInLabel>}
         </LinkButton>
       </div>
       <p className="mt-4 text-sm text-ink-muted">

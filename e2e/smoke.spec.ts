@@ -37,7 +37,7 @@ test.describe("Phase 1 page smokes", () => {
       page.getByRole("heading", { name: /Control plane for AI DevOps agents/i }),
     ).toBeVisible();
     await expect(
-      page.getByRole("banner").getByRole("link", { name: "Sign in" }),
+      page.getByRole("banner").getByRole("link", { name: "Get started" }),
     ).toBeVisible();
     await expect(page.getByRole("contentinfo")).toContainText("SkaleAgents");
   });
@@ -69,7 +69,7 @@ test.describe("Phase 1 page smokes", () => {
       await page.goto(path);
       await expect(page.getByRole("navigation")).toBeVisible();
       await expect(page.getByRole("navigation").getByRole("link")).toHaveCount(7);
-      await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toBeVisible();
+      await expect(page.getByRole("banner").getByRole("link", { name: "Get started" })).toBeVisible();
     }
   });
 

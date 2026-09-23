@@ -101,7 +101,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </>
             ) : (
               <LinkButton href={googleSignInHref()} className="px-3 py-1.5">
-                <GoogleSignInLabel>Sign in</GoogleSignInLabel>
+                <GoogleSignInLabel>Get started</GoogleSignInLabel>
               </LinkButton>
             )}
           </div>
