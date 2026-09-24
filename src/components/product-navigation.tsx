@@ -31,11 +31,15 @@ function NavigationIcon({ name }: { name: (typeof groups)[number]["items"][numbe
   return <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
 }
 
-export function ProductNavigation() {
+export function ProductNavigation({ staff = false }: { staff?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState<string | null>(null);
   const nav = useRef<HTMLElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigationGroups = groups.map((group) => group.label === "Review" && staff ? {
+    ...group,
+    items: [...group.items, { href: "/staff/advisory-bookings", label: "Advisory bookings", detail: "Assign requests and record advisory work.", icon: "calendar" as const }],
+  } : group);
   function cancelClose() {
     if (closeTimer.current !== null) clearTimeout(closeTimer.current);
     closeTimer.current = null;
@@ -69,7 +73,7 @@ export function ProductNavigation() {
         setOpen(null);
       }
     }}>
-      {groups.map((group, index) => (
+      {navigationGroups.map((group, index) => (
         <div key={group.label} className="product-nav-group" onPointerEnter={(event) => {
           if (event.pointerType !== "mouse" || !window.matchMedia("(hover: hover)").matches) return;
           cancelClose();

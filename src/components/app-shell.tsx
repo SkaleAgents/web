@@ -8,6 +8,7 @@ import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { Button } from "@/components/ui";
 import { BrandLogo } from "@/components/brand";
 import { ProductNavigation } from "@/components/product-navigation";
+import { isStaff } from "@/lib/advisory-bookings";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -38,6 +39,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       void queryClient.removeQueries({ queryKey: ["prompts"] });
       void queryClient.removeQueries({ queryKey: ["api-tokens"] });
       void queryClient.removeQueries({ queryKey: ["mcp-connections"] });
+      void queryClient.cancelQueries({ queryKey: ["staff-bookings"] });
+      queryClient.removeQueries({ queryKey: ["staff-bookings"] });
       toast.success("Signed out");
       router.push("/login");
     } catch (e) {
@@ -51,7 +54,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-3">
           <div className="contents">
             <BrandLogo />
-            <ProductNavigation key={pathname} />
+            <ProductNavigation key={pathname} staff={isStaff(userQuery.data) && !userQuery.isError} />
           </div>
           <div className="flex items-center gap-3 text-sm">
             {userQuery.isPending ? (
