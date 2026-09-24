@@ -12,8 +12,8 @@ importers:
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv@8.20.0)(react-hook-form@7.86.0(react@19.2.8))(zod@4.5.2)
       '@skaleagents/swarm':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.5.0
+        version: 0.5.0
       '@tanstack/react-query':
         specifier: ^5.102.8
         version: 5.102.8(react@19.2.8)
@@ -47,7 +47,7 @@ importers:
         version: 4.3.3
       '@testing-library/jest-dom':
         specifier: ^7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11(@types/node@20.19.43)(jsdom@30.0.1)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)))
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11(@types/node@20.19.43)(jsdom@30.0.1)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1)))
       '@testing-library/react':
         specifier: ^16.3.3
         version: 16.3.3(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -65,7 +65,7 @@ importers:
         version: 19.2.5(@types/react@19.2.18)
       '@vitejs/plugin-react':
         specifier: ^6.1.1
-        version: 6.1.1(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+        version: 6.1.1(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))
       eslint:
         specifier: ^9
         version: 9.39.5(jiti@2.7.0)
@@ -83,7 +83,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.1.11
-        version: 4.1.11(@types/node@20.19.43)(jsdom@30.0.1)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+        version: 4.1.11(@types/node@20.19.43)(jsdom@30.0.1)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))
 
 packages:
 
@@ -761,8 +761,8 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
-  '@skaleagents/swarm@0.4.0':
-    resolution: {integrity: sha512-sCTegVpBq9oRjPXQA8Q+wAUeD+o8bLQyEhoikBW6S4f4EuS0DP56VJhzxAUFqRXvJYsLYVbjBK8BuQqZS7QfJA==}
+  '@skaleagents/swarm@0.5.0':
+    resolution: {integrity: sha512-3sLH8bxLHshsCB2RJoCQDCHATQhMik7EKjQ4JDUMJuzZ3tOY5/EgYmV4Vub/t9dUT8iKT4j/qP9qv81Z6kgKfw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -1847,6 +1847,9 @@ packages:
   hasown@2.0.4:
     resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
+
+  hcl2-parser@1.0.3:
+    resolution: {integrity: sha512-NQUm/BFF+2nrBfeqDhhsy4DxxiLHgkeE3FywtjFiXnjSUaio3w4Tz1MQ3vGJBUhyArzOXJ24pO7JwE5LAn7Ncg==}
 
   hermes-estree@0.25.1:
     resolution: {integrity: sha512-0wUoCcLp+5Ev5pDW2OriHC2MJCbwLwuRx+gAqMTOkGKJJiBCLjtrvy4PWUGn6MIVefecRpzoOZ/UV6iGdOr+Cw==}
@@ -3045,6 +3048,11 @@ packages:
   yallist@3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
 
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
@@ -3574,9 +3582,11 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@skaleagents/swarm@0.4.0':
+  '@skaleagents/swarm@0.5.0':
     dependencies:
       '@modelcontextprotocol/sdk': 1.30.0(zod@4.5.2)
+      hcl2-parser: 1.0.3
+      yaml: 2.9.1
       zod: 4.5.2
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -3677,7 +3687,7 @@ snapshots:
       picocolors: 1.1.1
       pretty-format: 27.5.1
 
-  '@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11(@types/node@20.19.43)(jsdom@30.0.1)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)))':
+  '@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11(@types/node@20.19.43)(jsdom@30.0.1)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
       '@adobe/css-tools': 4.5.0
       '@testing-library/dom': 10.4.1
@@ -3687,7 +3697,7 @@ snapshots:
       picocolors: 1.1.1
       redent: 3.0.0
     optionalDependencies:
-      vitest: 4.1.11(@types/node@20.19.43)(jsdom@30.0.1)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+      vitest: 4.1.11(@types/node@20.19.43)(jsdom@30.0.1)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))
 
   '@testing-library/react@16.3.3(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -3896,10 +3906,10 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vitejs/plugin-react@6.1.1(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))':
+  '@vitejs/plugin-react@6.1.1(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))':
     dependencies:
       '@rolldown/pluginutils': 1.0.1
-      vite: 8.2.2(@types/node@20.19.43)(jiti@2.7.0)
+      vite: 8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1)
 
   '@vitest/expect@4.1.11':
     dependencies:
@@ -3910,13 +3920,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.1
 
-  '@vitest/mocker@4.1.11(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))':
+  '@vitest/mocker@4.1.11(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))':
     dependencies:
       '@vitest/spy': 4.1.11
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.2.2(@types/node@20.19.43)(jiti@2.7.0)
+      vite: 8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1)
 
   '@vitest/pretty-format@4.1.11':
     dependencies:
@@ -4809,6 +4819,8 @@ snapshots:
   hasown@2.0.4:
     dependencies:
       function-bind: 1.1.2
+
+  hcl2-parser@1.0.3: {}
 
   hermes-estree@0.25.1: {}
 
@@ -5932,7 +5944,7 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0):
+  vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -5943,11 +5955,12 @@ snapshots:
       '@types/node': 20.19.43
       fsevents: 2.3.3
       jiti: 2.7.0
+      yaml: 2.9.1
 
-  vitest@4.1.11(@types/node@20.19.43)(jsdom@30.0.1)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)):
+  vitest@4.1.11(@types/node@20.19.43)(jsdom@30.0.1)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1)):
     dependencies:
       '@vitest/expect': 4.1.11
-      '@vitest/mocker': 4.1.11(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+      '@vitest/mocker': 4.1.11(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))
       '@vitest/pretty-format': 4.1.11
       '@vitest/runner': 4.1.11
       '@vitest/snapshot': 4.1.11
@@ -5964,7 +5977,7 @@ snapshots:
       tinyexec: 1.3.0
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.1
-      vite: 8.2.2(@types/node@20.19.43)(jiti@2.7.0)
+      vite: 8.2.2(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.19.43
@@ -6055,6 +6068,8 @@ snapshots:
   xmlchars@2.2.0: {}
 
   yallist@3.1.1: {}
+
+  yaml@2.9.1: {}
 
   yocto-queue@0.1.0: {}
 
