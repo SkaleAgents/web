@@ -68,7 +68,7 @@ test("signed-in visitors retain the hero MCP shortcut", async ({ page }) => {
   await page.goto("/");
   const hero = page.getByRole("region", { name: "Control plane for AI DevOps agents" });
   await expect(hero).toContainText("Welcome back, Demo Engineer");
-  await expect(hero.getByRole("link", { name: "Connect MCP" })).toHaveAttribute("href", "/settings");
+  await expect(hero.getByRole("link", { name: "MCP config" })).toHaveAttribute("href", "/settings");
 });
 
 for (const colorScheme of ["light", "dark"] as const) {

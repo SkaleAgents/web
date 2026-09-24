@@ -39,7 +39,7 @@ export default function SettingsPage() {
     <main className="space-y-8">
       <div className="workspace-intro">
         <p className="workspace-kicker">MCP / The connection behind your workflow</p>
-        <h1 className="workspace-heading">Connect MCP</h1>
+        <h1 className="workspace-heading">MCP config</h1>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-muted">Bring SkaleAgents tools into Cursor, Claude Code, Claude Desktop, ChatGPT, or Codex. Add the server URL and connect through OAuth. Your client handles credentials automatically.</p>
       </div>
       <McpConnectionGuide />

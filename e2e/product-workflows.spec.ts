@@ -68,7 +68,7 @@ test("grouped navigation supports keyboard dismissal, active routes, and mobile"
     await expect(nav.getByRole("link")).toHaveCount(2);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   }
-  await nav.getByRole("link", { name: /Connect MCP/ }).click();
+  await nav.getByRole("link", { name: /MCP config/ }).click();
   await expect(page).toHaveURL(/\/settings$/);
   await expect(nav.getByRole("link")).toHaveCount(0);
   await page.getByRole("link", { name: "SkaleAgents home" }).click();

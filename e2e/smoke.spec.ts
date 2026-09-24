@@ -45,7 +45,7 @@ test.describe("Phase 1 page smokes", () => {
   test("settings page explains the MCP connection", async ({ page }) => {
     await page.goto("/settings");
     await expect(
-      page.getByRole("heading", { name: /Connect MCP/i }),
+      page.getByRole("heading", { name: /MCP config/i }),
     ).toBeVisible();
     await expect(page.getByText(/Your client handles credentials automatically/i)).toBeVisible();
   });
