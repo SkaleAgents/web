@@ -16,6 +16,20 @@ export type McpConnection = {
   expiresAt: string;
 };
 
+export type EmailPreferences = {
+  auditCompleted: boolean;
+  auditFailed: boolean;
+  reviewUpdates: boolean;
+};
+
+export type NotificationSettings = {
+  accountId: string;
+  email: string;
+  emailVerified: boolean;
+  deliveryEnabled: boolean;
+  preferences: EmailPreferences;
+};
+
 const MOCK_AUTH_ENABLED =
   process.env.NEXT_PUBLIC_MOCK_AUTH_ENABLED === "true";
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie, type SwarmSchedule } from "@/lib/api";
 import { Button, FieldLabel, LinkButton, Select, TextArea, TextInput } from "@/components/ui";
@@ -76,7 +77,8 @@ export default function SchedulesPage() {
         <h1 className="workspace-heading">Scheduled audits</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
           Rerun a saved infrastructure scope on your timetable. Choose a cadence and timezone,
-          then add a webhook if you want completion or failure alerts.
+          then manage email preferences in <Link href="/settings" className="text-accent underline">Settings</Link>.
+          Webhooks are optional.
         </p>
       </div>
 
