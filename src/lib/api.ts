@@ -1,5 +1,12 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
 
+export class ApiError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 export type McpConnection = {
   id: string;
   clientId: string;
@@ -59,7 +66,7 @@ export async function apiFetch<T>(
     } catch {
       /* ignore */
     }
-    throw new Error(message);
+    throw new ApiError(message, res.status);
   }
 
   if (res.status === 204) {
@@ -186,6 +193,7 @@ export type AdvisoryBooking = {
     id: string;
   };
   status: "requested" | "accepted" | "scheduled" | "in_progress" | "completed" | "cancelled";
+  assigneeRef: string | null;
   scope: string;
   urgency: "routine" | "soon" | "urgent" | "emergency";
   preferredWindow: {
@@ -196,10 +204,25 @@ export type AdvisoryBooking = {
   billing: {
     billableMinutes: number | null;
     feeCents: number | null;
-    currency: string;
+    currency: string | null;
   };
   createdAt: string;
   updatedAt: string;
+};
+
+export type AdvisoryBookingHistoryEntry = {
+  id: string;
+  type: "assignment" | "status" | "billing";
+  actorRef: string;
+  fromStatus: AdvisoryBooking["status"] | null;
+  toStatus: AdvisoryBooking["status"] | null;
+  assigneeRef: string | null;
+  billing: AdvisoryBooking["billing"];
+  createdAt: string;
+};
+
+export type StaffAdvisoryBooking = AdvisoryBooking & {
+  history: AdvisoryBookingHistoryEntry[];
 };
 
 export type PatchProposal = {
@@ -224,6 +247,7 @@ export type ApiUser = {
   googleSubject?: string | null;
   grokSubject: string | null;
   grokLinked?: boolean;
+  staffRole?: "staff" | "operator" | null;
 };
 
 export type AuthSession = {
