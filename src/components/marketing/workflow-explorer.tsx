@@ -31,7 +31,7 @@ const workflows = [
       ["Authorize through Google", "Sign in if needed and approve MCP access. Return to your editor to continue the review. Credentials are saved and refreshed automatically."],
     ],
     note: "Your client sends the content you include in tool calls. Manage connected clients from the MCP page.",
-    href: "/settings/mcp",
+    href: "/mcp-config",
     cta: "See MCP setup",
     codeTitle: "Ask your connected client",
     code: "Review this app with SkaleAgents.\n\nCall review_architecture with:\n  Relevant source and infrastructure\n  A security and reliability focus\n\nExplain the findings and suggest\nvalidation steps for each fix.",

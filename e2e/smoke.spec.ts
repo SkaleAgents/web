@@ -43,7 +43,7 @@ test.describe("Phase 1 page smokes", () => {
   });
 
   test("MCP config page explains the connection", async ({ page }) => {
-    await page.goto("/settings/mcp");
+    await page.goto("/mcp-config");
     await expect(
       page.getByRole("heading", { name: /MCP config/i }),
     ).toBeVisible();
@@ -66,7 +66,7 @@ test.describe("Phase 1 page smokes", () => {
 
   test("every public route uses the shared menu and sign-in action", async ({ page }) => {
     await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
-    for (const path of ["/", "/login", "/bots", "/jobs", "/schedules", "/studio", "/prompts", "/settings/mcp"]) {
+    for (const path of ["/", "/login", "/bots", "/jobs", "/schedules", "/studio", "/prompts", "/mcp-config"]) {
       await page.goto(path);
       await expect(page.getByRole("navigation")).toBeVisible();
       await expect(page.getByRole("navigation").getByRole("button")).toHaveCount(3);

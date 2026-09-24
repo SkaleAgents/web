@@ -29,8 +29,10 @@ test("MCP configuration needs no manual key and connected clients can be disconn
     connected = false;
     return route.fulfill({ json: { ok: true } });
   });
-  await page.goto("/settings");
-  await expect(page).toHaveURL(/\/settings\/mcp$/);
+  for (const path of ["/settings", "/settings/mcp"]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\/mcp-config$/);
+  }
   await expect(page.getByRole("heading", { name: "MCP config", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Create token" })).toHaveCount(0);
   await page.getByRole("button", { name: "Copy MCP config" }).click();
@@ -44,7 +46,7 @@ test("MCP configuration needs no manual key and connected clients can be disconn
 
 test("client setup offers URL-only connectors and client-specific editor configuration", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-  await page.goto("/settings/mcp");
+  await page.goto("/mcp-config");
   const choices = page.getByRole("group", { name: "Choose your MCP client" });
   await expect(choices.getByRole("button")).toHaveText(["Cursor", "Claude Code", "Claude Desktop", "ChatGPT", "Codex"]);
   for (const client of ["Claude Desktop", "ChatGPT"]) {
@@ -65,7 +67,7 @@ test("client setup offers URL-only connectors and client-specific editor configu
 
 test("Google sign-in appears only in the header on product pages and MCP is prominent on home", async ({ page }) => {
   await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
-  for (const path of ["/", "/bots", "/prompts", "/jobs", "/schedules", "/studio", "/settings/mcp", "/login", "/login?oauth=1"]) {
+  for (const path of ["/", "/bots", "/prompts", "/jobs", "/schedules", "/studio", "/mcp-config", "/login", "/login?oauth=1"]) {
     await page.goto(path);
     const signIn = page.getByRole("link", { name: "Sign in with Google", exact: true });
     await expect(signIn).toHaveCount(1);
@@ -78,12 +80,12 @@ test("Google sign-in appears only in the header on product pages and MCP is prom
   const section = page.getByRole("region", { name: "Your editor is the starting point." });
   await expect(section).toContainText("Connect through Google OAuth");
   await section.getByRole("link", { name: "Set up your MCP connection" }).click();
-  await expect(page).toHaveURL(/\/settings\/mcp$/);
+  await expect(page).toHaveURL(/\/mcp-config$/);
 });
 
 test("architecture review brief carries the selected question and project context into the copied consultation", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-  await page.goto("/settings/mcp");
+  await page.goto("/mcp-config");
   const review = page.getByRole("region", { name: "Review the whole application" });
   await review.getByRole("button", { name: "Data and authorization", exact: true }).click();
   await review.getByLabel("What does the application do?").fill("Next.js customer portal with a separate Laravel API and tenant-owned projects.");

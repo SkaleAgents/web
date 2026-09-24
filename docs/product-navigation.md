@@ -27,13 +27,13 @@ sign-in buttons. Local mock sign-in uses the same header location.
   save the supplied infrastructure text. Presets show their timing in plain language.
 - `/studio`: load a security, reliability, or capacity starter into the draft form.
   Existing save, edit, and publish endpoints remain the source of truth.
-- `/settings/mcp`: copy client-specific setup before signing in. The first MCP tool
+- `/mcp-config`: copy client-specific setup before signing in. The first MCP tool
   call opens Google-backed OAuth authorization. Credentials are issued and
   refreshed by the client; users don't create API keys. Signed-in users can list
   and disconnect clients through `/api/oauth/connections`.
 
-Existing `/settings` bookmarks redirect to `/settings/mcp`. The parent path can
-serve broader account settings as those sections are added.
+MCP config has its own route. `/settings` is reserved for future account settings.
+Old `/settings` and `/settings/mcp` links temporarily redirect to `/mcp-config`.
 
 Search and filters operate on the API's returned collection. Scheduled audits
 reuse saved text; they don't fetch a repository. Custom cron expressions are
