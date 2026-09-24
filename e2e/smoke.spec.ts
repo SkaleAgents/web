@@ -42,8 +42,8 @@ test.describe("Phase 1 page smokes", () => {
     await expect(page.getByRole("contentinfo")).toContainText("SkaleAgents");
   });
 
-  test("settings page explains the MCP connection", async ({ page }) => {
-    await page.goto("/settings");
+  test("MCP config page explains the connection", async ({ page }) => {
+    await page.goto("/settings/mcp");
     await expect(
       page.getByRole("heading", { name: /MCP config/i }),
     ).toBeVisible();
@@ -65,7 +65,8 @@ test.describe("Phase 1 page smokes", () => {
   });
 
   test("every public route uses the shared menu and sign-in action", async ({ page }) => {
-    for (const path of ["/", "/login", "/bots", "/jobs", "/schedules", "/studio", "/prompts", "/settings"]) {
+    await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
+    for (const path of ["/", "/login", "/bots", "/jobs", "/schedules", "/studio", "/prompts", "/settings/mcp"]) {
       await page.goto(path);
       await expect(page.getByRole("navigation")).toBeVisible();
       await expect(page.getByRole("navigation").getByRole("button")).toHaveCount(3);

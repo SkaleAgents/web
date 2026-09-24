@@ -4,7 +4,7 @@ The logo links to `/`. Three disclosure groups replace the flat seven-link menu:
 
 - **Explore:** Bot directory and Prompt library.
 - **Review:** Audit jobs and Scheduled audits. Watchtower keeps Review active.
-- **Build & connect:** Creator Studio and Connect MCP.
+- **Build & connect:** Creator Studio and MCP config.
 
 Desktop menus open on hover and stay open while the pointer moves into the panel.
 Touch and keyboard activation toggle them. Escape closes the menu and returns focus
@@ -27,10 +27,13 @@ sign-in buttons. Local mock sign-in uses the same header location.
   save the supplied infrastructure text. Presets show their timing in plain language.
 - `/studio`: load a security, reliability, or capacity starter into the draft form.
   Existing save, edit, and publish endpoints remain the source of truth.
-- `/settings`: copy client-specific setup before signing in. The first MCP tool
+- `/settings/mcp`: copy client-specific setup before signing in. The first MCP tool
   call opens Google-backed OAuth authorization. Credentials are issued and
   refreshed by the client; users don't create API keys. Signed-in users can list
   and disconnect clients through `/api/oauth/connections`.
+
+Existing `/settings` bookmarks redirect to `/settings/mcp`. The parent path can
+serve broader account settings as those sections are added.
 
 Search and filters operate on the API's returned collection. Scheduled audits
 reuse saved text; they don't fetch a repository. Custom cron expressions are

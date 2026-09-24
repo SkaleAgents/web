@@ -69,7 +69,7 @@ test("grouped navigation supports keyboard dismissal, active routes, and mobile"
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   }
   await nav.getByRole("link", { name: /MCP config/ }).click();
-  await expect(page).toHaveURL(/\/settings$/);
+  await expect(page).toHaveURL(/\/settings\/mcp$/);
   await expect(nav.getByRole("link")).toHaveCount(0);
   await page.getByRole("link", { name: "SkaleAgents home" }).click();
   await expect(page).toHaveURL(/\/$/);
@@ -164,7 +164,7 @@ test("audit specialist choices reach the API and job status filters work", async
 });
 
 test("MCP setup is readable before sign-in and changes with the selected editor", async ({ page }) => {
-  await page.goto("/settings");
+  await page.goto("/settings/mcp");
   await expect(page.getByText(".cursor/mcp.json", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Claude Code", exact: true }).click();
   await expect(page.getByText("/mcp", { exact: true })).toBeVisible();

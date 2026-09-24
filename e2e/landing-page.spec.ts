@@ -41,7 +41,7 @@ test("workflow choices lead to their matching product entry points", async ({ pa
   await page.getByText("In your editor", { exact: true }).click();
   const editor = page.getByRole("region", { name: "In your editor", exact: true });
   await expect(editor).toContainText("review_architecture");
-  await expect(editor.getByRole("link", { name: "See MCP setup" })).toHaveAttribute("href", "/settings");
+  await expect(editor.getByRole("link", { name: "See MCP setup" })).toHaveAttribute("href", "/settings/mcp");
   await page.getByText("In the web app", { exact: true }).click();
   const web = page.getByRole("region", { name: "In the web app", exact: true });
   await expect(web).toContainText("don't automatically track changes");
@@ -68,7 +68,7 @@ test("signed-in visitors retain the hero MCP shortcut", async ({ page }) => {
   await page.goto("/");
   const hero = page.getByRole("region", { name: "Control plane for AI DevOps agents" });
   await expect(hero).toContainText("Welcome back, Demo Engineer");
-  await expect(hero.getByRole("link", { name: "MCP config" })).toHaveAttribute("href", "/settings");
+  await expect(hero.getByRole("link", { name: "MCP config" })).toHaveAttribute("href", "/settings/mcp");
 });
 
 for (const colorScheme of ["light", "dark"] as const) {

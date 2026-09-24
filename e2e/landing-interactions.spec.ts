@@ -30,7 +30,7 @@ test("the starting-point picker recommends the matching route and can be reset",
   const choices = [
     ["Try a specialist", "Find a specialist bot", "/bots"],
     ["Try a specialist", "Grab a ready-made prompt", "/prompts"],
-    ["Review infrastructure", "Inside my editor", "/settings"],
+    ["Review infrastructure", "Inside my editor", "/settings/mcp"],
     ["Review infrastructure", "In a shared web review", "/jobs"],
     ["Review infrastructure", "On a recurring schedule", "/schedules"],
     ["Build my own bot", "Keep it private", "/studio"],

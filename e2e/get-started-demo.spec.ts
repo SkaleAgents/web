@@ -12,7 +12,7 @@ test("Get started stays on the page and restores focus when dismissed", async ({
   const panel = page.getByRole("dialog", { name: "Choose how to get started." });
   await expect(panel).toBeVisible();
   await expect(page).toHaveURL(/\/$/);
-  await expect(panel.getByRole("link", { name: "Set up MCP" })).toHaveAttribute("href", "/settings");
+  await expect(panel.getByRole("link", { name: "Set up MCP" })).toHaveAttribute("href", "/settings/mcp");
   await page.keyboard.press("Escape");
   await expect(panel).toBeHidden();
   await expect(trigger).toBeFocused();

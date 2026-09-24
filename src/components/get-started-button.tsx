@@ -44,7 +44,7 @@ export function GetStartedButton({ variant = "primary", className }: Pick<Compon
         <div className="mt-6 border-t border-line pt-6">
           <h3 className="text-base font-semibold">Bring SkaleAgents into your editor</h3>
           <p className="mt-2 text-sm leading-relaxed text-ink-muted">Connect through MCP to review your own code and infrastructure. Your client handles authorization through the browser.</p>
-          <LinkButton href="/settings" className="mt-4 w-full py-3" onClick={close}>Set up MCP</LinkButton>
+          <LinkButton href="/settings/mcp" className="mt-4 w-full py-3" onClick={close}>Set up MCP</LinkButton>
         </div>
       </dialog>
     </>

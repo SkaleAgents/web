@@ -13,7 +13,8 @@ pnpm dev
 ```
 
 - `localhost:3000/` → landing
-- Product routes: `/login`, `/bots`, `/studio`, `/prompts`, and `/settings`
+- Product routes: `/login`, `/bots`, `/studio`, `/prompts`, and `/settings/mcp`
+- `/settings` redirects to MCP config at `/settings/mcp` for existing bookmarks.
 - API: Sail on `:8082` (`NEXT_PUBLIC_API_URL`)
 
 Tailscale: `tailscale serve --service=skaleagents-web --bg http://127.0.0.1:3000`
