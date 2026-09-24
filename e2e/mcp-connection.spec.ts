@@ -29,10 +29,8 @@ test("MCP configuration needs no manual key and connected clients can be disconn
     connected = false;
     return route.fulfill({ json: { ok: true } });
   });
-  for (const path of ["/settings", "/settings/mcp"]) {
-    await page.goto(path);
-    await expect(page).toHaveURL(/\/mcp-config$/);
-  }
+  await page.goto("/settings/mcp");
+  await expect(page).toHaveURL(/\/mcp-config$/);
   await expect(page.getByRole("heading", { name: "MCP config", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Create token" })).toHaveCount(0);
   await page.getByRole("button", { name: "Copy MCP config" }).click();

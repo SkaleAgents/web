@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -51,6 +52,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="text-ink-muted">
                   {userQuery.data.displayName}
                 </span>
+                <Link href="/settings" aria-current={pathname === "/settings" ? "page" : undefined} className="text-ink-muted hover:text-ink">Settings</Link>
                 <Button
                   type="button"
                   variant="secondary"
