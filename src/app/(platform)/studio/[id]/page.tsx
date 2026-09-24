@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { currentUserOptions } from "@/lib/session";
 import {
   apiFetch,
   ensureCsrfCookie,
@@ -36,11 +37,13 @@ export default function StudioEditPage() {
   const id = params.id;
   const router = useRouter();
   const queryClient = useQueryClient();
+  const user = useQuery(currentUserOptions);
+  const botKey = ["bot", id, user.data?.id ?? "guest"];
 
   const botQuery = useQuery({
-    queryKey: ["bot", id],
-    queryFn: () => apiFetch<Bot>(`/api/bots/${id}`),
-    enabled: Boolean(id),
+    queryKey: botKey,
+    queryFn: ({ signal }) => apiFetch<Bot>(`/api/bots/${id}`, { signal }),
+    enabled: Boolean(id) && !user.isPending,
   });
 
   const bot = botQuery.data;
@@ -77,7 +80,7 @@ export default function StudioEditPage() {
       });
     },
     onSuccess: (updated) => {
-      queryClient.setQueryData(["bot", id], updated);
+      queryClient.setQueryData(botKey, updated);
       void queryClient.invalidateQueries({ queryKey: ["bots"] });
       toast.success("Saved");
     },
@@ -103,7 +106,7 @@ export default function StudioEditPage() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["bots"] });
-      void queryClient.invalidateQueries({ queryKey: ["bot", id] });
+      void queryClient.invalidateQueries({ queryKey: botKey });
       toast.success("Published");
       router.push("/bots");
     },

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie, type SwarmSchedule } from "@/lib/api";
 import { Button, FieldLabel, LinkButton, Select, TextArea, TextInput } from "@/components/ui";
+import { currentUserOptions } from "@/lib/session";
 
 const timezones = ["UTC", "America/Los_Angeles", "America/New_York", "Europe/London", "Europe/Berlin", "Asia/Dhaka", "Asia/Kolkata", "Asia/Singapore", "Asia/Tokyo", "Australia/Sydney"];
 const cadencePresets = [
@@ -15,6 +16,8 @@ const cadencePresets = [
 
 export default function SchedulesPage() {
   const queryClient = useQueryClient();
+  const user = useQuery(currentUserOptions);
+  const schedulesKey = ["swarm-schedules", user.data?.id ?? "guest"];
   const [name, setName] = useState("Hourly security review");
   const [cronExpression, setCronExpression] = useState("0 * * * *");
   const [timezone, setTimezone] = useState("UTC");
@@ -22,8 +25,9 @@ export default function SchedulesPage() {
   const [webhookUrl, setWebhookUrl] = useState("");
 
   const schedules = useQuery({
-    queryKey: ["swarm-schedules"],
-    queryFn: async () => (await apiFetch<{ schedules: SwarmSchedule[] }>("/api/schedules")).schedules,
+    queryKey: schedulesKey,
+    enabled: Boolean(user.data),
+    queryFn: async ({ signal }) => (await apiFetch<{ schedules: SwarmSchedule[] }>("/api/schedules", { signal })).schedules,
   });
 
   const create = useMutation({
@@ -42,7 +46,7 @@ export default function SchedulesPage() {
     },
     onSuccess: () => {
       setContent("");
-      void queryClient.invalidateQueries({ queryKey: ["swarm-schedules"] });
+      void queryClient.invalidateQueries({ queryKey: schedulesKey });
     },
   });
 
@@ -54,7 +58,7 @@ export default function SchedulesPage() {
         body: JSON.stringify({ enabled }),
       });
     },
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["swarm-schedules"] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: schedulesKey }),
   });
 
   const remove = useMutation({
@@ -62,7 +66,7 @@ export default function SchedulesPage() {
       await ensureCsrfCookie();
       return apiFetch<void>(`/api/schedules/${id}`, { method: "DELETE" });
     },
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["swarm-schedules"] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: schedulesKey }),
   });
 
   return (
@@ -109,7 +113,7 @@ export default function SchedulesPage() {
           <span className="mt-2 block text-xs text-ink-muted">Each run reviews this saved text. It does not pull fresh configuration from your repository or cloud account.</span>
         </label>
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <Button type="button" disabled={!name.trim() || !cronExpression.trim() || !content.trim() || create.isPending} onClick={() => create.mutate()}>
+          <Button type="button" disabled={!user.data || !name.trim() || !cronExpression.trim() || !content.trim() || create.isPending} onClick={() => create.mutate()}>
             {create.isPending ? "Saving…" : "Create schedule"}
           </Button>
           {create.isError && <p className="text-sm text-danger">{create.error.message}</p>}
@@ -119,7 +123,8 @@ export default function SchedulesPage() {
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your schedules</h2><LinkButton href="/jobs" variant="secondary">View audit results</LinkButton></div>
         {(update.isError || remove.isError) && <p role="alert" className="text-sm text-danger">{update.error?.message ?? remove.error?.message}</p>}
-        {schedules.isPending && <p className="text-sm text-ink-muted">Loading schedules…</p>}
+        {(user.isPending || user.data && schedules.isPending) && <p className="text-sm text-ink-muted">Loading schedules…</p>}
+        {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Google sign-in in the header to manage your schedules.</p>}
         {schedules.isError && (
           <div className="rounded-[10px] border border-line p-4">
             <p className="text-sm text-danger">{schedules.error.message}</p>

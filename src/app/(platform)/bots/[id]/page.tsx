@@ -6,14 +6,16 @@ import { useQuery } from "@tanstack/react-query";
 import { BotPromptActions } from "@/components/bot-prompt-actions";
 import { apiFetch, type Bot } from "@/lib/api";
 import { LinkButton } from "@/components/ui";
+import { currentUserOptions } from "@/lib/session";
 
 export default function BotDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
+  const user = useQuery(currentUserOptions);
   const botQuery = useQuery({
-    queryKey: ["bot", id],
-    queryFn: () => apiFetch<Bot>(`/api/bots/${id}`),
-    enabled: Boolean(id),
+    queryKey: ["bot", id, user.data?.id ?? "guest"],
+    queryFn: ({ signal }) => apiFetch<Bot>(`/api/bots/${id}`, { signal }),
+    enabled: Boolean(id) && !user.isPending,
   });
 
   if (botQuery.isPending) {

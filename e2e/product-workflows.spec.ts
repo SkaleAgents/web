@@ -124,6 +124,7 @@ test("Studio starter saves specialized instructions in a private draft", async (
 });
 
 test("schedule preset and timezone reach the API without altering the scope", async ({ page }) => {
+  await page.route("**/api/user", (route) => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
   await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
   let saved: Record<string, unknown> | null = null;
   await page.route("**/api/schedules", async (route) => {
@@ -143,6 +144,7 @@ test("schedule preset and timezone reach the API without altering the scope", as
 });
 
 test("audit specialist choices reach the API and job status filters work", async ({ page }) => {
+  await page.route("**/api/user", (route) => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
   await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
   let saved: Record<string, unknown> | null = null;
   await page.route("**/api/jobs", async (route) => {

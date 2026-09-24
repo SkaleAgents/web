@@ -29,11 +29,15 @@ it("keeps local preview sign-in working from the header and populates the shared
     .mockResolvedValueOnce(Response.json({ user }));
   vi.stubGlobal("fetch", fetcher);
   const client = renderMockSignIn();
+  client.setQueryData(["swarm-jobs", "previous-user"], [{ summary: "Private previous audit" }]);
+  client.setQueryData(["bot", "private-bot", "previous-user"], { promptBody: "Private previous prompt" });
 
   await userEvent.click(screen.getByRole("button", { name: "Sign in with Google" }));
 
   await waitFor(() => expect(push).toHaveBeenCalledWith("/bots"));
   expect(client.getQueryData(["user"])).toEqual(user);
+  expect(client.getQueryData(["swarm-jobs", "previous-user"])).toBeUndefined();
+  expect(client.getQueryData(["bot", "private-bot", "previous-user"])).toBeUndefined();
   expect(fetcher.mock.calls[0][0]).toMatch(/\/sanctum\/csrf-cookie$/);
   expect(fetcher.mock.calls[1][0]).toMatch(/\/api\/auth\/google\/callback$/);
   expect(fetcher.mock.calls[1][1]).toMatchObject({ method: "POST", credentials: "include" });

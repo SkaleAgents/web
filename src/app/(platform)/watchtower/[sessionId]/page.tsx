@@ -6,15 +6,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, API_URL, type PatchProposal, type ProposalGenerationResult, type SwarmFinding, type SwarmJob, type SwarmStep, type WatchtowerRedirect, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
 import { AdvisoryBookingRequest } from "@/components/advisory-booking-request";
+import { currentUserOptions } from "@/lib/session";
 
 export default function WatchtowerPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const queryClient = useQueryClient();
+  const user = useQuery(currentUserOptions);
+  const userId = user.data?.id ?? "guest";
   const [steps, setSteps] = useState<SwarmStep[]>([]);
   const [instruction, setInstruction] = useState("");
   const close = useMutation({
     mutationFn: () => watchtowerFetch<WatchtowerSession & { proposals?: PatchProposal[] }>(`/sessions/${sessionId}/close`, { method: "POST" }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId, userId] }),
   });
   const redirect = useMutation({
     mutationFn: () => watchtowerFetch<WatchtowerRedirect>(`/sessions/${sessionId}/redirect`, {
@@ -23,17 +26,18 @@ export default function WatchtowerPage() {
     }),
     onSuccess: () => {
       setInstruction("");
-      void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId] });
+      void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId, userId] });
     },
   });
   const session = useQuery({
-    queryKey: ["watchtower-session", sessionId],
-    queryFn: () => watchtowerFetch<WatchtowerSession & { proposals?: PatchProposal[] }>(`/sessions/${sessionId}`),
+    queryKey: ["watchtower-session", sessionId, userId],
+    enabled: !user.isPending,
+    queryFn: ({ signal }) => watchtowerFetch<WatchtowerSession & { proposals?: PatchProposal[] }>(`/sessions/${sessionId}`, { signal }),
   });
   const job = useQuery({
-    queryKey: ["swarm-job", session.data?.jobId],
+    queryKey: ["swarm-job", session.data?.jobId, userId],
     enabled: Boolean(session.data?.jobId),
-    queryFn: () => apiFetch<SwarmJob>(`/api/jobs/${session.data!.jobId}`),
+    queryFn: ({ signal }) => apiFetch<SwarmJob>(`/api/jobs/${session.data!.jobId}`, { signal }),
   });
 
   useEffect(() => {
@@ -43,17 +47,26 @@ export default function WatchtowerPage() {
       const payload = JSON.parse((event as MessageEvent).data) as { step: SwarmStep };
       setSteps((current) => current.some((step) => step.stepId === payload.step.stepId) ? current : [...current, payload.step]);
     });
-    const refresh = () => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId] });
+    const refresh = () => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId, userId] });
     events.addEventListener("proposal", refresh);
     events.addEventListener("closed", refresh);
     return () => events.close();
-  }, [queryClient, session.data, sessionId]);
+  }, [queryClient, session.data, sessionId, userId]);
 
-  if (session.isPending || job.isPending) return <p className="text-sm text-ink-muted">Loading Watchtower…</p>;
   if (session.isError || job.isError) {
     const error = session.error instanceof Error ? session.error : job.error;
-    return <p className="text-sm text-danger">{error instanceof Error ? error.message : "Watchtower unavailable"}</p>;
+    return (
+      <main className="space-y-4">
+        <h1 className="workspace-heading">Watchtower unavailable</h1>
+        <p role="alert" className="text-sm text-danger">{error instanceof Error ? error.message : "Could not load this review."}</p>
+        <div className="flex gap-3">
+          <Button type="button" disabled={session.isFetching || job.isFetching} onClick={() => void (session.isError ? session.refetch() : job.refetch())}>Try again</Button>
+          <LinkButton href="/jobs" variant="secondary">Back to audits</LinkButton>
+        </div>
+      </main>
+    );
   }
+  if (session.isPending || job.isPending) return <p role="status" className="text-sm text-ink-muted">Loading Watchtower…</p>;
   const proposals = session.data?.proposals ?? [];
   const redirects = session.data?.redirects ?? [];
   const content = typeof job.data?.scope.content === "string" ? job.data.scope.content : "";
@@ -142,7 +155,7 @@ export default function WatchtowerPage() {
         sessionId={sessionId}
         findings={job.data?.findings ?? []}
         content={content}
-        onUpdated={() => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId] })}
+        onUpdated={() => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId, userId] })}
       />
       {close.isError && <p className="text-sm text-danger">{close.error.message}</p>}
     </main>

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { apiFetch, ensureCsrfCookie, googleSignInHref, type AuthSession } from "@/lib/api";
 import { GoogleSignInLabel } from "@/components/google-mark";
 import { Button, LinkButton } from "@/components/ui";
+import { setSessionUser } from "@/lib/session";
 
 export function GoogleSignInButton() {
   if (process.env.NEXT_PUBLIC_MOCK_AUTH_ENABLED === "true") {
@@ -34,8 +35,8 @@ function MockGoogleSignInButton() {
         }),
       });
     },
-    onSuccess: (session) => {
-      queryClient.setQueryData(["user"], session.user);
+    onSuccess: async (session) => {
+      await setSessionUser(queryClient, session.user);
       toast.success(`Signed in as ${session.user.displayName}`);
       router.push("/bots");
     },

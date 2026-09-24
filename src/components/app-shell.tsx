@@ -1,9 +1,11 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { apiFetch, type ApiUser, ensureCsrfCookie } from "@/lib/api";
+import { apiFetch, ensureCsrfCookie } from "@/lib/api";
+import { currentUserOptions, setSessionUser } from "@/lib/session";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { Button } from "@/components/ui";
 import { BrandLogo } from "@/components/brand";
@@ -15,36 +17,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const userQuery = useQuery({
-    queryKey: ["user"],
-    queryFn: async (): Promise<ApiUser | null> => {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
-      const res = await fetch(`${API_URL}/api/user`, {
-        credentials: "include",
-        headers: { Accept: "application/json" },
-      });
-      if (res.status === 401) return null;
-      if (!res.ok) throw new Error(res.statusText);
-      return res.json() as Promise<ApiUser>;
-    },
-    staleTime: 45_000,
-    refetchOnWindowFocus: true,
-  });
+  const userQuery = useQuery(currentUserOptions);
+  const [signingOut, setSigningOut] = useState(false);
 
   async function logout() {
+    setSigningOut(true);
     try {
       await ensureCsrfCookie();
       await apiFetch("/api/auth/logout", { method: "POST", body: "{}" });
-      queryClient.setQueryData(["user"], null);
-      void queryClient.removeQueries({ queryKey: ["prompts"] });
-      void queryClient.removeQueries({ queryKey: ["api-tokens"] });
-      void queryClient.removeQueries({ queryKey: ["mcp-connections"] });
-      void queryClient.cancelQueries({ queryKey: ["staff-bookings"] });
-      queryClient.removeQueries({ queryKey: ["staff-bookings"] });
+      await setSessionUser(queryClient, null);
       toast.success("Signed out");
       router.push("/login");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Sign out failed");
+    } finally {
+      setSigningOut(false);
     }
   }
 
@@ -68,6 +55,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   type="button"
                   variant="secondary"
                   className="px-2 py-1"
+                  disabled={signingOut}
                   onClick={() => void logout()}
                 >
                   Sign out
@@ -79,7 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
-      <div className={
+      <div key={userQuery.data?.id ?? "guest"} className={
         pathname === "/login" || pathname === "/"
           ? "flex flex-1 flex-col"
           : "motion-enter mx-auto w-full max-w-5xl flex-1 px-6 py-8"

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { apiFetch, ensureCsrfCookie, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { AdvisoryBookingRequest } from "@/components/advisory-booking-request";
 import { Button, LinkButton } from "@/components/ui";
+import { currentUserOptions } from "@/lib/session";
 
 const AUDIT_SPECIALISTS = ["devsecops", "sre", "mlops", "scaling"] as const;
 const specialistDetails = {
@@ -19,13 +20,16 @@ type AuditSpecialist = (typeof AUDIT_SPECIALISTS)[number];
 export default function JobsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const user = useQuery(currentUserOptions);
+  const jobsKey = ["swarm-jobs", user.data?.id ?? "guest"];
   const [content, setContent] = useState("");
   const [telemetry, setTelemetry] = useState("");
   const [status, setStatus] = useState("all");
   const [specialists, setSpecialists] = useState<AuditSpecialist[]>(["devsecops", "sre"]);
   const jobs = useQuery({
-    queryKey: ["swarm-jobs"],
-    queryFn: async () => (await apiFetch<{ jobs: SwarmJob[] }>("/api/jobs")).jobs,
+    queryKey: jobsKey,
+    enabled: Boolean(user.data),
+    queryFn: async ({ signal }) => (await apiFetch<{ jobs: SwarmJob[] }>("/api/jobs", { signal })).jobs,
     refetchInterval: (query) => query.state.data?.some((job) => job.status === "queued" || job.status === "running") ? 5000 : false,
   });
   const create = useMutation({
@@ -56,7 +60,7 @@ export default function JobsPage() {
     onSuccess: () => {
       setContent("");
       setTelemetry("");
-      void queryClient.invalidateQueries({ queryKey: ["swarm-jobs"] });
+      void queryClient.invalidateQueries({ queryKey: jobsKey });
     },
   });
   const openReview = useMutation({
@@ -115,7 +119,7 @@ export default function JobsPage() {
           </div>
         </fieldset>
         <div className="mt-3 flex items-center gap-3">
-          <Button type="button" disabled={!content.trim() || specialists.length === 0 || create.isPending} onClick={() => create.mutate()}>
+          <Button type="button" disabled={!user.data || !content.trim() || specialists.length === 0 || create.isPending} onClick={() => create.mutate()}>
             {create.isPending ? "Queueing…" : "Queue audit"}
           </Button>
           {create.isError && <p className="text-sm text-danger">{create.error.message}</p>}
@@ -126,7 +130,8 @@ export default function JobsPage() {
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your jobs</h2><LinkButton href="/schedules" variant="secondary">Set up recurring reviews</LinkButton></div>
         <div className="flex flex-wrap gap-2">{["all", "queued", "running", "completed", "failed"].map((item) => <button key={item} type="button" className="filter-chip capitalize" aria-pressed={status === item} onClick={() => setStatus(item)}>{item === "all" ? "All jobs" : item} {jobs.data ? `(${jobs.data.filter((job) => item === "all" || job.status === item).length})` : ""}</button>)}</div>
         {openReview.isError && <p role="alert" className="text-sm text-danger">{openReview.error.message}</p>}
-        {jobs.isPending && <p className="text-sm text-ink-muted">Loading jobs…</p>}
+        {(user.isPending || user.data && jobs.isPending) && <p className="text-sm text-ink-muted">Loading jobs…</p>}
+        {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Google sign-in in the header to access your audit jobs.</p>}
         {jobs.isError && (
           <div className="rounded-[10px] border border-line p-4">
             <p className="text-sm text-danger">{jobs.error.message}</p>
