@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui";
+import { ArchitectureReviewBrief } from "@/components/architecture-review-brief";
 
 const serverUrl = "https://skaleagents.com/mcp";
 const clients = ["Cursor", "Claude Code", "Claude Desktop", "ChatGPT", "Codex"] as const;
@@ -29,7 +30,7 @@ export function McpConnectionGuide() {
       <ol className="grid gap-3 text-sm sm:grid-cols-3">
         <li className="rounded-lg border border-line bg-canvas-elevated p-4"><strong>1. Add SkaleAgents</strong><p className="mt-2 text-ink-muted">Choose your client below and add the server URL using its setup steps.</p></li>
         <li className="rounded-lg border border-line bg-canvas-elevated p-4"><strong>2. Connect with OAuth</strong><p className="mt-2 text-ink-muted">Connect in your client, sign in with Google if needed, and approve MCP access.</p></li>
-        <li className="rounded-lg border border-line bg-canvas-elevated p-4"><strong>3. Request a review</strong><p className="mt-2 text-ink-muted">Ask your assistant to call review_architecture with the code or configuration you want reviewed.</p></li>
+        <li className="rounded-lg border border-line bg-canvas-elevated p-4"><strong>3. Request a review</strong><p className="mt-2 text-ink-muted">Ask for a whole-application consultation, a source review, or an infrastructure scan. Build a review brief below.</p></li>
       </ol>
       <div className="space-y-4">
         <div role="group" className="flex flex-wrap gap-2" aria-label="Choose your MCP client">{clients.map((name) => <button type="button" key={name} className="filter-chip" aria-pressed={client === name} aria-controls="mcp-client-setup" onClick={() => setClient(name)}>{name}</button>)}</div>
@@ -47,9 +48,9 @@ export function McpConnectionGuide() {
         </div>
       </div>
       <details className="rounded-lg border border-line bg-canvas-elevated p-4"><summary className="cursor-pointer font-semibold">Need to reconnect?</summary><p className="mt-3 text-sm text-ink-muted">Use Connect or Authenticate in your client&apos;s MCP settings to start OAuth again. For Codex, run <code>codex mcp login skaleagents</code>. If the client timed out while you signed in, retry the connection.</p><p className="mt-3 text-sm text-ink-muted">Your client stores OAuth credentials and refreshes access automatically. Disconnect it below to revoke access. Signing out of this website does not disconnect your MCP clients.</p></details>
-      <div className="grid gap-4 sm:grid-cols-2"><div><h3 className="font-mono text-sm font-semibold">review_architecture</h3><p className="mt-2 text-sm text-ink-muted">Review application code or infrastructure for security, reliability, and cost concerns. Get finding locations and suggested fixes.</p></div><div><h3 className="font-mono text-sm font-semibold">scan_iac</h3><p className="mt-2 text-sm text-ink-muted">Scan Terraform, CloudFormation, or Kubernetes configuration for resource-level risks. Filter findings by focus or severity, with rule IDs and remediation for each finding.</p></div></div>
+      <ArchitectureReviewBrief />
+      <div className="grid gap-4 sm:grid-cols-2"><div><h3 className="break-words font-mono text-sm font-semibold">plan_architecture_review</h3><p className="mt-2 text-sm text-ink-muted">Start a consultation with a file inventory, project goals, and a focused set of follow-up questions.</p></div><div><h3 className="break-words font-mono text-sm font-semibold">review_application_architecture</h3><p className="mt-2 text-sm text-ink-muted">Map related source files and check Next.js boundaries. Review the whole design with evidence and questions across data, authorization, reliability, and delivery.</p></div><div><h3 className="font-mono text-sm font-semibold">review_architecture</h3><p className="mt-2 text-sm text-ink-muted">Review an individual source snippet or infrastructure configuration for security, reliability, and cost concerns.</p></div><div><h3 className="font-mono text-sm font-semibold">scan_iac</h3><p className="mt-2 text-sm text-ink-muted">Scan Terraform, CloudFormation, or Kubernetes configuration for resource-level risks, with severity filters and remediation.</p></div></div>
       <p className="text-sm text-ink-muted">Scans inspect the configuration you submit. Results include coverage limits; cloud accounts, external modules, and runtime behavior are not inspected.</p>
-      <p className="border-t border-line pt-5 text-sm text-ink-muted">Try: “Use SkaleAgents to call review_architecture on this configuration. Explain each finding and show how to validate the fix.”</p>
     </section>
   );
 }

@@ -79,3 +79,20 @@ test("Google sign-in appears only in the header on product pages and MCP is prom
   await section.getByRole("link", { name: "Set up your MCP connection" }).click();
   await expect(page).toHaveURL(/\/settings$/);
 });
+
+test("architecture review brief carries the selected question and project context into the copied consultation", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/settings");
+  const review = page.getByRole("region", { name: "Review the whole application" });
+  await review.getByRole("button", { name: "Data and authorization", exact: true }).click();
+  await review.getByLabel("What does the application do?").fill("Next.js customer portal with a separate Laravel API and tenant-owned projects.");
+  await review.getByRole("button", { name: "Copy review brief" }).click();
+  const brief = await page.evaluate(() => navigator.clipboard.readText());
+  expect(brief).toContain("tenant isolation");
+  expect(brief).toContain("separate Laravel API");
+  expect(brief).toContain("plan_architecture_review");
+  expect(brief).toContain("review_application_architecture");
+  expect(brief).toContain("three follow-up questions");
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});

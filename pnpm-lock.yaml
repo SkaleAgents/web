@@ -12,8 +12,8 @@ importers:
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv@8.20.0)(react-hook-form@7.86.0(react@19.2.8))(zod@4.5.2)
       '@skaleagents/swarm':
-        specifier: 0.5.0
-        version: 0.5.0
+        specifier: 0.6.0
+        version: 0.6.0
       '@tanstack/react-query':
         specifier: ^5.102.8
         version: 5.102.8(react@19.2.8)
@@ -761,8 +761,8 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
-  '@skaleagents/swarm@0.5.0':
-    resolution: {integrity: sha512-3sLH8bxLHshsCB2RJoCQDCHATQhMik7EKjQ4JDUMJuzZ3tOY5/EgYmV4Vub/t9dUT8iKT4j/qP9qv81Z6kgKfw==}
+  '@skaleagents/swarm@0.6.0':
+    resolution: {integrity: sha512-OE+0sUQief7jl6iA9KjUKjLECjHB1wsXvSEKXfbVFs8ZQOJCKMcCsYRPoKzZ0121w/6t2tuGBEfL9GxhXiOjbw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -3582,10 +3582,11 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@skaleagents/swarm@0.5.0':
+  '@skaleagents/swarm@0.6.0':
     dependencies:
       '@modelcontextprotocol/sdk': 1.30.0(zod@4.5.2)
       hcl2-parser: 1.0.3
+      typescript: 5.9.3
       yaml: 2.9.1
       zod: 4.5.2
     transitivePeerDependencies:
