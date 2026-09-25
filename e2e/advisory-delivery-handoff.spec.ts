@@ -164,6 +164,10 @@ test("agreement acceptance, appointment, and two-step delivery handoff gate work
   await page.getByRole("button", { name: "Change status" }).click();
   await expect(page.getByText("Booking updated.", { exact: true })).toBeVisible();
   expect(deliveryBodies.map((body) => body.contactVerified)).toEqual([false, false, true, false, true]);
+  await expect(page.getByRole("region", { name: "Delivery handoff" }).getByRole("status")).toContainText("cannot reopen or restart work");
+  await expect(page.getByRole("region", { name: "Delivery handoff" }).getByLabel("Contact detail")).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Offer agreement" }).getByRole("status")).toContainText("Agreement terms cannot be replaced now");
+  await expect(page.getByRole("region", { name: "Offer agreement" }).getByRole("button", { name: "Offer new version" })).toHaveCount(0);
 
   const wrongOwner = await context.newPage();
   await wrongOwner.route("**/api/user", (route) => route.fulfill({ json: { ...customer, id: "other-customer" } }));

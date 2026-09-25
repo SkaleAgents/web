@@ -37,6 +37,7 @@ export function StaffAdvisoryDelivery({ booking, onRefresh }: { booking: StaffAd
   const submitting = useRef(false);
   const base = `/api/staff/advisory-bookings/${encodeURIComponent(booking.id)}/delivery`;
   const unchanged = matchesDelivery(input, booking.delivery);
+  const workStarted = booking.status === "in_progress";
 
   const update = useMutation({
     mutationFn: async (contactVerified: boolean) => {
@@ -99,7 +100,17 @@ export function StaffAdvisoryDelivery({ booking, onRefresh }: { booking: StaffAd
         <p className="mt-1 text-sm text-ink-muted">Save the owner and contact details first. Saving never confirms them. After the delivery owner verifies unchanged details, use the separate confirmation action.</p>
       </div>
       {booking.delivery && <p className="text-sm">Handoff status: <strong>{booking.delivery.handoffStatus}</strong>{booking.delivery.handedOffAt ? ` · confirmed ${new Date(booking.delivery.handedOffAt).toLocaleString()}` : ""}</p>}
-      {stale ? (
+      {workStarted ? (
+        <div className="space-y-3 text-sm text-ink-muted">
+          <p role="status">Work has started. Delivery owner, contact, and handoff readiness are locked. Updating them cannot reopen or restart work.</p>
+          {booking.delivery && <dl className="grid gap-3 sm:grid-cols-2">
+            <div><dt>Delivery owner reference</dt><dd className="mt-1 break-all font-mono text-xs">{booking.delivery.ownerRef}</dd></div>
+            <div><dt>Contact name</dt><dd className="mt-1">{booking.delivery.contact.name}</dd></div>
+            <div><dt>Contact channel</dt><dd className="mt-1">{booking.delivery.contact.channel}</dd></div>
+            <div><dt>Contact detail</dt><dd className="mt-1 break-words">{booking.delivery.contact.value}</dd></div>
+          </dl>}
+        </div>
+      ) : stale ? (
         <div className="space-y-3">
           <p role="alert" className="text-sm text-danger">The booking changed while you were editing. Refresh it, review the current delivery details, then make any needed changes again.</p>
           <div className="flex flex-wrap gap-2">

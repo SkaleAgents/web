@@ -88,4 +88,22 @@ describe("staff advisory delivery handoff", () => {
     expect(screen.queryByRole("region", { name: "Delivery handoff" })).toBeNull();
     expect(mocks.apiFetch).not.toHaveBeenCalled();
   });
+
+  it("locks delivery changes after work starts and never reopens the booking", () => {
+    const started: StaffAdvisoryBooking = {
+      ...booking,
+      status: "in_progress",
+      agreement: { id: "agreement-a", version: 1, scope: "Review rollback plan", currency: "USD", quotedFeeCents: 25000, minimumBillableMinutes: 60, incrementMinutes: 15, rateCentsPerHour: 25000, cancellationTermsVersion: "paid-pilot-v1", offeredAt: "2026-09-25T16:00:00Z", acceptedAt: "2026-09-25T16:10:00Z" },
+      appointment: { confirmedWindow: { startAt: "2026-09-29T16:00:00Z", endAt: "2026-09-29T17:00:00Z", timezone: "UTC" }, confirmedAt: "2026-09-25T18:00:00Z" },
+      delivery: { ownerRef: "delivery-owner:1", contact: { name: "Test Owner", channel: "email", value: "owner@example.test" }, handoffStatus: "ready", handedOffAt: "2026-09-25T18:30:00Z" },
+    };
+    renderEditor(started);
+
+    expect(screen.getByRole("status").textContent).toContain("cannot reopen or restart work");
+    expect(screen.getByText("owner@example.test")).toBeTruthy();
+    expect(screen.queryByLabelText("Delivery owner reference")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Save owner and contact" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Confirm verified unchanged details" })).toBeNull();
+    expect(mocks.apiFetch).not.toHaveBeenCalled();
+  });
 });

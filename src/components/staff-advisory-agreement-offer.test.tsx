@@ -81,4 +81,15 @@ describe("staff advisory agreement offer", () => {
     expect(submit).toBeDisabled();
     resolveRequest({ ...booking, version: 9 });
   });
+
+  it("locks agreement editing after work starts without attempting a mutation", async () => {
+    const { StaffAdvisoryAgreementOffer } = await import("@/components/staff-advisory-agreement-offer");
+    const client = new QueryClient();
+    render(<QueryClientProvider client={client}><StaffAdvisoryAgreementOffer booking={{ ...booking, status: "in_progress" }} onRefresh={vi.fn()} /></QueryClientProvider>);
+
+    expect(screen.getByRole("status").textContent).toContain("Agreement terms cannot be replaced now");
+    expect(screen.queryByLabelText("Exact scope")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Offer new version" })).toBeNull();
+    expect(mocks.apiFetch).not.toHaveBeenCalled();
+  });
 });
