@@ -8,6 +8,7 @@ import { AdvisoryBookingRequest } from "@/components/advisory-booking-request";
 import { Button, LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retention-controls";
+import { RetentionNotice } from "@/components/retention-notice";
 
 const AUDIT_SPECIALISTS = ["devsecops", "sre", "mlops", "scaling"] as const;
 const specialistDetails = {
@@ -75,6 +76,7 @@ export default function JobsPage() {
 
   return (
     <main className="space-y-8">
+      {user.data && <RetentionNotice key={user.data.id} accountId={user.data.id} />}
       <div className="workspace-intro">
         <p className="workspace-kicker">Review / From configuration to findings</p>
         <h1 className="workspace-heading">Audit jobs</h1>

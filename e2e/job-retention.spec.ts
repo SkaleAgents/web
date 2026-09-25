@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "owner", enabled: false } }));
+});
+
 const id = "00000000-0000-4000-8000-000000000001";
 const receipt = "00000000-0000-4000-8000-000000000002";
 const baseJob = { id, status: "completed", summary: "Finished review", requestedBy: "owner", sourcePurged: false, specialists: ["sre"], partial: false, scope: {}, createdAt: "2026-09-25T00:00:00Z", updatedAt: "2026-09-25T00:00:00Z" };
