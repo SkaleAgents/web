@@ -13,6 +13,7 @@ export function StaffAdvisoryAgreementOffer({ booking, onRefresh }: { booking: S
   const [estimate, setEstimate] = useState(booking.agreement ? (booking.agreement.quotedFeeCents / 100).toFixed(2) : "");
   const [staleAtVersion, setStaleAtVersion] = useState<number | null>(null);
   const stale = staleAtVersion === booking.version;
+  const workStarted = booking.status === "in_progress";
   const submitting = useRef(false);
   const base = `/api/staff/advisory-bookings/${encodeURIComponent(booking.id)}`;
   const offer = useMutation({
@@ -61,7 +62,9 @@ export function StaffAdvisoryAgreementOffer({ booking, onRefresh }: { booking: S
         <p className="mt-1 text-sm text-ink-muted">Offering revised terms creates a new version and clears the previous acceptance. Accepted versions remain unchanged.</p>
       </div>
       {booking.agreement && <p className="text-sm">Current version: {booking.agreement.version}{booking.agreement.acceptedAt ? " (accepted)" : " (awaiting customer review)"}.</p>}
+      {workStarted && <p role="status" className="text-sm text-ink-muted">Work has started. Agreement terms cannot be replaced now. Agree on any scope or price changes before work starts.</p>}
       {stale && <p role="alert" className="text-sm text-danger">The booking changed. Review the refreshed booking before offering terms again.</p>}
+      {!workStarted && (
       <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); if (!offer.isPending && !submitting.current) { submitting.current = true; offer.mutate(); } }}>
         <label className="block"><FieldLabel>Exact scope</FieldLabel><TextArea required maxLength={10000} value={scope} disabled={offer.isPending} onChange={(event) => setScope(event.target.value)} className="mt-1 min-h-24" /></label>
         <label className="block"><FieldLabel>Written estimate (USD)</FieldLabel><TextInput required type="number" min="0" step="0.01" value={estimate} disabled={offer.isPending} onChange={(event) => setEstimate(event.target.value)} className="mt-1" placeholder="312.50" /></label>
@@ -77,6 +80,7 @@ export function StaffAdvisoryAgreementOffer({ booking, onRefresh }: { booking: S
         {offer.isSuccess && <p role="status" className="text-sm text-accent">Agreement version {offer.data.agreement?.version} offered. Customer acceptance is still required.</p>}
         {offer.isError && <p role="alert" className="text-sm text-danger">{offer.error instanceof ApiError && offer.error.status === 409 ? "The booking changed. The latest booking has been refreshed; review it before offering again." : offer.error.message}</p>}
       </form>
+      )}
     </section>
   );
 }

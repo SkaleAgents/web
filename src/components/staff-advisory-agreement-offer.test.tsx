@@ -25,6 +25,7 @@ const booking: StaffAdvisoryBooking = {
   billing: { billableMinutes: null, feeCents: null, currency: "USD" },
   agreement: null,
   appointment: null,
+  delivery: null,
   history: [],
   createdAt: "2026-09-25T15:00:00Z",
   updatedAt: "2026-09-25T16:00:00Z",
@@ -79,5 +80,16 @@ describe("staff advisory agreement offer", () => {
     await waitFor(() => expect(mocks.apiFetch).toHaveBeenCalledTimes(1));
     expect(submit).toBeDisabled();
     resolveRequest({ ...booking, version: 9 });
+  });
+
+  it("locks agreement editing after work starts without attempting a mutation", async () => {
+    const { StaffAdvisoryAgreementOffer } = await import("@/components/staff-advisory-agreement-offer");
+    const client = new QueryClient();
+    render(<QueryClientProvider client={client}><StaffAdvisoryAgreementOffer booking={{ ...booking, status: "in_progress" }} onRefresh={vi.fn()} /></QueryClientProvider>);
+
+    expect(screen.getByRole("status").textContent).toContain("Agreement terms cannot be replaced now");
+    expect(screen.queryByLabelText("Exact scope")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Offer new version" })).toBeNull();
+    expect(mocks.apiFetch).not.toHaveBeenCalled();
   });
 });

@@ -27,6 +27,7 @@ const baseBooking = {
     acceptedAt: null as string | null,
   },
   appointment: null,
+  delivery: null,
   createdAt: "2026-09-25T15:00:00Z",
   updatedAt: "2026-09-25T16:00:00Z",
 };

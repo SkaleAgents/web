@@ -8,7 +8,7 @@ const fixture: StaffAdvisoryBooking = {
   id, version: 1, source: { type: "audit_job", id: "22222222-2222-4222-8222-222222222222" },
   status: "requested", assigneeRef: null, scope: "Review migration rollback", urgency: "urgent",
   preferredWindow: { startAt: "2026-09-25T09:00:00Z", endAt: "2026-09-25T10:00:00Z" },
-  notes: "Check the recovery plan.", billing: { billableMinutes: null, feeCents: null, currency: "USD" }, agreement: null, appointment: null,
+  notes: "Check the recovery plan.", billing: { billableMinutes: null, feeCents: null, currency: "USD" }, agreement: null, appointment: null, delivery: null,
   createdAt: "2026-09-24T09:00:00Z", updatedAt: "2026-09-24T09:00:00Z", history: [],
 };
 
@@ -48,6 +48,7 @@ test("staff can filter, assign, complete, and bill through the exact API contrac
         id: String(mutations.length), type: action as "status" | "assignment" | "billing", actorRef: staff.id,
         fromStatus: action === "status" ? previous : null, toStatus: body.status ?? null,
         assigneeRef: body.assigneeRef ?? null, billing: body.billing ?? { billableMinutes: null, feeCents: null, currency: null },
+        changedFields: null,
         createdAt: "2026-09-24T10:00:00Z",
       }, ...booking.history];
     }
@@ -191,7 +192,7 @@ test("staff confirms a separate timezone-aware appointment before scheduling", a
       booking = action === "appointment"
         ? { ...booking, version: booking.version + 1, appointment: { confirmedWindow: body.confirmedWindow, confirmedAt: "2026-09-25T18:00:00Z" } }
         : { ...booking, version: booking.version + 1, status: body.status };
-      if (action === "appointment") booking.history.unshift({ id: "appointment-event", type: "appointment", actorRef: staff.id, fromStatus: null, toStatus: null, assigneeRef: null, billing: { billableMinutes: null, feeCents: null, currency: null }, createdAt: "2026-09-25T18:00:00Z" });
+      if (action === "appointment") booking.history.unshift({ id: "appointment-event", type: "appointment", actorRef: staff.id, fromStatus: null, toStatus: null, assigneeRef: null, billing: { billableMinutes: null, feeCents: null, currency: null }, changedFields: null, createdAt: "2026-09-25T18:00:00Z" });
     }
     await route.fulfill({ json: booking });
   });
