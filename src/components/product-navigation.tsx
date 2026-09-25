@@ -17,6 +17,7 @@ const groups = [
   { label: "Build & connect", items: [
     { href: "/studio", label: "Creator Studio", detail: "Turn your review process into a reusable bot.", icon: "studio" },
     { href: "/mcp-config", label: "MCP config", detail: "Configure your client and manage OAuth connections.", icon: "plug" },
+    { href: "/workspaces", label: "Workspaces", detail: "Manage your workspace memberships.", icon: "team" },
   ] },
 ] as const;
 
@@ -28,6 +29,7 @@ function NavigationIcon({ name }: { name: (typeof groups)[number]["items"][numbe
     calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 2v6m10-6v6M3 10h18m-13 5h2m4 0h2m-8 3h2" /></>,
     studio: <><path d="m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-5-5L4 14v6ZM4 20h16" /></>,
     plug: <><path d="M8 2v5m8-5v5M6 7h12v3a6 6 0 0 1-12 0V7Zm6 9v6" /></>,
+    team: <><circle cx="9" cy="8" r="3" /><path d="M3 20v-1a6 6 0 0 1 12 0v1H3Zm13-9a3 3 0 1 0 0-6m1 9a5 5 0 0 1 4 5v1h-3" /></>,
   };
   return <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
 }

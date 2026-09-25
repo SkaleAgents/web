@@ -65,7 +65,7 @@ test("grouped navigation supports keyboard dismissal, active routes, and mobile"
   await page.setViewportSize({ width: 320, height: 740 });
   for (const label of ["Explore", "Review", "Build & connect"]) {
     await nav.getByRole("button", { name: label, exact: true }).click();
-    await expect(nav.getByRole("link")).toHaveCount(label === "Review" ? 3 : 2);
+    await expect(nav.getByRole("link")).toHaveCount(label === "Review" || label === "Build & connect" ? 3 : 2);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   }
   await nav.getByRole("link", { name: /MCP config/ }).click();
