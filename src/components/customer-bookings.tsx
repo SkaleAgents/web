@@ -69,7 +69,7 @@ export function CustomerBookingList() {
       </div>
       {bookings.isPending ? <p role="status" className="text-sm text-ink-muted">Loading advisory requests…</p> : bookings.isError ? (
         <div role="alert" className="space-y-3 rounded-xl border border-line p-5">
-          <p className="text-danger">{denied ? "Your session expired. Sign in again to view your requests." : bookings.error.message}</p>
+          <p className="text-danger">{denied ? "Your session or account access changed. Sign in again to view your requests." : bookings.error.message}</p>
           {denied && <LinkButton href="/login" variant="secondary">Sign in</LinkButton>}
         </div>
       ) : bookings.data.length === 0 ? (
@@ -105,7 +105,7 @@ export function CustomerBookingDetail({ id }: { id: string }) {
       {denied || notFound ? (
         <div className="space-y-3">
           <h1 className="workspace-heading">{denied ? "Sign in required" : "Request unavailable"}</h1>
-          <p role="alert" className="text-sm text-ink-muted">{denied ? "Your session expired. Sign in again to view your requests." : "This request is unavailable or has been removed."}</p>
+          <p role="alert" className="text-sm text-ink-muted">{denied ? "Your session or account access changed. Sign in again to view your requests." : "This request is unavailable or has been removed."}</p>
           {denied && <LinkButton href="/login">Sign in</LinkButton>}
         </div>
       ) : booking.isPending ? <p role="status" className="text-sm text-ink-muted">Loading advisory request…</p> : booking.isError || !data ? (
@@ -152,11 +152,11 @@ export function CustomerBookingDetail({ id }: { id: string }) {
           </section>
           <section aria-label="Recorded fee" className="rounded-xl border border-line bg-canvas-elevated p-5">
             <h2 className="text-lg font-semibold">Recorded fee</h2>
-            {data.billing.feeCents === null || !data.billing.currency ? (
-              <p className="mt-2 text-sm text-ink-muted">No fee has been recorded.</p>
+            {data.billing.feeCents === null ? (
+              <p className="mt-2 text-sm text-ink-muted">No fee amount has been recorded.</p>
             ) : (
               <>
-                <p className="mt-2 text-sm">{(data.billing.feeCents / 100).toFixed(2)} {data.billing.currency}</p>
+                <p className="mt-2 text-sm">{data.billing.currency ? `${(data.billing.feeCents / 100).toFixed(2)} ${data.billing.currency}` : `${data.billing.feeCents} cents (currency not recorded)`}</p>
                 <p className="mt-1 text-xs text-ink-muted">This amount is recorded for staff tracking. It is not a payment confirmation.</p>
               </>
             )}
