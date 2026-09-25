@@ -1,10 +1,12 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Button, TextInput } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
+import { workspaceAuditsEnabled } from "@/lib/workspace-audits";
 
 type Workspace = {
   id: string;
@@ -22,7 +24,7 @@ export function WorkspacesView() {
         <p className="workspace-kicker">Team / Memberships</p>
         <h1 className="workspace-heading">Workspaces</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-          See the workspaces you belong to or create one. Memberships do not change access to your audits, schedules, or advisory requests. Those records remain tied to your account.
+          See the workspaces you belong to or create one. Workspace members can share audit history. Your personal audits, schedules, and advisory requests stay tied to your account.
         </p>
       </div>
 
@@ -115,6 +117,11 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
                 <p className="mt-1 text-sm text-ink-muted">
                   {workspace.role} · Created {new Date(workspace.createdAt).toLocaleDateString()}
                 </p>
+                {workspaceAuditsEnabled() && (
+                  <Link className="mt-3 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href={`/workspaces/${workspace.id}/audits`}>
+                    Shared audits
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
