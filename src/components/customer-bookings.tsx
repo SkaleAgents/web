@@ -7,6 +7,7 @@ import { ApiError, apiFetch, type AdvisoryBooking } from "@/lib/api";
 import { bookingStatusLabels } from "@/lib/advisory-bookings";
 import { useCustomerUser, isSessionError } from "@/components/customer-booking-access";
 import { Button, LinkButton } from "@/components/ui";
+import { AdvisoryAgreementReview } from "@/components/advisory-agreement-review";
 
 function bookingListKey(accountId: string) {
   return ["customer-advisory-bookings", accountId] as const;
@@ -161,6 +162,7 @@ export function CustomerBookingDetail({ id }: { id: string }) {
               </>
             )}
           </section>
+          <AdvisoryAgreementReview booking={data} onRefresh={() => void booking.refetch()} />
         </>
       )}
     </main>

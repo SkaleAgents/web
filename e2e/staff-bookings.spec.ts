@@ -5,10 +5,10 @@ const id = "11111111-1111-4111-8111-111111111111";
 const root = "/staff/advisory-bookings";
 const staff: ApiUser = { id: "staff-1", displayName: "Test operator", email: null, grokSubject: null, staffRole: "operator" };
 const fixture: StaffAdvisoryBooking = {
-  id, source: { type: "audit_job", id: "22222222-2222-4222-8222-222222222222" },
+  id, version: 1, source: { type: "audit_job", id: "22222222-2222-4222-8222-222222222222" },
   status: "requested", assigneeRef: null, scope: "Review migration rollback", urgency: "urgent",
   preferredWindow: { startAt: "2026-09-25T09:00:00Z", endAt: "2026-09-25T10:00:00Z" },
-  notes: "Check the recovery plan.", billing: { billableMinutes: null, feeCents: null, currency: "USD" },
+  notes: "Check the recovery plan.", billing: { billableMinutes: null, feeCents: null, currency: "USD" }, agreement: null,
   createdAt: "2026-09-24T09:00:00Z", updatedAt: "2026-09-24T09:00:00Z", history: [],
 };
 
