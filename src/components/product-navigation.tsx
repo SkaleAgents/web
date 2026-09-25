@@ -12,6 +12,7 @@ const groups = [
   { label: "Review", items: [
     { href: "/jobs", label: "Audit jobs", detail: "Review infrastructure with selected specialists.", icon: "audit" },
     { href: "/schedules", label: "Scheduled audits", detail: "Repeat reviews and manage optional webhooks.", icon: "calendar" },
+    { href: "/advisory-bookings", label: "Advisory requests", detail: "Track the status of your advisory requests.", icon: "calendar" },
   ] },
   { label: "Build & connect", items: [
     { href: "/studio", label: "Creator Studio", detail: "Turn your review process into a reusable bot.", icon: "studio" },
