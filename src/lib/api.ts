@@ -149,6 +149,9 @@ export async function watchtowerFetch<T>(
 }
 
 export type SwarmFinding = {
+  id?: string;
+  classification?: "unclassified" | "builtin-v1";
+  inputLocatorAvailable?: boolean;
   severity: "info" | "low" | "medium" | "high" | "critical";
   title: string;
   detail: string;
