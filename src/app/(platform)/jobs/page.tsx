@@ -23,11 +23,12 @@ export default function JobsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const user = useQuery(currentUserOptions);
-  const jobsKey = ["swarm-jobs", user.data?.id ?? "guest"];
+  const accountId = user.data?.id;
+  const jobsKey = ["swarm-jobs", accountId ?? "guest"];
   const [content, setContent] = useState("");
   const [telemetry, setTelemetry] = useState("");
   const [status, setStatus] = useState("all");
-  const [deletions, setDeletions] = useState<Record<string, "pending" | "failed" | "completed">>({});
+  const [deletions, setDeletions] = useState<Record<string, "pending" | "processing" | "failed" | "completed">>({});
   const [specialists, setSpecialists] = useState<AuditSpecialist[]>(["devsecops", "sre"]);
   const jobs = useQuery({
     queryKey: jobsKey,
@@ -131,7 +132,7 @@ export default function JobsPage() {
       </section>
 
       <section className="space-y-3">
-        {Object.entries(deletions).map(([jobId, initialStatus]) => <JobDeletionStatus key={jobId} jobId={jobId} initialStatus={initialStatus} />)}
+        {accountId && Object.entries(deletions).map(([jobId, initialStatus]) => <JobDeletionStatus key={jobId} jobId={jobId} initialStatus={initialStatus} accountId={accountId} />)}
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your jobs</h2><LinkButton href="/schedules" variant="secondary">Set up recurring reviews</LinkButton></div>
         <div className="flex flex-wrap gap-2">{["all", "queued", "running", "completed", "failed"].map((item) => <button key={item} type="button" className="filter-chip capitalize" aria-pressed={status === item} onClick={() => setStatus(item)}>{item === "all" ? "All jobs" : item} {jobs.data ? `(${jobs.data.filter((job) => item === "all" || job.status === item).length})` : ""}</button>)}</div>
         {openReview.isError && <p role="alert" className="text-sm text-danger">{openReview.error.message}</p>}

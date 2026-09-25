@@ -149,6 +149,9 @@ export async function watchtowerFetch<T>(
 }
 
 export type SwarmFinding = {
+  id?: string;
+  classification?: "unclassified" | "builtin-v1";
+  inputLocatorAvailable?: boolean;
   severity: "info" | "low" | "medium" | "high" | "critical";
   title: string;
   detail: string;
@@ -185,11 +188,10 @@ export type SwarmJob = {
 export type InputCleanupResponse = {
   ok: boolean;
   sourcePurged: boolean;
-  inputPurgeStatus: "pending" | "failed" | "purged";
-  cleanupReceiptId: string;
+  retention: Pick<NonNullable<SwarmJob["retention"]>, "inputPurgeStatus" | "inputPurgedAt">;
 };
 
-export type DeletionPendingResponse = { cleanupReceiptId: string; status: "pending" | "failed" };
+export type DeletionPendingResponse = { ok: true; status: "pending" | "processing" | "failed" };
 
 export type SwarmSchedule = {
   id: string;

@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie, type DeletionPendingResponse, type InputCleanupResponse, type SwarmJob } from "@/lib/api";
 import { Button } from "@/components/ui";
 
 export function JobRetentionControls({ job, accountId, onDeletion }: {
   job: SwarmJob;
   accountId: string;
-  onDeletion: (jobId: string, status: "pending" | "failed" | "completed") => void;
+  onDeletion: (jobId: string, status: "pending" | "processing" | "failed" | "completed") => void;
 }) {
   const client = useQueryClient();
   const [confirm, setConfirm] = useState<"input" | "history" | "cancel" | null>(null);
@@ -98,19 +98,23 @@ export function JobRetentionControls({ job, accountId, onDeletion }: {
   );
 }
 
-export function JobDeletionStatus({ jobId, initialStatus }: { jobId: string; initialStatus: "pending" | "failed" | "completed" }) {
-  const check = useMutation({
-    mutationFn: async () => {
-      await ensureCsrfCookie();
-      return apiFetch<DeletionPendingResponse | undefined>(`/api/jobs/${jobId}`, { method: "DELETE" });
+export function JobDeletionStatus({ jobId, initialStatus, accountId }: { jobId: string; initialStatus: "pending" | "processing" | "failed" | "completed"; accountId: string }) {
+  const check = useQuery({
+    queryKey: ["swarm-job-deletion-status", accountId, jobId],
+    enabled: initialStatus !== "completed",
+    queryFn: async ({ signal }): Promise<DeletionPendingResponse | { ok: true; status: "completed" }> => {
+      await ensureCsrfCookie(signal);
+      const result = await apiFetch<DeletionPendingResponse | undefined>(`/api/jobs/${jobId}`, { method: "DELETE", signal });
+      return result ?? { ok: true, status: "completed" };
     },
+    refetchInterval: (query) => query.state.data?.status === "completed" ? false : query.state.data || query.state.status === "error" ? 3000 : false,
   });
-  const status = check.isSuccess ? check.data?.status ?? "completed" : initialStatus;
+  const status = check.data?.status ?? initialStatus;
   return (
     <div className="space-y-2 rounded-[10px] border border-line p-3 text-sm">
       <p className="font-mono text-xs text-ink-muted">{jobId}</p>
-      <p role="status">{status === "completed" ? "Audit deletion completed across live stores." : status === "failed" ? "Audit deletion incomplete. It stays hidden while cleanup retries." : "Audit deletion pending. It is hidden from normal reads."}</p>
-      {status !== "completed" && <Button type="button" variant="secondary" disabled={check.isPending} onClick={() => check.mutate()}>Check deletion status</Button>}
+      <p role="status">{status === "completed" ? "Audit deletion completed across live stores." : status === "failed" ? "Audit deletion incomplete. It stays hidden while cleanup retries." : status === "processing" ? "Audit deletion is processing. Status refreshes automatically." : "Audit deletion pending. It is hidden from normal reads. Status refreshes automatically."}</p>
+      {status !== "completed" && <Button type="button" variant="secondary" disabled={check.isFetching} onClick={() => void check.refetch()}>Refresh deletion status</Button>}
       {check.isError && <p role="alert" className="text-danger">{check.error.message}</p>}
     </div>
   );
