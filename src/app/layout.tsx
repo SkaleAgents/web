@@ -66,7 +66,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: captureWorkspaceInvitationScript }}
         />
         <script
-          async
+          defer
           src="https://news.google.com/swg/js/v1/publisher.js"
         />
       </head>
