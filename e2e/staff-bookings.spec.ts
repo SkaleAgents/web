@@ -8,7 +8,7 @@ const fixture: StaffAdvisoryBooking = {
   id, version: 1, source: { type: "audit_job", id: "22222222-2222-4222-8222-222222222222" },
   status: "requested", assigneeRef: null, scope: "Review migration rollback", urgency: "urgent",
   preferredWindow: { startAt: "2026-09-25T09:00:00Z", endAt: "2026-09-25T10:00:00Z" },
-  notes: "Check the recovery plan.", billing: { billableMinutes: null, feeCents: null, currency: "USD" }, agreement: null,
+  notes: "Check the recovery plan.", billing: { billableMinutes: null, feeCents: null, currency: "USD" }, agreement: null, appointment: null,
   createdAt: "2026-09-24T09:00:00Z", updatedAt: "2026-09-24T09:00:00Z", history: [],
 };
 
@@ -167,4 +167,52 @@ test("operator navigation and long booking details fit a narrow screen", async (
   await expect(page.getByRole("link", { name: /Advisory bookings/ })).toHaveAttribute("aria-current", "page");
   await page.keyboard.press("Escape");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
+test("staff confirms a separate timezone-aware appointment before scheduling", async ({ page }) => {
+  await account(page, { ...staff, staffRole: "operator" });
+  let booking: StaffAdvisoryBooking = {
+    ...structuredClone(fixture),
+    status: "accepted",
+    agreement: {
+      id: "33333333-3333-4333-8333-333333333333", version: 1, scope: fixture.scope, currency: "USD",
+      quotedFeeCents: 25000, minimumBillableMinutes: 60, incrementMinutes: 15, rateCentsPerHour: 25000,
+      cancellationTermsVersion: "paid-pilot-v1", offeredAt: "2026-09-25T15:00:00Z", acceptedAt: "2026-09-25T15:10:00Z",
+    },
+    appointment: null,
+  };
+  const mutations: Array<{ action: string; body: Record<string, unknown>; ifMatch: string | null }> = [];
+  await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
+  await page.route("**/api/staff/advisory-bookings/**", async (route) => {
+    const action = new URL(route.request().url()).pathname.split("/").pop()!;
+    if (route.request().method() === "PATCH") {
+      const body = route.request().postDataJSON();
+      mutations.push({ action, body, ifMatch: route.request().headers()["if-match"] ?? null });
+      booking = action === "appointment"
+        ? { ...booking, version: booking.version + 1, appointment: { confirmedWindow: body.confirmedWindow, confirmedAt: "2026-09-25T18:00:00Z" } }
+        : { ...booking, version: booking.version + 1, status: body.status };
+      if (action === "appointment") booking.history.unshift({ id: "appointment-event", type: "appointment", actorRef: staff.id, fromStatus: null, toStatus: null, assigneeRef: null, billing: { billableMinutes: null, feeCents: null, currency: null }, createdAt: "2026-09-25T18:00:00Z" });
+    }
+    await route.fulfill({ json: booking });
+  });
+  await page.goto(`${root}/${id}`);
+  await expect(page.getByText("Customer preferred window (not confirmed)")).toBeVisible();
+  await expect(page.getByLabel("Next status").locator("option")).toHaveText(["Choose a transition", "Cancelled"]);
+  await page.getByLabel("Timezone (IANA)").fill("America/Los_Angeles");
+  await page.getByLabel("Confirmed start in selected timezone").fill("2026-09-29T09:00");
+  await page.getByLabel("Confirmed end in selected timezone").fill("2026-09-29T10:00");
+  await page.getByRole("button", { name: "Confirm appointment" }).click();
+  await expect(page.getByText(/Confirmed window \(America\/Los_Angeles\)/)).toBeVisible();
+  await expect(page.getByText("Confirmed or replaced appointment")).toBeVisible();
+  await expect(page.getByText("Staff: staff-1")).toBeVisible();
+  expect(mutations).toEqual([{
+    action: "appointment",
+    ifMatch: "1",
+    body: { confirmedWindow: { startAt: "2026-09-29T09:00:00-07:00", endAt: "2026-09-29T10:00:00-07:00", timezone: "America/Los_Angeles" } },
+  }]);
+  await expect(page.getByLabel("Next status").locator("option")).toHaveText(["Choose a transition", "Scheduled", "Cancelled"]);
+  await page.getByLabel("Next status").selectOption("scheduled");
+  await page.getByRole("button", { name: "Change status" }).click();
+  await expect(page.getByText("Work start stays blocked until the delivery handoff is ready.")).toBeVisible();
+  await expect(page.getByLabel("Next status").locator("option")).toHaveText(["Choose a transition", "Cancelled"]);
 });

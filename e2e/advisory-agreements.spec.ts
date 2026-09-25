@@ -26,6 +26,7 @@ const baseBooking = {
     offeredAt: "2026-09-25T16:00:00Z",
     acceptedAt: null as string | null,
   },
+  appointment: null,
   createdAt: "2026-09-25T15:00:00Z",
   updatedAt: "2026-09-25T16:00:00Z",
 };
@@ -77,6 +78,19 @@ test("guessed booking ID and customer account cannot expose another customer's a
   await expect(page.getByRole("heading", { name: "Request unavailable" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Advisory agreement" })).toHaveCount(0);
   await expect(page.getByText("Review the rollback procedure")).toHaveCount(0);
+});
+
+test("customer sees the confirmed appointment with its timezone, separate from the requested window", async ({ page }) => {
+  const appointment = {
+    confirmedWindow: { startAt: "2026-09-29T16:00:00Z", endAt: "2026-09-29T17:00:00Z", timezone: "America/Los_Angeles" },
+    confirmedAt: "2026-09-25T18:00:00Z",
+  };
+  await page.route("**/api/user", (route) => route.fulfill({ json: customer }));
+  await page.route(`**/api/advisory-bookings/${bookingId}`, (route) => route.fulfill({ json: { ...baseBooking, appointment } }));
+  await page.goto(`/advisory-bookings/${bookingId}`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByText(/Preferred window \(requested, not confirmed\)/)).toBeVisible();
+  await expect(page.getByRole("region", { name: "Confirmed appointment" })).toContainText("America/Los_Angeles");
+  await expect(page.getByRole("region", { name: "Confirmed appointment" })).toContainText("separate from your requested preferred window");
 });
 
 test("staff offer screen sends the reserved shape, duplicate clicks do not repeat it", async ({ page }) => {

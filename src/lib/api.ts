@@ -284,8 +284,18 @@ export type AdvisoryBooking = {
     currency: string | null;
   };
   agreement: AdvisoryAgreement | null;
+  appointment: AdvisoryAppointment | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type AdvisoryAppointment = {
+  confirmedWindow: {
+    startAt: string;
+    endAt: string;
+    timezone: string;
+  };
+  confirmedAt: string;
 };
 
 export type AdvisoryAgreement = {
@@ -304,7 +314,7 @@ export type AdvisoryAgreement = {
 
 export type AdvisoryBookingHistoryEntry = {
   id: string;
-  type: "assignment" | "status" | "billing";
+  type: "assignment" | "status" | "appointment" | "billing";
   actorRef: string;
   fromStatus: AdvisoryBooking["status"] | null;
   toStatus: AdvisoryBooking["status"] | null;
