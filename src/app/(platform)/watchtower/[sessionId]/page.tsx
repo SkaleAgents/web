@@ -165,11 +165,12 @@ function SessionReview({ sessionId }: { sessionId: string }) {
           <h2 className="text-lg font-semibold text-ink">Findings</h2>
           <ul className="mt-4 space-y-4">
             {job.data?.findings?.map((finding) => (
-              <li key={`${finding.specialist}-${finding.resource}-${finding.title}`} className="border-l-2 border-danger pl-3">
+              <li key={finding.id ?? `${finding.specialist}-${finding.resource}-${finding.title}`} className="border-l-2 border-danger pl-3">
                 <p className="font-mono text-xs uppercase tracking-wide text-danger">{finding.severity} · {finding.specialist}</p>
                 <p className="mt-1 font-medium text-ink">{finding.title}</p>
                 <p className="mt-1 text-sm text-ink-muted">{finding.detail}</p>
                 <p className="mt-2 text-xs text-ink-muted">Remediation: {finding.remediation}</p>
+                {finding.inputLocatorAvailable === false && <p className="mt-2 text-xs text-ink-muted">{finding.classification === "builtin-v1" ? "Finding retained without source. Original resource locator removed." : "Unclassified finding text removed with input."}</p>}
               </li>
             ))}
             {job.data?.findings?.length === 0 && <li className="text-sm text-ink-muted">No findings.</li>}
