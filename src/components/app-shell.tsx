@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui";
 import { BrandLogo } from "@/components/brand";
 import { ProductNavigation } from "@/components/product-navigation";
 import { isStaff } from "@/lib/advisory-bookings";
+import { clearWorkspaceInvitation, hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,12 +22,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const userQuery = useQuery(currentUserOptions);
   const [signingOut, setSigningOut] = useState(false);
 
+  useEffect(() => {
+    if (
+      userQuery.data &&
+      pathname !== WORKSPACE_INVITATION_PATH &&
+      hasWorkspaceInvitation()
+    ) {
+      router.replace(WORKSPACE_INVITATION_PATH);
+    }
+  }, [pathname, router, userQuery.data]);
+
   async function logout() {
     setSigningOut(true);
     try {
       await ensureCsrfCookie();
       await apiFetch("/api/auth/logout", { method: "POST", body: "{}" });
       await setSessionUser(queryClient, null);
+      clearWorkspaceInvitation();
       toast.success("Signed out");
       router.push("/login");
     } catch (e) {

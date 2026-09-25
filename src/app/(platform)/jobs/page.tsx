@@ -9,6 +9,9 @@ import { Button, LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retention-controls";
 import { RetentionNotice } from "@/components/retention-notice";
+import { SourceMetadata } from "@/components/source-metadata";
+import { SourceMetadataFields } from "@/components/source-metadata-fields";
+import { buildSourceMetadata } from "@/lib/source-metadata";
 
 const AUDIT_SPECIALISTS = ["devsecops", "sre", "mlops", "scaling"] as const;
 const specialistDetails = {
@@ -27,6 +30,8 @@ export default function JobsPage() {
   const jobsKey = ["swarm-jobs", accountId ?? "guest"];
   const [content, setContent] = useState("");
   const [telemetry, setTelemetry] = useState("");
+  const [sourceRevision, setSourceRevision] = useState("");
+  const [sourceObservedAt, setSourceObservedAt] = useState("");
   const [status, setStatus] = useState("all");
   const [deletions, setDeletions] = useState<Record<string, "pending" | "processing" | "failed" | "completed">>({});
   const [specialists, setSpecialists] = useState<AuditSpecialist[]>(["devsecops", "sre"]);
@@ -57,6 +62,7 @@ export default function JobsPage() {
         body: JSON.stringify({
           scope: { kind: "iac_text", format: "auto", content },
           specialists,
+          ...buildSourceMetadata(sourceRevision, sourceObservedAt),
           ...(parsedTelemetry ? { telemetry: parsedTelemetry } : {}),
         }),
       });
@@ -64,6 +70,8 @@ export default function JobsPage() {
     onSuccess: () => {
       setContent("");
       setTelemetry("");
+      setSourceRevision("");
+      setSourceObservedAt("");
       void queryClient.invalidateQueries({ queryKey: jobsKey });
     },
   });
@@ -105,6 +113,13 @@ export default function JobsPage() {
           className="mt-2 min-h-24 w-full rounded-[10px] border border-line bg-canvas px-3 py-2 font-mono text-sm text-ink outline-none focus:border-accent"
           placeholder={'{ "retryCount": 4, "logs": ["request timeout"] }'}
           aria-label="Telemetry JSON"
+        />
+        <SourceMetadataFields
+          idPrefix="audit-source"
+          revision={sourceRevision}
+          observedAt={sourceObservedAt}
+          onRevisionChange={setSourceRevision}
+          onObservedAtChange={setSourceObservedAt}
         />
         <fieldset className="mt-4">
           <legend className="text-sm font-medium text-ink">Specialists</legend>
@@ -155,6 +170,7 @@ export default function JobsPage() {
                 <p className="mt-1 text-xs text-ink-muted">{job.specialists.join(" · ")}{job.partial ? " · Partial results" : ""}</p>
                 {job.error && <p className="mt-1 text-sm text-danger">{job.error}</p>}
                 <p className="mt-1 text-xs text-ink-muted">{new Date(job.createdAt).toLocaleString()}</p>
+                <SourceMetadata sourceRevision={job.sourceRevision} sourceObservedAt={job.sourceObservedAt} inputAvailable={job.retention?.inputAvailable} />
               </div>
               <div className="flex flex-wrap gap-2">
                 {(job.status === "completed" || job.status === "failed") && (
