@@ -5,6 +5,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { AppShell } from "@/components/app-shell";
 import { FooterBadges } from "@/components/footer-badges";
+import { captureWorkspaceInvitationScript } from "@/lib/workspace-invitations";
 
 const syne = localFont({
   src: "./fonts/Syne.ttf",
@@ -60,6 +61,10 @@ export default function RootLayout({
       className={`${syne.variable} ${sourceSans.variable} ${plexMono.variable} h-full antialiased`}
     >
       <head>
+        <script
+          id="capture-workspace-invitation"
+          dangerouslySetInnerHTML={{ __html: captureWorkspaceInvitationScript }}
+        />
         <script
           async
           src="https://news.google.com/swg/js/v1/publisher.js"
