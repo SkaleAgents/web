@@ -1,14 +1,13 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { currentUserOptions, setSessionUser } from "@/lib/session";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
-import { Button } from "@/components/ui";
+import { AccountNavigation } from "@/components/account-navigation";
 import { BrandLogo } from "@/components/brand";
 import { ProductNavigation } from "@/components/product-navigation";
 import { isStaff } from "@/lib/advisory-bookings";
@@ -56,25 +55,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <BrandLogo />
             <ProductNavigation key={pathname} staff={isStaff(userQuery.data) && !userQuery.isError} />
           </div>
-          <div className="flex items-center gap-3 text-sm">
+          <div className="ml-auto flex items-center gap-3 text-sm sm:ml-0">
             {userQuery.isPending ? (
               <span className="text-ink-muted">…</span>
             ) : userQuery.data ? (
-              <>
-                <span className="text-ink-muted">
-                  {userQuery.data.displayName}
-                </span>
-                <Link href="/settings" aria-current={pathname === "/settings" ? "page" : undefined} className="text-ink-muted hover:text-ink">Settings</Link>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="px-2 py-1"
-                  disabled={signingOut}
-                  onClick={() => void logout()}
-                >
-                  Sign out
-                </Button>
-              </>
+              <AccountNavigation
+                key={`${userQuery.data.id}:${pathname}`}
+                user={userQuery.data}
+                settingsActive={pathname === "/settings"}
+                signingOut={signingOut}
+                onSignOut={() => void logout()}
+              />
             ) : (
               <GoogleSignInButton />
             )}

@@ -131,6 +131,7 @@ test("late preference saves cannot restore private data after logout", async ({ 
   await page.goto("/settings");
   await page.getByRole("checkbox", { name: /^Completed audits/ }).click();
   await expect.poll(() => saving).toBe(true);
+  await page.getByRole("button", { name: "Alice, account menu" }).click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   release();

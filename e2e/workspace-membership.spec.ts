@@ -175,6 +175,7 @@ test("sign-out removes pending invitation credential", async ({ page }) => {
     return route.fulfill({ json: { ok: true } });
   });
   await page.goto(`/workspace-invitations/accept#token=${invitationToken}`);
+  await page.getByRole("button", { name: /, account menu$/ }).click();
   await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/login$/);
