@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import type { RetentionPolicy } from "../src/lib/api";
 
 const id = "00000000-0000-4000-8000-000000000001";
 const policy = { accountId: "owner", enabled: true, version: "audit-minimal-v1", notice: ["Audit input expires after 15 minutes.", "Existing records receive at least 30 days from notice."], noticeDeliveredAt: null, legacyNotBefore: null, noticeArchived: false, noticeToken: "account-bound-notice" };
@@ -30,6 +31,30 @@ test("changed-account policy responses cannot offer acknowledgement", async ({ p
   await page.goto("/jobs");
   await expect(page.getByText("Your account changed. Reload the policy notice.")).toBeVisible();
   await expect(page.getByRole("button", { name: "I've read this retention policy" })).toHaveCount(0);
+});
+
+test("advance notice can be recorded before automatic cleanup and survives reload", async ({ page }) => {
+  let acknowledgements = 0;
+  let state: RetentionPolicy = { ...policy, enabled: false, acknowledgementEnabled: true };
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: [] } }));
+  await page.route("**/sanctum/csrf-cookie", route => route.fulfill({ status: 204 }));
+  await page.route("**/api/account/retention", route => route.fulfill({ json: state }));
+  await page.route("**/api/account/retention/acknowledge", route => {
+    expect(route.request().postDataJSON()).toEqual({ accountId: "owner", noticeToken: policy.noticeToken });
+    acknowledgements++;
+    state = { ...state, noticeArchived: true, noticeDeliveredAt: "2026-09-25T00:00:00Z", legacyNotBefore: "2026-10-25T00:00:00Z" };
+    return route.fulfill({ json: state });
+  });
+  await page.goto("/jobs");
+  await expect(page.getByText("Automatic retention is not active. Recording this notice starts your 30-day legacy grace period but does not activate cleanup.")).toBeVisible();
+  expect(acknowledgements).toBe(0);
+  await page.getByRole("button", { name: "I've read this retention policy" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Notice recorded" })).toContainText("Deadlines will appear after activation.");
+  await page.reload();
+  await expect(page.getByRole("status").filter({ hasText: "Notice recorded" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "I've read this retention policy" })).toHaveCount(0);
+  expect(acknowledgements).toBe(1);
 });
 
 test("purged schedules require fresh input and deletion remains incomplete until confirmed by the API", async ({ page }) => {

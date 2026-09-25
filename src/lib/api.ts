@@ -220,6 +220,7 @@ export type SwarmSchedule = {
 export type RetentionPolicy = {
   accountId: string;
   enabled: boolean;
+  acknowledgementEnabled?: boolean;
   version: string;
   notice: string[];
   noticeDeliveredAt: string | null;
