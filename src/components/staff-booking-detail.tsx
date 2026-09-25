@@ -6,6 +6,7 @@ import { apiFetch, ApiError, ensureCsrfCookie, type AdvisoryBookingHistoryEntry,
 import { bookingStatusLabels, bookingTransitions, isClosedBooking, type BookingStatus } from "@/lib/advisory-bookings";
 import { useStaffUserId } from "@/components/staff-access";
 import { Button, FieldLabel, LinkButton, Select, TextInput } from "@/components/ui";
+import { StaffAdvisoryAgreementOffer } from "@/components/staff-advisory-agreement-offer";
 
 type BookingChange =
   | { action: "assignment"; body: { assigneeRef: string } }
@@ -20,11 +21,13 @@ type EditorProps = {
 
 function StatusEditor({ booking, disabled, save }: EditorProps) {
   const [next, setNext] = useState<BookingStatus | "">("");
-  const transitions = bookingTransitions[booking.status];
+  const hasAgreement = Boolean(booking.agreement);
+  const transitions = bookingTransitions[booking.status].filter((status) => !hasAgreement || !["scheduled", "in_progress"].includes(status));
   return (
     <section className="rounded-xl border border-line bg-canvas-elevated p-5">
       <h2 className="text-lg font-semibold">Work status</h2>
-      {transitions.length === 0 ? <p className="mt-3 text-sm text-ink-muted">This booking is closed. Its status cannot change.</p> : (
+      {hasAgreement && <p className="mt-3 text-sm text-ink-muted">An accepted agreement does not confirm an appointment. Scheduling and work-start transitions remain unavailable until appointment confirmation is supported.</p>}
+      {transitions.length === 0 ? <p className="mt-3 text-sm text-ink-muted">This booking has no available status changes.</p> : (
         <form className="mt-4 space-y-3" onSubmit={(event) => {
           event.preventDefault();
           if (next && transitions.includes(next)) save({ action: "status", body: { status: next } });
@@ -125,7 +128,11 @@ export function StaffBookingDetail({ id }: { id: string }) {
   const update = useMutation({
     mutationFn: async (change: BookingChange) => {
       await ensureCsrfCookie();
-      return apiFetch<StaffAdvisoryBooking>(`${base}/${change.action}`, { method: "PATCH", body: JSON.stringify(change.body) });
+      return apiFetch<StaffAdvisoryBooking>(`${base}/${change.action}`, {
+        method: "PATCH",
+        headers: Number.isSafeInteger(booking.data?.version) ? { "If-Match": String(booking.data?.version) } : undefined,
+        body: JSON.stringify(change.body),
+      });
     },
     onSuccess: (result) => {
       queryClient.setQueryData(queryKey, result);
@@ -185,6 +192,7 @@ export function StaffBookingDetail({ id }: { id: string }) {
             <AssignmentEditor key={data.assigneeRef ?? "unassigned"} booking={data} disabled={update.isPending || booking.isFetching} save={(change) => update.mutate(change)} />
           </div>
           <BillingEditor key={JSON.stringify(data.billing)} booking={data} disabled={update.isPending || booking.isFetching} save={(change) => update.mutate(change)} />
+          <StaffAdvisoryAgreementOffer booking={data} onRefresh={() => void booking.refetch()} />
           <section className="rounded-xl border border-line bg-canvas-elevated p-5">
             <h2 className="text-lg font-semibold">Booking history</h2>
             <p className="mt-1 text-sm text-ink-muted">Recorded changes and staff references. Times use your timezone.</p>

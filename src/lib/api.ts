@@ -1,5 +1,9 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
 
+export function advisoryAgreementsEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_ADVISORY_AGREEMENTS_ENABLED === "true";
+}
+
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
     super(message);
@@ -260,6 +264,7 @@ export type AdvisoryBookingSourceType = "audit_job" | "watchtower_session";
 
 export type AdvisoryBooking = {
   id: string;
+  version: number;
   source: {
     type: AdvisoryBookingSourceType;
     id: string;
@@ -278,8 +283,23 @@ export type AdvisoryBooking = {
     feeCents: number | null;
     currency: string | null;
   };
+  agreement: AdvisoryAgreement | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type AdvisoryAgreement = {
+  id: string;
+  version: number;
+  scope: string;
+  currency: "USD";
+  quotedFeeCents: number;
+  minimumBillableMinutes: number;
+  incrementMinutes: number;
+  rateCentsPerHour: number;
+  cancellationTermsVersion: string;
+  offeredAt: string;
+  acceptedAt: string | null;
 };
 
 export type AdvisoryBookingHistoryEntry = {
