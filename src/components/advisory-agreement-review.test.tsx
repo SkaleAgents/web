@@ -36,6 +36,7 @@ const booking = (version = 3): AdvisoryBooking => ({
     offeredAt: "2026-09-25T16:00:00Z",
     acceptedAt: null,
   },
+  appointment: null,
   createdAt: "2026-09-25T15:00:00Z",
   updatedAt: "2026-09-25T16:00:00Z",
 });

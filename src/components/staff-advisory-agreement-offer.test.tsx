@@ -24,6 +24,7 @@ const booking: StaffAdvisoryBooking = {
   assigneeRef: "expert:42",
   billing: { billableMinutes: null, feeCents: null, currency: "USD" },
   agreement: null,
+  appointment: null,
   history: [],
   createdAt: "2026-09-25T15:00:00Z",
   updatedAt: "2026-09-25T16:00:00Z",

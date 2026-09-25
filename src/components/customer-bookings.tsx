@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ApiError, apiFetch, type AdvisoryBooking } from "@/lib/api";
+import { advisoryAgreementsEnabled, ApiError, apiFetch, type AdvisoryBooking } from "@/lib/api";
 import { bookingStatusLabels } from "@/lib/advisory-bookings";
 import { useCustomerUser, isSessionError } from "@/components/customer-booking-access";
 import { Button, LinkButton } from "@/components/ui";
@@ -146,6 +146,16 @@ export function CustomerBookingDetail({ id }: { id: string }) {
             </dl>
             {data.notes && <div><h3 className="text-sm text-ink-muted">Your notes</h3><p className="mt-1 whitespace-pre-wrap break-words text-sm">{data.notes}</p></div>}
           </section>
+          {advisoryAgreementsEnabled() && data.appointment && (
+            <section aria-label="Confirmed appointment" className="space-y-3 rounded-xl border border-line bg-canvas-elevated p-5">
+              <h2 className="text-lg font-semibold">Confirmed appointment</h2>
+              <p className="text-xs text-ink-muted">This confirmed window is separate from your requested preferred window above.</p>
+              <dl className="grid gap-4 text-sm sm:grid-cols-2">
+                <div><dt className="text-ink-muted">Confirmed window ({data.appointment.confirmedWindow.timezone})</dt><dd className="mt-1">{new Date(data.appointment.confirmedWindow.startAt).toLocaleString("en", { timeZone: data.appointment.confirmedWindow.timezone, timeZoneName: "short" })} to {new Date(data.appointment.confirmedWindow.endAt).toLocaleString("en", { timeZone: data.appointment.confirmedWindow.timezone, timeZoneName: "short" })}</dd></div>
+                <div><dt className="text-ink-muted">Confirmed at (your timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone || "local timezone"})</dt><dd className="mt-1">{new Date(data.appointment.confirmedAt).toLocaleString()}</dd></div>
+              </dl>
+            </section>
+          )}
           <section aria-label="Assignment" className="rounded-xl border border-line bg-canvas-elevated p-5">
             <h2 className="text-lg font-semibold">Assignment</h2>
             <p className="mt-2 break-all font-mono text-sm">{data.assigneeRef ?? "No assignment recorded"}</p>
