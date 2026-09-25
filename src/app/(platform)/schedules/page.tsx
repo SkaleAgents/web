@@ -8,6 +8,9 @@ import { Button, FieldLabel, LinkButton, Select, TextArea, TextInput } from "@/c
 import { currentUserOptions } from "@/lib/session";
 import { ScheduleDeletionStatus, ScheduleRetentionControls } from "@/components/schedule-retention-controls";
 import { RetentionNotice } from "@/components/retention-notice";
+import { SourceMetadata } from "@/components/source-metadata";
+import { SourceMetadataFields } from "@/components/source-metadata-fields";
+import { buildSourceMetadata } from "@/lib/source-metadata";
 
 const timezones = ["UTC", "America/Los_Angeles", "America/New_York", "Europe/London", "Europe/Berlin", "Asia/Dhaka", "Asia/Kolkata", "Asia/Singapore", "Asia/Tokyo", "Australia/Sydney"];
 const cadencePresets = [
@@ -25,6 +28,8 @@ export default function SchedulesPage() {
   const [cronExpression, setCronExpression] = useState("0 * * * *");
   const [timezone, setTimezone] = useState("UTC");
   const [content, setContent] = useState("");
+  const [sourceRevision, setSourceRevision] = useState("");
+  const [sourceObservedAt, setSourceObservedAt] = useState("");
   const [webhookUrl, setWebhookUrl] = useState("");
   const [deletions, setDeletions] = useState<Record<string, "pending" | "processing" | "failed" | "completed">>({});
 
@@ -45,12 +50,15 @@ export default function SchedulesPage() {
           cronExpression,
           timezone,
           scope: { kind: "iac_text", format: "auto", content },
+          ...buildSourceMetadata(sourceRevision, sourceObservedAt),
           webhookUrl: webhookUrl || null,
         }),
       });
     },
     onSuccess: () => {
       setContent("");
+      setSourceRevision("");
+      setSourceObservedAt("");
       void queryClient.invalidateQueries({ queryKey: schedulesKey });
     },
   });
@@ -100,6 +108,13 @@ export default function SchedulesPage() {
           <TextArea value={content} onChange={(event) => setContent(event.target.value)} className="mt-1 min-h-32" placeholder={'resource "aws_security_group" "web" {}'} aria-label="Scheduled IaC content" />
           <span className="mt-2 block text-xs text-ink-muted">Each run reviews this saved text. It does not pull fresh configuration from your repository or cloud account.</span>
         </label>
+        <SourceMetadataFields
+          idPrefix="schedule-source"
+          revision={sourceRevision}
+          observedAt={sourceObservedAt}
+          onRevisionChange={setSourceRevision}
+          onObservedAtChange={setSourceObservedAt}
+        />
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <Button type="button" disabled={!user.data || !name.trim() || !cronExpression.trim() || !content.trim() || create.isPending} onClick={() => create.mutate()}>
             {create.isPending ? "Saving…" : "Create schedule"}
@@ -127,6 +142,7 @@ export default function SchedulesPage() {
                 <p className="font-semibold text-ink">{schedule.name}</p>
                 <p className="mt-1 font-mono text-xs text-ink-muted">{schedule.cronExpression} · {schedule.timezone} · {schedule.enabled ? "enabled" : "paused"}</p>
                 <p className="mt-1 text-xs text-ink-muted">Next run: {schedule.nextRunAt ? new Date(schedule.nextRunAt).toLocaleString() : "paused"}{schedule.webhookConfigured ? " · webhook enabled" : ""}</p>
+                <SourceMetadata sourceRevision={schedule.sourceRevision} sourceObservedAt={schedule.sourceObservedAt} inputAvailable={schedule.retention?.inputAvailable} />
                 {schedule.lastError && <p className="mt-1 text-xs text-danger">{schedule.lastError}</p>}
               </div>
               {user.data && <ScheduleRetentionControls schedule={schedule} accountId={user.data.id} onDeletion={(id, status) => setDeletions(current => ({ ...current, [id]: status }))} />}

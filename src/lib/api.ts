@@ -167,8 +167,10 @@ export type SwarmJob = {
   scheduleId?: string | null;
   scope: Record<string, unknown>;
   sourcePurged: boolean;
+  sourceRevision?: string | null;
+  sourceObservedAt?: string | null;
   retention?: {
-    inputAvailable: boolean;
+    inputAvailable?: boolean;
     inputPurgeStatus: "retained" | "pending" | "purged" | "failed";
     inputExpiresAt: string | null;
     historyExpiresAt: string | null;
@@ -199,6 +201,8 @@ export type SwarmSchedule = {
   cronExpression: string;
   timezone: string;
   scope: Record<string, unknown>;
+  sourceRevision?: string | null;
+  sourceObservedAt?: string | null;
   specialists: string[];
   telemetry?: Record<string, unknown> | null;
   webhookConfigured: boolean;
