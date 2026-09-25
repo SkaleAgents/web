@@ -7,6 +7,42 @@ export class ApiError extends Error {
   }
 }
 
+export const API_REQUEST_TIMEOUT_MS = 15_000;
+
+export class ApiTimeoutError extends Error {
+  constructor() {
+    super("Request timed out. Check the latest state before retrying a change.");
+    this.name = "ApiTimeoutError";
+  }
+}
+
+async function withDeadline<T>(signal: AbortSignal | null | undefined, action: (signal: AbortSignal) => Promise<T>): Promise<T> {
+  signal?.throwIfAborted();
+  const controller = new AbortController();
+  let timedOut = false;
+  const abort = () => controller.abort(signal?.reason);
+  signal?.addEventListener("abort", abort, { once: true });
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort(new ApiTimeoutError());
+  }, API_REQUEST_TIMEOUT_MS);
+  let rejectAbort: () => void = () => {};
+  const interrupted = new Promise<never>((_, reject) => {
+    rejectAbort = () => reject(controller.signal.reason);
+    controller.signal.addEventListener("abort", rejectAbort, { once: true });
+  });
+  try {
+    return await Promise.race([action(controller.signal), interrupted]);
+  } catch (error) {
+    if (timedOut) throw new ApiTimeoutError();
+    throw error;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", abort);
+    controller.signal.removeEventListener("abort", rejectAbort);
+  }
+}
+
 export type McpConnection = {
   id: string;
   clientId: string;
@@ -44,11 +80,16 @@ function readCookie(name: string): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
-export async function ensureCsrfCookie(): Promise<void> {
-  await fetch(`${API_URL}/sanctum/csrf-cookie`, {
-    method: "GET",
-    credentials: "include",
-    headers: { Accept: "application/json" },
+export async function ensureCsrfCookie(signal?: AbortSignal): Promise<void> {
+  return withDeadline(signal, async (requestSignal) => {
+    const response = await fetch(`${API_URL}/sanctum/csrf-cookie`, {
+      method: "GET",
+      credentials: "include",
+      headers: { Accept: "application/json" },
+      signal: requestSignal,
+    });
+    if (!response.ok) throw new ApiError("Could not prepare a secure request", response.status);
+    await response.body?.cancel();
   });
 }
 
@@ -56,6 +97,10 @@ export async function apiFetch<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
+  return withDeadline(init.signal, (signal) => apiRequest<T>(`${API_URL}${path}`, { ...init, signal }));
+}
+
+async function apiRequest<T>(url: string, init: RequestInit): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
   if (!headers.has("Content-Type") && init.body) {
@@ -66,7 +111,7 @@ export async function apiFetch<T>(
     headers.set("X-XSRF-TOKEN", xsrf);
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(url, {
     ...init,
     credentials: "include",
     headers,
@@ -94,35 +139,13 @@ export async function watchtowerFetch<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
-  const method = (init.method ?? "GET").toUpperCase();
-  if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
-    await ensureCsrfCookie();
-  }
-  const headers = new Headers(init.headers);
-  headers.set("Accept", "application/json");
-  if (!headers.has("Content-Type") && init.body) {
-    headers.set("Content-Type", "application/json");
-  }
-  const xsrf = readCookie("XSRF-TOKEN");
-  if (xsrf) {
-    headers.set("X-XSRF-TOKEN", xsrf);
-  }
-  const res = await fetch(`${API_URL}/api/watchtower${path}`, {
-    ...init,
-    credentials: "include",
-    headers,
-  });
-  if (!res.ok) {
-    let message = res.statusText;
-    try {
-      const data = (await res.json()) as { error?: string; message?: string };
-      message = data.error ?? data.message ?? message;
-    } catch {
-      /* ignore */
+  return withDeadline(init.signal, async (signal) => {
+    const method = (init.method ?? "GET").toUpperCase();
+    if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
+      await ensureCsrfCookie(signal);
     }
-    throw new Error(message);
-  }
-  return res.json() as Promise<T>;
+    return apiRequest<T>(`${API_URL}/api/watchtower${path}`, { ...init, signal });
+  });
 }
 
 export type SwarmFinding = {

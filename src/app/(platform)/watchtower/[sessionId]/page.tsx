@@ -10,10 +10,16 @@ import { currentUserOptions } from "@/lib/session";
 
 export default function WatchtowerPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
+  return <SessionReview key={sessionId} sessionId={sessionId} />;
+}
+
+function SessionReview({ sessionId }: { sessionId: string }) {
   const queryClient = useQueryClient();
   const user = useQuery(currentUserOptions);
   const userId = user.data?.id ?? "guest";
   const [steps, setSteps] = useState<SwarmStep[]>([]);
+  const [streamStatus, setStreamStatus] = useState<"connecting" | "live" | "reconnecting" | "disconnected">("connecting");
+  const [streamAttempt, setStreamAttempt] = useState(0);
   const [instruction, setInstruction] = useState("");
   const close = useMutation({
     mutationFn: () => watchtowerFetch<WatchtowerSession & { proposals?: PatchProposal[] }>(`/sessions/${sessionId}/close`, { method: "POST" }),
@@ -40,18 +46,42 @@ export default function WatchtowerPage() {
     queryFn: ({ signal }) => apiFetch<SwarmJob>(`/api/jobs/${session.data!.jobId}`, { signal }),
   });
 
+  const streamJobId = session.data?.jobId;
+  const streamOpen = session.data?.status === "open";
   useEffect(() => {
-    if (!session.data || session.data.status === "closed") return;
+    if (!streamJobId || !streamOpen) return;
+    let active = true;
     const events = new EventSource(`${API_URL}/api/watchtower/sessions/${sessionId}/stream`, { withCredentials: true });
+    const refresh = () => {
+      if (!active) return;
+      void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId, userId] });
+      void queryClient.invalidateQueries({ queryKey: ["swarm-job", streamJobId, userId] });
+    };
+    events.onopen = () => {
+      if (!active) return;
+      setStreamStatus("live");
+      refresh();
+    };
+    events.onerror = () => {
+      if (!active) return;
+      setStreamStatus(events.readyState === EventSource.CLOSED ? "disconnected" : "reconnecting");
+    };
     events.addEventListener("step", (event) => {
-      const payload = JSON.parse((event as MessageEvent).data) as { step: SwarmStep };
-      setSteps((current) => current.some((step) => step.stepId === payload.step.stepId) ? current : [...current, payload.step]);
+      if (!active) return;
+      try {
+        const payload = JSON.parse((event as MessageEvent).data) as { step: SwarmStep };
+        if (!payload.step || typeof payload.step.stepId !== "string" || payload.step.jobId !== streamJobId) throw new Error("Invalid step");
+        setSteps((current) => current.some((step) => step.stepId === payload.step.stepId) ? current : [...current, payload.step]);
+      } catch {
+        events.close();
+        setStreamStatus("disconnected");
+        refresh();
+      }
     });
-    const refresh = () => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId, userId] });
     events.addEventListener("proposal", refresh);
-    events.addEventListener("closed", refresh);
-    return () => events.close();
-  }, [queryClient, session.data, sessionId, userId]);
+    events.addEventListener("closed", () => { if (active) { events.close(); setStreamStatus("disconnected"); refresh(); } });
+    return () => { active = false; events.close(); };
+  }, [queryClient, streamJobId, streamOpen, sessionId, userId, streamAttempt]);
 
   if (session.isError || job.isError) {
     const error = session.error instanceof Error ? session.error : job.error;
@@ -80,6 +110,14 @@ export default function WatchtowerPage() {
           <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink">Live audit session</h1>
           <p className="mt-1 text-sm text-ink-muted">{job.data?.summary ?? "Specialists are working"}</p>
           <p className="mt-2 text-xs text-ink-muted">Participants: {session.data?.participants.length ?? 0}</p>
+          {session.data?.status === "open" && (
+            <div className="mt-2 flex items-center gap-3 text-sm">
+              <p role="status" className={streamStatus === "live" ? "text-ink-muted" : "text-warning"}>
+                {streamStatus === "live" ? "Live updates connected" : streamStatus === "connecting" ? "Connecting live updates…" : streamStatus === "reconnecting" ? "Reconnecting live updates. Displayed results may be outdated." : "Live updates disconnected. Displayed results may be outdated."}
+              </p>
+              {(streamStatus === "reconnecting" || streamStatus === "disconnected") && <Button variant="secondary" onClick={() => { setStreamStatus("connecting"); setStreamAttempt(value => value + 1); }}>Reconnect</Button>}
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {session.data?.status === "open" && (
