@@ -25,6 +25,7 @@ const booking: StaffAdvisoryBooking = {
   billing: { billableMinutes: null, feeCents: null, currency: "USD" },
   agreement: null,
   appointment: null,
+  delivery: null,
   history: [],
   createdAt: "2026-09-25T15:00:00Z",
   updatedAt: "2026-09-25T16:00:00Z",

@@ -8,6 +8,7 @@ import { useStaffUserId } from "@/components/staff-access";
 import { Button, FieldLabel, LinkButton, Select, TextInput } from "@/components/ui";
 import { StaffAdvisoryAgreementOffer } from "@/components/staff-advisory-agreement-offer";
 import { StaffAdvisoryAppointment } from "@/components/staff-advisory-appointment";
+import { StaffAdvisoryDelivery } from "@/components/staff-advisory-delivery";
 
 type BookingChange =
   | { action: "assignment"; body: { assigneeRef: string } }
@@ -198,6 +199,7 @@ export function StaffBookingDetail({ id }: { id: string }) {
           <BillingEditor key={JSON.stringify(data.billing)} booking={data} disabled={update.isPending || booking.isFetching} save={(change) => update.mutate(change)} />
           <StaffAdvisoryAgreementOffer booking={data} onRefresh={() => void booking.refetch()} />
           <StaffAdvisoryAppointment booking={data} onRefresh={() => booking.refetch()} />
+          <StaffAdvisoryDelivery booking={data} onRefresh={() => booking.refetch()} />
           <section className="rounded-xl border border-line bg-canvas-elevated p-5">
             <h2 className="text-lg font-semibold">Booking history</h2>
             <p className="mt-1 text-sm text-ink-muted">Recorded changes and staff references. Times use your timezone.</p>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { advisoryAgreementsEnabled, ApiError, apiFetch, type AdvisoryBooking } from "@/lib/api";
+import { advisoryAgreementsEnabled, advisoryDeliveryHandoffsEnabled, ApiError, apiFetch, type AdvisoryBooking } from "@/lib/api";
 import { bookingStatusLabels } from "@/lib/advisory-bookings";
 import { useCustomerUser, isSessionError } from "@/components/customer-booking-access";
 import { Button, LinkButton } from "@/components/ui";
@@ -153,6 +153,18 @@ export function CustomerBookingDetail({ id }: { id: string }) {
               <dl className="grid gap-4 text-sm sm:grid-cols-2">
                 <div><dt className="text-ink-muted">Confirmed window ({data.appointment.confirmedWindow.timezone})</dt><dd className="mt-1">{new Date(data.appointment.confirmedWindow.startAt).toLocaleString("en", { timeZone: data.appointment.confirmedWindow.timezone, timeZoneName: "short" })} to {new Date(data.appointment.confirmedWindow.endAt).toLocaleString("en", { timeZone: data.appointment.confirmedWindow.timezone, timeZoneName: "short" })}</dd></div>
                 <div><dt className="text-ink-muted">Confirmed at (your timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone || "local timezone"})</dt><dd className="mt-1">{new Date(data.appointment.confirmedAt).toLocaleString()}</dd></div>
+              </dl>
+            </section>
+          )}
+          {advisoryAgreementsEnabled() && advisoryDeliveryHandoffsEnabled() && data.delivery && (
+            <section aria-label="Delivery handoff" className="space-y-3 rounded-xl border border-line bg-canvas-elevated p-5">
+              <h2 className="text-lg font-semibold">Delivery contact</h2>
+              <p className="text-sm">{data.delivery.handoffStatus === "ready" ? "Confirmed with the delivery owner" : "Awaiting confirmation with the delivery owner"}</p>
+              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <div><dt className="text-ink-muted">Contact name</dt><dd className="mt-1">{data.delivery.contact.name}</dd></div>
+                <div><dt className="text-ink-muted">Channel</dt><dd className="mt-1">{data.delivery.contact.channel}</dd></div>
+                <div><dt className="text-ink-muted">Contact detail</dt><dd className="mt-1 break-words">{data.delivery.contact.value}</dd></div>
+                {data.delivery.handedOffAt && <div><dt className="text-ink-muted">Confirmed at</dt><dd className="mt-1">{new Date(data.delivery.handedOffAt).toLocaleString()}</dd></div>}
               </dl>
             </section>
           )}

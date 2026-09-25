@@ -1,4 +1,4 @@
-import { advisoryAgreementsEnabled, type AdvisoryBooking, type ApiUser } from "./api";
+import { advisoryAgreementsEnabled, advisoryDeliveryHandoffsEnabled, type AdvisoryBooking, type ApiUser } from "./api";
 
 export type BookingStatus = AdvisoryBooking["status"];
 
@@ -33,7 +33,13 @@ export function availableBookingTransitions(booking: AdvisoryBooking): BookingSt
   if (!advisoryAgreementsEnabled() || !booking.agreement) return transitions;
   return transitions.filter((status) => {
     if (status === "scheduled") return Boolean(booking.agreement?.acceptedAt && booking.appointment);
-    if (status === "in_progress") return false;
+    if (status === "in_progress") {
+      return advisoryDeliveryHandoffsEnabled()
+        && Boolean(booking.appointment)
+        && Boolean(booking.agreement?.acceptedAt)
+        && booking.delivery?.handoffStatus === "ready"
+        && Boolean(booking.delivery.handedOffAt);
+    }
     return true;
   });
 }

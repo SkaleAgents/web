@@ -8,7 +8,7 @@ const fixture: StaffAdvisoryBooking = {
   id, version: 1, source: { type: "audit_job", id: "22222222-2222-4222-8222-222222222222" },
   status: "requested", assigneeRef: null, scope: "Review migration rollback", urgency: "urgent",
   preferredWindow: { startAt: "2026-09-25T09:00:00Z", endAt: "2026-09-25T10:00:00Z" },
-  notes: "Check the recovery plan.", billing: { billableMinutes: null, feeCents: null, currency: "USD" }, agreement: null, appointment: null,
+  notes: "Check the recovery plan.", billing: { billableMinutes: null, feeCents: null, currency: "USD" }, agreement: null, appointment: null, delivery: null,
   createdAt: "2026-09-24T09:00:00Z", updatedAt: "2026-09-24T09:00:00Z", history: [],
 };
 

@@ -4,6 +4,10 @@ export function advisoryAgreementsEnabled(): boolean {
   return process.env.NEXT_PUBLIC_ADVISORY_AGREEMENTS_ENABLED === "true";
 }
 
+export function advisoryDeliveryHandoffsEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_ADVISORY_DELIVERY_HANDOFFS_ENABLED === "true";
+}
+
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
     super(message);
@@ -285,6 +289,7 @@ export type AdvisoryBooking = {
   };
   agreement: AdvisoryAgreement | null;
   appointment: AdvisoryAppointment | null;
+  delivery: AdvisoryDelivery | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -310,6 +315,17 @@ export type AdvisoryAgreement = {
   cancellationTermsVersion: string;
   offeredAt: string;
   acceptedAt: string | null;
+};
+
+export type AdvisoryDelivery = {
+  ownerRef: string;
+  contact: {
+    name: string;
+    channel: string;
+    value: string;
+  };
+  handoffStatus: "pending" | "ready";
+  handedOffAt: string | null;
 };
 
 export type AdvisoryBookingHistoryEntry = {

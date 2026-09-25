@@ -15,6 +15,7 @@ const accepted: AdvisoryBooking = {
   billing: { billableMinutes: null, feeCents: null, currency: "USD" },
   agreement: { id: "agreement-a", version: 2, scope: "Review rollback plan", currency: "USD", quotedFeeCents: 25000, minimumBillableMinutes: 60, incrementMinutes: 15, rateCentsPerHour: 25000, cancellationTermsVersion: "paid-pilot-v1", offeredAt: "2026-09-25T16:00:00Z", acceptedAt: null },
   appointment: null,
+  delivery: null,
   createdAt: "2026-09-25T15:00:00Z",
   updatedAt: "2026-09-25T16:00:00Z",
 };
@@ -37,6 +38,11 @@ describe("advisory booking transitions", () => {
     vi.stubEnv("NEXT_PUBLIC_ADVISORY_AGREEMENTS_ENABLED", "true");
     const scheduled = { ...accepted, status: "scheduled" as const, appointment: { confirmedWindow: { startAt: "2026-09-29T16:00:00Z", endAt: "2026-09-29T17:00:00Z", timezone: "UTC" }, confirmedAt: "2026-09-25T18:00:00Z" }, agreement: { ...accepted.agreement!, acceptedAt: "2026-09-25T16:10:00Z" } };
     expect(availableBookingTransitions(scheduled)).not.toContain("in_progress");
+    vi.stubEnv("NEXT_PUBLIC_ADVISORY_DELIVERY_HANDOFFS_ENABLED", "true");
+    expect(availableBookingTransitions({ ...scheduled, delivery: { ownerRef: "delivery-owner:1", contact: { name: "Test Owner", channel: "email", value: "owner@example.test" }, handoffStatus: "pending", handedOffAt: null } })).not.toContain("in_progress");
+    expect(availableBookingTransitions({ ...scheduled, delivery: { ownerRef: "delivery-owner:1", contact: { name: "Test Owner", channel: "email", value: "owner@example.test" }, handoffStatus: "ready", handedOffAt: "2026-09-25T18:30:00Z" } })).toContain("in_progress");
+    vi.stubEnv("NEXT_PUBLIC_ADVISORY_DELIVERY_HANDOFFS_ENABLED", "false");
+    expect(availableBookingTransitions({ ...scheduled, delivery: { ownerRef: "delivery-owner:1", contact: { name: "Test Owner", channel: "email", value: "owner@example.test" }, handoffStatus: "ready", handedOffAt: "2026-09-25T18:30:00Z" } })).not.toContain("in_progress");
     vi.stubEnv("NEXT_PUBLIC_ADVISORY_AGREEMENTS_ENABLED", "false");
     expect(availableBookingTransitions(scheduled)).toContain("in_progress");
   });
