@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("audit creation sends paired caller metadata and job reads distinguish unknown from unavailable", async ({ page }) => {
+test("audit creation submits paired source metadata and job reads distinguish unknown, recorded, and unavailable", async ({ page }) => {
   let createdBody: Record<string, unknown> | undefined;
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
   await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "owner", enabled: false } }));
@@ -19,16 +19,62 @@ test("audit creation sends paired caller metadata and job reads distinguish unkn
 
   await page.goto("/jobs");
   await page.getByLabel("IaC content").fill('resource "test" {}');
-  await page.getByLabel("Source revision").fill("commit-abc");
+  await page.getByLabel("Source revision").fill("commit-audit");
   await page.getByLabel("Source observed at").fill("2026-09-25T10:30");
   await page.getByRole("button", { name: "Queue audit" }).click();
 
   await expect.poll(() => createdBody).toMatchObject({
-    sourceRevision: "commit-abc",
-    sourceObservedAt: new Date("2026-09-25T10:30:00").toISOString(),
+    scope: { kind: "iac_text", content: 'resource "test" {}' },
+    sourceRevision: "commit-audit",
+    sourceObservedAt: new Date("2026-09-25T10:30").toISOString(),
   });
   await expect(page.getByText("Caller-reported source revision: unknown")).toBeVisible();
   await expect(page.getByText("Caller-reported source revision: recorded-revision")).toBeVisible();
   await expect(page.getByText("Input unavailable. Source metadata is hidden.")).toBeVisible();
   await expect(page.getByText(/private-revision/)).toHaveCount(0);
+});
+
+test("audit form rejects one-sided metadata before sending a request", async ({ page }) => {
+  let createCalls = 0;
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "owner", enabled: false } }));
+  await page.route("**/sanctum/csrf-cookie", route => route.fulfill({ status: 204 }));
+  await page.route("**/api/jobs", route => {
+    if (route.request().method() === "POST") createCalls++;
+    return route.fulfill({ json: { jobs: [] } });
+  });
+
+  await page.goto("/jobs");
+  await page.getByLabel("IaC content").fill('resource "test" {}');
+  await page.getByLabel("Source revision").fill("only-revision");
+  await page.getByRole("button", { name: "Queue audit" }).click();
+
+  await expect(page.getByText("Enter both a source revision and observation time, or leave both blank")).toBeVisible();
+  expect(createCalls).toBe(0);
+});
+
+test("schedule creation submits a paired caller revision and observation time", async ({ page }) => {
+  let createdBody: Record<string, unknown> | undefined;
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "owner", enabled: false } }));
+  await page.route("**/sanctum/csrf-cookie", route => route.fulfill({ status: 204 }));
+  await page.route("**/api/schedules", route => {
+    if (route.request().method() === "POST") {
+      createdBody = route.request().postDataJSON();
+      return route.fulfill({ status: 201, json: { id: "schedule-created" } });
+    }
+    return route.fulfill({ json: { schedules: [] } });
+  });
+
+  await page.goto("/schedules");
+  await page.getByLabel("Scheduled IaC content").fill('resource "test" {}');
+  await page.getByLabel("Source revision").fill("commit-schedule");
+  await page.getByLabel("Source observed at").fill("2026-09-25T10:30");
+  await page.getByRole("button", { name: "Create schedule" }).click();
+
+  await expect.poll(() => createdBody).toMatchObject({
+    scope: { kind: "iac_text", content: 'resource "test" {}' },
+    sourceRevision: "commit-schedule",
+    sourceObservedAt: new Date("2026-09-25T10:30").toISOString(),
+  });
 });
