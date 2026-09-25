@@ -38,6 +38,7 @@ test("logout removes cached jobs and schedules across client navigation", async 
   await expect(page.getByText("Alice private audit", { exact: true })).toBeVisible();
   await openReviewPage(page, "Scheduled audits");
   await expect(page.getByText("Alice private schedule", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Alice, account menu" }).click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
 
@@ -68,6 +69,7 @@ test("a late private response cannot repopulate the cache after logout", async (
   });
   await page.goto("/schedules");
   await expect.poll(() => scheduleRequested).toBe(true);
+  await page.getByRole("button", { name: "Alice, account menu" }).click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   release();
@@ -87,7 +89,7 @@ test("an account change isolates private queries and clears local form state", a
   owner = "Bob";
   await page.clock.fastForward(46_000);
   await page.evaluate(() => window.dispatchEvent(new Event("visibilitychange")));
-  await expect(page.getByRole("banner").getByText("Bob", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Bob, account menu" })).toBeVisible();
   await expect(page.getByText("Bob private audit", { exact: true })).toBeVisible();
   await expect(page.getByText("Alice private audit", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("textbox", { name: "IaC content", exact: true })).toHaveValue("");
@@ -101,12 +103,14 @@ test("failed logout keeps the current account and lets the user retry", async ({
   await page.route("**/api/auth/logout", (route) => route.fulfill(fail ? { status: 503, json: { message: "Sign out unavailable" } } : { json: { ok: true } }));
   await page.goto("/jobs");
   await expect(page.getByText("Alice private audit", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Alice, account menu" }).click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page.getByText("Sign out unavailable", { exact: true })).toBeVisible();
   await expect(page.getByText("Alice private audit", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Sign out", exact: true })).toBeEnabled();
   await page.getByRole("button", { name: "Close toast", exact: true }).click();
   fail = false;
+  await page.getByRole("button", { name: "Alice, account menu" }).click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
 });
