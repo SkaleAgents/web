@@ -36,7 +36,10 @@ test("purged schedules require fresh input and deletion remains incomplete until
   let hidden = false;
   let deleted = false;
   let available = false;
+  let sourceRevision: string | null = null;
+  let sourceObservedAt: string | null = null;
   const schedule = () => ({ id, name: "Saved review", cronExpression: "0 * * * *", timezone: "UTC", enabled: false, scope: {}, specialists: ["sre"], nextRunAt: null,
+    sourceRevision: available ? sourceRevision : "private-old-revision", sourceObservedAt: available ? sourceObservedAt : "2026-09-25T10:00:00Z",
     retention: { inputAvailable: available, inputPurgeStatus: available ? "retained" : "purged", inputExpiresAt: null } });
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
   await page.route("**/api/account/retention", route => route.fulfill({ json: { ...policy, enabled: false } }));
@@ -44,7 +47,22 @@ test("purged schedules require fresh input and deletion remains incomplete until
   await page.route("**/api/schedules", route => route.fulfill({ json: { schedules: hidden ? [] : [schedule()] } }));
   await page.route(`**/api/schedules/${id}`, route => {
     if (route.request().method() === "PATCH") {
-      expect(route.request().postDataJSON()).toEqual({ scope: { kind: "iac_text", format: "auto", content: "fresh input" }, telemetry: {}, enabled: false });
+      const body = route.request().postDataJSON();
+      expect(body.scope).toMatchObject({ kind: "iac_text", format: "auto" });
+      expect(body.telemetry).toEqual({});
+      expect(body.enabled).toBe(false);
+      if (body.scope.content === "fresh input") {
+        expect(body.sourceRevision).toBe("new-revision");
+        expect(body.sourceObservedAt).toBe(new Date("2026-09-25T10:30:00").toISOString());
+        sourceRevision = body.sourceRevision;
+        sourceObservedAt = body.sourceObservedAt;
+      } else {
+        expect(body.scope.content).toBe("replacement without metadata");
+        expect(body).not.toHaveProperty("sourceRevision");
+        expect(body).not.toHaveProperty("sourceObservedAt");
+        sourceRevision = null;
+        sourceObservedAt = null;
+      }
       available = true;
       return route.fulfill({ json: schedule() });
     }
@@ -54,10 +72,20 @@ test("purged schedules require fresh input and deletion remains incomplete until
   });
   await page.goto("/schedules");
   await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeDisabled();
+  await expect(page.getByText("Input unavailable. Source metadata is hidden.")).toBeVisible();
+  await expect(page.getByText(/private-old-revision/)).toHaveCount(0);
   await page.getByRole("button", { name: "Supply fresh input" }).click();
+  await expect(page.getByRole("button", { name: "Replace input and keep paused" })).toBeDisabled();
   await page.getByLabel("Fresh IaC input").fill("fresh input");
+  await page.getByLabel("Source revision").last().fill("new-revision");
+  await page.getByLabel("Source observed at").last().fill("2026-09-25T10:30");
   await page.getByRole("button", { name: "Replace input and keep paused" }).click();
   await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeEnabled();
+  await expect(page.getByText("Caller-reported source revision: new-revision")).toBeVisible();
+  await page.getByRole("button", { name: "Supply fresh input" }).click();
+  await page.getByLabel("Fresh IaC input").fill("replacement without metadata");
+  await page.getByRole("button", { name: "Replace input and keep paused" }).click();
+  await expect(page.getByText("Caller-reported source revision: unknown")).toBeVisible();
   await page.getByRole("button", { name: "Delete schedule", exact: true }).click();
   await page.getByRole("button", { name: "Confirm schedule deletion" }).click();
   await expect(page.getByText("Schedule deletion incomplete.", { exact: false })).toBeVisible();
