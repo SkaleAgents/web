@@ -56,9 +56,9 @@ export async function purgeWorkspaceAuditSource(workspaceId: string, auditId: st
   }>(`${workspaceAuditPath(workspaceId, auditId)}/purge-source`, { method: "POST" });
 }
 
-export async function deleteWorkspaceAudit(workspaceId: string, auditId: string) {
-  await ensureCsrfCookie();
-  return apiFetch<void | { cleanupReceiptId: string; status: "pending" | "failed" }>(workspaceAuditPath(workspaceId, auditId), { method: "DELETE" });
+export async function deleteWorkspaceAudit(workspaceId: string, auditId: string, signal?: AbortSignal) {
+  await ensureCsrfCookie(signal);
+  return apiFetch<void | { cleanupReceiptId: string; status: "pending" | "failed" }>(workspaceAuditPath(workspaceId, auditId), { method: "DELETE", signal });
 }
 
 export function isWorkspaceAuditUnavailable(error: unknown): boolean {

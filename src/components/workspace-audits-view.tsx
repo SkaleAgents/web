@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Button, TextArea } from "@/components/ui";
@@ -106,6 +107,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
       if (selectedAuditId === auditId) setSelectedAuditId(null);
       void client.invalidateQueries({ queryKey: auditKey });
       void client.removeQueries({ queryKey: ["workspace-audit-detail", accountId, workspaceId, auditId] });
+      void client.removeQueries({ queryKey: ["workspace-audit-deletion-status", accountId, workspaceId, auditId] });
     },
   });
   const unavailable = unavailableQuery.data || [audits.error, detail.error, create.error, purge.error, remove.error].some(isWorkspaceAuditUnavailable);
@@ -115,7 +117,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
     const memberWorkspaceIds = new Set(workspaceQuery.data.map((item) => item.id));
     for (const query of client.getQueryCache().getAll()) {
       const [kind, cachedAccountId, cachedWorkspaceId] = query.queryKey;
-      if ((kind === "workspace-audits" || kind === "workspace-audit-detail" || kind === "workspace-audits-unavailable")
+      if ((kind === "workspace-audits" || kind === "workspace-audit-detail" || kind === "workspace-audit-deletion-status" || kind === "workspace-audits-unavailable")
         && cachedAccountId === accountId
         && typeof cachedWorkspaceId === "string"
         && !memberWorkspaceIds.has(cachedWorkspaceId)) {
@@ -150,6 +152,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
         <p className="workspace-kicker">Workspaces / Shared review</p>
         <h1 className="workspace-heading">{workspace.name} audits</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">Shared audit history for current workspace members. Workspace Watchtower, exports, and scheduled audits are not available here.</p>
+        <Link className="mt-3 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href="/workspaces">All workspaces</Link>
       </div>
       {canCreate && !unavailable && <form onSubmit={submit} className="max-w-3xl space-y-3 rounded-[10px] border border-line bg-canvas-elevated p-5">
         <h2 className="text-lg font-semibold text-ink">Start a shared IaC audit</h2>
@@ -171,7 +174,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
               <div className="flex gap-2"><Button variant="secondary" onClick={() => setSelectedAuditId(audit.id)}>Details</Button>{canManage && <Button variant="secondary" disabled={remove.isPending || audit.status === "queued" || audit.status === "running"} onClick={() => remove.mutate(audit.id)}>Delete</Button>}</div>
             </li>)}
           </ul>
-          {Object.entries(deleteStates).map(([auditId, state]) => <div key={auditId} className="flex flex-wrap items-center gap-3 rounded-[10px] border border-line p-3 text-sm" role="status"><span>Deletion {state} for audit {auditId.slice(0, 8)}.</span>{canManage && <Button variant="secondary" disabled={remove.isPending} onClick={() => remove.mutate(auditId)}>Retry deletion</Button>}</div>)}
+          {Object.entries(deleteStates).map(([auditId, state]) => <WorkspaceAuditDeletionStatus key={auditId} accountId={accountId} workspaceId={workspaceId} auditId={auditId} initialStatus={state} />)}
           {remove.isError && <p role="alert" className="text-sm text-danger">{remove.error.message}</p>}
         </section>
       )}
@@ -199,4 +202,33 @@ function AuditDetail({ detail, canManage, onPurge, purgePending, purgeError, onC
     {audit.findings?.length ? <div className="space-y-3"><h3 className="font-semibold text-ink">Findings</h3><ul className="space-y-3">{audit.findings.map((finding, index) => <li key={finding.id ?? `${finding.title}-${index}`} className="rounded-[10px] border border-line p-3"><p className="text-sm font-semibold text-ink">{finding.severity.toUpperCase()} · {finding.title}</p><p className="mt-1 text-sm text-ink-muted">{finding.detail}</p><p className="mt-2 text-xs text-ink-muted">{finding.resource} · {finding.specialist}</p></li>)}</ul></div> : <p className="text-sm text-ink-muted">No findings are available yet.</p>}
     {audit.steps?.length ? <div><h3 className="font-semibold text-ink">Audit activity</h3><ul className="mt-2 space-y-2">{audit.steps.map((step) => <li key={step.stepId} className="text-sm text-ink-muted">{step.agent}: {step.message}</li>)}</ul></div> : null}
   </section>;
+}
+
+function WorkspaceAuditDeletionStatus({ accountId, workspaceId, auditId, initialStatus }: {
+  accountId: string;
+  workspaceId: string;
+  auditId: string;
+  initialStatus: "pending" | "failed";
+}) {
+  const client = useQueryClient();
+  const status = useQuery({
+    queryKey: ["workspace-audit-deletion-status", accountId, workspaceId, auditId],
+    enabled: initialStatus === "pending",
+    initialData: { status: initialStatus },
+    queryFn: async ({ signal }) => {
+      if (client.getQueryData(currentUserOptions.queryKey)?.id !== accountId) throw new Error("Your account changed. Reload workspace access before continuing.");
+      const response = await deleteWorkspaceAudit(workspaceId, auditId, signal);
+      if (client.getQueryData(currentUserOptions.queryKey)?.id !== accountId) throw new Error("Your account changed. Reload workspace access before continuing.");
+      return { status: response?.status ?? "completed" as const };
+    },
+    refetchInterval: (query) => query.state.data?.status === "pending" || query.state.status === "error" ? 3000 : false,
+  });
+  const currentStatus = status.data?.status ?? initialStatus;
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-[10px] border border-line p-3 text-sm">
+      <p role="status">{currentStatus === "completed" ? "Audit deletion completed." : currentStatus === "failed" ? `Audit deletion incomplete for ${auditId.slice(0, 8)}.` : `Audit deletion pending for ${auditId.slice(0, 8)}. Checking status automatically.`}</p>
+      {(currentStatus === "failed" || status.isError) && <Button variant="secondary" disabled={status.isFetching} onClick={() => void status.refetch()}>Retry deletion</Button>}
+      {status.isError && <p role="alert" className="text-danger">{status.error.message}</p>}
+    </div>
+  );
 }

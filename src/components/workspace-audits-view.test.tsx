@@ -73,8 +73,8 @@ it("lets a workspace owner create, inspect, purge, and retry pending deletion th
   expect(await screen.findByText(/Purge status: pending/)).toBeInTheDocument();
   await userEvent.click(screen.getAllByRole("button", { name: "Close details" })[0]);
   await userEvent.click(await screen.findByRole("button", { name: "Delete" }));
-  expect(await screen.findByText(/Deletion pending for audit audit-a/)).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Retry deletion" })).toBeInTheDocument();
+  expect(await screen.findByText(/Audit deletion pending for audit-a/)).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Retry deletion" })).not.toBeInTheDocument();
   expect(fetcher).toHaveBeenCalledWith(expect.stringMatching(/\/api\/workspaces\/workspace-a\/audits(?:\/audit-a)?$/), expect.anything());
   expect(client.getQueryData(["workspace-audits", "account-a", "workspace-a"])).toBeDefined();
 });
@@ -105,14 +105,18 @@ it("lets viewers read details and never offers write actions", async () => {
 });
 
 it("does not request audits for a removed membership and keeps cache account/workspace scoped", async () => {
-  const fetcher = routeFetch({ workspaceIds: ["another-workspace"] });
+  const fetcher = routeFetch({ workspaceIds: ["workspace-b"] });
   const { client, renderPage } = setup(fetcher);
   client.setQueryData(["workspace-audits", "account-a", "workspace-a"], [audit]);
+  client.setQueryData(["workspace-audit-detail", "account-a", "workspace-a", "audit-a"], audit);
+  client.setQueryData(["workspace-audits", "account-a", "workspace-b"], [{ ...audit, id: "audit-b", workspaceId: "workspace-b" }]);
   renderPage();
 
   expect(await screen.findByRole("heading", { name: "Workspace unavailable" })).toBeInTheDocument();
   await waitFor(() => expect(fetcher).not.toHaveBeenCalledWith(expect.stringContaining("/api/workspaces/workspace-a/audits"), expect.anything()));
   await waitFor(() => expect(client.getQueryData(["workspace-audits", "account-a", "workspace-a"])).toBeUndefined());
+  expect(client.getQueryData(["workspace-audit-detail", "account-a", "workspace-a", "audit-a"])).toBeUndefined();
+  expect(client.getQueryData(["workspace-audits", "account-a", "workspace-b"])).toEqual([{ ...audit, id: "audit-b", workspaceId: "workspace-b" }]);
   expect(client.getQueryData(["workspace-audits", "account-b", "workspace-a"])).toBeUndefined();
 });
 
@@ -121,6 +125,7 @@ it("clears shared audit list, detail, and rollout cache on sign-out", async () =
   client.setQueryData(["user"], { id: "account-a" });
   client.setQueryData(["workspace-audits", "account-a", "workspace-a"], [audit]);
   client.setQueryData(["workspace-audit-detail", "account-a", "workspace-a", "audit-a"], audit);
+  client.setQueryData(["workspace-audit-deletion-status", "account-a", "workspace-a", "audit-a"], { status: "pending" });
   client.setQueryData(["workspace-audits-unavailable", "account-a", "workspace-a"], true);
 
   await setSessionUser(client, null);
