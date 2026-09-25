@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Source_Sans_3, Syne } from "next/font/google";
+import { IBM_Plex_Mono, Source_Sans_3 } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 import { AppShell } from "@/components/app-shell";
 import { FooterBadges } from "@/components/footer-badges";
 
-const syne = Syne({
+const syne = localFont({
+  src: "./fonts/Syne.ttf",
   variable: "--font-syne",
-  subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: "600 700",
+  display: "swap",
 });
 
 const sourceSans = Source_Sans_3({

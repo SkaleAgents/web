@@ -7,6 +7,7 @@ import { apiFetch, ensureCsrfCookie, type SwarmJob, type WatchtowerSession, watc
 import { AdvisoryBookingRequest } from "@/components/advisory-booking-request";
 import { Button, LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
+import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retention-controls";
 
 const AUDIT_SPECIALISTS = ["devsecops", "sre", "mlops", "scaling"] as const;
 const specialistDetails = {
@@ -25,12 +26,13 @@ export default function JobsPage() {
   const [content, setContent] = useState("");
   const [telemetry, setTelemetry] = useState("");
   const [status, setStatus] = useState("all");
+  const [deletions, setDeletions] = useState<Record<string, "pending" | "failed" | "completed">>({});
   const [specialists, setSpecialists] = useState<AuditSpecialist[]>(["devsecops", "sre"]);
   const jobs = useQuery({
     queryKey: jobsKey,
     enabled: Boolean(user.data),
     queryFn: async ({ signal }) => (await apiFetch<{ jobs: SwarmJob[] }>("/api/jobs", { signal })).jobs,
-    refetchInterval: (query) => query.state.data?.some((job) => job.status === "queued" || job.status === "running") ? 5000 : false,
+    refetchInterval: (query) => query.state.data?.some((job) => job.status === "queued" || job.status === "running" || job.retention?.inputPurgeStatus === "pending" || job.retention?.inputPurgeStatus === "failed") ? 5000 : false,
   });
   const create = useMutation({
     mutationFn: async () => {
@@ -127,6 +129,7 @@ export default function JobsPage() {
       </section>
 
       <section className="space-y-3">
+        {Object.entries(deletions).map(([jobId, initialStatus]) => <JobDeletionStatus key={jobId} jobId={jobId} initialStatus={initialStatus} />)}
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your jobs</h2><LinkButton href="/schedules" variant="secondary">Set up recurring reviews</LinkButton></div>
         <div className="flex flex-wrap gap-2">{["all", "queued", "running", "completed", "failed"].map((item) => <button key={item} type="button" className="filter-chip capitalize" aria-pressed={status === item} onClick={() => setStatus(item)}>{item === "all" ? "All jobs" : item} {jobs.data ? `(${jobs.data.filter((job) => item === "all" || job.status === item).length})` : ""}</button>)}</div>
         {openReview.isError && <p role="alert" className="text-sm text-danger">{openReview.error.message}</p>}
@@ -158,6 +161,7 @@ export default function JobsPage() {
                   Open Watchtower
                 </Button>
               </div>
+              {user.data && <JobRetentionControls job={job} accountId={user.data.id} onDeletion={(jobId, state) => setDeletions(current => ({ ...current, [jobId]: state }))} />}
             </li>
           ))}
         </ul>

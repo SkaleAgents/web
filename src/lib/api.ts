@@ -164,6 +164,13 @@ export type SwarmJob = {
   scheduleId?: string | null;
   scope: Record<string, unknown>;
   sourcePurged: boolean;
+  retention?: {
+    inputAvailable: boolean;
+    inputPurgeStatus: "retained" | "pending" | "purged" | "failed";
+    inputExpiresAt: string | null;
+    historyExpiresAt: string | null;
+    inputPurgedAt: string | null;
+  };
   specialists: string[];
   partial: boolean;
   summary?: string;
@@ -174,6 +181,15 @@ export type SwarmJob = {
   tasks?: Array<{ specialist: string; status: string; skipReason?: string }>;
   steps?: SwarmStep[];
 };
+
+export type InputCleanupResponse = {
+  ok: boolean;
+  sourcePurged: boolean;
+  inputPurgeStatus: "pending" | "failed" | "purged";
+  cleanupReceiptId: string;
+};
+
+export type DeletionPendingResponse = { cleanupReceiptId: string; status: "pending" | "failed" };
 
 export type SwarmSchedule = {
   id: string;
