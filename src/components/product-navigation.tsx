@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { advisoryAgreementsEnabled } from "@/lib/api";
 
 const groups = [
   { label: "Explore", items: [
@@ -39,9 +40,13 @@ export function ProductNavigation({ staff = false }: { staff?: boolean }) {
   const [open, setOpen] = useState<string | null>(null);
   const nav = useRef<HTMLElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const navigationGroups = groups.map((group) => group.label === "Review" && staff ? {
+  const agreementsEnabled = advisoryAgreementsEnabled();
+  const navigationGroups = groups.map((group) => group.label === "Review" ? {
     ...group,
-    items: [...group.items, { href: "/staff/advisory-bookings", label: "Advisory bookings", detail: "Assign requests and record advisory work.", icon: "calendar" as const }],
+    items: [
+      ...group.items.filter((item) => agreementsEnabled || item.href !== "/advisory-bookings"),
+      ...(agreementsEnabled && staff ? [{ href: "/staff/advisory-bookings", label: "Advisory bookings", detail: "Assign requests and record advisory work.", icon: "calendar" as const }] : []),
+    ],
   } : group);
   function cancelClose() {
     if (closeTimer.current !== null) clearTimeout(closeTimer.current);
