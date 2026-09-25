@@ -32,6 +32,38 @@ test("changed-account policy responses cannot offer acknowledgement", async ({ p
   await expect(page.getByRole("button", { name: "I've read this retention policy" })).toHaveCount(0);
 });
 
+test("reloads a fresh acknowledgement token after a rolling-deploy conflict", async ({ page }) => {
+  let noticeFetches = 0;
+  let acknowledgements = 0;
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: [] } }));
+  await page.route("**/sanctum/csrf-cookie", route => route.fulfill({ status: 204 }));
+  await page.route("**/api/account/retention", route => {
+    noticeFetches++;
+    return route.fulfill({ json: { ...policy, noticeToken: noticeFetches === 1 ? "pre-hash-token" : "hash-bound-token" } });
+  });
+  await page.route("**/api/account/retention/acknowledge", route => {
+    acknowledgements++;
+    const token = route.request().postDataJSON().noticeToken;
+    if (acknowledgements === 1) {
+      expect(token).toBe("pre-hash-token");
+      return route.fulfill({ status: 409, json: { error: "Account or notice changed. Reload the policy notice." } });
+    }
+    expect(token).toBe("hash-bound-token");
+    return route.fulfill({ json: { ...policy, noticeToken: token, noticeArchived: true, noticeDeliveredAt: "2026-09-25T00:00:00Z", legacyNotBefore: "2026-10-25T00:00:00Z" } });
+  });
+
+  await page.goto("/jobs");
+  await expect(page.getByText(policy.notice[1])).toBeVisible();
+  await page.getByRole("button", { name: "I've read this retention policy" }).click();
+  await expect(page.getByText("Account or notice changed. Reload the policy notice.")).toBeVisible();
+  await page.getByRole("button", { name: "Reload retention policy" }).click();
+  await expect.poll(() => noticeFetches).toBe(2);
+  await page.getByRole("button", { name: "I've read this retention policy" }).click();
+  await expect(page.getByText("Notice recorded", { exact: false })).toBeVisible();
+  expect(acknowledgements).toBe(2);
+});
+
 test("purged schedules require fresh input and deletion remains incomplete until confirmed by the API", async ({ page }) => {
   let hidden = false;
   let deleted = false;
