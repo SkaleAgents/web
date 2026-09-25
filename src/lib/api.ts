@@ -330,12 +330,13 @@ export type AdvisoryDelivery = {
 
 export type AdvisoryBookingHistoryEntry = {
   id: string;
-  type: "assignment" | "status" | "appointment" | "billing";
+  type: "assignment" | "status" | "appointment" | "delivery" | "billing";
   actorRef: string;
   fromStatus: AdvisoryBooking["status"] | null;
   toStatus: AdvisoryBooking["status"] | null;
   assigneeRef: string | null;
   billing: AdvisoryBooking["billing"];
+  changedFields: string[] | null;
   createdAt: string;
 };
 

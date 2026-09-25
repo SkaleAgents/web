@@ -112,10 +112,11 @@ function BillingEditor({ booking, disabled, save }: EditorProps) {
   );
 }
 
-function HistoryDescription({ entry }: { entry: AdvisoryBookingHistoryEntry }) {
+export function HistoryDescription({ entry }: { entry: AdvisoryBookingHistoryEntry }) {
   if (entry.type === "status") return <p>{entry.fromStatus ? bookingStatusLabels[entry.fromStatus] : "Unknown"} to {entry.toStatus ? bookingStatusLabels[entry.toStatus] : "Unknown"}</p>;
   if (entry.type === "assignment") return <p className="break-all">Assigned to {entry.assigneeRef ?? "unassigned"}</p>;
   if (entry.type === "appointment") return <p>Confirmed or replaced appointment</p>;
+  if (entry.type === "delivery") return <p>Delivery handoff updated ({(entry.changedFields ?? []).join(", ") || "details omitted"})</p>;
   return <p>{entry.billing.billableMinutes ?? "Not recorded"} minutes · {entry.billing.feeCents ?? "Not recorded"} cents · {entry.billing.currency ?? "No currency"}</p>;
 }
 

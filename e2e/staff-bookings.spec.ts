@@ -48,6 +48,7 @@ test("staff can filter, assign, complete, and bill through the exact API contrac
         id: String(mutations.length), type: action as "status" | "assignment" | "billing", actorRef: staff.id,
         fromStatus: action === "status" ? previous : null, toStatus: body.status ?? null,
         assigneeRef: body.assigneeRef ?? null, billing: body.billing ?? { billableMinutes: null, feeCents: null, currency: null },
+        changedFields: null,
         createdAt: "2026-09-24T10:00:00Z",
       }, ...booking.history];
     }
@@ -191,7 +192,7 @@ test("staff confirms a separate timezone-aware appointment before scheduling", a
       booking = action === "appointment"
         ? { ...booking, version: booking.version + 1, appointment: { confirmedWindow: body.confirmedWindow, confirmedAt: "2026-09-25T18:00:00Z" } }
         : { ...booking, version: booking.version + 1, status: body.status };
-      if (action === "appointment") booking.history.unshift({ id: "appointment-event", type: "appointment", actorRef: staff.id, fromStatus: null, toStatus: null, assigneeRef: null, billing: { billableMinutes: null, feeCents: null, currency: null }, createdAt: "2026-09-25T18:00:00Z" });
+      if (action === "appointment") booking.history.unshift({ id: "appointment-event", type: "appointment", actorRef: staff.id, fromStatus: null, toStatus: null, assigneeRef: null, billing: { billableMinutes: null, feeCents: null, currency: null }, changedFields: null, createdAt: "2026-09-25T18:00:00Z" });
     }
     await route.fulfill({ json: booking });
   });
