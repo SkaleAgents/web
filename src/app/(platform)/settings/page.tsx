@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie, type EmailPreferences, type NotificationSettings } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { Button, LinkButton } from "@/components/ui";
+import { RetentionNotice } from "@/components/retention-notice";
 
 const preferences: Array<{ key: keyof EmailPreferences; label: string; detail: string }> = [
   { key: "auditCompleted", label: "Completed audits", detail: "A link to your results when a manual or scheduled audit finishes, including partial results." },
@@ -29,7 +30,7 @@ export default function SettingsPage() {
       ) : user.isPending ? (
         <p className="text-sm text-ink-muted">Loading your account…</p>
       ) : user.data ? (
-        <EmailSettings key={user.data.id} accountId={user.data.id} />
+        <div key={user.data.id} className="space-y-8"><EmailSettings accountId={user.data.id} /><RetentionNotice accountId={user.data.id} /></div>
       ) : (
         <p className="text-sm text-ink-muted">Use Google sign-in in the header to manage email notifications.</p>
       )}

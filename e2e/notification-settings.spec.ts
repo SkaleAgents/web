@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "alice", enabled: false } }));
+});
+
 function settings(owner = "alice") {
   return {
     accountId: owner,
@@ -89,6 +93,7 @@ test("guests see the header sign-in and make no private preference requests", as
 
 test("account changes discard the previous email address and preferences", async ({ page }) => {
   let owner = "alice";
+  await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: owner, enabled: false } }));
   await page.clock.install();
   await page.route("**/api/user", (route) => route.fulfill({ json: { id: owner, displayName: owner } }));
   await page.route("**/api/account/notifications", (route) => route.fulfill({ json: {

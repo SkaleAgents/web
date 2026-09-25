@@ -208,6 +208,18 @@ export type SwarmSchedule = {
   lastError: string | null;
   createdAt: string;
   updatedAt: string;
+  retention?: Omit<NonNullable<SwarmJob["retention"]>, "historyExpiresAt"> & { snapshotId: string; policyVersion: string | null; pausedAt: string | null };
+};
+
+export type RetentionPolicy = {
+  accountId: string;
+  enabled: boolean;
+  version: string;
+  notice: string[];
+  noticeDeliveredAt: string | null;
+  legacyNotBefore: string | null;
+  noticeArchived: boolean;
+  noticeToken: string;
 };
 
 export type SwarmStep = {

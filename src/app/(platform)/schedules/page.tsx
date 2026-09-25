@@ -6,6 +6,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie, type SwarmSchedule } from "@/lib/api";
 import { Button, FieldLabel, LinkButton, Select, TextArea, TextInput } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
+import { ScheduleDeletionStatus, ScheduleRetentionControls } from "@/components/schedule-retention-controls";
+import { RetentionNotice } from "@/components/retention-notice";
 
 const timezones = ["UTC", "America/Los_Angeles", "America/New_York", "Europe/London", "Europe/Berlin", "Asia/Dhaka", "Asia/Kolkata", "Asia/Singapore", "Asia/Tokyo", "Australia/Sydney"];
 const cadencePresets = [
@@ -24,11 +26,13 @@ export default function SchedulesPage() {
   const [timezone, setTimezone] = useState("UTC");
   const [content, setContent] = useState("");
   const [webhookUrl, setWebhookUrl] = useState("");
+  const [deletions, setDeletions] = useState<Record<string, "pending" | "failed" | "completed">>({});
 
   const schedules = useQuery({
     queryKey: schedulesKey,
     enabled: Boolean(user.data),
     queryFn: async ({ signal }) => (await apiFetch<{ schedules: SwarmSchedule[] }>("/api/schedules", { signal })).schedules,
+    refetchInterval: query => query.state.data?.some(schedule => ["pending", "failed"].includes(schedule.retention?.inputPurgeStatus ?? "")) ? 5000 : false,
   });
 
   const create = useMutation({
@@ -51,27 +55,9 @@ export default function SchedulesPage() {
     },
   });
 
-  const update = useMutation({
-    mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
-      await ensureCsrfCookie();
-      return apiFetch<SwarmSchedule>(`/api/schedules/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ enabled }),
-      });
-    },
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: schedulesKey }),
-  });
-
-  const remove = useMutation({
-    mutationFn: async (id: string) => {
-      await ensureCsrfCookie();
-      return apiFetch<void>(`/api/schedules/${id}`, { method: "DELETE" });
-    },
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: schedulesKey }),
-  });
-
   return (
     <main className="space-y-8">
+      {user.data && <RetentionNotice key={user.data.id} accountId={user.data.id} />}
       <div className="workspace-intro">
         <p className="workspace-kicker">Review / Make it repeatable</p>
         <h1 className="workspace-heading">Scheduled audits</h1>
@@ -124,7 +110,7 @@ export default function SchedulesPage() {
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your schedules</h2><LinkButton href="/jobs" variant="secondary">View audit results</LinkButton></div>
-        {(update.isError || remove.isError) && <p role="alert" className="text-sm text-danger">{update.error?.message ?? remove.error?.message}</p>}
+        {Object.entries(deletions).map(([id, initialStatus]) => <ScheduleDeletionStatus key={id} id={id} initialStatus={initialStatus} />)}
         {(user.isPending || user.data && schedules.isPending) && <p className="text-sm text-ink-muted">Loading schedules…</p>}
         {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Google sign-in in the header to manage your schedules.</p>}
         {schedules.isError && (
@@ -143,14 +129,7 @@ export default function SchedulesPage() {
                 <p className="mt-1 text-xs text-ink-muted">Next run: {schedule.nextRunAt ? new Date(schedule.nextRunAt).toLocaleString() : "paused"}{schedule.webhookConfigured ? " · webhook enabled" : ""}</p>
                 {schedule.lastError && <p className="mt-1 text-xs text-danger">{schedule.lastError}</p>}
               </div>
-              <div className="flex gap-2">
-                <Button type="button" variant="secondary" disabled={update.isPending} onClick={() => update.mutate({ id: schedule.id, enabled: !schedule.enabled })}>
-                  {schedule.enabled ? "Pause" : "Resume"}
-                </Button>
-                <Button type="button" variant="ghost" disabled={remove.isPending} onClick={() => remove.mutate(schedule.id)}>
-                  Delete
-                </Button>
-              </div>
+              {user.data && <ScheduleRetentionControls schedule={schedule} accountId={user.data.id} onDeletion={(id, status) => setDeletions(current => ({ ...current, [id]: status }))} />}
             </li>
           ))}
         </ul>
