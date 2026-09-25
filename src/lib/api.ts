@@ -185,11 +185,10 @@ export type SwarmJob = {
 export type InputCleanupResponse = {
   ok: boolean;
   sourcePurged: boolean;
-  inputPurgeStatus: "pending" | "failed" | "purged";
-  cleanupReceiptId: string;
+  retention: Pick<NonNullable<SwarmJob["retention"]>, "inputPurgeStatus" | "inputPurgedAt">;
 };
 
-export type DeletionPendingResponse = { cleanupReceiptId: string; status: "pending" | "failed" };
+export type DeletionPendingResponse = { ok: true; status: "pending" | "processing" | "failed" };
 
 export type SwarmSchedule = {
   id: string;
@@ -209,6 +208,17 @@ export type SwarmSchedule = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type SwarmSchedulePurgeResponse = {
+  ok: boolean;
+  sourcePurged: boolean;
+  dispatchedJobId: string | null;
+  message: string;
+};
+
+export type SwarmJobPurgeResponse = InputCleanupResponse;
+
+export type SwarmJobDeleteResponse = DeletionPendingResponse;
 
 export type SwarmStep = {
   jobId: string;

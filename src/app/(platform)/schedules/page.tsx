@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, ensureCsrfCookie, type SwarmSchedule } from "@/lib/api";
+import { apiFetch, ensureCsrfCookie, type SwarmSchedule, type SwarmSchedulePurgeResponse } from "@/lib/api";
 import { Button, FieldLabel, LinkButton, Select, TextArea, TextInput } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 
@@ -24,6 +24,7 @@ export default function SchedulesPage() {
   const [timezone, setTimezone] = useState("UTC");
   const [content, setContent] = useState("");
   const [webhookUrl, setWebhookUrl] = useState("");
+  const [replacementInputs, setReplacementInputs] = useState<Record<string, string>>({});
 
   const schedules = useQuery({
     queryKey: schedulesKey,
@@ -68,6 +69,35 @@ export default function SchedulesPage() {
       return apiFetch<void>(`/api/schedules/${id}`, { method: "DELETE" });
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: schedulesKey }),
+  });
+
+  const purgeInput = useMutation({
+    mutationFn: async (id: string) => {
+      await ensureCsrfCookie();
+      return apiFetch<SwarmSchedulePurgeResponse>(`/api/schedules/${id}/purge-source`, { method: "POST" });
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: schedulesKey }),
+        queryClient.invalidateQueries({ queryKey: ["swarm-jobs", user.data?.id ?? "guest"] }),
+      ]);
+    },
+  });
+
+  const replaceInput = useMutation({
+    mutationFn: async ({ id, input }: { id: string; input: string }) => {
+      await ensureCsrfCookie();
+      return apiFetch<SwarmSchedule>(`/api/schedules/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ scope: { kind: "iac_text", format: "auto", content: input } }),
+      });
+    },
+    onSuccess: async (_schedule, variables) => {
+      setReplacementInputs((current) => current[variables.id] === variables.input
+        ? { ...current, [variables.id]: "" }
+        : current);
+      await queryClient.invalidateQueries({ queryKey: schedulesKey });
+    },
   });
 
   return (
@@ -127,6 +157,8 @@ export default function SchedulesPage() {
         {(update.isError || remove.isError) && <p role="alert" className="text-sm text-danger">{update.error?.message ?? remove.error?.message}</p>}
         {(user.isPending || user.data && schedules.isPending) && <p className="text-sm text-ink-muted">Loading schedules…</p>}
         {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Google sign-in in the header to manage your schedules.</p>}
+        {(update.isError || remove.isError || purgeInput.isError || replaceInput.isError) && <p role="alert" className="text-sm text-danger">{update.error?.message ?? remove.error?.message ?? purgeInput.error?.message ?? replaceInput.error?.message}</p>}
+        {purgeInput.data && <p role="status" className="text-sm text-ink-muted">{purgeInput.data.message}{purgeInput.data.dispatchedJobId ? ` Dispatched audit ${purgeInput.data.dispatchedJobId} keeps its own input copy. Purging this schedule does not purge that audit; purge it separately if needed.` : ""}</p>}
         {schedules.isError && (
           <div className="rounded-[10px] border border-line p-4">
             <p className="text-sm text-danger">{schedules.error.message}</p>
@@ -142,11 +174,46 @@ export default function SchedulesPage() {
                 <p className="mt-1 font-mono text-xs text-ink-muted">{schedule.cronExpression} · {schedule.timezone} · {schedule.enabled ? "enabled" : "paused"}</p>
                 <p className="mt-1 text-xs text-ink-muted">Next run: {schedule.nextRunAt ? new Date(schedule.nextRunAt).toLocaleString() : "paused"}{schedule.webhookConfigured ? " · webhook enabled" : ""}</p>
                 {schedule.lastError && <p className="mt-1 text-xs text-danger">{schedule.lastError}</p>}
+                {((!schedule.scope?.content && !schedule.scope?.ref) || Boolean(replacementInputs[schedule.id])) && (
+                  <div className="mt-3 max-w-xl rounded-lg border border-line bg-canvas-elevated p-3">
+                    <p className="text-sm font-medium text-ink">{schedule.scope?.content || schedule.scope?.ref ? "Unsaved snapshot draft" : "Input snapshot purged"}</p>
+                    <p className="mt-1 text-xs text-ink-muted">{schedule.scope?.content || schedule.scope?.ref ? "Save this newer draft to replace the schedule input." : "This schedule stays paused until you submit a fresh IaC snapshot. Previously dispatched audits keep their own copies."}</p>
+                    <TextArea
+                      value={replacementInputs[schedule.id] ?? ""}
+                      onChange={(event) => setReplacementInputs((current) => ({ ...current, [schedule.id]: event.target.value }))}
+                      className="mt-2 min-h-24"
+                      placeholder={'resource "aws_security_group" "web" {}'}
+                      aria-label={`Fresh IaC snapshot for ${schedule.name}`}
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="mt-2"
+                      disabled={!replacementInputs[schedule.id]?.trim() || replaceInput.isPending}
+                      onClick={() => replaceInput.mutate({ id: schedule.id, input: replacementInputs[schedule.id] ?? "" })}
+                    >
+                      Save fresh snapshot
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="flex gap-2">
-                <Button type="button" variant="secondary" disabled={update.isPending} onClick={() => update.mutate({ id: schedule.id, enabled: !schedule.enabled })}>
+                <Button type="button" variant="secondary" disabled={update.isPending || (!schedule.enabled && !schedule.scope?.content && !schedule.scope?.ref)} onClick={() => update.mutate({ id: schedule.id, enabled: !schedule.enabled })}>
                   {schedule.enabled ? "Pause" : "Resume"}
                 </Button>
+                {Boolean(schedule.scope?.content || schedule.scope?.ref) && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    disabled={purgeInput.isPending}
+                    onClick={() => {
+                      const confirmed = window.confirm("Purge this schedule's saved input and pause future runs? Any already dispatched job keeps a separate copy.");
+                      if (confirmed) purgeInput.mutate(schedule.id);
+                    }}
+                  >
+                    Purge input
+                  </Button>
+                )}
                 <Button type="button" variant="ghost" disabled={remove.isPending} onClick={() => remove.mutate(schedule.id)}>
                   Delete
                 </Button>

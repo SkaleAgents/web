@@ -143,6 +143,234 @@ test("schedule preset and timezone reach the API without altering the scope", as
   await expect.poll(() => saved).toMatchObject({ cronExpression: "0 9 * * 1-5", timezone: "Asia/Dhaka", scope: { content: "kind: Deployment" } });
 });
 
+test("purging a schedule pauses it and requires a fresh snapshot before resume", async ({ page }) => {
+  await page.route("**/api/user", (route) => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
+  page.on("dialog", (dialog) => dialog.accept());
+  const schedule: Record<string, unknown> = {
+    id: "schedule-1",
+    name: "Hourly security review",
+    cronExpression: "0 * * * *",
+    timezone: "UTC",
+    scope: { kind: "iac_text", format: "terraform", content: "private input" },
+    specialists: ["sre"],
+    webhookConfigured: false,
+    enabled: true,
+    nextRunAt: new Date(Date.now() + 60_000).toISOString(),
+    lastRunAt: null,
+    lastJobId: "job-dispatched",
+    lastNotifiedJobId: null,
+    lastError: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  await page.route("**/api/schedules**", async (route) => {
+    const request = route.request();
+    if (request.method() === "GET") {
+      await route.fulfill({ json: { schedules: [schedule] } });
+    } else if (request.method() === "POST" && request.url().endsWith("/purge-source")) {
+      schedule.scope = { kind: "iac_text", format: "terraform" };
+      schedule.enabled = false;
+      schedule.nextRunAt = null;
+      await route.fulfill({ json: { ok: true, sourcePurged: true, dispatchedJobId: "job-dispatched", message: "The schedule snapshot was purged." } });
+    } else if (request.method() === "PATCH") {
+      const body = request.postDataJSON() as { enabled?: boolean; scope?: Record<string, unknown> };
+      if (body.scope) schedule.scope = body.scope;
+      if (body.enabled !== undefined) schedule.enabled = body.enabled;
+      await route.fulfill({ json: schedule });
+    }
+  });
+
+  await page.goto("/schedules");
+  await page.getByRole("button", { name: "Purge input", exact: true }).click();
+  await expect(page.getByText("Input snapshot purged")).toBeVisible();
+  await expect(page.getByText(/Dispatched audit job-dispatched keeps its own input copy/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeDisabled();
+
+  await page.getByRole("textbox", { name: "Fresh IaC snapshot for Hourly security review" }).fill("new snapshot");
+  await page.getByRole("button", { name: "Save fresh snapshot" }).click();
+  await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeEnabled();
+  await page.getByRole("button", { name: "Resume", exact: true }).click();
+  await expect.poll(() => schedule.enabled).toBe(true);
+});
+
+test("editing a replacement snapshot during save preserves the newer local draft", async ({ page }) => {
+  await page.route("**/api/user", (route) => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
+  const schedule: Record<string, unknown> = {
+    id: "schedule-replacement",
+    name: "Purged schedule",
+    cronExpression: "0 * * * *",
+    timezone: "UTC",
+    scope: { kind: "iac_text", format: "terraform" },
+    specialists: ["sre"],
+    webhookConfigured: false,
+    enabled: false,
+    nextRunAt: null,
+    lastRunAt: null,
+    lastJobId: null,
+    lastNotifiedJobId: null,
+    lastError: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  await page.route("**/api/schedules**", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({ json: { schedules: [schedule] } });
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    const body = route.request().postDataJSON() as { scope: Record<string, unknown> };
+    schedule.scope = body.scope;
+    await route.fulfill({ json: schedule });
+  });
+
+  await page.goto("/schedules");
+  const replacement = page.getByRole("textbox", { name: "Fresh IaC snapshot for Purged schedule" });
+  await replacement.fill("first snapshot");
+  await page.getByRole("button", { name: "Save fresh snapshot" }).click();
+  await replacement.fill("newer unsaved draft");
+  await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeEnabled();
+  await expect(replacement).toHaveValue("newer unsaved draft");
+});
+
+test("job input purge does not report completion while cleanup is pending", async ({ page }) => {
+  await page.route("**/api/user", (route) => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
+  const retention = {
+    inputAvailable: true,
+    inputPurgeStatus: "retained",
+    inputExpiresAt: null,
+    historyExpiresAt: null,
+    inputPurgedAt: null,
+  };
+  const job: Record<string, unknown> = {
+    id: "job-1",
+    status: "completed",
+    requestedBy: "owner-1",
+    scheduleId: null,
+    scope: { kind: "iac_text", format: "terraform" },
+    sourcePurged: false,
+    retention,
+    specialists: ["sre"],
+    partial: false,
+    summary: "Review complete",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  await page.route("**/api/jobs**", async (route) => {
+    if (route.request().method() === "POST") {
+      job.retention = { ...retention, inputAvailable: false, inputPurgeStatus: "pending" };
+      await route.fulfill({ status: 202, json: { ok: true, sourcePurged: false, retention: { inputPurgeStatus: "pending", inputPurgedAt: null } } });
+    } else {
+      await route.fulfill({ json: { jobs: [job] } });
+    }
+  });
+
+  await page.goto("/jobs");
+  await page.getByRole("button", { name: "Purge audit input", exact: true }).click();
+  await page.getByRole("button", { name: "Confirm input purge", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Input cleanup pending. Input is hidden while removal finishes.");
+});
+
+test("legacy sourcePurged flag does not skip retention cleanup status polling", async ({ page }) => {
+  await page.route("**/api/user", (route) => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
+  let purgeRequested = false;
+  let listReads = 0;
+  const job: Record<string, unknown> = {
+    id: "legacy-job",
+    status: "completed",
+    requestedBy: "owner-1",
+    scope: { kind: "iac_text", format: "terraform" },
+    sourcePurged: true,
+    specialists: ["sre"],
+    partial: false,
+    createdAt: new Date().toISOString(),
+  };
+  await page.route("**/api/jobs**", async (route) => {
+    if (route.request().method() === "POST") {
+      purgeRequested = true;
+      job.retention = { inputAvailable: false, inputPurgeStatus: "pending", inputExpiresAt: null, historyExpiresAt: null, inputPurgedAt: null };
+      await route.fulfill({ status: 202, json: { ok: true, sourcePurged: false, retention: { inputAvailable: false, inputPurgeStatus: "pending", inputExpiresAt: null, historyExpiresAt: null, inputPurgedAt: null } } });
+      return;
+    }
+    listReads += 1;
+    const retention = purgeRequested && listReads >= 3
+      ? { inputAvailable: false, inputPurgeStatus: "purged", inputExpiresAt: null, historyExpiresAt: null, inputPurgedAt: new Date().toISOString() }
+      : job.retention;
+    await route.fulfill({ json: { jobs: [{ ...job, ...(retention ? { retention } : {}) }] } });
+  });
+
+  await page.goto("/jobs");
+  await expect(page.getByText("Source content was previously purged. Other input may remain.")).toBeVisible();
+  await page.getByRole("button", { name: "Purge audit input", exact: true }).click();
+  await page.getByRole("button", { name: "Confirm input purge", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Input cleanup pending.");
+  await expect(page.getByRole("status")).toContainText("Input cleanup completed across live stores.", { timeout: 7000 });
+});
+
+test("history deletion keeps polling an accepted cleanup until it completes", async ({ page }) => {
+  await page.route("**/api/user", (route) => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
+  let deleteCalls = 0;
+  await page.route("**/api/jobs**", async (route) => {
+    if (route.request().method() === "DELETE") {
+      deleteCalls += 1;
+      if (deleteCalls < 3) await route.fulfill({ status: 202, json: { ok: true, status: "processing" } });
+      else await route.fulfill({ status: 204 });
+      return;
+    }
+    await route.fulfill({ json: { jobs: deleteCalls > 0 ? [] : [{
+      id: "job-pending-delete",
+      status: "completed",
+      requestedBy: "owner-1",
+      scope: { kind: "iac_text", format: "terraform" },
+      sourcePurged: false,
+      specialists: ["sre"],
+      partial: false,
+      createdAt: new Date().toISOString(),
+    }] } });
+  });
+
+  await page.goto("/jobs");
+  await page.getByRole("button", { name: "Delete audit", exact: true }).click();
+  await page.getByRole("button", { name: "Confirm audit deletion", exact: true }).click();
+  await expect(page.getByText("Audit deletion is processing. Status refreshes automatically.")).toBeVisible();
+  await expect.poll(() => deleteCalls).toBeGreaterThanOrEqual(2);
+  await expect(page.getByText("Your first review starts above.")).toBeVisible();
+  await expect(page.getByText("Audit deletion completed across live stores.")).toBeVisible({ timeout: 7000 });
+});
+
+test("terminal audit history can be deleted after confirmation", async ({ page }) => {
+  await page.route("**/api/user", (route) => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
+  let deleted = false;
+  await page.route("**/api/jobs**", async (route) => {
+    if (route.request().method() === "DELETE") {
+      deleted = true;
+      await route.fulfill({ status: 204 });
+    } else {
+      await route.fulfill({ json: { jobs: deleted ? [] : [{
+        id: "job-delete",
+        status: "completed",
+        requestedBy: "owner-1",
+        scope: { kind: "iac_text", format: "terraform" },
+        sourcePurged: false,
+        specialists: ["sre"],
+        partial: false,
+        summary: "Review complete",
+        createdAt: new Date().toISOString(),
+      }] } });
+    }
+  });
+
+  await page.goto("/jobs");
+  await page.getByRole("button", { name: "Delete audit", exact: true }).click();
+  await page.getByRole("button", { name: "Confirm audit deletion", exact: true }).click();
+  await expect(page.getByText("Your first review starts above.")).toBeVisible();
+});
+
 test("audit specialist choices reach the API and job status filters work", async ({ page }) => {
   await page.route("**/api/user", (route) => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
   await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
