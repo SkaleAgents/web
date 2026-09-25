@@ -9,7 +9,7 @@ import { Button, TextArea } from "@/components/ui";
 export function ScheduleRetentionControls({ schedule, accountId, onDeletion }: {
   schedule: SwarmSchedule;
   accountId: string;
-  onDeletion: (id: string, status: "pending" | "failed" | "completed") => void;
+  onDeletion: (id: string, status: "pending" | "processing" | "failed" | "completed") => void;
 }) {
   const client = useQueryClient();
   const [confirm, setConfirm] = useState<"purge" | "delete" | null>(null);
@@ -57,11 +57,11 @@ export function ScheduleRetentionControls({ schedule, accountId, onDeletion }: {
   );
 }
 
-export function ScheduleDeletionStatus({ id, initialStatus }: { id: string; initialStatus: "pending" | "failed" | "completed" }) {
+export function ScheduleDeletionStatus({ id, initialStatus }: { id: string; initialStatus: "pending" | "processing" | "failed" | "completed" }) {
   const check = useMutation({ mutationFn: async () => {
     await ensureCsrfCookie();
     return apiFetch<DeletionPendingResponse | undefined>(`/api/schedules/${id}`, { method: "DELETE" });
   } });
   const status = check.isSuccess ? check.data?.status ?? "completed" : initialStatus;
-  return <div className="space-y-2 rounded-lg border border-line p-3 text-sm"><p className="font-mono text-xs">{id}</p><p role="status">{status === "completed" ? "Schedule deletion completed. Dispatched audits remain separate." : "Schedule deletion incomplete. It is hidden and cannot dispatch new audits."}</p>{status !== "completed" && <Button variant="secondary" disabled={check.isPending} onClick={() => check.mutate()}>Check schedule deletion</Button>}{check.isError && <p role="alert" className="text-danger">{check.error.message}</p>}</div>;
+  return <div className="space-y-2 rounded-lg border border-line p-3 text-sm"><p className="font-mono text-xs">{id}</p><p role="status">{status === "completed" ? "Schedule deletion completed. Dispatched audits remain separate." : status === "processing" ? "Schedule deletion is processing. It is hidden and cannot dispatch new audits." : "Schedule deletion incomplete. It is hidden and cannot dispatch new audits."}</p>{status !== "completed" && <Button variant="secondary" disabled={check.isPending} onClick={() => check.mutate()}>Check schedule deletion</Button>}{check.isError && <p role="alert" className="text-danger">{check.error.message}</p>}</div>;
 }

@@ -26,7 +26,7 @@ export default function SchedulesPage() {
   const [timezone, setTimezone] = useState("UTC");
   const [content, setContent] = useState("");
   const [webhookUrl, setWebhookUrl] = useState("");
-  const [deletions, setDeletions] = useState<Record<string, "pending" | "failed" | "completed">>({});
+  const [deletions, setDeletions] = useState<Record<string, "pending" | "processing" | "failed" | "completed">>({});
 
   const schedules = useQuery({
     queryKey: schedulesKey,
