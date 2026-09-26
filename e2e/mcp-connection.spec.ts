@@ -72,7 +72,7 @@ test("header opens sign-in methods and MCP is prominent on home", async ({ page 
     await expect(signIn).toHaveAttribute("href", "/login");
     if (path.startsWith("/login")) {
       await expect(page.getByRole("main").getByRole("link", { name: "Continue with Google" })).toBeVisible();
-      await expect(page.getByRole("button", { name: "Next", exact: true })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Sign in with password", exact: true })).toBeVisible();
     }
   }
   await page.goto("/");
