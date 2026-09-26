@@ -8,6 +8,7 @@ import { bookingStatusLabels } from "@/lib/advisory-bookings";
 import { useCustomerUser, isSessionError } from "@/components/customer-booking-access";
 import { Button, LinkButton } from "@/components/ui";
 import { AdvisoryAgreementReview } from "@/components/advisory-agreement-review";
+import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 
 function bookingListKey(accountId: string) {
   return ["customer-advisory-bookings", accountId] as const;
@@ -63,6 +64,7 @@ export function CustomerBookingList() {
         <h1 className="workspace-heading">Advisory requests</h1>
         <p className="mt-2 max-w-2xl text-sm text-ink-muted">Track request status, the preferred window you submitted, and any recorded fee.</p>
       </div>
+      <ConsultancyBookingLink />
       <div className="flex justify-end">
         <Button variant="secondary" onClick={() => void bookings.refetch()} disabled={bookings.isFetching}>
           {bookings.isFetching ? "Refreshing…" : "Refresh requests"}
@@ -125,6 +127,7 @@ export function CustomerBookingDetail({ id }: { id: string }) {
               <Button variant="secondary" disabled={booking.isFetching} onClick={() => void booking.refetch()}>{booking.isFetching ? "Refreshing…" : "Refresh request"}</Button>
             </div>
           </div>
+          <ConsultancyBookingLink />
           <section aria-label="Request details" className="space-y-4 rounded-xl border border-line bg-canvas-elevated p-5">
             <h2 className="text-lg font-semibold">Requested scope</h2>
             <p className="whitespace-pre-wrap break-words text-sm">{data.scope}</p>
