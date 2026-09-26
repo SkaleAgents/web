@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import type { RetentionPolicy } from "../src/lib/api";
 
+test.use({ timezoneId: "Asia/Dhaka" });
+
 const id = "00000000-0000-4000-8000-000000000001";
 const policy = { accountId: "owner", enabled: true, version: "audit-minimal-v1", notice: ["Audit input expires after 15 minutes.", "Existing records receive at least 30 days from notice."], noticeDeliveredAt: null, legacyNotBefore: null, noticeArchived: false, noticeToken: "account-bound-notice" };
 
@@ -110,7 +112,7 @@ test("purged schedules require fresh input and deletion remains incomplete until
       expect(body.enabled).toBe(false);
       if (body.scope.content === "fresh input") {
         expect(body.sourceRevision).toBe("new-revision");
-        expect(body.sourceObservedAt).toBe(new Date("2026-09-25T10:30:00").toISOString());
+        expect(body.sourceObservedAt).toBe("2026-09-25T04:30:00Z");
         sourceRevision = body.sourceRevision;
         sourceObservedAt = body.sourceObservedAt;
       } else {

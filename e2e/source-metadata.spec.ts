@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+test.use({ timezoneId: "Asia/Dhaka" });
+
 test("audit creation submits paired source metadata and job reads distinguish unknown, recorded, and unavailable", async ({ page }) => {
   let createdBody: Record<string, unknown> | undefined;
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
@@ -26,7 +28,7 @@ test("audit creation submits paired source metadata and job reads distinguish un
   await expect.poll(() => createdBody).toMatchObject({
     scope: { kind: "iac_text", content: 'resource "test" {}' },
     sourceRevision: "commit-audit",
-    sourceObservedAt: new Date("2026-09-25T10:30").toISOString(),
+    sourceObservedAt: "2026-09-25T04:30:00Z",
   });
   await expect(page.getByText("Caller-reported source revision: unknown")).toBeVisible();
   await expect(page.getByText("Caller-reported source revision: recorded-revision")).toBeVisible();
@@ -75,6 +77,6 @@ test("schedule creation submits a paired caller revision and observation time", 
   await expect.poll(() => createdBody).toMatchObject({
     scope: { kind: "iac_text", content: 'resource "test" {}' },
     sourceRevision: "commit-schedule",
-    sourceObservedAt: new Date("2026-09-25T10:30").toISOString(),
+    sourceObservedAt: "2026-09-25T04:30:00Z",
   });
 });
