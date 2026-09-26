@@ -139,9 +139,10 @@ test("sign-in is a focused entry point with a way back to the public site", asyn
   await page.goto("/login");
   await expect(page.getByRole("navigation", { name: "Main navigation" })).toHaveCount(0);
   await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
-  await expect(page.getByRole("contentinfo")).toHaveCount(0);
-  await expect(page.getByRole("banner").getByRole("link", { name: "Dashboard", exact: true })).toHaveCount(0);
-  await page.getByRole("link", { name: "Back to public site" }).click();
+  await expect(page.getByRole("banner")).toHaveCount(0);
+  const footer = page.getByRole("contentinfo", { name: "Account page links" });
+  await expect(footer.getByRole("link", { name: "Browse the directory" })).toHaveAttribute("href", "/bots");
+  await footer.getByRole("link", { name: "Back to public site" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
 });

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { EmailSignIn } from "@/components/email-sign-in";
@@ -40,7 +39,7 @@ export function LoginScreen({ reauthenticate = false }: { reauthenticate?: boole
   if (user.isPending || (user.data && !reauthenticate)) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">{user.data ? "Opening your workspace…" : "Checking your session…"}</main>;
 
   return (
-    <main className="flex flex-1 items-center justify-center px-5 py-10 sm:py-16">
+    <main className="flex flex-1 items-center justify-center py-10 sm:py-16">
       <div className="w-full max-w-md">
         <div className="mb-7">
           <h1 className="font-display text-3xl font-bold tracking-tight text-ink">Sign in to your control plane</h1>
@@ -50,18 +49,7 @@ export function LoginScreen({ reauthenticate = false }: { reauthenticate?: boole
         </div>
         <div className="space-y-5 rounded-xl border border-line bg-canvas-elevated p-6 sm:p-8">
           <EmailSignIn />
-          <details className="border-t border-line pt-5 text-sm text-ink-muted">
-            <summary className="cursor-pointer">Connecting an MCP client?</summary>
-            <p className="mt-2 leading-relaxed">
-              After sign-in, approve the MCP access request and return to
-              your MCP client. The client handles credentials automatically.
-            </p>
-          </details>
         </div>
-        <p className="mt-6 text-center text-sm text-ink-muted">
-          Prefer to look around first?{" "}
-          <Link href="/bots" className="font-medium text-ink underline-offset-4 hover:underline">Browse the directory</Link>
-        </p>
       </div>
     </main>
   );

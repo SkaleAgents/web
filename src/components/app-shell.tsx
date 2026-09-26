@@ -10,6 +10,7 @@ import { LinkButton } from "@/components/ui";
 import { AccountMenu } from "@/components/account-menu";
 import { BrandLogo } from "@/components/brand";
 import { ProductNavigation } from "@/components/product-navigation";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
 
 export function AppShell({ children, publicFooter }: { children: React.ReactNode; publicFooter: React.ReactNode }) {
@@ -30,24 +31,38 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
 
   const dashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
   const invitation = pathname === WORKSPACE_INVITATION_PATH;
-  const authentication = pathname === "/login" || pathname.startsWith("/auth/") || invitation;
+  const authentication = pathname === "/login" || pathname.startsWith("/auth/");
 
   if (dashboard) return <div key={userQuery.data?.id ?? "guest"} className="flex min-h-0 flex-1 flex-col">{children}</div>;
 
   if (authentication) return (
+    <div className="flex flex-1 flex-col">
+      <div key={userQuery.data?.id ?? "guest"} className="flex flex-1 flex-col px-5">
+        {children}
+      </div>
+      <footer aria-label="Account page links" className="mx-auto w-full max-w-md px-5 pb-8 text-center text-sm text-ink-muted">
+        <p>Prefer to look around first?</p>
+        <div className="mt-2 flex flex-wrap justify-center gap-x-5 gap-y-2">
+          <Link href="/" className="hover:text-ink hover:underline underline-offset-4">Back to public site</Link>
+          <Link href="/bots" className="hover:text-ink hover:underline underline-offset-4">Browse the directory</Link>
+        </div>
+        <div className="mt-5"><ThemeSwitcher /></div>
+      </footer>
+    </div>
+  );
+
+  if (invitation) return (
     <div className="flex flex-1 flex-col">
       <header className="border-b border-line bg-canvas-elevated">
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-8">
           <BrandLogo />
           <div className="flex flex-wrap items-center gap-4">
             <Link href="/" className="text-sm text-ink-muted hover:text-ink">Back to public site</Link>
-            {invitation && userQuery.data && <AccountMenu key={userQuery.data.id} user={userQuery.data} />}
+            {userQuery.data ? <AccountMenu key={userQuery.data.id} user={userQuery.data} /> : <ThemeSwitcher />}
           </div>
         </div>
       </header>
-      <div key={userQuery.data?.id ?? "guest"} className={invitation
-        ? "mx-auto w-full max-w-5xl flex-1 px-6 py-8"
-        : "flex flex-1 flex-col"}>{children}</div>
+      <div key={userQuery.data?.id ?? "guest"} className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">{children}</div>
     </div>
   );
 
@@ -59,8 +74,9 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
             <BrandLogo />
             <ProductNavigation key={pathname} />
           </div>
-          <div className="ml-auto flex items-center gap-3 text-sm sm:ml-0">
-            <LinkButton href="/dashboard" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-3 text-sm sm:ml-0">
+            {userQuery.data && <LinkButton href="/dashboard" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>}
+            {!userQuery.data && <ThemeSwitcher />}
             {userQuery.isPending ? (
               <span className="text-ink-muted">…</span>
             ) : userQuery.data ? (
