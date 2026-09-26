@@ -91,7 +91,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
         <p role="alert" className="text-sm text-danger">{error instanceof Error ? error.message : "Could not load this review."}</p>
         <div className="flex gap-3">
           <Button type="button" disabled={session.isFetching || job.isFetching} onClick={() => void (session.isError ? session.refetch() : job.refetch())}>Try again</Button>
-          <LinkButton href="/jobs" variant="secondary">Back to audits</LinkButton>
+          <LinkButton href="/dashboard/jobs" variant="secondary">Back to audits</LinkButton>
         </div>
       </main>
     );
@@ -131,7 +131,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
             </Button>
           )}
           <AdvisoryBookingRequest source={{ type: "watchtower_session", id: sessionId }} />
-          <LinkButton href="/jobs" className="bg-transparent">Back to audits</LinkButton>
+          <LinkButton href="/dashboard/jobs" className="bg-transparent">Back to audits</LinkButton>
         </div>
       </div>
 

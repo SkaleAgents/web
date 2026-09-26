@@ -22,12 +22,11 @@ test("unauthenticated and ordinary accounts never fetch staff records or see the
   await page.route("**/api/staff/**", (route) => { staffRequests++; return route.fulfill({ status: 403, json: { error: "Staff access required" } }); });
   await account(page, null);
   await page.goto(`${root}/${id}`);
-  await expect(page.getByRole("heading", { name: "Sign in to manage bookings" })).toBeVisible();
+  await expect(page).toHaveURL(/\/login\?next=/);
   await account(page, { ...staff, staffRole: null });
-  await page.reload();
+  await page.goto(`${root}/${id}`);
   await expect(page.getByRole("heading", { name: "Staff access required" })).toBeVisible();
-  await page.getByRole("button", { name: "Review", exact: true }).click();
-  await expect(page.getByRole("link", { name: /Advisory bookings/ })).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "Dashboard navigation" }).getByRole("link", { name: "Staff bookings" })).toHaveCount(0);
   expect(staffRequests).toBe(0);
 });
 
@@ -164,9 +163,8 @@ test("operator navigation and long booking details fit a narrow screen", async (
   await page.route("**/api/staff/advisory-bookings/**", (route) => route.fulfill({ json: { ...fixture, scope: "x".repeat(300), status: "accepted", assigneeRef: "expert:" + "x".repeat(240) } }));
   await page.goto(`${root}/${id}`);
   await expect(page.getByRole("heading", { name: "Booking #11111111" })).toBeVisible();
-  await page.getByRole("button", { name: "Review", exact: true }).click();
-  await expect(page.getByRole("link", { name: /Advisory bookings/ })).toHaveAttribute("aria-current", "page");
-  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Open menu", exact: true }).click();
+  await expect(page.getByRole("navigation", { name: "Dashboard navigation" }).getByRole("link", { name: "Staff bookings" })).toHaveAttribute("aria-current", "page");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 

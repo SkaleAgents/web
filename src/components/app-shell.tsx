@@ -11,7 +11,6 @@ import { LinkButton } from "@/components/ui";
 import { AccountNavigation } from "@/components/account-navigation";
 import { BrandLogo } from "@/components/brand";
 import { ProductNavigation } from "@/components/product-navigation";
-import { isStaff } from "@/lib/advisory-bookings";
 import { clearWorkspaceInvitation, hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -51,19 +50,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <header className="border-b border-line border-t-2 border-t-accent bg-canvas-elevated">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-3">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-3">
           <div className="contents">
             <BrandLogo />
-            <ProductNavigation key={pathname} staff={isStaff(userQuery.data) && !userQuery.isError} />
+            <ProductNavigation key={pathname} />
           </div>
           <div className="ml-auto flex items-center gap-3 text-sm sm:ml-0">
+            <LinkButton href="/dashboard" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>
             {userQuery.isPending ? (
               <span className="text-ink-muted">…</span>
             ) : userQuery.data ? (
               <AccountNavigation
                 key={`${userQuery.data.id}:${pathname}`}
                 user={userQuery.data}
-                settingsActive={pathname === "/settings"}
+                settingsActive={pathname === "/dashboard/settings"}
                 signingOut={signingOut}
                 onSignOut={() => void logout()}
               />
@@ -74,7 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <div key={userQuery.data?.id ?? "guest"} className={
-        pathname === "/login" || pathname === "/"
+        pathname === "/login" || pathname === "/" || pathname === "/dashboard" || pathname.startsWith("/dashboard/")
           ? "flex flex-1 flex-col"
           : "motion-enter mx-auto w-full max-w-5xl flex-1 px-6 py-8"
       }>

@@ -71,7 +71,7 @@ export default function SchedulesPage() {
         <h1 className="workspace-heading">Scheduled audits</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
           Rerun a saved infrastructure scope on your timetable. Choose a cadence and timezone,
-          then manage email preferences in <Link href="/settings" className="text-accent underline">Settings</Link>.
+          then manage email preferences in <Link href="/dashboard/settings" className="text-accent underline">Settings</Link>.
           Webhooks are optional.
         </p>
       </div>
@@ -124,7 +124,7 @@ export default function SchedulesPage() {
       </section>
 
       <section className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your schedules</h2><LinkButton href="/jobs" variant="secondary">View audit results</LinkButton></div>
+        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your schedules</h2><LinkButton href="/dashboard/jobs" variant="secondary">View audit results</LinkButton></div>
         {Object.entries(deletions).map(([id, initialStatus]) => <ScheduleDeletionStatus key={id} id={id} initialStatus={initialStatus} />)}
         {(user.isPending || user.data && schedules.isPending) && <p className="text-sm text-ink-muted">Loading schedules…</p>}
         {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Sign in in the header to manage your schedules.</p>}

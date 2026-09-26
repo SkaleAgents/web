@@ -15,10 +15,10 @@ export const metadata: Metadata = {
 
 const features = [
   { number: "01", title: "Find your specialist", label: "Bot directory", description: "Search by task and filter by specialty. Read a bot's instructions, then open them in your assistant with your own project context.", href: "/bots", cta: "Explore bots" },
-  { number: "02", title: "Write a review playbook", label: "Creator Studio", description: "Start with a security, reliability, or capacity template. Customize the instructions, save a draft, and publish publicly or keep it private.", href: "/studio", cta: "Open Studio" },
+  { number: "02", title: "Write a review playbook", label: "Creator Studio", description: "Start with a security, reliability, or capacity template. Customize the instructions, save a draft, and publish publicly or keep it private.", href: "/dashboard/studio", cta: "Open Studio" },
   { number: "03", title: "Find it. Copy it. Get to work.", label: "Prompt library", description: "Search prompt text, narrow by topic, and copy the full instructions in one click. Sign in to save your own reusable prompts.", href: "/prompts", cta: "Browse prompts" },
-  { number: "04", title: "Choose your review team", label: "Audits & Watchtower", description: "Select specialists for your infrastructure audit and track jobs by status. Open Watchtower to inspect findings and redirect the review.", href: "/jobs", cta: "Explore audits" },
-  { number: "05", title: "Set a review rhythm", label: "Scheduled audits", description: "Pick an hourly, daily, weekday, or weekly cadence for saved infrastructure text. Set the timezone and send completion or failure alerts to a webhook.", href: "/schedules", cta: "View schedules" },
+  { number: "04", title: "Choose your review team", label: "Audits & Watchtower", description: "Select specialists for your infrastructure audit and track jobs by status. Open Watchtower to inspect findings and redirect the review.", href: "/dashboard/jobs", cta: "Explore audits" },
+  { number: "05", title: "Set a review rhythm", label: "Scheduled audits", description: "Pick an hourly, daily, weekday, or weekly cadence for saved infrastructure text. Set the timezone and send completion or failure alerts to a webhook.", href: "/dashboard/schedules", cta: "View schedules" },
   { number: "06", title: "Stay in your editor", label: "MCP connection", description: "Connect Cursor or Claude Code through browser OAuth. Your assistant can call architecture review tools while you work, with credentials handled automatically.", href: "/mcp-config", cta: "MCP config" },
 ];
 

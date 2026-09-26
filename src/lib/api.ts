@@ -115,13 +115,13 @@ async function apiRequest<T>(url: string, init: RequestInit): Promise<T> {
     headers.set("Content-Type", "application/json");
   }
   const xsrf = readCookie("XSRF-TOKEN");
-  if (xsrf) {
+  if (xsrf && init.credentials !== "omit") {
     headers.set("X-XSRF-TOKEN", xsrf);
   }
 
   const res = await fetch(url, {
     ...init,
-    credentials: "include",
+    credentials: init.credentials ?? "include",
     headers,
   });
 
