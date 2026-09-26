@@ -14,5 +14,6 @@ export function buildSourceMetadata(revision: string, observedAt: string): Parti
   const date = new Date(observedAt);
   if (Number.isNaN(date.getTime())) throw new Error("Enter a valid source observation time");
 
-  return { sourceRevision, sourceObservedAt: date.toISOString() };
+  // The source-metadata API accepts timestamps at whole-second precision.
+  return { sourceRevision, sourceObservedAt: date.toISOString().replace(/\.\d{3}Z$/, "Z") };
 }
