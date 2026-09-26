@@ -1,8 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 async function openReviewPage(page: Page, name: "Audit jobs" | "Scheduled audits") {
-  const navigation = page.getByRole("navigation", { name: "Main navigation" });
-  await navigation.getByRole("button", { name: "Review", exact: true }).click();
+  const navigation = page.getByRole("navigation", { name: "Dashboard navigation" });
   await navigation.getByRole("link", { name: new RegExp(`^${name}`) }).click();
   await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
 }
@@ -40,13 +39,13 @@ test("logout removes cached jobs and schedules across client navigation", async 
   await expect(page.getByText("Alice private schedule", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Alice, account menu" }).click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login(?:\?next=.*)?$/);
 
-  await openReviewPage(page, "Audit jobs");
-  await expect(page.getByText("Use Sign in in the header to access your audit jobs.", { exact: true })).toBeVisible();
+  await page.goto("/dashboard/jobs");
+  await expect(page).toHaveURL(/\/login\?next=/);
   await expect(page.getByText("Alice private audit", { exact: true })).toHaveCount(0);
-  await openReviewPage(page, "Scheduled audits");
-  await expect(page.getByText("Use Sign in in the header to manage your schedules.", { exact: true })).toBeVisible();
+  await page.goto("/dashboard/schedules");
+  await expect(page).toHaveURL(/\/login\?next=/);
   await expect(page.getByText("Alice private schedule", { exact: true })).toHaveCount(0);
   expect(guestRequests).toBe(0);
 });
@@ -71,10 +70,10 @@ test("a late private response cannot repopulate the cache after logout", async (
   await expect.poll(() => scheduleRequested).toBe(true);
   await page.getByRole("button", { name: "Alice, account menu" }).click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login(?:\?next=.*)?$/);
   release();
-  await openReviewPage(page, "Scheduled audits");
-  await expect(page.getByText("Use Sign in in the header to manage your schedules.", { exact: true })).toBeVisible();
+  await page.goto("/dashboard/schedules");
+  await expect(page).toHaveURL(/\/login\?next=/);
   await expect(page.getByText("Alice private schedule", { exact: true })).toHaveCount(0);
 });
 
@@ -112,5 +111,5 @@ test("failed logout keeps the current account and lets the user retry", async ({
   fail = false;
   await page.getByRole("button", { name: "Alice, account menu" }).click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login(?:\?next=.*)?$/);
 });

@@ -42,7 +42,7 @@ export function AccountSecurity({ accountId, email }: { accountId: string; email
         <label className="min-w-0 flex-1 space-y-1"><FieldLabel>Passkey name</FieldLabel><TextInput value={name} onChange={(event) => setName(event.target.value)} required maxLength={80} disabled={busy} /></label>
         <Button type="submit" disabled={busy}>Add a passkey</Button>
       </form>
-      <p className="text-xs text-ink-muted">Adding or removing passkeys requires sign-in within the last 10 minutes. <a href="/login" className="underline">Sign in again</a> if prompted.</p>
+      <p className="text-xs text-ink-muted">Adding or removing passkeys requires sign-in within the last 10 minutes. <a href="/auth/reauth?next=%2Fdashboard%2Fsettings" className="underline">Sign in again</a> if prompted.</p>
       {settings.data.passkeys.length ? <ul className="divide-y divide-line">{settings.data.passkeys.map((passkey) => <li className="flex items-center justify-between gap-3 py-3" key={passkey.id}>
         <span className="min-w-0 break-words text-sm">{passkey.name}<span className="block text-xs text-ink-muted">{passkey.last_used_at ? `Last used ${new Date(passkey.last_used_at).toLocaleDateString()}` : "Not used yet"}</span></span>
         <Button variant="secondary" disabled={busy} aria-label={`Remove ${passkey.name}`} onClick={() => void run(async () => { await ensureCsrfCookie(); return apiFetch<PasskeySettings>(`/api/account/passkeys/${passkey.id}`, { method: "DELETE", body: JSON.stringify({ accountId }) }); }, "Passkey removed.")}>Remove</Button>
@@ -53,6 +53,6 @@ export function AccountSecurity({ accountId, email }: { accountId: string; email
     </>}
     {message && <p role="status" className="text-sm">{message}</p>}
     {error && <p role="alert" className="text-sm text-danger">{error}</p>}
-    <LinkButton href="/login" variant="ghost">Use another sign-in method</LinkButton>
+    <LinkButton href="/auth/reauth?next=%2Fdashboard%2Fsettings" variant="ghost">Use another sign-in method</LinkButton>
   </section>;
 }

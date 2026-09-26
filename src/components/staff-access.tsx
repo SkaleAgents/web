@@ -48,7 +48,7 @@ export function StaffAccess({ children }: { children: React.ReactNode }) {
     <main className="space-y-4">
       <h1 className="workspace-heading">Staff access required</h1>
       <p className="text-sm text-ink-muted">Your account does not have access to advisory booking operations.</p>
-      <LinkButton href="/jobs" variant="secondary">Back to audits</LinkButton>
+      <LinkButton href="/dashboard/jobs" variant="secondary">Back to audits</LinkButton>
     </main>
   );
 

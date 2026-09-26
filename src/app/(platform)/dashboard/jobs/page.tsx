@@ -80,7 +80,7 @@ export default function JobsPage() {
       method: "POST",
       body: JSON.stringify({ jobId }),
     }),
-    onSuccess: (session) => router.push(`/watchtower/${session.id}`),
+    onSuccess: (session) => router.push(`/dashboard/watchtower/${session.id}`),
   });
 
   return (
@@ -148,7 +148,7 @@ export default function JobsPage() {
 
       <section className="space-y-3">
         {accountId && Object.entries(deletions).map(([jobId, initialStatus]) => <JobDeletionStatus key={jobId} jobId={jobId} initialStatus={initialStatus} accountId={accountId} />)}
-        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your jobs</h2><LinkButton href="/schedules" variant="secondary">Set up recurring reviews</LinkButton></div>
+        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your jobs</h2><LinkButton href="/dashboard/schedules" variant="secondary">Set up recurring reviews</LinkButton></div>
         <div className="flex flex-wrap gap-2">{["all", "queued", "running", "completed", "failed"].map((item) => <button key={item} type="button" className="filter-chip capitalize" aria-pressed={status === item} onClick={() => setStatus(item)}>{item === "all" ? "All jobs" : item} {jobs.data ? `(${jobs.data.filter((job) => item === "all" || job.status === item).length})` : ""}</button>)}</div>
         {openReview.isError && <p role="alert" className="text-sm text-danger">{openReview.error.message}</p>}
         {(user.isPending || user.data && jobs.isPending) && <p className="text-sm text-ink-muted">Loading jobs…</p>}

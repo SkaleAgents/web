@@ -12,7 +12,10 @@ const nextConfig: NextConfig = {
   },
   redirects() {
     return [
-      { source: "/settings/mcp", destination: "/mcp-config", permanent: false },
+      { source: "/settings/mcp", destination: "/dashboard/mcp-config", permanent: false },
+      ...["jobs", "schedules", "settings", "studio", "workspaces", "watchtower", "advisory-bookings", "staff"].map(path => ({
+        source: `/${path}/:path*`, destination: `/dashboard/${path}/:path*`, permanent: false,
+      })),
     ];
   },
 };

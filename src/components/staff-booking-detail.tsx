@@ -156,7 +156,7 @@ export function StaffBookingDetail({ id }: { id: string }) {
 
   return (
     <main className="space-y-6">
-      <LinkButton href="/staff/advisory-bookings" variant="ghost">Back to bookings</LinkButton>
+      <LinkButton href="/dashboard/staff/advisory-bookings" variant="ghost">Back to bookings</LinkButton>
       {denied || notFound ? (
         <div className="space-y-3">
           <h1 className="workspace-heading">{denied ? "Staff access required" : "Booking not found"}</h1>

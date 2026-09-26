@@ -52,7 +52,7 @@ export function StaffBookingList() {
         <ul className="divide-y divide-line rounded-xl border border-line bg-canvas-elevated">
           {visible.map((booking) => (
             <li key={booking.id}>
-              <Link href={`/staff/advisory-bookings/${booking.id}`} className="block space-y-3 p-5 hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent">
+              <Link href={`/dashboard/staff/advisory-bookings/${booking.id}`} className="block space-y-3 p-5 hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent">
                 <div className="flex flex-wrap items-center gap-2 text-xs">
                   <span className="rounded-full bg-accent-soft px-2 py-1 font-semibold text-ink">{bookingStatusLabels[booking.status]}</span>
                   <span className={booking.urgency === "emergency" || booking.urgency === "urgent" ? "font-semibold text-danger" : "text-ink-muted"}>{booking.urgency}</span>
