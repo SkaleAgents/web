@@ -111,3 +111,56 @@ test("login accepts dashboard destinations and rejects external redirects", asyn
   await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/auth\/reauth\?next=/);
 });
+
+test("dashboard has its own navigation and keeps the public shell on public pages", async ({ page }) => {
+  await page.route("**/api/user", route => route.fulfill({ json: owner }));
+  await overview(page);
+  await page.goto("/dashboard");
+  await expect(page.getByRole("navigation", { name: "Main navigation" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Dashboard", exact: true })).toBeVisible();
+  await expect(page.getByRole("contentinfo")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Dashboard, account menu" })).toBeVisible();
+  const sidebar = page.getByRole("navigation", { name: "Dashboard navigation" });
+  const before = await sidebar.boundingBox();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  expect((await sidebar.boundingBox())!.y).toBe(before!.y);
+  await sidebar.getByRole("link", { name: "Visit public site" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
+  await expect(page.getByRole("contentinfo")).toBeVisible();
+  await expect(sidebar).toHaveCount(0);
+  await page.getByRole("banner").getByRole("link", { name: "Dashboard", exact: true }).click();
+  await expect(sidebar).toBeVisible();
+  await expect(page.getByRole("contentinfo")).toHaveCount(0);
+});
+
+test("sign-in is a focused entry point with a way back to the public site", async ({ page }) => {
+  await page.route("**/api/user", route => route.fulfill({ status: 401, json: {} }));
+  await page.goto("/login");
+  await expect(page.getByRole("navigation", { name: "Main navigation" })).toHaveCount(0);
+  await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
+  await expect(page.getByRole("contentinfo")).toHaveCount(0);
+  await expect(page.getByRole("banner").getByRole("link", { name: "Dashboard", exact: true })).toHaveCount(0);
+  await page.getByRole("link", { name: "Back to public site" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
+});
+
+test("mobile dashboard menu closes on Escape and after navigation", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route("**/api/user", route => route.fulfill({ json: owner }));
+  await overview(page);
+  await page.goto("/dashboard");
+  const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
+  await nav.getByRole("button", { name: "Open menu" }).click();
+  await nav.getByRole("link", { name: "My bots", exact: true }).focus();
+  await page.keyboard.press("Escape");
+  await expect(nav.getByRole("button", { name: "Open menu" })).toBeFocused();
+  await expect(nav.getByRole("link", { name: "My bots", exact: true })).toBeHidden();
+  await nav.getByRole("button", { name: "Open menu" }).click();
+  await nav.getByRole("link", { name: "My bots", exact: true }).click();
+  await expect(page).toHaveURL(/\/dashboard\/bots$/);
+  await expect(nav.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
+  await nav.getByRole("button", { name: "Open menu" }).click();
+  await expect(nav.getByRole("link", { name: "My bots", exact: true })).toHaveAttribute("aria-current", "page");
+});

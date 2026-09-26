@@ -78,7 +78,7 @@ test("disabled delivery is explicit while preferences remain editable", async ({
   await expect(page.getByRole("checkbox", { name: /^Completed audits/ })).toBeEnabled();
 });
 
-test("guests see the header sign-in and make no private preference requests", async ({ page }) => {
+test("guests reach the sign-in form and make no private preference requests", async ({ page }) => {
   let privateRequests = 0;
   await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
   await page.route("**/api/account/notifications", (route) => {
@@ -87,7 +87,7 @@ test("guests see the header sign-in and make no private preference requests", as
   });
   await page.goto("/settings");
   await expect(page).toHaveURL(/\/login\?next=%2Fdashboard%2Fsettings$/);
-  await expect(page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true })).toHaveCount(1);
+  await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   expect(privateRequests).toBe(0);
 });

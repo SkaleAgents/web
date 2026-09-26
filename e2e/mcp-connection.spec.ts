@@ -63,17 +63,20 @@ test("client setup offers URL-only connectors and client-specific editor configu
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
-test("header opens sign-in methods and MCP is prominent on home", async ({ page }) => {
+test("public headers open sign-in, private links lead to the focused form, and home highlights MCP", async ({ page }) => {
   await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
-  for (const path of ["/", "/bots", "/prompts", "/jobs", "/schedules", "/studio", "/mcp-config", "/login", "/login?oauth=1"]) {
+  for (const path of ["/", "/bots", "/prompts", "/mcp-config"]) {
     await page.goto(path);
     const signIn = page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true });
     await expect(signIn).toHaveCount(1);
     await expect(signIn).toHaveAttribute("href", "/login");
-    if (path.startsWith("/login")) {
-      await expect(page.getByRole("main").getByRole("link", { name: "Continue with Google" })).toBeVisible();
-      await expect(page.getByRole("button", { name: "Sign in with password", exact: true })).toBeVisible();
-    }
+  }
+  for (const path of ["/jobs", "/schedules", "/studio", "/login", "/login?oauth=1"]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\/login(?:\?|$)/);
+    await expect(page.getByRole("main").getByRole("link", { name: "Continue with Google" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Sign in with password", exact: true })).toBeVisible();
+    await expect(page.getByRole("banner").getByRole("link", { name: "Back to public site" })).toHaveAttribute("href", "/");
   }
   await page.goto("/");
   const section = page.getByRole("region", { name: "Your editor is the starting point." });

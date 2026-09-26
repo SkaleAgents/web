@@ -71,7 +71,7 @@ test.describe("Phase 1 page smokes", () => {
 
   test("every public route uses the shared menu and sign-in action", async ({ page }) => {
     await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
-    for (const path of ["/", "/login", "/bots", "/prompts", "/mcp-config"]) {
+    for (const path of ["/", "/bots", "/prompts", "/mcp-config"]) {
       await page.goto(path);
       await expect(page.getByRole("navigation")).toBeVisible();
       await expect(page.getByRole("navigation").getByRole("button")).toHaveCount(2);
