@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
+  await page.route("**/api/account/passkeys", route => route.fulfill({ json: { accountId: "alice", hasPassword: false, passkeys: [] } }));
   await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "alice", enabled: false } }));
 });
 
@@ -85,8 +86,8 @@ test("guests see the header sign-in and make no private preference requests", as
     return route.fulfill({ status: 401, json: {} });
   });
   await page.goto("/settings");
-  await expect(page.getByText("Use Google sign-in in the header to manage email notifications.")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Sign in with Google", exact: true })).toHaveCount(1);
+  await expect(page.getByRole("link", { name: "Sign in to manage your account" })).toBeVisible();
+  await expect(page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true })).toHaveCount(1);
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   expect(privateRequests).toBe(0);
 });
@@ -136,6 +137,6 @@ test("late preference saves cannot restore private data after logout", async ({ 
   await expect(page).toHaveURL(/\/login$/);
   release();
   await page.goto("/settings");
-  await expect(page.getByText("Use Google sign-in in the header to manage email notifications.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Sign in to manage your account" })).toBeVisible();
   await expect(page.getByText("alice@example.com", { exact: true })).toHaveCount(0);
 });

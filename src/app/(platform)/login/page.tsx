@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { toast } from "sonner";
-
-const MOCK_AUTH_ENABLED = process.env.NEXT_PUBLIC_MOCK_AUTH_ENABLED === "true";
+import { EmailSignIn } from "@/components/email-sign-in";
 
 export default function LoginPage() {
   useEffect(() => {
@@ -70,26 +69,15 @@ export default function LoginPage() {
             className="absolute inset-y-0 left-0 w-[3px] rounded-l-[10px] bg-accent"
           />
 
-          <div>
-            <h2 className="text-lg font-semibold text-ink">Use the sign-in button in the header</h2>
-            <p className="mt-1 text-sm text-ink-muted">
-              Choose Sign in with Google above to continue with your Google account.
-            </p>
-          </div>
+          <EmailSignIn />
 
           <div className="border-t border-line pt-5">
             <h3 className="font-semibold text-ink">Connecting an MCP client?</h3>
             <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-              After Google sign-in, approve the MCP access request and return to
+              After sign-in, approve the MCP access request and return to
               your MCP client. The client handles credentials automatically.
             </p>
           </div>
-
-          <p className="text-xs text-ink-muted">
-            {MOCK_AUTH_ENABLED
-              ? "Local preview uses the mock callback."
-              : "Google confirms your identity; SkaleAgents handles your account and client access."}
-          </p>
 
           <p className="text-center text-sm text-ink-muted lg:hidden">
             <Link href="/bots" className="underline-offset-4 hover:underline">

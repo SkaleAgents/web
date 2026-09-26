@@ -43,10 +43,10 @@ test("logout removes cached jobs and schedules across client navigation", async 
   await expect(page).toHaveURL(/\/login$/);
 
   await openReviewPage(page, "Audit jobs");
-  await expect(page.getByText("Use Google sign-in in the header to access your audit jobs.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Use Sign in in the header to access your audit jobs.", { exact: true })).toBeVisible();
   await expect(page.getByText("Alice private audit", { exact: true })).toHaveCount(0);
   await openReviewPage(page, "Scheduled audits");
-  await expect(page.getByText("Use Google sign-in in the header to manage your schedules.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Use Sign in in the header to manage your schedules.", { exact: true })).toBeVisible();
   await expect(page.getByText("Alice private schedule", { exact: true })).toHaveCount(0);
   expect(guestRequests).toBe(0);
 });
@@ -74,7 +74,7 @@ test("a late private response cannot repopulate the cache after logout", async (
   await expect(page).toHaveURL(/\/login$/);
   release();
   await openReviewPage(page, "Scheduled audits");
-  await expect(page.getByText("Use Google sign-in in the header to manage your schedules.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Use Sign in in the header to manage your schedules.", { exact: true })).toBeVisible();
   await expect(page.getByText("Alice private schedule", { exact: true })).toHaveCount(0);
 });
 

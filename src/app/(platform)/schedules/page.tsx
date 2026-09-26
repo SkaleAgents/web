@@ -127,11 +127,11 @@ export default function SchedulesPage() {
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your schedules</h2><LinkButton href="/jobs" variant="secondary">View audit results</LinkButton></div>
         {Object.entries(deletions).map(([id, initialStatus]) => <ScheduleDeletionStatus key={id} id={id} initialStatus={initialStatus} />)}
         {(user.isPending || user.data && schedules.isPending) && <p className="text-sm text-ink-muted">Loading schedules…</p>}
-        {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Google sign-in in the header to manage your schedules.</p>}
+        {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Sign in in the header to manage your schedules.</p>}
         {schedules.isError && (
           <div className="rounded-[10px] border border-line p-4">
             <p className="text-sm text-danger">{schedules.error.message}</p>
-            <p className="mt-2 text-sm text-ink-muted">Use Google sign-in in the header to manage your schedules.</p>
+            <p className="mt-2 text-sm text-ink-muted">Use Sign in in the header to manage your schedules.</p>
           </div>
         )}
         {schedules.data?.length === 0 && <p className="rounded-xl border border-dashed border-line p-6 text-sm text-ink-muted">No recurring reviews yet. Pick a cadence above and save the infrastructure text you want to revisit.</p>}

@@ -152,11 +152,11 @@ export default function JobsPage() {
         <div className="flex flex-wrap gap-2">{["all", "queued", "running", "completed", "failed"].map((item) => <button key={item} type="button" className="filter-chip capitalize" aria-pressed={status === item} onClick={() => setStatus(item)}>{item === "all" ? "All jobs" : item} {jobs.data ? `(${jobs.data.filter((job) => item === "all" || job.status === item).length})` : ""}</button>)}</div>
         {openReview.isError && <p role="alert" className="text-sm text-danger">{openReview.error.message}</p>}
         {(user.isPending || user.data && jobs.isPending) && <p className="text-sm text-ink-muted">Loading jobs…</p>}
-        {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Google sign-in in the header to access your audit jobs.</p>}
+        {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Sign in in the header to access your audit jobs.</p>}
         {jobs.isError && (
           <div className="rounded-[10px] border border-line p-4">
             <p className="text-sm text-danger">{jobs.error.message}</p>
-            <p className="mt-2 text-sm text-ink-muted">Use Google sign-in in the header to access your audit jobs.</p>
+            <p className="mt-2 text-sm text-ink-muted">Use Sign in in the header to access your audit jobs.</p>
           </div>
         )}
         {jobs.data?.length === 0 && <p className="rounded-xl border border-dashed border-line p-6 text-sm text-ink-muted">Your first review starts above. Paste a configuration, select at least one specialist, and queue the audit.</p>}

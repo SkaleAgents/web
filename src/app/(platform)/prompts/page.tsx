@@ -160,7 +160,7 @@ export default function PromptsPage() {
         </details>
       ) : (
         <p className="text-sm text-ink-muted">
-          Community prompts are free to use. To save your own, use Google sign-in in the header.
+          Community prompts are free to use. To save your own, use Sign in in the header.
         </p>
       )}
 

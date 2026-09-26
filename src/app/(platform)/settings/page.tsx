@@ -5,6 +5,7 @@ import { apiFetch, ensureCsrfCookie, type EmailPreferences, type NotificationSet
 import { currentUserOptions } from "@/lib/session";
 import { Button, LinkButton } from "@/components/ui";
 import { RetentionNotice } from "@/components/retention-notice";
+import { AccountSecurity } from "@/components/account-security";
 
 const preferences: Array<{ key: keyof EmailPreferences; label: string; detail: string }> = [
   { key: "auditCompleted", label: "Completed audits", detail: "A link to your results when a manual or scheduled audit finishes, including partial results." },
@@ -30,9 +31,9 @@ export default function SettingsPage() {
       ) : user.isPending ? (
         <p className="text-sm text-ink-muted">Loading your account…</p>
       ) : user.data ? (
-        <div key={user.data.id} className="space-y-8"><EmailSettings accountId={user.data.id} /><RetentionNotice accountId={user.data.id} /></div>
+        <div key={user.data.id} className="space-y-8"><AccountSecurity accountId={user.data.id} email={user.data.email ?? null} /><EmailSettings accountId={user.data.id} /><RetentionNotice accountId={user.data.id} /></div>
       ) : (
-        <p className="text-sm text-ink-muted">Use Google sign-in in the header to manage email notifications.</p>
+        <LinkButton href="/login">Sign in to manage your account</LinkButton>
       )}
     </main>
   );
