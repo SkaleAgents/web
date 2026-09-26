@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { currentUserOptions, setSessionUser } from "@/lib/session";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
+import { LinkButton } from "@/components/ui";
 import { AccountNavigation } from "@/components/account-navigation";
 import { BrandLogo } from "@/components/brand";
 import { ProductNavigation } from "@/components/product-navigation";
@@ -67,7 +68,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 onSignOut={() => void logout()}
               />
             ) : (
-              <GoogleSignInButton />
+              process.env.NEXT_PUBLIC_MOCK_AUTH_ENABLED === "true" ? <GoogleSignInButton /> : <LinkButton href="/login" className="px-3 py-1.5">Sign in</LinkButton>
             )}
           </div>
         </div>
