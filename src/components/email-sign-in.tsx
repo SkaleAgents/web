@@ -1,81 +1,69 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Button, FieldLabel, TextInput } from "./ui";
 import { GoogleSignInLabel } from "./google-mark";
 import { API_URL } from "@/lib/api";
-import { authPost, authenticationError, completeSignIn, signInWithPasskey, type AuthResult } from "@/lib/email-auth";
+import { authPost, authenticationError, completeSignIn, type AuthResult } from "@/lib/email-auth";
+
+type Mode = "signin" | "signup" | "recover";
 
 export function EmailSignIn() {
+  const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [step, setStep] = useState<"email" | "method">("email");
-  const [method, setMethod] = useState<"password" | "passkey">("password");
-  const [busy, setBusy] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
-  const passwordInput = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (step === "method" && method === "password" && mode === "signin") passwordInput.current?.focus();
-  }, [step, method, mode]);
+  function changeMode(next: Mode) {
+    setMode(next); setPassword(""); setSent(false); setError("");
+  }
 
-  async function submit(method: "password" | "passkey" | "signin" | "setup") {
-    setBusy(method); setMessage(""); setError("");
+  async function submit() {
+    if (busy) return;
+    setBusy(true); setError("");
     try {
-      if (method === "password") completeSignIn(await authPost<AuthResult>("/api/auth/password", { email, password }));
-      else if (method === "passkey") completeSignIn(await signInWithPasskey(email));
-      else {
-        const result = await authPost<{ message: string }>("/api/auth/email", { email, purpose: method === "setup" ? "password" : "signin" });
-        setMessage(result.message);
+      if (mode === "signin") {
+        completeSignIn(await authPost<AuthResult>("/api/auth/password", { email: email.trim(), password }));
+      } else {
+        if (mode === "signup") {
+          await authPost("/api/auth/register", { email: email.trim(), password, password_confirmation: password });
+        } else {
+          await authPost("/api/auth/email", { email: email.trim(), purpose: "password" });
+        }
+        setSent(true);
       }
     } catch (err) { setError(authenticationError(err)); }
-    finally { setBusy(null); }
+    finally { setBusy(false); }
   }
 
   return <div className="space-y-5">
-    <h2 className="text-xl font-semibold text-ink">{step === "email" ? "Welcome back" : mode === "signup" ? "Create your account" : "Sign in with email"}</h2>
-    {step === "email" ? <>
-      <a className="flex w-full items-center justify-center rounded-[10px] border border-line bg-canvas px-3 py-3 text-sm font-semibold hover:bg-accent-soft" href={`${API_URL}/api/auth/google/redirect`}>
-        <GoogleSignInLabel>Continue with Google</GoogleSignInLabel>
-      </a>
-      <div className="flex items-center gap-3 text-xs text-ink-muted"><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
-      <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); setEmail(email.trim()); setStep("method"); setError(""); setMessage(""); }}>
-        <label className="block space-y-1"><FieldLabel>Email</FieldLabel><TextInput type="email" name="email" autoComplete="username" required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} /></label>
-        <Button className="w-full" type="submit">Next</Button>
-      </form>
+    <h2 className="text-xl font-semibold text-ink">{sent ? "Check your email" : mode === "signup" ? "Create your account" : mode === "recover" ? "Reset your password" : "Welcome back"}</h2>
+    {sent ? <>
+      <p role="status" className="text-sm leading-relaxed text-ink-muted">{mode === "signup" ? "We sent account confirmation instructions to " : "We sent a password-reset link to "}<strong className="break-all text-ink">{email.trim()}</strong>. Open the email to continue.</p>
+      <Button className="w-full" variant="secondary" disabled={busy} onClick={() => void submit()}>{busy ? "Sending…" : "Resend email"}</Button>
+      <Button className="w-full" variant="ghost" disabled={busy} onClick={() => changeMode("signin")}>Back to sign in</Button>
     </> : <>
-      <div className="flex items-center justify-between gap-3 text-sm">
-        <p className="min-w-0 break-all text-ink-muted">{email}</p>
-        <Button variant="ghost" type="button" className="shrink-0 px-0" disabled={busy !== null} aria-label="Change email" onClick={() => { setStep("email"); setPassword(""); setError(""); setMessage(""); }}>Change</Button>
-      </div>
-      <form className="space-y-4" onSubmit={(event) => {
-        event.preventDefault();
-        void submit(mode === "signup" ? method === "password" ? "setup" : "signin" : method);
-      }}>
-        <fieldset disabled={busy !== null} className="space-y-4">
-          <div role="group" aria-label="Sign-in method" className="grid grid-cols-2 gap-1 rounded-[10px] border border-line p-1">
-            {([['password', 'Password'], ['passkey', 'Touch ID / Face ID']] as const).map(([value, label]) => <button
-              key={value} type="button" aria-pressed={method === value}
-              className={`min-h-11 rounded-[7px] px-2 py-2 text-sm font-semibold leading-snug disabled:opacity-60 ${method === value ? "bg-accent-soft text-ink" : "text-ink-muted hover:text-ink"}`}
-              onClick={() => { setMethod(value); setPassword(""); setError(""); setMessage(""); }}
-            >{label}</button>)}
-          </div>
-          <input type="hidden" name="email" autoComplete="username" value={email} />
-          {mode === "signup" ? <p className="text-sm text-ink-muted">{method === "password" ? "Verify your email, then set your password." : "Verify your email, then add a passkey in Settings."}</p> : method === "password" ?
-            <label className="block space-y-1"><FieldLabel>Password</FieldLabel><TextInput ref={passwordInput} type="password" name="password" autoComplete="current-password" required maxLength={72} value={password} onChange={(event) => setPassword(event.target.value)} /></label> :
-            <p className="text-sm text-ink-muted">Use a saved passkey with your fingerprint, face, or device screen lock.</p>}
-          <Button className="w-full" type="submit">{busy ? "Working…" : mode === "signup" ? method === "password" ? "Verify email to set a password" : "Verify email to add a passkey" : method === "password" ? "Sign in with password" : "Use Touch ID / Face ID"}</Button>
-          {mode === "signin" && method === "password" && <button className="block w-full text-center text-sm text-ink-muted hover:text-ink disabled:opacity-60" type="button" onClick={() => void submit("setup")}>Forgot password?</button>}
-          <button className="block w-full text-center text-sm text-ink-muted hover:text-ink disabled:opacity-60" type="button" onClick={() => void submit("signin")}>{busy === "signin" ? "Sending…" : "Email me a magic link"}</button>
+      {mode !== "recover" && <>
+        <a className="flex w-full items-center justify-center rounded-[10px] border border-line bg-canvas px-3 py-3 text-sm font-semibold hover:bg-accent-soft" href={`${API_URL}/api/auth/google/redirect`}>
+          <GoogleSignInLabel>Continue with Google</GoogleSignInLabel>
+        </a>
+        <div className="flex items-center gap-3 text-xs text-ink-muted"><span className="h-px flex-1 bg-line" />or use email<span className="h-px flex-1 bg-line" /></div>
+      </>}
+      {mode === "recover" && <p className="text-sm text-ink-muted">We&apos;ll email you a link to choose a new password.</p>}
+      <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
+        <fieldset disabled={busy} className="space-y-4">
+          <label className="block space-y-1"><FieldLabel>Email</FieldLabel><TextInput type="email" name="email" autoComplete="username" required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} /></label>
+          {mode !== "recover" && <label className="block space-y-1"><FieldLabel>Password</FieldLabel><TextInput type="password" name="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={mode === "signup" ? 12 : undefined} maxLength={72} placeholder={mode === "signup" ? "At least 12 characters" : undefined} value={password} onChange={(event) => setPassword(event.target.value)} /></label>}
+          <Button className="w-full" type="submit">{busy ? "Working…" : mode === "signup" ? "Create account" : mode === "recover" ? "Send reset link" : "Sign in with password"}</Button>
+          {mode === "signin" && <button className="block w-full text-center text-sm text-ink-muted hover:text-ink disabled:opacity-60" type="button" onClick={() => changeMode("recover")}>Forgot password?</button>}
         </fieldset>
       </form>
       <div className="border-t border-line pt-4 text-center">
-        <Button variant="ghost" type="button" disabled={busy !== null} onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setError(""); setMessage(""); setPassword(""); }}>{mode === "signin" ? "Create an account" : "Already have an account? Sign in"}</Button>
+        <Button variant="ghost" type="button" disabled={busy} onClick={() => changeMode(mode === "signin" ? "signup" : "signin")}>{mode === "signin" ? "Create an account" : "Back to sign in"}</Button>
       </div>
     </>}
-    {message && <p role="status" className="rounded-lg border border-line p-3 text-sm text-ink">{message}</p>}
     {error && <p role="alert" className="text-sm text-danger">{error}</p>}
   </div>;
 }

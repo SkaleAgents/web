@@ -1,7 +1,7 @@
 import { apiFetch, ensureCsrfCookie } from "./api";
 
 export type AuthResult = { ok: boolean; redirect: string };
-export type EmailLink = { token: string; purpose: "signin" | "password" };
+export type EmailLink = { token: string; purpose: "signin" | "password" | "register" };
 
 declare global {
   interface Window { __skaleEmailLink?: EmailLink }
@@ -13,7 +13,7 @@ export const captureEmailLinkScript = `(() => {
   const params = new URLSearchParams(location.hash.slice(1));
   const token = params.get("token"), purpose = params.get("purpose");
   history.replaceState(history.state, "", location.pathname);
-  if (token && /^[a-zA-Z0-9]{64}$/.test(token) && ["signin", "password"].includes(purpose)) {
+  if (token && /^[a-zA-Z0-9]{64}$/.test(token) && ["signin", "password", "register"].includes(purpose)) {
     window.__skaleEmailLink = { token, purpose };
   }
 })();`;

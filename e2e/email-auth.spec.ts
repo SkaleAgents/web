@@ -14,7 +14,6 @@ test("password sign-in reports failures and allows a retry", async ({ page }) =>
   });
   await page.goto("/login");
   await page.getByLabel("Email", { exact: true }).fill("person@example.com");
-  await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByLabel("Password", { exact: true }).fill("test-password123");
   await page.getByRole("button", { name: "Sign in with password" }).click();
   await expect(page.getByRole("main").getByRole("alert")).toHaveText("Email or password is incorrect.");
@@ -22,20 +21,32 @@ test("password sign-in reports failures and allows a retry", async ({ page }) =>
   expect(requests).toBe(1);
 });
 
-test("magic links and password setup work without entering a current password", async ({ page }) => {
-  const purposes: string[] = [];
+test("signup asks for email and password before verification and recovery stays separate", async ({ page }) => {
+  let registrations = 0;
+  await page.route("**/api/auth/register", route => {
+    registrations++;
+    expect(route.request().postDataJSON()).toEqual({ email: "person@example.com", password: "chosen-password123", password_confirmation: "chosen-password123" });
+    return route.fulfill({ status: 202, json: { message: "Check your email to finish signing up." } });
+  });
   await page.route("**/api/auth/email", route => {
-    purposes.push(route.request().postDataJSON().purpose);
-    return route.fulfill({ status: 202, json: { message: "Check your email for a link valid for 15 minutes." } });
+    expect(route.request().postDataJSON()).toEqual({ email: "person@example.com", purpose: "password" });
+    return route.fulfill({ status: 202, json: {} });
   });
   await page.goto("/login");
   await page.getByLabel("Email", { exact: true }).fill("person@example.com");
-  await page.getByRole("button", { name: "Next", exact: true }).click();
-  await page.getByRole("button", { name: "Email me a magic link" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Check your email" })).toBeVisible();
   await page.getByRole("button", { name: "Create an account", exact: true }).click();
-  await page.getByRole("button", { name: "Verify email to set a password" }).click();
-  await expect.poll(() => purposes).toEqual(["signin", "password"]);
+  await page.getByLabel("Password", { exact: true }).fill("chosen-password123");
+  await page.getByRole("button", { name: "Create account", exact: true }).click();
+  await expect(page.getByRole("main").getByRole("heading", { name: "Check your email" })).toBeVisible();
+  expect(registrations).toBe(1);
+  await page.getByRole("button", { name: "Resend email" }).click();
+  await expect.poll(() => registrations).toBe(2);
+  await page.getByRole("button", { name: "Back to sign in" }).click();
+  await expect(page.getByLabel("Password", { exact: true })).toHaveValue("");
+  await page.getByRole("button", { name: "Forgot password?" }).click();
+  await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Send reset link" }).click();
+  await expect(page.getByRole("main").getByRole("status")).toContainText("password-reset link");
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -65,48 +76,41 @@ test("email tokens are stripped before scripts and require explicit confirmation
   expect(leaked).toEqual([]);
 });
 
-test("passkey cancellation offers email fallback", async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator.credentials, "get", { value: async () => { throw new DOMException("cancelled", "NotAllowedError"); } });
-  });
-  await page.route("**/api/auth/passkeys/options", route => route.fulfill({ json: { challengeId: "test", publicKey: { challenge: "YQ", rpId: "localhost", userVerification: "required" } } }));
-  await page.goto("/login");
-  await page.getByLabel("Email", { exact: true }).fill("person@example.com");
-  await page.getByRole("button", { name: "Next", exact: true }).click();
-  await page.getByRole("button", { name: "Touch ID / Face ID", exact: true }).click();
-  await page.getByRole("button", { name: "Use Touch ID / Face ID" }).click();
-  await expect(page.getByRole("main").getByRole("alert")).toContainText("Passkey request cancelled or unavailable");
-  await expect(page.getByRole("button", { name: "Email me a magic link" })).toBeEnabled();
-});
-
-test("Google comes first and email advances to a single selected sign-in method", async ({ page }) => {
+test("Google comes first with a direct email and password form", async ({ page }) => {
   const authRequests: string[] = [];
   page.on("request", request => { if (request.url().includes("/api/auth/")) authRequests.push(request.url()); });
   await page.goto("/login");
   const main = page.getByRole("main");
   await expect(main.getByRole("link", { name: "Continue with Google" })).toBeVisible();
-  await expect(main.getByRole("button")).toHaveCount(1);
-  await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
+  await expect(main.getByRole("button", { name: "Next", exact: true })).toHaveCount(0);
+  await expect(main.getByRole("button", { name: /Touch ID|magic link/ })).toHaveCount(0);
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
-  await page.getByRole("button", { name: "Next", exact: true }).click();
-  await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
-  await page.getByLabel("Email", { exact: true }).fill("person@example.com");
-  await page.getByLabel("Email", { exact: true }).press("Enter");
-  await expect(page.getByLabel("Password", { exact: true })).toBeFocused();
-  await expect(page.getByRole("button", { name: "Password", exact: true })).toHaveAttribute("aria-pressed", "true");
   await page.getByLabel("Password", { exact: true }).fill("unsubmitted-password");
-  await page.getByRole("button", { name: "Touch ID / Face ID", exact: true }).click();
-  await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Use Touch ID / Face ID", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Change email" }).click();
-  await expect(page.getByLabel("Email", { exact: true })).toHaveValue("person@example.com");
-  await expect(page.getByRole("link", { name: "Continue with Google" })).toBeVisible();
-  await page.getByLabel("Email", { exact: true }).fill("other@example.com");
-  await page.getByRole("button", { name: "Next", exact: true }).click();
-  await page.getByRole("button", { name: "Password", exact: true }).click();
+  await page.getByRole("button", { name: "Create an account", exact: true }).click();
   await expect(page.getByLabel("Password", { exact: true })).toHaveValue("");
   expect(authRequests).toEqual([]);
 });
+
+for (const requiresPassword of [false, true]) {
+  test(`signup confirmation uses the chosen password, other browser: ${requiresPassword}`, async ({ page }) => {
+    const token = "b".repeat(64);
+    await page.route("**/api/auth/email/inspect", route => route.fulfill({ json: { email: "person@example.com", purpose: "register", requiresPassword } }));
+    await page.route("**/api/auth/email/confirm", route => {
+      expect(route.request().postDataJSON()).toEqual({ token, purpose: "register", ...(requiresPassword ? { email: "person@example.com", password: "chosen-password123" } : {}) });
+      return route.fulfill({ status: 422, json: { message: "This link is already used." } });
+    });
+    await page.goto(`/auth/confirm#token=${token}&purpose=register`);
+    await expect(page.getByRole("heading", { name: "Confirm your email" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Confirm email and sign in" })).toBeEnabled();
+    await expect(page.getByLabel("New password")).toHaveCount(0);
+    if (requiresPassword) await page.getByLabel("Password", { exact: true }).fill("chosen-password123");
+    else await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
+    await page.getByRole("button", { name: "Confirm email and sign in" }).click();
+    await expect(page.getByRole("main").getByRole("alert")).toHaveText("This link is already used.");
+  });
+}
