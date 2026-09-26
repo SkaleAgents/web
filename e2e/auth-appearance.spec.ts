@@ -1,5 +1,17 @@
 import { expect, test, type Page } from "@playwright/test";
 
+async function selectTheme(page: Page, name: string) {
+  await page.getByRole("button", { name: "Color theme" }).click();
+  await page.getByRole("menuitemradio", { name, exact: true }).click();
+  await expect(page.getByRole("menu", { name: "Color theme" })).toHaveCount(0);
+}
+
+async function expectTheme(page: Page, name: string) {
+  await page.getByRole("button", { name: "Color theme" }).click();
+  await expect(page.getByRole("menuitemradio", { name, exact: true })).toHaveAttribute("aria-checked", "true");
+  await page.keyboard.press("Escape");
+}
+
 async function expectFocusedAccountPage(page: Page) {
   await expect(page.getByRole("banner")).toHaveCount(0);
   await expect(page.getByRole("navigation")).toHaveCount(0);
@@ -34,10 +46,10 @@ test("theme selection persists and System follows the device while the logo matc
   await page.goto("/");
   const theme = page.getByLabel("Color theme");
   await expect(theme).toBeEnabled();
-  await expect(theme).toHaveValue("system");
+  await expectTheme(page, "System");
   const mark = page.getByRole("link", { name: "SkaleAgents home" }).locator("svg");
   for (const selected of ["light", "dark"]) {
-    await theme.selectOption(selected);
+    await selectTheme(page, selected === "light" ? "Light" : "Dark");
     await expect(page.locator("html")).toHaveClass(new RegExp(`\\b${selected}\\b`));
     await expect(mark.locator("rect")).toHaveCSS("fill", "rgb(14, 21, 24)");
     await expect(mark.locator("path")).toHaveCSS("stroke", "rgb(0, 194, 168)");
@@ -46,15 +58,15 @@ test("theme selection persists and System follows the device while the logo matc
   expect(await favicon.text()).toContain('fill="#0e1518"');
   expect(await favicon.text()).toContain('stroke="#00c2a8"');
   await page.goto("/login");
-  await expect(theme).toHaveValue("dark");
+  await expectTheme(page, "Dark");
   await expect(page.locator("html")).toHaveClass(/\bdark\b/);
   await page.reload();
-  await expect(theme).toHaveValue("dark");
-  await theme.selectOption("system");
+  await expectTheme(page, "Dark");
+  await selectTheme(page, "System");
   await expect(page.locator("html")).toHaveClass(/\blight\b/);
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("html")).toHaveClass(/\bdark\b/);
-  await theme.selectOption("light");
+  await selectTheme(page, "Light");
   await expect(page.locator("html")).toHaveClass(/\blight\b/);
 });
 
@@ -65,9 +77,9 @@ test("signed-in users can change theme from their dashboard account menu", async
   }
   await page.goto("/dashboard");
   await page.getByRole("button", { name: "Appearance, account menu" }).click();
-  await page.getByLabel("Color theme").selectOption("dark");
+  await selectTheme(page, "Dark");
   await expect(page.locator("html")).toHaveClass(/\bdark\b/);
-  await page.getByLabel("Color theme").selectOption("light");
+  await selectTheme(page, "Light");
   await expect(page.locator("html")).toHaveClass(/\blight\b/);
   await page.setViewportSize({ width: 320, height: 900 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -90,4 +102,44 @@ test("public navigation only offers Dashboard and the account avatar to signed-i
   await expect(account).toBeVisible();
   await expect(account).toContainText("TU");
   await expect(header.getByRole("link", { name: "Sign in", exact: true })).toHaveCount(0);
+});
+
+
+test("theme menu is icon-only, keyboard accessible, and dismisses without changing the theme", async ({ page }) => {
+  await page.route("**/api/user", route => route.fulfill({ status: 401, json: {} }));
+  await page.goto("/");
+  const trigger = page.getByRole("button", { name: "Color theme" });
+  await expect(trigger).toHaveText("");
+  await expect(trigger.locator("svg")).toBeVisible();
+  expect((await trigger.boundingBox())!.width).toBeLessThanOrEqual(40);
+  await trigger.focus();
+  await page.keyboard.press("ArrowDown");
+  await expect(page.getByRole("menuitemradio", { name: "System", exact: true })).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await expect(trigger).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(page.getByRole("menuitemradio", { name: "System", exact: true })).toBeFocused();
+  await page.keyboard.press("Home");
+  await expect(page.getByRole("menuitemradio", { name: "Light", exact: true })).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("html")).toHaveClass(/\bdark\b/);
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  for (const name of ["Light", "Dark", "System"]) {
+    await expect(page.getByRole("menuitemradio", { name, exact: true }).locator("svg").first()).toBeVisible();
+  }
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await trigger.click();
+  await page.getByRole("link", { name: "SkaleAgents home" }).click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await expectTheme(page, "Dark");
+  await page.setViewportSize({ width: 320, height: 900 });
+  await trigger.click();
+  const menu = await page.getByRole("menu", { name: "Color theme" }).boundingBox();
+  expect(menu!.x).toBeGreaterThanOrEqual(0);
+  expect(menu!.x + menu!.width).toBeLessThanOrEqual(320);
 });

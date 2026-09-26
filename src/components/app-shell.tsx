@@ -46,7 +46,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
           <Link href="/" className="hover:text-ink hover:underline underline-offset-4">Back to public site</Link>
           <Link href="/bots" className="hover:text-ink hover:underline underline-offset-4">Browse the directory</Link>
         </div>
-        <div className="mt-5"><ThemeSwitcher /></div>
+        <div className="mt-5"><ThemeSwitcher side="top" /></div>
       </footer>
     </div>
   );
