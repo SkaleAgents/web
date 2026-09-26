@@ -14,6 +14,7 @@ test("password sign-in reports failures and allows a retry", async ({ page }) =>
   });
   await page.goto("/login");
   await page.getByLabel("Email", { exact: true }).fill("person@example.com");
+  await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByLabel("Password", { exact: true }).fill("test-password123");
   await page.getByRole("button", { name: "Sign in with password" }).click();
   await expect(page.getByRole("main").getByRole("alert")).toHaveText("Email or password is incorrect.");
@@ -29,6 +30,7 @@ test("magic links and password setup work without entering a current password", 
   });
   await page.goto("/login");
   await page.getByLabel("Email", { exact: true }).fill("person@example.com");
+  await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByRole("button", { name: "Email me a magic link" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Check your email" })).toBeVisible();
   await page.getByRole("button", { name: "Create an account", exact: true }).click();
@@ -70,7 +72,41 @@ test("passkey cancellation offers email fallback", async ({ page }) => {
   await page.route("**/api/auth/passkeys/options", route => route.fulfill({ json: { challengeId: "test", publicKey: { challenge: "YQ", rpId: "localhost", userVerification: "required" } } }));
   await page.goto("/login");
   await page.getByLabel("Email", { exact: true }).fill("person@example.com");
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await page.getByRole("button", { name: "Touch ID / Face ID", exact: true }).click();
   await page.getByRole("button", { name: "Use Touch ID / Face ID" }).click();
   await expect(page.getByRole("main").getByRole("alert")).toContainText("Passkey request cancelled or unavailable");
   await expect(page.getByRole("button", { name: "Email me a magic link" })).toBeEnabled();
+});
+
+test("Google comes first and email advances to a single selected sign-in method", async ({ page }) => {
+  const authRequests: string[] = [];
+  page.on("request", request => { if (request.url().includes("/api/auth/")) authRequests.push(request.url()); });
+  await page.goto("/login");
+  const main = page.getByRole("main");
+  await expect(main.getByRole("link", { name: "Continue with Google" })).toBeVisible();
+  await expect(main.getByRole("button")).toHaveCount(1);
+  await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
+  for (const width of [320, 390, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
+  await page.getByLabel("Email", { exact: true }).fill("person@example.com");
+  await page.getByLabel("Email", { exact: true }).press("Enter");
+  await expect(page.getByLabel("Password", { exact: true })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Password", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.getByLabel("Password", { exact: true }).fill("unsubmitted-password");
+  await page.getByRole("button", { name: "Touch ID / Face ID", exact: true }).click();
+  await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Use Touch ID / Face ID", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Change email" }).click();
+  await expect(page.getByLabel("Email", { exact: true })).toHaveValue("person@example.com");
+  await expect(page.getByRole("link", { name: "Continue with Google" })).toBeVisible();
+  await page.getByLabel("Email", { exact: true }).fill("other@example.com");
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await page.getByRole("button", { name: "Password", exact: true }).click();
+  await expect(page.getByLabel("Password", { exact: true })).toHaveValue("");
+  expect(authRequests).toEqual([]);
 });

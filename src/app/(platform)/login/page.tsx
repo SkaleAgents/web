@@ -71,13 +71,13 @@ export default function LoginPage() {
 
           <EmailSignIn />
 
-          <div className="border-t border-line pt-5">
-            <h3 className="font-semibold text-ink">Connecting an MCP client?</h3>
+          <details className="border-t border-line pt-5 text-sm text-ink-muted">
+            <summary className="cursor-pointer">Connecting an MCP client?</summary>
             <p className="mt-2 text-sm leading-relaxed text-ink-muted">
               After sign-in, approve the MCP access request and return to
               your MCP client. The client handles credentials automatically.
             </p>
-          </div>
+          </details>
 
           <p className="text-center text-sm text-ink-muted lg:hidden">
             <Link href="/bots" className="underline-offset-4 hover:underline">
