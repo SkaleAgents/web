@@ -84,22 +84,25 @@ export default function RootLayout({
         ) : null}
         <div className="flex min-h-0 flex-1 flex-col">
           <Providers>
-            <AppShell>{children}</AppShell>
+            <AppShell publicFooter={
+              <footer className="border-t border-line bg-canvas-elevated">
+                <div className="mx-auto w-full max-w-5xl px-6 py-5">
+                  <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
+                    <span>© 2026 SkaleAgents</span>
+                    <span>AI DevOps control plane</span>
+                  </div>
+                  <div
+                    className="google-add-preferred-source-btn mb-5"
+                    google-add-preferred-source-btn=""
+                  />
+                  <FooterBadges />
+                </div>
+              </footer>
+            }>
+              {children}
+            </AppShell>
           </Providers>
         </div>
-        <footer className="border-t border-line bg-canvas-elevated">
-          <div className="mx-auto w-full max-w-5xl px-6 py-5">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
-              <span>© 2026 SkaleAgents</span>
-              <span>AI DevOps control plane</span>
-            </div>
-            <div
-              className="google-add-preferred-source-btn mb-5"
-              google-add-preferred-source-btn=""
-            />
-            <FooterBadges />
-          </div>
-        </footer>
       </body>
     </html>
   );

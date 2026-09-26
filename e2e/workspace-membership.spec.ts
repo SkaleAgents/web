@@ -165,9 +165,9 @@ test("workspace membership queries switch with the signed-in account", async ({ 
   await expect(page.getByRole("heading", { name: "alice workspace" })).toHaveCount(0);
 });
 
-test("sign-out removes pending invitation credential", async ({ page }) => {
+test("an unverified invitee can sign out and clear the pending invitation credential", async ({ page }) => {
   let signedIn = true;
-  await mockAccount(page);
+  await mockAccount(page, false);
   await page.route("**/api/user", (route) => route.fulfill(signedIn ? { json: account } : { status: 401, json: {} }));
   await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
   await page.route("**/api/auth/logout", (route) => {
@@ -175,6 +175,7 @@ test("sign-out removes pending invitation credential", async ({ page }) => {
     return route.fulfill({ json: { ok: true } });
   });
   await page.goto(`/workspace-invitations/accept#token=${invitationToken}`);
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("Your account email is not verified");
   await page.getByRole("button", { name: /, account menu$/ }).click();
   await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
   await page.getByRole("button", { name: "Sign out" }).click();

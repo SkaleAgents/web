@@ -1,25 +1,22 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { apiFetch, ensureCsrfCookie } from "@/lib/api";
-import { currentUserOptions, setSessionUser } from "@/lib/session";
+import { useEffect } from "react";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { currentUserOptions } from "@/lib/session";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { LinkButton } from "@/components/ui";
-import { AccountNavigation } from "@/components/account-navigation";
+import { AccountMenu } from "@/components/account-menu";
 import { BrandLogo } from "@/components/brand";
 import { ProductNavigation } from "@/components/product-navigation";
-import { clearWorkspaceInvitation, hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
+import { hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children, publicFooter }: { children: React.ReactNode; publicFooter: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const userQuery = useQuery(currentUserOptions);
-  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     if (
@@ -31,21 +28,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, router, userQuery.data]);
 
-  async function logout() {
-    setSigningOut(true);
-    try {
-      await ensureCsrfCookie();
-      await apiFetch("/api/auth/logout", { method: "POST", body: "{}" });
-      await setSessionUser(queryClient, null);
-      clearWorkspaceInvitation();
-      toast.success("Signed out");
-      router.push("/login");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Sign out failed");
-    } finally {
-      setSigningOut(false);
-    }
-  }
+  const dashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const invitation = pathname === WORKSPACE_INVITATION_PATH;
+  const authentication = pathname === "/login" || pathname.startsWith("/auth/") || invitation;
+
+  if (dashboard) return <div key={userQuery.data?.id ?? "guest"} className="flex min-h-0 flex-1 flex-col">{children}</div>;
+
+  if (authentication) return (
+    <div className="flex flex-1 flex-col">
+      <header className="border-b border-line bg-canvas-elevated">
+        <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-8">
+          <BrandLogo />
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/" className="text-sm text-ink-muted hover:text-ink">Back to public site</Link>
+            {invitation && userQuery.data && <AccountMenu key={userQuery.data.id} user={userQuery.data} />}
+          </div>
+        </div>
+      </header>
+      <div key={userQuery.data?.id ?? "guest"} className={invitation
+        ? "mx-auto w-full max-w-5xl flex-1 px-6 py-8"
+        : "flex flex-1 flex-col"}>{children}</div>
+    </div>
+  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -60,13 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {userQuery.isPending ? (
               <span className="text-ink-muted">…</span>
             ) : userQuery.data ? (
-              <AccountNavigation
-                key={`${userQuery.data.id}:${pathname}`}
-                user={userQuery.data}
-                settingsActive={pathname === "/dashboard/settings"}
-                signingOut={signingOut}
-                onSignOut={() => void logout()}
-              />
+              <AccountMenu key={userQuery.data.id} user={userQuery.data} />
             ) : (
               process.env.NEXT_PUBLIC_MOCK_AUTH_ENABLED === "true" ? <GoogleSignInButton /> : <LinkButton href="/login" className="px-3 py-1.5">Sign in</LinkButton>
             )}
@@ -74,12 +72,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <div key={userQuery.data?.id ?? "guest"} className={
-        pathname === "/login" || pathname === "/" || pathname === "/dashboard" || pathname.startsWith("/dashboard/")
+        pathname === "/"
           ? "flex flex-1 flex-col"
           : "motion-enter mx-auto w-full max-w-5xl flex-1 px-6 py-8"
       }>
         {children}
       </div>
+      {publicFooter}
     </div>
   );
 }
