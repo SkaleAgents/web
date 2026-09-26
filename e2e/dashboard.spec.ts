@@ -47,11 +47,11 @@ test("guests cannot mount management pages or request private data", async ({ pa
 test("public catalogs omit credentials and hide private resources even for a signed-in visitor", async ({ page, context }) => {
   await context.addCookies([{ name: "session", value: "test-session", domain: "localhost", path: "/" }]);
   await page.route("**/api/user", route => route.fulfill({ json: owner }));
-  let publicRequests = 0;
+  const publicRequests = new Set<string>();
   await page.route("**/api/bots", async route => {
     expect(await route.request().headerValue("cookie")).toBeNull();
     expect(await route.request().headerValue("x-xsrf-token")).toBeNull();
-    publicRequests++;
+    publicRequests.add(new URL(route.request().url()).pathname);
     return route.fulfill({ json: { bots: [
       { id: "public", name: "Public reviewer", visibility: "public", status: "published", specialty: "sre", description: "Public instructions" },
       { id: "private", name: "Private draft", ownerUserId: owner.id, visibility: "private", status: "draft", specialty: "sre", description: "Secret" },
@@ -59,7 +59,7 @@ test("public catalogs omit credentials and hide private resources even for a sig
   });
   await page.route("**/api/prompts", async route => {
     expect(await route.request().headerValue("cookie")).toBeNull();
-    publicRequests++;
+    publicRequests.add(new URL(route.request().url()).pathname);
     return route.fulfill({ json: { prompts: [
       { id: "public", title: "Community prompt", body: "Public", tags: [], ownerUserId: null },
       { id: "private", title: "Private prompt", body: "Secret", tags: [], ownerUserId: owner.id },
@@ -78,7 +78,7 @@ test("public catalogs omit credentials and hide private resources even for a sig
   await page.goto("/mcp-config");
   await expect(page.getByRole("link", { name: "Open MCP connections" })).toHaveAttribute("href", "/dashboard/mcp-config");
   expect(connections).toBe(0);
-  expect(publicRequests).toBe(2);
+  expect([...publicRequests].sort()).toEqual(["/api/bots", "/api/prompts"]);
 });
 
 test("signed-in OAuth login resumes consent instead of opening the dashboard", async ({ page }) => {
