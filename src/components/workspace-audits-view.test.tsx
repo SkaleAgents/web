@@ -66,7 +66,7 @@ it("lets a workspace owner inspect, purge, and retry pending deletion through wo
   await userEvent.click(await screen.findByRole("button", { name: "Details" }));
   expect(await screen.findByRole("heading", { name: "Audit details" })).toBeInTheDocument();
   expect(screen.getByText(/Review permissions/)).toBeInTheDocument();
-  expect(screen.getByText(/Watchtower, exports, and scheduled audits are not available for shared jobs yet/)).toBeInTheDocument();
+  expect(screen.getByText(/Watchtower and exports are not available for shared jobs yet/)).toBeInTheDocument();
 
   await userEvent.click(screen.getByRole("button", { name: "Purge source" }));
   expect(fetcher).not.toHaveBeenCalledWith(expect.stringMatching(/purge-source$/), expect.anything());

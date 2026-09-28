@@ -20,6 +20,7 @@ import {
   type AuditWorkspace,
   type WorkspaceAuditDetail,
 } from "@/lib/workspace-audits";
+import { workspaceSchedulesEnabled } from "@/lib/workspace-schedules";
 
 export function WorkspaceAuditsView() {
   const params = useParams<{ workspaceId: string }>();
@@ -198,8 +199,9 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
       <div className="workspace-intro">
         <p className="workspace-kicker">Organizations / Shared review</p>
         <h1 className="workspace-heading">{workspace.name} audits</h1>
-        <p className="mt-1 max-w-2xl text-sm text-ink-muted">Shared audit history for current organization members. Watchtower, exports, and scheduled audits are not available for shared jobs yet.</p>
+        <p className="mt-1 max-w-2xl text-sm text-ink-muted">Shared audit history for current organization members. Watchtower and exports are not available for shared jobs yet.</p>
         <Link className="mt-3 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href="/dashboard/workspaces">All organizations</Link>
+        {workspaceSchedulesEnabled() && <Link className="ml-4 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href={`/dashboard/workspaces/${workspaceId}/schedules`}>Shared schedules</Link>}
       </div>
       {canCreate && !unavailable && <Link href={`/dashboard/workspaces/${workspaceId}/jobs/new`} className="inline-flex rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-fg hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">New shared audit</Link>}
       {unavailable ? <p role="alert" className="text-sm text-ink-muted">Shared audits are unavailable. Confirm the feature is enabled and that you still belong to this organization.</p> : (
