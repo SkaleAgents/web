@@ -50,11 +50,14 @@ describe("consultancy booking handoff", () => {
       close: vi.fn(),
     };
     vi.spyOn(window, "open").mockReturnValue(opened as unknown as Window);
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
 
     render(<ConsultancyBookingLink source={{ type: "audit_job", id: "private-job-id" }} />);
     fireEvent.click(screen.getByRole("button", { name: "Book a consultancy session" }));
 
-    await waitFor(() => expect(opened.location.assign).toHaveBeenCalledWith("https://harun.dev/book?sa_ref=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+    await waitFor(() => expect(click).toHaveBeenCalledOnce());
+    expect(opened.document.body.querySelector("a")?.href).toBe("https://harun.dev/book?sa_ref=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    expect(opened.document.body.querySelector("a")?.rel).toBe("noreferrer");
     expect(opened.opener).toBeNull();
     expect(opened.document.querySelector('meta[name="referrer"]')?.getAttribute("content")).toBe("no-referrer");
     expect(fetcher).toHaveBeenCalledWith(expect.stringMatching(/\/api\/portfolio-booking-referrals$/), expect.objectContaining({
