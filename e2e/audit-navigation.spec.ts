@@ -72,3 +72,38 @@ test("audit jobs stay paged as the list grows", async ({ page }) => {
   await expect(page.getByText("Audit 11", { exact: true })).toBeVisible();
   await expect(page.getByText("Audit 1", { exact: true })).toHaveCount(0);
 });
+
+test("audit history opens one job at a time for review and management", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const id = "00000000-0000-4000-8000-000000000001";
+  const job = {
+    id, status: "completed", summary: "Ingress review", requestedBy: "owner",
+    sourcePurged: false, specialists: ["devsecops"], partial: false, scope: {},
+    createdAt: "2026-09-28T12:00:00Z", updatedAt: "2026-09-28T12:00:00Z",
+  };
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "owner", enabled: false } }));
+  await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: [job] } }));
+  await page.route(`**/api/jobs/${id}`, route => route.fulfill({ json: job }));
+
+  await page.goto("/dashboard/jobs");
+  await expect(page.getByText("Ingress review")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Export report" })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.getByRole("link", { name: "View audit" }).click();
+  await expect(page).toHaveURL(new RegExp(`/dashboard/jobs/${id}$`));
+  await expect(page.getByRole("heading", { name: "Audit details" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Open Watchtower" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Export report" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to audit jobs" })).toHaveAttribute("href", "/dashboard/jobs");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
+test("a guessed audit detail ID stays unavailable without exposing source data", async ({ page }) => {
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/api/jobs/unknown", route => route.fulfill({ status: 404, json: { message: "Another account owns private-revision" } }));
+  await page.goto("/dashboard/jobs/unknown");
+  await expect(page.getByRole("main").getByRole("alert")).toHaveText("This audit is unavailable or has been removed.");
+  await expect(page.getByText("private-revision")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Export report" })).toHaveCount(0);
+});

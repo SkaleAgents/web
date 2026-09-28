@@ -24,6 +24,7 @@ export function JobRetentionControls({ job, accountId, onDeletion }: {
       if (!ownsView()) return;
       setConfirm(null);
       void client.invalidateQueries({ queryKey: ["swarm-jobs", accountId] });
+      void client.invalidateQueries({ queryKey: ["swarm-job", job.id, accountId] });
     },
   });
   const cleanup = useMutation({

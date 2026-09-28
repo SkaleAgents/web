@@ -20,6 +20,7 @@ test("input cleanup stays visibly incomplete and deletion waits for actual compl
     return route.fulfill({ status: 202, json: { ok: true, sourcePurged: false, retention: { inputPurgeStatus: "pending", inputPurgedAt: null } } });
   });
   await page.route(`**/api/jobs/${id}`, async route => {
+    if (route.request().method() === "GET") return route.fulfill({ json: { ...baseJob, scheduleId: "schedule", retention: { inputAvailable: purgeStatus === "retained", inputPurgeStatus: purgeStatus, inputExpiresAt: null, historyExpiresAt: null, inputPurgedAt: null } } });
     expect(route.request().method()).toBe("DELETE");
     deleteCalls++;
     hidden = true;
@@ -28,6 +29,7 @@ test("input cleanup stays visibly incomplete and deletion waits for actual compl
     return route.fulfill({ status: 202, json: { ok: true, status: deleteCalls === 1 ? "pending" : "processing" } });
   });
   await page.goto("/jobs");
+  await page.getByRole("link", { name: "View audit" }).click();
   await expect(page.getByText("The recurring schedule keeps a separate input copy.", { exact: false })).toBeVisible();
   await page.getByRole("button", { name: "Purge audit input", exact: true }).click();
   await page.getByRole("button", { name: "Confirm input purge", exact: true }).click();
@@ -45,7 +47,7 @@ test("input cleanup stays visibly incomplete and deletion waits for actual compl
 
 test("legacy sourcePurged jobs still poll until retention input cleanup completes", async ({ page }) => {
   let purgeRequested = false;
-  let listReads = 0;
+  let detailReads = 0;
   const job = { ...baseJob, sourcePurged: true } as Record<string, unknown>;
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
   await page.route("**/sanctum/csrf-cookie", route => route.fulfill({ status: 204 }));
@@ -53,15 +55,17 @@ test("legacy sourcePurged jobs still poll until retention input cleanup complete
     purgeRequested = true;
     await route.fulfill({ status: 202, json: { ok: true, sourcePurged: false, retention: { inputAvailable: false, inputPurgeStatus: "pending", inputExpiresAt: null, historyExpiresAt: null, inputPurgedAt: null } } });
   });
-  await page.route("**/api/jobs", async route => {
-    listReads++;
-    const retention = purgeRequested && listReads >= 3
+  await page.route(`**/api/jobs/${id}`, async route => {
+    detailReads++;
+    const retention = purgeRequested && detailReads >= 3
       ? { inputAvailable: false, inputPurgeStatus: "purged", inputExpiresAt: null, historyExpiresAt: null, inputPurgedAt: new Date().toISOString() }
       : purgeRequested ? { inputAvailable: false, inputPurgeStatus: "pending", inputExpiresAt: null, historyExpiresAt: null, inputPurgedAt: null } : undefined;
-    await route.fulfill({ json: { jobs: [{ ...job, ...(retention ? { retention } : {}) }] } });
+    await route.fulfill({ json: { ...job, ...(retention ? { retention } : {}) } });
   });
+  await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: [job] } }));
 
   await page.goto("/jobs");
+  await page.getByRole("link", { name: "View audit" }).click();
   await expect(page.getByText("Source content was previously purged. Other input may remain.")).toBeVisible();
   await page.getByRole("button", { name: "Purge audit input", exact: true }).click();
   await page.getByRole("button", { name: "Confirm input purge", exact: true }).click();
@@ -74,11 +78,13 @@ test("active audits require confirmed cancellation before cleanup controls appea
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
   await page.route("**/sanctum/csrf-cookie", route => route.fulfill({ status: 204 }));
   await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: [{ ...baseJob, status }] } }));
+  await page.route(`**/api/jobs/${id}`, route => route.fulfill({ json: { ...baseJob, status } }));
   await page.route(`**/api/jobs/${id}/cancel`, route => {
     status = "failed";
     return route.fulfill({ json: { ...baseJob, status } });
   });
   await page.goto("/jobs");
+  await page.getByRole("link", { name: "View audit" }).click();
   await expect(page.getByRole("button", { name: "Cancel audit", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Purge audit input", exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Cancel audit", exact: true }).click();
