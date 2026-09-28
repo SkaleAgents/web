@@ -9,15 +9,9 @@ const groups = [
     { href: "/bots", label: "Bot directory", detail: "Find a specialist for your next review.", icon: "bot" },
     { href: "/prompts", label: "Prompt library", detail: "Copy focused instructions into your assistant.", icon: "library" },
   ] },
-  { label: "Review", items: [
-    { href: "/jobs", label: "Audit jobs", detail: "Review infrastructure with selected specialists.", icon: "audit" },
-    { href: "/schedules", label: "Scheduled audits", detail: "Repeat reviews and manage optional webhooks.", icon: "calendar" },
-    { href: "/advisory-bookings", label: "Advisory requests", detail: "Track the status of your advisory requests.", icon: "calendar" },
-  ] },
-  { label: "Build & connect", items: [
-    { href: "/studio", label: "Creator Studio", detail: "Turn your review process into a reusable bot.", icon: "studio" },
-    { href: "/mcp-config", label: "MCP config", detail: "Configure your client and manage OAuth connections.", icon: "plug" },
-    { href: "/workspaces", label: "Workspaces", detail: "Manage your workspace memberships.", icon: "team" },
+  { label: "Connect", items: [
+    { href: "/mcp-config", label: "MCP config", detail: "Set up SkaleAgents in your editor or AI client.", icon: "plug" },
+    { href: "/pricing", label: "Pricing", detail: "Compare organization audit and monitoring plans.", icon: "team" },
   ] },
 ] as const;
 
@@ -34,20 +28,16 @@ function NavigationIcon({ name }: { name: (typeof groups)[number]["items"][numbe
   return <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
 }
 
-export function ProductNavigation({ staff = false }: { staff?: boolean }) {
+export function ProductNavigation() {
   const pathname = usePathname();
   const [open, setOpen] = useState<string | null>(null);
   const nav = useRef<HTMLElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const navigationGroups = groups.map((group) => group.label === "Review" && staff ? {
-    ...group,
-    items: [...group.items, { href: "/staff/advisory-bookings", label: "Advisory bookings", detail: "Assign requests and record advisory work.", icon: "calendar" as const }],
-  } : group);
   function cancelClose() {
     if (closeTimer.current !== null) clearTimeout(closeTimer.current);
     closeTimer.current = null;
   }
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`) || (href === "/jobs" && pathname.startsWith("/watchtower/"));
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   useEffect(() => {
     function dismiss(event: PointerEvent) {
@@ -76,7 +66,7 @@ export function ProductNavigation({ staff = false }: { staff?: boolean }) {
         setOpen(null);
       }
     }}>
-      {navigationGroups.map((group, index) => (
+      {groups.map((group, index) => (
         <div key={group.label} className="product-nav-group" onPointerEnter={(event) => {
           if (event.pointerType !== "mouse" || !window.matchMedia("(hover: hover)").matches) return;
           cancelClose();

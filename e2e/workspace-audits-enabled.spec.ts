@@ -36,6 +36,7 @@ async function mockSharedAuditApi(page: Page, options: {
   onCreate?: (body: Record<string, unknown>) => void;
 } = {}) {
   let deletes = 0;
+  let created = false;
   const auditRequests: Array<{ path: string; method: string }> = [];
   await page.route("**/api/user", (route) => route.fulfill({ json: account }));
   await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
@@ -47,12 +48,13 @@ async function mockSharedAuditApi(page: Page, options: {
       return route.fulfill({ json: { data: options.memberships?.() ?? [workspace("workspace-a")] } });
     }
     auditRequests.push({ path, method });
-    const match = path.match(/^\/api\/workspaces\/([^/]+)\/audits(?:\/([^/]+))?(?:\/(purge-source))?$/);
+    const match = path.match(/^\/api\/workspaces\/([^/]+)\/jobs(?:\/([^/]+))?(?:\/(purge-source))?$/);
     if (!match) return route.fulfill({ status: 404, json: { error: "Not found" } });
     const [, workspaceId, auditId, action] = match;
     if (method === "POST" && !auditId) {
       const body = route.request().postDataJSON() as Record<string, unknown>;
       options.onCreate?.(body);
+      created = true;
       return route.fulfill({ status: 202, json: { ...auditFor(workspaceId, "audit-created"), requestedBy: account.id } });
     }
     if (action === "purge-source" && method === "POST") {
@@ -79,7 +81,7 @@ async function mockSharedAuditApi(page: Page, options: {
     }
     if (method === "GET" && !auditId) {
       if (options.listStatus) return route.fulfill({ status: options.listStatus, json: { error: "Not found" } });
-      return route.fulfill({ json: { data: [auditFor(workspaceId)] } });
+      return route.fulfill({ json: { jobs: created ? [auditFor(workspaceId), auditFor(workspaceId, "audit-created")] : [auditFor(workspaceId)] } });
     }
     return route.fulfill({ status: 404, json: { error: "Not found" } });
   });
@@ -87,7 +89,7 @@ async function mockSharedAuditApi(page: Page, options: {
 }
 
 async function openWorkspaceAudits(page: Page, workspaceId = "workspace-a") {
-  await page.goto(`/workspaces/${workspaceId}/audits`);
+  await page.goto(`/dashboard/workspaces/${workspaceId}/jobs`);
   await expect(page.getByRole("heading", { name: new RegExp(`Team ${workspaceId} audits`) })).toBeVisible();
 }
 
@@ -104,36 +106,42 @@ test.describe("workspace shared audits with rollout enabled", () => {
     });
     await openWorkspaceAudits(page);
     await expect(page.getByText("Shared history workspace-a")).toBeVisible();
+    await page.getByRole("link", { name: "New shared audit" }).click();
     await page.getByLabel("Infrastructure configuration").fill("resource config");
     await page.getByRole("button", { name: "Queue shared audit" }).click();
+    await expect(page).toHaveURL(/\/dashboard\/workspaces\/workspace-a\/jobs$/);
+    await page.getByRole("button", { name: "Details" }).last().click();
     await expect(page.getByRole("heading", { name: "Audit details" })).toBeVisible();
     await expect(page.getByText(/Review permissions/)).toBeVisible();
     expect(createBody).toEqual({ scope: { kind: "iac_text", format: "auto", content: "resource config" }, specialists: ["devsecops", "sre"] });
-    await expect.poll(() => api.auditRequests.some(({ path, method }) => path.endsWith("/audits") && method === "POST")).toBe(true);
+    await expect.poll(() => api.auditRequests.some(({ path, method }) => path.endsWith("/jobs") && method === "POST")).toBe(true);
 
     await page.getByRole("button", { name: "Purge source" }).click();
     await expect(page.getByText(/Purge status: pending/)).toBeVisible();
-    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-a/audits/audit-created/purge-source", method: "POST" });
+    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-a/jobs/audit-created/purge-source", method: "POST" });
 
     await page.getByRole("button", { name: "Close details" }).click();
-    await page.getByRole("button", { name: "Delete" }).click();
+    await page.getByRole("button", { name: "Delete" }).first().click();
     await expect(page.getByRole("status")).toContainText("Audit deletion pending");
     await expect.poll(() => api.deleteCount(), { timeout: 8_000 }).toBeGreaterThanOrEqual(3);
     await expect(page.getByRole("status")).toContainText("Audit deletion completed");
-    expect(api.auditRequests.filter(({ method, path }) => method === "DELETE" && path === "/api/workspaces/workspace-a/audits/audit-workspace-a").length).toBeGreaterThanOrEqual(3);
+    expect(api.auditRequests.filter(({ method, path }) => method === "DELETE" && path === "/api/workspaces/workspace-a/jobs/audit-workspace-a").length).toBeGreaterThanOrEqual(3);
   });
 
   test("members can create and read but do not get owner purge or delete controls", async ({ page }) => {
     const api = await mockSharedAuditApi(page, { memberships: () => [workspace("workspace-a", "member")] });
     await openWorkspaceAudits(page);
-    await expect(page.getByRole("button", { name: "Queue shared audit" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "New shared audit" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Details" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Delete" })).toHaveCount(0);
+    await page.getByRole("link", { name: "New shared audit" }).click();
     await page.getByLabel("Infrastructure configuration").fill("member source");
     await page.getByRole("button", { name: "Queue shared audit" }).click();
+    await expect(page).toHaveURL(/\/dashboard\/workspaces\/workspace-a\/jobs$/);
+    await page.getByRole("button", { name: "Details" }).last().click();
     await expect(page.getByRole("heading", { name: "Audit details" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Purge source" })).toHaveCount(0);
-    expect(api.auditRequests.some(({ path, method }) => path.endsWith("/audits") && method === "POST")).toBe(true);
+    expect(api.auditRequests.some(({ path, method }) => path.endsWith("/jobs") && method === "POST")).toBe(true);
     expect(api.auditRequests.some(({ method }) => method === "DELETE")).toBe(false);
   });
 
@@ -141,7 +149,7 @@ test.describe("workspace shared audits with rollout enabled", () => {
     await mockSharedAuditApi(page, { memberships: () => [workspace("workspace-a", "viewer")] });
     await openWorkspaceAudits(page);
     await expect(page.getByText("Shared history workspace-a")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Queue shared audit" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "New shared audit" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Delete" })).toHaveCount(0);
     await page.getByRole("button", { name: "Details" }).click();
     await expect(page.getByText(/Review permissions/)).toBeVisible();
@@ -150,15 +158,15 @@ test.describe("workspace shared audits with rollout enabled", () => {
 
   test("keeps audit lists separate across workspace route changes", async ({ page }) => {
     const api = await mockSharedAuditApi(page, { memberships: () => [workspace("workspace-a", "member"), workspace("workspace-b", "viewer")] });
-    await page.goto("/workspaces");
+    await page.goto("/dashboard/workspaces");
     await page.getByRole("link", { name: "Shared audits" }).nth(0).click();
     await expect(page.getByText("Shared history workspace-a")).toBeVisible();
-    await page.getByRole("link", { name: "All workspaces" }).click();
+    await page.getByRole("link", { name: "All organizations" }).click();
     await page.getByRole("link", { name: "Shared audits" }).nth(1).click();
     await expect(page.getByText("Shared history workspace-b")).toBeVisible();
     await expect(page.getByText("Shared history workspace-a")).toHaveCount(0);
-    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-a/audits", method: "GET" });
-    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-b/audits", method: "GET" });
+    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-a/jobs", method: "GET" });
+    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-b/jobs", method: "GET" });
   });
 
   test("removes cached detail when refreshed membership no longer includes the workspace", async ({ page }) => {
@@ -171,16 +179,16 @@ test.describe("workspace shared audits with rollout enabled", () => {
     active = false;
     await page.clock.fastForward(46_000);
     await page.evaluate(() => window.dispatchEvent(new Event("visibilitychange")));
-    await expect(page.getByRole("heading", { name: "Workspace unavailable" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Organization unavailable" })).toBeVisible();
     await expect(page.getByText(/Review permissions/)).toHaveCount(0);
   });
 
   test("fails closed on API 404 and removes shared audit actions", async ({ page }) => {
     const api = await mockSharedAuditApi(page, { listStatus: 404 });
     await openWorkspaceAudits(page);
-    await expect(page.getByText("Shared audits are unavailable. Confirm the feature is enabled and that you still belong to this workspace.")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Queue shared audit" })).toHaveCount(0);
+    await expect(page.getByText("Shared audits are unavailable. Confirm the feature is enabled and that you still belong to this organization.")).toBeVisible();
+    await expect(page.getByRole("link", { name: "New shared audit" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Delete" })).toHaveCount(0);
-    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-a/audits", method: "GET" });
+    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-a/jobs", method: "GET" });
   });
 });

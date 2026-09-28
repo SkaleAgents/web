@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+test.use({ timezoneId: "Asia/Dhaka" });
+
 test("audit creation submits paired source metadata and job reads distinguish unknown, recorded, and unavailable", async ({ page }) => {
   let createdBody: Record<string, unknown> | undefined;
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
@@ -17,7 +19,7 @@ test("audit creation submits paired source metadata and job reads distinguish un
     ] } });
   });
 
-  await page.goto("/jobs");
+  await page.goto("/dashboard/jobs/new");
   await page.getByLabel("IaC content").fill('resource "test" {}');
   await page.getByLabel("Source revision").fill("commit-audit");
   await page.getByLabel("Source observed at").fill("2026-09-25T10:30");
@@ -26,7 +28,7 @@ test("audit creation submits paired source metadata and job reads distinguish un
   await expect.poll(() => createdBody).toMatchObject({
     scope: { kind: "iac_text", content: 'resource "test" {}' },
     sourceRevision: "commit-audit",
-    sourceObservedAt: new Date("2026-09-25T10:30").toISOString(),
+    sourceObservedAt: "2026-09-25T04:30:00Z",
   });
   await expect(page.getByText("Caller-reported source revision: unknown")).toBeVisible();
   await expect(page.getByText("Caller-reported source revision: recorded-revision")).toBeVisible();
@@ -44,7 +46,7 @@ test("audit form rejects one-sided metadata before sending a request", async ({ 
     return route.fulfill({ json: { jobs: [] } });
   });
 
-  await page.goto("/jobs");
+  await page.goto("/dashboard/jobs/new");
   await page.getByLabel("IaC content").fill('resource "test" {}');
   await page.getByLabel("Source revision").fill("only-revision");
   await page.getByRole("button", { name: "Queue audit" }).click();
@@ -75,6 +77,6 @@ test("schedule creation submits a paired caller revision and observation time", 
   await expect.poll(() => createdBody).toMatchObject({
     scope: { kind: "iac_text", content: 'resource "test" {}' },
     sourceRevision: "commit-schedule",
-    sourceObservedAt: new Date("2026-09-25T10:30").toISOString(),
+    sourceObservedAt: "2026-09-25T04:30:00Z",
   });
 });

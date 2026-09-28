@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("desktop menus open on hover, bridge the panel gap, and dismiss on exit", async ({ page }) => {
-  await page.goto("/studio");
+  await page.goto("/mcp-config");
   const nav = page.getByRole("navigation", { name: "Main navigation" });
   const explore = nav.getByRole("button", { name: "Explore", exact: true });
   await explore.hover();
@@ -19,7 +19,7 @@ test("desktop menus open on hover, bridge the panel gap, and dismiss on exit", a
   await expect(nav.getByRole("link", { name: /Bot directory/ })).toBeVisible();
   await nav.getByRole("link", { name: /Bot directory/ }).hover();
   await expect(explore).toHaveAttribute("aria-expanded", "true");
-  const review = nav.getByRole("button", { name: "Review", exact: true });
+  const review = nav.getByRole("button", { name: "Connect", exact: true });
   await review.hover();
   await expect(explore).toHaveAttribute("aria-expanded", "false");
   await expect(review).toHaveAttribute("aria-expanded", "true");
@@ -35,7 +35,7 @@ test("touch menus toggle without hover and destination taps navigate", async ({ 
   const page = await context.newPage();
   await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
   try {
-    await page.goto("/studio");
+    await page.goto("/mcp-config");
     const nav = page.getByRole("navigation", { name: "Main navigation" });
     const explore = nav.getByRole("button", { name: "Explore", exact: true });
     await explore.tap();
@@ -51,21 +51,22 @@ test("touch menus toggle without hover and destination taps navigate", async ({ 
 });
 
 test("grouped navigation supports keyboard dismissal, active routes, and mobile", async ({ page }) => {
-  await page.goto("/studio");
+  await page.goto("/mcp-config");
   const nav = page.getByRole("navigation", { name: "Main navigation" });
-  const build = nav.getByRole("button", { name: "Build & connect" });
+  const build = nav.getByRole("button", { name: "Connect" });
   await build.focus();
   await page.keyboard.press("Enter");
   await page.keyboard.press("Tab");
-  await expect(nav.getByRole("link", { name: /Creator Studio/ })).toBeFocused();
-  await expect(nav.getByRole("link", { name: /Creator Studio/ })).toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: /MCP config/ })).toBeFocused();
+  await expect(nav.getByRole("link", { name: /MCP config/ })).toHaveAttribute("aria-current", "page");
   await page.keyboard.press("Escape");
   await expect(build).toBeFocused();
   await expect(build).toHaveAttribute("aria-expanded", "false");
   await page.setViewportSize({ width: 320, height: 740 });
-  for (const label of ["Explore", "Review", "Build & connect"]) {
+  for (const label of ["Explore", "Connect"]) {
     await nav.getByRole("button", { name: label, exact: true }).click();
-    await expect(nav.getByRole("link")).toHaveCount(label === "Review" || label === "Build & connect" ? 3 : 2);
+    await expect(nav.getByRole("link")).toHaveCount(2);
+    if (label === "Connect") await expect(nav.getByRole("link", { name: /Pricing/ })).toHaveAttribute("href", "/pricing");
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   }
   await nav.getByRole("link", { name: /MCP config/ }).click();
@@ -107,6 +108,7 @@ test("prompt topics and search select the full text to copy", async ({ page, con
 });
 
 test("Studio starter saves specialized instructions in a private draft", async ({ page }) => {
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
   await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
   let saved: Record<string, unknown> = {};
   await page.route("**/api/bots", async (route) => {
@@ -153,7 +155,7 @@ test("audit specialist choices reach the API and job status filters work", async
       await route.fulfill({ status: 201, json: { id: "new-job" } });
     } else await route.fulfill({ json: { jobs: [{ id: "done", status: "completed", summary: "Review complete", specialists: ["sre"], createdAt: new Date().toISOString() }] } });
   });
-  await page.goto("/jobs");
+  await page.goto("/dashboard/jobs/new");
   await page.getByRole("textbox", { name: "IaC content", exact: true }).fill("kind: Deployment");
   await page.getByRole("checkbox", { name: /^Security/ }).uncheck();
   await page.getByRole("checkbox", { name: /^Scaling & cost/ }).check();

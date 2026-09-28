@@ -7,6 +7,7 @@ import { setSessionUser } from "@/lib/session";
 
 const fixtureBooking = {
   id: "booking-customer-a",
+  version: 1,
   source: { type: "watchtower_session" as const, id: "session-source-1" },
   status: "completed" as const,
   assigneeRef: "expert:internal-7",
@@ -15,6 +16,8 @@ const fixtureBooking = {
   preferredWindow: { startAt: "2026-09-28T16:00:00Z", endAt: "2026-09-28T17:00:00Z" },
   notes: "Focus on rollback.",
   billing: { billableMinutes: 60, feeCents: 25000, currency: "USD" },
+  agreement: null,
+  appointment: null,
   createdAt: "2026-09-25T12:00:00Z",
   updatedAt: "2026-09-25T12:00:00Z",
 };
@@ -22,6 +25,7 @@ const fixtureBooking = {
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
   vi.clearAllMocks();
 });
 
@@ -54,22 +58,34 @@ it("loads only the signed-in caller's list into an account-scoped cache", async 
 });
 
 it("keeps customer detail language inside the deployed fields' limits", async () => {
+  vi.stubEnv("NEXT_PUBLIC_ADVISORY_AGREEMENTS_ENABLED", "true");
+  const withAppointment = {
+    ...fixtureBooking,
+    version: 4,
+    agreement: null,
+    appointment: {
+      confirmedWindow: { startAt: "2026-09-29T16:00:00Z", endAt: "2026-09-29T17:00:00Z", timezone: "America/Los_Angeles" },
+      confirmedAt: "2026-09-25T18:00:00Z",
+    },
+  };
   const fetcher = vi.fn(async (input: RequestInfo | URL) => String(input).endsWith("/api/user")
     ? accountResponse()
-    : Response.json(fixtureBooking)) as typeof fetch;
+    : Response.json(withAppointment)) as typeof fetch;
   const { client, render: renderPage } = setup(fetcher);
 
   renderPage(<CustomerBookingDetail id={fixtureBooking.id} />);
 
   expect(await screen.findByRole("heading", { name: /Advisory request/ })).toBeInTheDocument();
   expect(screen.getByText(/requested, not confirmed/)).toBeInTheDocument();
+  expect(screen.getByText("Confirmed window (America/Los_Angeles)")).toBeInTheDocument();
+  expect(screen.getByText(/separate from your requested preferred window/)).toBeInTheDocument();
   expect(screen.getByText("expert:internal-7")).toBeInTheDocument();
   expect(screen.getByText(/internal reference, not a contact detail/)).toBeInTheDocument();
   expect(screen.getByText("250.00 USD")).toBeInTheDocument();
   expect(screen.getByText(/not a payment confirmation/)).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "Open source Watchtower session" })).toHaveAttribute("href", "/watchtower/session-source-1");
+  expect(screen.getByRole("link", { name: "Open source Watchtower session" })).toHaveAttribute("href", "/dashboard/watchtower/session-source-1");
   expect(fetcher).toHaveBeenCalledWith(expect.stringMatching(/\/api\/advisory-bookings\/booking-customer-a$/), expect.objectContaining({ credentials: "include" }));
-  expect(client.getQueryData(["customer-advisory-booking", "customer-a", fixtureBooking.id])).toEqual(fixtureBooking);
+  expect(client.getQueryData(["customer-advisory-booking", "customer-a", fixtureBooking.id])).toEqual(withAppointment);
 });
 
 it("presents an unavailable response generically for guessed or removed booking IDs", async () => {

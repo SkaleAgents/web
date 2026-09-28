@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Button, TextArea } from "@/components/ui";
@@ -15,6 +16,7 @@ import {
   listWorkspaceAudits,
   purgeWorkspaceAuditSource,
   workspaceAuditsEnabled,
+  workspaceAuditCreationEnabled,
   type AuditWorkspace,
   type WorkspaceAuditDetail,
 } from "@/lib/workspace-audits";
@@ -31,13 +33,66 @@ export function WorkspaceAuditsPage({ workspaceId }: { workspaceId: string }) {
   return <WorkspaceAudits workspaceId={workspaceId} />;
 }
 
+export function WorkspaceNewAuditView() {
+  const params = useParams<{ workspaceId: string }>();
+  return <WorkspaceNewAuditPage workspaceId={params.workspaceId} />;
+}
+
+export function WorkspaceNewAuditPage({ workspaceId }: { workspaceId: string }) {
+  const router = useRouter();
+  const client = useQueryClient();
+  const user = useQuery(currentUserOptions);
+  const accountId = user.data?.id;
+  const [content, setContent] = useState("");
+  const workspaceQuery = useQuery({
+    queryKey: ["workspaces", accountId ?? "guest"],
+    enabled: Boolean(accountId && workspaceAuditsEnabled()),
+    queryFn: async ({ signal }) => {
+      const response = await apiFetch<{ data: AuditWorkspace[] }>("/api/workspaces", { signal });
+      if (client.getQueryData(currentUserOptions.queryKey)?.id !== accountId) throw new Error("Your account changed. Reload organization access before continuing.");
+      return response.data;
+    },
+  });
+  const workspace = workspaceQuery.data?.find((item) => item.id === workspaceId);
+  const canCreate = workspace?.role === "owner" || workspace?.role === "member";
+  const create = useMutation({
+    mutationFn: () => createWorkspaceAudit(workspaceId, content.trim()),
+    onSuccess: (audit) => {
+      if (client.getQueryData(currentUserOptions.queryKey)?.id !== accountId || audit.workspaceId !== workspaceId) return;
+      void client.invalidateQueries({ queryKey: ["workspace-audits", accountId, workspaceId] });
+      router.push(`/dashboard/workspaces/${workspaceId}/jobs`);
+    },
+  });
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    create.mutate();
+  }
+  if (!workspaceAuditsEnabled() || !workspaceAuditCreationEnabled()) return <main className="space-y-4"><h1 className="workspace-heading">New shared audit</h1><p className="text-sm text-ink-muted">Shared audit creation is not enabled for this deployment.</p></main>;
+  if (user.isPending || accountId && workspaceQuery.isPending) return <main><p role="status">Checking organization access…</p></main>;
+  if (user.isError || !accountId || workspaceQuery.isError || !workspace || !canCreate) return <main><h1 className="workspace-heading">Organization unavailable</h1><p role="alert" className="mt-3 text-sm text-ink-muted">You cannot create audits in this organization.</p></main>;
+  return <main className="mx-auto max-w-3xl space-y-6">
+    <div className="workspace-intro">
+      <Link href={`/dashboard/workspaces/${workspaceId}/jobs`} className="text-sm font-semibold text-accent hover:underline">Back to shared audits</Link>
+      <h1 className="workspace-heading mt-3">New shared audit</h1>
+      <p className="mt-2 text-sm text-ink-muted">Add configuration for {workspace.name}. Members of this organization can see the result.</p>
+    </div>
+    <form onSubmit={submit} className="space-y-3 rounded-[10px] border border-line bg-canvas-elevated p-5">
+      <label htmlFor="workspace-audit-content" className="block text-sm font-medium text-ink">Infrastructure configuration</label>
+      <TextArea id="workspace-audit-content" className="min-h-32" value={content} onChange={(event) => setContent(event.target.value)} required placeholder={'resource "aws_security_group" "web" {}'} />
+      <p className="text-xs text-ink-muted">Queued for Security and Reliability specialists.</p>
+      <Button type="submit" disabled={!content.trim() || create.isPending}>{create.isPending ? "Queueing…" : "Queue shared audit"}</Button>
+      {create.isError && <p role="alert" className="text-sm text-danger">{create.error.message}</p>}
+    </form>
+  </main>;
+}
+
 function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
   const client = useQueryClient();
   const user = useQuery(currentUserOptions);
   const accountId = user.data?.id;
   const workspaceKey = ["workspaces", accountId ?? "guest"] as const;
-  const [content, setContent] = useState("");
   const [selectedAuditId, setSelectedAuditId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const [deleteStates, setDeleteStates] = useState<Record<string, "pending" | "failed">>({});
   const unavailableKey = useMemo(() => ["workspace-audits-unavailable", accountId ?? "guest", workspaceId] as const, [accountId, workspaceId]);
   const unavailableQuery = useQuery({ queryKey: unavailableKey, queryFn: async () => false, enabled: false, initialData: false });
@@ -52,7 +107,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
   });
   const workspace = workspaceQuery.data?.find((item) => item.id === workspaceId);
   const role = workspace?.role;
-  const canCreate = role === "owner" || role === "member";
+  const canCreate = workspaceAuditCreationEnabled() && (role === "owner" || role === "member");
   const canManage = role === "owner";
   const auditKey = useMemo(() => ["workspace-audits", accountId ?? "guest", workspaceId] as const, [accountId, workspaceId]);
   const audits = useQuery({
@@ -74,15 +129,6 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
       if (result.workspaceId !== workspaceId) throw new Error("The audit response did not match this workspace.");
       if (client.getQueryData(currentUserOptions.queryKey)?.id !== accountId) throw new Error("Your account changed. Reload workspace access before continuing.");
       return result;
-    },
-  });
-  const create = useMutation({
-    mutationFn: () => createWorkspaceAudit(workspaceId, content.trim()),
-    onSuccess: (audit) => {
-      if (client.getQueryData(currentUserOptions.queryKey)?.id !== accountId || audit.workspaceId !== workspaceId) return;
-      setContent("");
-      setSelectedAuditId(audit.id);
-      void client.invalidateQueries({ queryKey: auditKey });
     },
   });
   const purge = useMutation({
@@ -110,7 +156,10 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
       void client.removeQueries({ queryKey: ["workspace-audit-deletion-status", accountId, workspaceId, auditId] });
     },
   });
-  const unavailable = unavailableQuery.data || [audits.error, detail.error, create.error, purge.error, remove.error].some(isWorkspaceAuditUnavailable);
+  const pageCount = Math.max(1, Math.ceil((audits.data?.length ?? 0) / 10));
+  const currentPage = Math.min(page, pageCount);
+  const visibleAudits = audits.data?.slice((currentPage - 1) * 10, currentPage * 10);
+  const unavailable = unavailableQuery.data || [audits.error, detail.error, purge.error, remove.error].some(isWorkspaceAuditUnavailable);
 
   useEffect(() => {
     if (!accountId || !workspaceQuery.data) return;
@@ -127,53 +176,46 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
   }, [accountId, client, workspaceQuery.data]);
 
   useEffect(() => {
-    const errors = [audits.error, detail.error, create.error, purge.error, remove.error];
+    const errors = [audits.error, detail.error, purge.error, remove.error];
     if (!errors.some(isWorkspaceAuditUnavailable)) return;
     client.setQueryData(unavailableKey, true);
     void client.cancelQueries({ queryKey: auditKey });
     void client.removeQueries({ queryKey: auditKey });
     void client.removeQueries({ queryKey: ["workspace-audit-detail", accountId, workspaceId] });
-  }, [accountId, auditKey, audits.error, client, create.error, detail.error, purge.error, remove.error, unavailableKey, workspaceId]);
-
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    create.mutate();
-  }
+  }, [accountId, auditKey, audits.error, client, detail.error, purge.error, remove.error, unavailableKey, workspaceId]);
 
   if (user.isError) return <main><h1 className="workspace-heading">Shared audits</h1><p role="alert" className="text-sm text-danger">Could not verify your account.</p></main>;
-  if (user.isPending || accountId && workspaceQuery.isPending) return <main><p role="status" className="text-sm text-ink-muted">Checking workspace access…</p></main>;
-  if (!accountId) return <main className="space-y-3"><h1 className="workspace-heading">Shared audits</h1><p className="text-sm text-ink-muted">Sign in to view this workspace.</p></main>;
-  if (workspaceQuery.isError) return <main><p role="alert" className="text-sm text-danger">Could not verify workspace membership. Refresh and try again.</p></main>;
-  if (!workspace) return <main className="space-y-3"><h1 className="workspace-heading">Workspace unavailable</h1><p role="alert" className="text-sm text-ink-muted">This workspace is unavailable or you no longer belong to it.</p></main>;
+  if (user.isPending || accountId && workspaceQuery.isPending) return <main><p role="status" className="text-sm text-ink-muted">Checking organization access…</p></main>;
+  if (!accountId) return <main className="space-y-3"><h1 className="workspace-heading">Shared audits</h1><p className="text-sm text-ink-muted">Sign in to view this organization.</p></main>;
+  if (workspaceQuery.isError) return <main><p role="alert" className="text-sm text-danger">Could not verify organization membership. Refresh and try again.</p></main>;
+  if (!workspace) return <main className="space-y-3"><h1 className="workspace-heading">Organization unavailable</h1><p role="alert" className="text-sm text-ink-muted">This organization is unavailable or you no longer belong to it.</p></main>;
 
   return (
     <main className="space-y-8">
       <div className="workspace-intro">
-        <p className="workspace-kicker">Workspaces / Shared review</p>
+        <p className="workspace-kicker">Organizations / Shared review</p>
         <h1 className="workspace-heading">{workspace.name} audits</h1>
-        <p className="mt-1 max-w-2xl text-sm text-ink-muted">Shared audit history for current workspace members. Workspace Watchtower, exports, and scheduled audits are not available here.</p>
-        <Link className="mt-3 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href="/workspaces">All workspaces</Link>
+        <p className="mt-1 max-w-2xl text-sm text-ink-muted">Shared audit history for current organization members. Watchtower, exports, and scheduled audits are not available for shared jobs yet.</p>
+        <Link className="mt-3 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href="/dashboard/workspaces">All organizations</Link>
       </div>
-      {canCreate && !unavailable && <form onSubmit={submit} className="max-w-3xl space-y-3 rounded-[10px] border border-line bg-canvas-elevated p-5">
-        <h2 className="text-lg font-semibold text-ink">Start a shared IaC audit</h2>
-        <label htmlFor="workspace-audit-content" className="block text-sm font-medium text-ink">Infrastructure configuration</label>
-        <TextArea id="workspace-audit-content" className="min-h-32" value={content} onChange={(event) => setContent(event.target.value)} required placeholder={'resource "aws_security_group" "web" {}'} />
-        <p className="text-xs text-ink-muted">Queued for Security and Reliability specialists.</p>
-        <Button type="submit" disabled={!content.trim() || create.isPending}>{create.isPending ? "Queueing…" : "Queue shared audit"}</Button>
-        {create.isError && <p role="alert" className="text-sm text-danger">{create.error.message}</p>}
-      </form>}
-      {unavailable ? <p role="alert" className="text-sm text-ink-muted">Shared audits are unavailable. Confirm the feature is enabled and that you still belong to this workspace.</p> : (
+      {canCreate && !unavailable && <Link href={`/dashboard/workspaces/${workspaceId}/jobs/new`} className="inline-flex rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-fg hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">New shared audit</Link>}
+      {unavailable ? <p role="alert" className="text-sm text-ink-muted">Shared audits are unavailable. Confirm the feature is enabled and that you still belong to this organization.</p> : (
         <section className="space-y-4">
           <h2 className="text-lg font-semibold text-ink">Shared audit history</h2>
           {audits.isPending && <p role="status" className="text-sm text-ink-muted">Loading shared audits…</p>}
           {audits.isError && !unavailable && <div role="alert" className="space-y-2 text-sm text-danger"><p>{audits.error.message}</p><Button variant="secondary" onClick={() => void audits.refetch()}>Retry</Button></div>}
           {audits.data?.length === 0 && <p className="text-sm text-ink-muted">No shared audits are available yet.</p>}
           <ul className="divide-y divide-line">
-            {audits.data?.map((audit) => <li key={audit.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
+            {visibleAudits?.map((audit) => <li key={audit.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
               <div><p className="font-mono text-xs uppercase tracking-wide text-ink-muted">{audit.status}</p><p className="mt-1 text-sm text-ink">{audit.summary ?? "Waiting for specialist results"}</p><p className="mt-1 text-xs text-ink-muted">{audit.specialists.join(" · ")}{audit.partial ? " · Partial results" : ""} · {new Date(audit.createdAt).toLocaleString()}</p></div>
               <div className="flex gap-2"><Button variant="secondary" onClick={() => setSelectedAuditId(audit.id)}>Details</Button>{canManage && <Button variant="secondary" disabled={remove.isPending || audit.status === "queued" || audit.status === "running"} onClick={() => remove.mutate(audit.id)}>Delete</Button>}</div>
             </li>)}
           </ul>
+          {pageCount > 1 && <nav aria-label="Shared audit pages" className="flex items-center justify-between gap-4 border-t border-line pt-4 text-sm">
+            <Button variant="secondary" disabled={currentPage === 1} onClick={() => { setSelectedAuditId(null); setPage(currentPage - 1); }}>Previous</Button>
+            <span>Page {currentPage} of {pageCount}</span>
+            <Button variant="secondary" disabled={currentPage === pageCount} onClick={() => { setSelectedAuditId(null); setPage(currentPage + 1); }}>Next</Button>
+          </nav>}
           {Object.entries(deleteStates).map(([auditId, state]) => <WorkspaceAuditDeletionStatus key={auditId} accountId={accountId} workspaceId={workspaceId} auditId={auditId} initialStatus={state} />)}
           {remove.isError && <p role="alert" className="text-sm text-danger">{remove.error.message}</p>}
         </section>

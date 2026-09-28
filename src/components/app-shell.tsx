@@ -1,26 +1,23 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { apiFetch, ensureCsrfCookie } from "@/lib/api";
-import { currentUserOptions, setSessionUser } from "@/lib/session";
+import { useQuery } from "@tanstack/react-query";
+import { currentUserOptions } from "@/lib/session";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
-import { Button } from "@/components/ui";
+import { LinkButton } from "@/components/ui";
+import { AccountMenu } from "@/components/account-menu";
 import { BrandLogo } from "@/components/brand";
 import { ProductNavigation } from "@/components/product-navigation";
-import { isStaff } from "@/lib/advisory-bookings";
-import { clearWorkspaceInvitation, hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
+import { ThemeSwitcher } from "@/components/theme-switcher";
+import { hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children, publicFooter }: { children: React.ReactNode; publicFooter: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const userQuery = useQuery(currentUserOptions);
-  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     if (
@@ -32,62 +29,73 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, router, userQuery.data]);
 
-  async function logout() {
-    setSigningOut(true);
-    try {
-      await ensureCsrfCookie();
-      await apiFetch("/api/auth/logout", { method: "POST", body: "{}" });
-      await setSessionUser(queryClient, null);
-      clearWorkspaceInvitation();
-      toast.success("Signed out");
-      router.push("/login");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Sign out failed");
-    } finally {
-      setSigningOut(false);
-    }
-  }
+  const dashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const invitation = pathname === WORKSPACE_INVITATION_PATH;
+  const authentication = pathname === "/login" || pathname.startsWith("/auth/");
+
+  if (dashboard) return <div key={userQuery.data?.id ?? "guest"} className="flex min-h-0 flex-1 flex-col">{children}</div>;
+
+  if (authentication) return (
+    <div className="flex flex-1 flex-col">
+      <div key={userQuery.data?.id ?? "guest"} className="flex flex-1 flex-col px-5">
+        {children}
+      </div>
+      <footer aria-label="Account page links" className="mx-auto w-full max-w-md px-5 pb-8 text-center text-sm text-ink-muted">
+        <p>Prefer to look around first?</p>
+        <div className="mt-2 flex flex-wrap justify-center gap-x-5 gap-y-2">
+          <Link href="/" className="hover:text-ink hover:underline underline-offset-4">Back to public site</Link>
+          <Link href="/bots" className="hover:text-ink hover:underline underline-offset-4">Browse the directory</Link>
+        </div>
+        <div className="mt-5"><ThemeSwitcher side="top" /></div>
+      </footer>
+    </div>
+  );
+
+  if (invitation) return (
+    <div className="flex flex-1 flex-col">
+      <header className="border-b border-line bg-canvas-elevated">
+        <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-8">
+          <BrandLogo />
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/" className="text-sm text-ink-muted hover:text-ink">Back to public site</Link>
+            <ThemeSwitcher />
+            {userQuery.data && <AccountMenu key={userQuery.data.id} user={userQuery.data} />}
+          </div>
+        </div>
+      </header>
+      <div key={userQuery.data?.id ?? "guest"} className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">{children}</div>
+    </div>
+  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <header className="border-b border-line border-t-2 border-t-accent bg-canvas-elevated">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-3">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-3">
           <div className="contents">
             <BrandLogo />
-            <ProductNavigation key={pathname} staff={isStaff(userQuery.data) && !userQuery.isError} />
+            <ProductNavigation key={pathname} />
           </div>
-          <div className="flex items-center gap-3 text-sm">
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-3 text-sm sm:ml-0">
+            {userQuery.data && <LinkButton href="/dashboard" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>}
+            <ThemeSwitcher />
             {userQuery.isPending ? (
               <span className="text-ink-muted">…</span>
             ) : userQuery.data ? (
-              <>
-                <span className="text-ink-muted">
-                  {userQuery.data.displayName}
-                </span>
-                <Link href="/settings" aria-current={pathname === "/settings" ? "page" : undefined} className="text-ink-muted hover:text-ink">Settings</Link>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="px-2 py-1"
-                  disabled={signingOut}
-                  onClick={() => void logout()}
-                >
-                  Sign out
-                </Button>
-              </>
+              <AccountMenu key={userQuery.data.id} user={userQuery.data} />
             ) : (
-              <GoogleSignInButton />
+              process.env.NEXT_PUBLIC_MOCK_AUTH_ENABLED === "true" ? <GoogleSignInButton /> : <LinkButton href="/login" className="px-3 py-1.5">Sign in</LinkButton>
             )}
           </div>
         </div>
       </header>
       <div key={userQuery.data?.id ?? "guest"} className={
-        pathname === "/login" || pathname === "/"
+        pathname === "/"
           ? "flex flex-1 flex-col"
           : "motion-enter mx-auto w-full max-w-5xl flex-1 px-6 py-8"
       }>
         {children}
       </div>
+      {publicFooter}
     </div>
   );
 }

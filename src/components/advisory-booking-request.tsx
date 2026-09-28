@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiFetch, type AdvisoryBooking, type AdvisoryBookingSourceType } from "@/lib/api";
 import { Button, FieldLabel, Select, TextArea, TextInput } from "@/components/ui";
+import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 
 export function AdvisoryBookingRequest({
   source,
@@ -36,9 +37,12 @@ export function AdvisoryBookingRequest({
 
   if (!open) {
     return (
-      <Button type="button" variant="secondary" onClick={() => setOpen(true)}>
-        Request expert help
-      </Button>
+      <div className="space-y-4">
+        <ConsultancyBookingLink />
+        <Button type="button" variant="secondary" onClick={() => setOpen(true)}>
+          Request expert help
+        </Button>
+      </div>
     );
   }
 

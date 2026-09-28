@@ -31,17 +31,17 @@ test("the starting-point picker recommends the matching route and can be reset",
     ["Try a specialist", "Find a specialist bot", "/bots"],
     ["Try a specialist", "Grab a ready-made prompt", "/prompts"],
     ["Review infrastructure", "Inside my editor", "/mcp-config"],
-    ["Review infrastructure", "In a shared web review", "/jobs"],
-    ["Review infrastructure", "On a recurring schedule", "/schedules"],
-    ["Build my own bot", "Keep it private", "/studio"],
-    ["Build my own bot", "Share it publicly", "/studio"],
+    ["Review infrastructure", "In a shared web review", "/dashboard/jobs"],
+    ["Review infrastructure", "On a recurring schedule", "/dashboard/schedules"],
+    ["Build my own bot", "Keep it private", "/dashboard/studio"],
+    ["Build my own bot", "Share it publicly", "/dashboard/studio"],
   ];
   for (const [goal, preference, href] of choices) {
     await picker.getByText(goal, { exact: true }).click();
     await picker.getByText(preference, { exact: true }).click();
     await expect(picker.getByRole("link")).toHaveAttribute("href", href);
   }
-  await expect(picker).toContainText("Google sign-in is needed");
+  await expect(picker).toContainText("Sign in to create and publish a bot");
   await picker.getByRole("button", { name: "Start over" }).click();
   await expect(picker.getByRole("link")).toHaveCount(0);
   await expect(picker.getByRole("radio", { name: "Try a specialist" })).toBeFocused();

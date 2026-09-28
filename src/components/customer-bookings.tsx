@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ApiError, apiFetch, type AdvisoryBooking } from "@/lib/api";
+import { advisoryAgreementsEnabled, advisoryDeliveryHandoffsEnabled, ApiError, apiFetch, type AdvisoryBooking } from "@/lib/api";
 import { bookingStatusLabels } from "@/lib/advisory-bookings";
 import { useCustomerUser, isSessionError } from "@/components/customer-booking-access";
 import { Button, LinkButton } from "@/components/ui";
+import { AdvisoryAgreementReview } from "@/components/advisory-agreement-review";
+import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 
 function bookingListKey(accountId: string) {
   return ["customer-advisory-bookings", accountId] as const;
@@ -24,7 +26,7 @@ function handleSessionExpiry(queryClient: ReturnType<typeof useQueryClient>, que
 
 function BookingSummary({ booking }: { booking: AdvisoryBooking }) {
   return (
-    <Link href={`/advisory-bookings/${encodeURIComponent(booking.id)}`} className="block space-y-3 p-5 hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent">
+    <Link href={`/dashboard/advisory-bookings/${encodeURIComponent(booking.id)}`} className="block space-y-3 p-5 hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent">
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="rounded-full bg-accent-soft px-2 py-1 font-semibold text-ink">{bookingStatusLabels[booking.status]}</span>
         <span className="text-ink-muted">{booking.urgency} priority</span>
@@ -62,6 +64,7 @@ export function CustomerBookingList() {
         <h1 className="workspace-heading">Advisory requests</h1>
         <p className="mt-2 max-w-2xl text-sm text-ink-muted">Track request status, the preferred window you submitted, and any recorded fee.</p>
       </div>
+      <ConsultancyBookingLink />
       <div className="flex justify-end">
         <Button variant="secondary" onClick={() => void bookings.refetch()} disabled={bookings.isFetching}>
           {bookings.isFetching ? "Refreshing…" : "Refresh requests"}
@@ -101,7 +104,7 @@ export function CustomerBookingDetail({ id }: { id: string }) {
 
   return (
     <main className="space-y-6">
-      <LinkButton href="/advisory-bookings" variant="ghost">Back to advisory requests</LinkButton>
+      <LinkButton href="/dashboard/advisory-bookings" variant="ghost">Back to advisory requests</LinkButton>
       {denied || notFound ? (
         <div className="space-y-3">
           <h1 className="workspace-heading">{denied ? "Sign in required" : "Request unavailable"}</h1>
@@ -124,6 +127,7 @@ export function CustomerBookingDetail({ id }: { id: string }) {
               <Button variant="secondary" disabled={booking.isFetching} onClick={() => void booking.refetch()}>{booking.isFetching ? "Refreshing…" : "Refresh request"}</Button>
             </div>
           </div>
+          <ConsultancyBookingLink />
           <section aria-label="Request details" className="space-y-4 rounded-xl border border-line bg-canvas-elevated p-5">
             <h2 className="text-lg font-semibold">Requested scope</h2>
             <p className="whitespace-pre-wrap break-words text-sm">{data.scope}</p>
@@ -137,7 +141,7 @@ export function CustomerBookingDetail({ id }: { id: string }) {
                 <dt className="text-ink-muted">Source</dt>
                 <dd className="mt-1 break-all">
                   {data.source.type === "watchtower_session" ? (
-                    <Link className="text-accent underline" href={`/watchtower/${encodeURIComponent(data.source.id)}`}>Open source Watchtower session</Link>
+                    <Link className="text-accent underline" href={`/dashboard/watchtower/${encodeURIComponent(data.source.id)}`}>Open source Watchtower session</Link>
                   ) : <span>Audit job reference (no direct source page available)</span>}
                   <span className="mt-1 block font-mono text-xs text-ink-muted">{data.source.id}</span>
                 </dd>
@@ -145,6 +149,28 @@ export function CustomerBookingDetail({ id }: { id: string }) {
             </dl>
             {data.notes && <div><h3 className="text-sm text-ink-muted">Your notes</h3><p className="mt-1 whitespace-pre-wrap break-words text-sm">{data.notes}</p></div>}
           </section>
+          {advisoryAgreementsEnabled() && data.appointment && (
+            <section aria-label="Confirmed appointment" className="space-y-3 rounded-xl border border-line bg-canvas-elevated p-5">
+              <h2 className="text-lg font-semibold">Confirmed appointment</h2>
+              <p className="text-xs text-ink-muted">This confirmed window is separate from your requested preferred window above.</p>
+              <dl className="grid gap-4 text-sm sm:grid-cols-2">
+                <div><dt className="text-ink-muted">Confirmed window ({data.appointment.confirmedWindow.timezone})</dt><dd className="mt-1">{new Date(data.appointment.confirmedWindow.startAt).toLocaleString("en", { timeZone: data.appointment.confirmedWindow.timezone, timeZoneName: "short" })} to {new Date(data.appointment.confirmedWindow.endAt).toLocaleString("en", { timeZone: data.appointment.confirmedWindow.timezone, timeZoneName: "short" })}</dd></div>
+                <div><dt className="text-ink-muted">Confirmed at (your timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone || "local timezone"})</dt><dd className="mt-1">{new Date(data.appointment.confirmedAt).toLocaleString()}</dd></div>
+              </dl>
+            </section>
+          )}
+          {advisoryAgreementsEnabled() && advisoryDeliveryHandoffsEnabled() && data.delivery && (
+            <section aria-label="Delivery handoff" className="space-y-3 rounded-xl border border-line bg-canvas-elevated p-5">
+              <h2 className="text-lg font-semibold">Delivery contact</h2>
+              <p className="text-sm">{data.delivery.handoffStatus === "ready" ? "Confirmed with the delivery owner" : "Awaiting confirmation with the delivery owner"}</p>
+              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <div><dt className="text-ink-muted">Contact name</dt><dd className="mt-1">{data.delivery.contact.name}</dd></div>
+                <div><dt className="text-ink-muted">Channel</dt><dd className="mt-1">{data.delivery.contact.channel}</dd></div>
+                <div><dt className="text-ink-muted">Contact detail</dt><dd className="mt-1 break-words">{data.delivery.contact.value}</dd></div>
+                {data.delivery.handedOffAt && <div><dt className="text-ink-muted">Confirmed at</dt><dd className="mt-1">{new Date(data.delivery.handedOffAt).toLocaleString()}</dd></div>}
+              </dl>
+            </section>
+          )}
           <section aria-label="Assignment" className="rounded-xl border border-line bg-canvas-elevated p-5">
             <h2 className="text-lg font-semibold">Assignment</h2>
             <p className="mt-2 break-all font-mono text-sm">{data.assigneeRef ?? "No assignment recorded"}</p>
@@ -161,6 +187,7 @@ export function CustomerBookingDetail({ id }: { id: string }) {
               </>
             )}
           </section>
+          <AdvisoryAgreementReview booking={data} onRefresh={() => void booking.refetch()} />
         </>
       )}
     </main>

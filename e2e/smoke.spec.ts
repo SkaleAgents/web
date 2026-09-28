@@ -1,13 +1,16 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Phase 1 page smokes", () => {
-  test("login page shows Google sign-in", async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
+    await page.route("**/api/user", route => route.fulfill({ status: 401, json: {} }));
+  });
+  test("login page shows email and Google sign-in", async ({ page }) => {
     await page.goto("/login");
     await expect(
       page.getByRole("heading", { name: /Sign in to your control plane/i }),
     ).toBeVisible();
     await expect(
-      page.getByRole("banner").getByRole("link", { name: "Sign in with Google" }),
+      page.getByRole("main").getByRole("link", { name: "Continue with Google" }),
     ).toBeVisible();
   });
 
@@ -17,7 +20,7 @@ test.describe("Phase 1 page smokes", () => {
       page.getByRole("heading", { name: /Bot directory/i }),
     ).toBeVisible();
     await expect(
-      page.getByRole("banner").getByRole("link", { name: "Sign in with Google" }),
+      page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true }),
     ).toBeVisible();
     await expect(page.getByText("Deferred", { exact: true })).not.toBeVisible();
   });
@@ -27,7 +30,7 @@ test.describe("Phase 1 page smokes", () => {
     await expect(
       page.getByRole("heading", { name: /Prompt library/i }),
     ).toBeVisible();
-    await expect(page.getByRole("main").getByText(/use Google sign-in in the header/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Manage your prompts" })).toBeVisible();
   });
 
   test("marketing landing shows Signal Deck brand hero", async ({ page }) => {
@@ -37,7 +40,7 @@ test.describe("Phase 1 page smokes", () => {
       page.getByRole("heading", { name: /Control plane for AI DevOps agents/i }),
     ).toBeVisible();
     await expect(
-      page.getByRole("banner").getByRole("link", { name: "Sign in with Google" }),
+      page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true }),
     ).toBeVisible();
     await expect(page.getByRole("contentinfo")).toContainText("SkaleAgents");
   });
@@ -51,14 +54,17 @@ test.describe("Phase 1 page smokes", () => {
   });
 
   test("audit page explains the signed-in workflow", async ({ page }) => {
+    await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
     await page.goto("/jobs");
     await expect(page.getByRole("heading", { name: /Audit jobs/i })).toBeVisible();
+    await page.getByRole("link", { name: "New audit" }).first().click();
     await expect(page.getByRole("heading", { name: /Start an IaC audit/i })).toBeVisible();
     await expect(page.getByRole("textbox", { name: "Telemetry JSON" })).toBeVisible();
     await expect(page.getByRole("group", { name: "Specialists" })).toBeVisible();
   });
 
   test("schedule page explains recurring audits", async ({ page }) => {
+    await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
     await page.goto("/schedules");
     await expect(page.getByRole("heading", { name: /Scheduled audits/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Create a schedule/i })).toBeVisible();
@@ -66,13 +72,13 @@ test.describe("Phase 1 page smokes", () => {
 
   test("every public route uses the shared menu and sign-in action", async ({ page }) => {
     await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
-    for (const path of ["/", "/login", "/bots", "/jobs", "/schedules", "/studio", "/prompts", "/mcp-config"]) {
+    for (const path of ["/", "/bots", "/prompts", "/mcp-config"]) {
       await page.goto(path);
       await expect(page.getByRole("navigation")).toBeVisible();
-      await expect(page.getByRole("navigation").getByRole("button")).toHaveCount(3);
+      await expect(page.getByRole("navigation").getByRole("button")).toHaveCount(2);
       await expect(page.getByRole("navigation").getByRole("link", { name: "Home", exact: true })).toHaveCount(0);
       await expect(page.getByRole("link", { name: "SkaleAgents home" })).toHaveAttribute("href", "/");
-      await expect(page.getByRole("banner").getByRole("link", { name: "Sign in with Google" })).toBeVisible();
+      await expect(page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true })).toBeVisible();
     }
   });
 

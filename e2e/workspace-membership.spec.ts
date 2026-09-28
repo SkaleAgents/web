@@ -35,7 +35,7 @@ test("captures the mailed fragment before the publisher script, verifies, and ac
 
   await page.goto(`/workspace-invitations/accept#token=${invitationToken}`);
   await expect(page).toHaveURL(/\/workspace-invitations\/accept$/);
-  await expect(page.getByRole("heading", { name: "Accept workspace invitation" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Accept organization invitation" })).toBeVisible();
   await expect.poll(() => page.evaluate(() => Boolean((window as Window & { publisherObservedLocation?: string }).publisherObservedLocation))).toBe(true);
   const securityState = await page.evaluate(() => ({
     publisherSawCleanUrl: !(window as unknown as { publisherObservedLocation: string }).publisherObservedLocation.includes("token="),
@@ -77,7 +77,7 @@ test("keeps an invite through sign-in and resumes the exact accept route", async
   signedIn = true;
   await page.goto("/bots");
   await expect(page).toHaveURL(/\/workspace-invitations\/accept$/);
-  await expect(page.getByRole("heading", { name: "Accept workspace invitation" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Accept organization invitation" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Accept invitation" })).toBeVisible();
 });
 
@@ -120,7 +120,7 @@ test("reports an already-active membership separately", async ({ page }) => {
   }));
   await page.goto(`/workspace-invitations/accept#token=${invitationToken}`);
   await page.getByRole("button", { name: "Accept invitation" }).click();
-  await expect(page.getByRole("main").getByRole("alert")).toHaveText("This account already has an active membership in the workspace.");
+  await expect(page.getByRole("main").getByRole("alert")).toHaveText("This account already has an active membership in the organization.");
   await expect.poll(() => page.evaluate(() => sessionStorage.getItem("skaleagents_workspace_invitation"))).toBeNull();
 });
 
@@ -140,12 +140,12 @@ test("lists and creates only memberships and leaves personal resources unscoped"
   });
 
   await page.goto("/workspaces");
-  await expect(page.getByRole("heading", { name: "Workspaces", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Organizations", exact: true })).toBeVisible();
   await expect(page.getByText("Infra", { exact: true })).toBeVisible();
-  await expect(page.getByText(/personal audits, schedules, and advisory requests stay tied to your account/)).toBeVisible();
-  await expect(page.locator("select")).toHaveCount(0);
-  await page.getByLabel("Workspace name").fill("Platform Team");
-  await page.getByRole("button", { name: "Create workspace" }).click();
+  await expect(page.getByText(/personal audits, schedules, and advisory requests remain tied to your account/)).toBeVisible();
+  await expect(page.getByRole("main").getByRole("combobox")).toHaveCount(0);
+  await page.getByLabel("Organization name").fill("Platform Team");
+  await page.getByRole("button", { name: "Create organization" }).click();
   await expect(page.getByText("Platform Team", { exact: true })).toBeVisible();
 });
 
@@ -165,9 +165,9 @@ test("workspace membership queries switch with the signed-in account", async ({ 
   await expect(page.getByRole("heading", { name: "alice workspace" })).toHaveCount(0);
 });
 
-test("sign-out removes pending invitation credential", async ({ page }) => {
+test("an unverified invitee can sign out and clear the pending invitation credential", async ({ page }) => {
   let signedIn = true;
-  await mockAccount(page);
+  await mockAccount(page, false);
   await page.route("**/api/user", (route) => route.fulfill(signedIn ? { json: account } : { status: 401, json: {} }));
   await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
   await page.route("**/api/auth/logout", (route) => {
@@ -175,6 +175,8 @@ test("sign-out removes pending invitation credential", async ({ page }) => {
     return route.fulfill({ json: { ok: true } });
   });
   await page.goto(`/workspace-invitations/accept#token=${invitationToken}`);
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("Your account email is not verified");
+  await page.getByRole("button", { name: /, account menu$/ }).click();
   await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/login$/);

@@ -6,6 +6,7 @@ import { Providers } from "./providers";
 import { AppShell } from "@/components/app-shell";
 import { FooterBadges } from "@/components/footer-badges";
 import { captureWorkspaceInvitationScript } from "@/lib/workspace-invitations";
+import { captureEmailLinkScript } from "@/lib/email-auth";
 
 const syne = localFont({
   src: "./fonts/Syne.ttf",
@@ -61,6 +62,7 @@ export default function RootLayout({
       className={`${syne.variable} ${sourceSans.variable} ${plexMono.variable} h-full antialiased`}
     >
       <head>
+        <script id="capture-email-link" dangerouslySetInnerHTML={{ __html: captureEmailLinkScript }} />
         <script
           id="capture-workspace-invitation"
           dangerouslySetInnerHTML={{ __html: captureWorkspaceInvitationScript }}
@@ -82,22 +84,25 @@ export default function RootLayout({
         ) : null}
         <div className="flex min-h-0 flex-1 flex-col">
           <Providers>
-            <AppShell>{children}</AppShell>
+            <AppShell publicFooter={
+              <footer className="border-t border-line bg-canvas-elevated">
+                <div className="mx-auto w-full max-w-5xl px-6 py-5">
+                  <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
+                    <span>© 2026 SkaleAgents</span>
+                    <span>AI DevOps control plane</span>
+                  </div>
+                  <div
+                    className="google-add-preferred-source-btn mb-5"
+                    google-add-preferred-source-btn=""
+                  />
+                  <FooterBadges />
+                </div>
+              </footer>
+            }>
+              {children}
+            </AppShell>
           </Providers>
         </div>
-        <footer className="border-t border-line bg-canvas-elevated">
-          <div className="mx-auto w-full max-w-5xl px-6 py-5">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
-              <span>© 2026 SkaleAgents</span>
-              <span>AI DevOps control plane</span>
-            </div>
-            <div
-              className="google-add-preferred-source-btn mb-5"
-              google-add-preferred-source-btn=""
-            />
-            <FooterBadges />
-          </div>
-        </footer>
       </body>
     </html>
   );

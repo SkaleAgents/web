@@ -24,13 +24,17 @@ export function workspaceAuditsEnabled(): boolean {
   return process.env.NEXT_PUBLIC_WORKSPACE_AUDITS_ENABLED === "true";
 }
 
+export function workspaceAuditCreationEnabled(): boolean {
+  return workspaceAuditsEnabled() && process.env.NEXT_PUBLIC_WORKSPACE_AUDIT_CREATION_ENABLED === "true";
+}
+
 export function workspaceAuditPath(workspaceId: string, auditId?: string): string {
-  return `/api/workspaces/${encodeURIComponent(workspaceId)}/audits${auditId ? `/${encodeURIComponent(auditId)}` : ""}`;
+  return `/api/workspaces/${encodeURIComponent(workspaceId)}/jobs${auditId ? `/${encodeURIComponent(auditId)}` : ""}`;
 }
 
 export async function listWorkspaceAudits(workspaceId: string, signal?: AbortSignal): Promise<WorkspaceAudit[]> {
-  const response = await apiFetch<{ data: WorkspaceAudit[] }>(workspaceAuditPath(workspaceId), { signal });
-  return response.data;
+  const response = await apiFetch<{ jobs: WorkspaceAudit[] }>(workspaceAuditPath(workspaceId), { signal });
+  return response.jobs;
 }
 
 export async function createWorkspaceAudit(workspaceId: string, content: string): Promise<WorkspaceAudit> {

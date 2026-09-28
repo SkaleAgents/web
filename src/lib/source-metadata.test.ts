@@ -11,10 +11,14 @@ describe("buildSourceMetadata", () => {
     expect(() => buildSourceMetadata("", "2026-09-25T10:30")).toThrow("Enter both a source revision and observation time");
   });
 
-  it("converts the caller-entered local time to RFC 3339 UTC", () => {
-    expect(buildSourceMetadata(" rev-1 ", "2026-09-25T10:30:00")).toEqual({
+  it.each([
+    ["2026-09-25T10:30:00Z", "2026-09-25T10:30:00Z"],
+    ["2026-09-25T10:30:45+06:00", "2026-09-25T04:30:45Z"],
+    ["2026-09-25T23:30:00-04:00", "2026-09-26T03:30:00Z"],
+  ])("serializes %s with the API's whole-second UTC precision", (input, expected) => {
+    expect(buildSourceMetadata(" rev-1 ", input)).toEqual({
       sourceRevision: "rev-1",
-      sourceObservedAt: new Date("2026-09-25T10:30:00").toISOString(),
+      sourceObservedAt: expected,
     });
   });
 

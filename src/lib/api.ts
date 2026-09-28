@@ -1,5 +1,13 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
 
+export function advisoryAgreementsEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_ADVISORY_AGREEMENTS_ENABLED === "true";
+}
+
+export function advisoryDeliveryHandoffsEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_ADVISORY_DELIVERY_HANDOFFS_ENABLED === "true";
+}
+
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
     super(message);
@@ -107,13 +115,13 @@ async function apiRequest<T>(url: string, init: RequestInit): Promise<T> {
     headers.set("Content-Type", "application/json");
   }
   const xsrf = readCookie("XSRF-TOKEN");
-  if (xsrf) {
+  if (xsrf && init.credentials !== "omit") {
     headers.set("X-XSRF-TOKEN", xsrf);
   }
 
   const res = await fetch(url, {
     ...init,
-    credentials: "include",
+    credentials: init.credentials ?? "include",
     headers,
   });
 
@@ -260,6 +268,7 @@ export type AdvisoryBookingSourceType = "audit_job" | "watchtower_session";
 
 export type AdvisoryBooking = {
   id: string;
+  version: number;
   source: {
     type: AdvisoryBookingSourceType;
     id: string;
@@ -278,18 +287,56 @@ export type AdvisoryBooking = {
     feeCents: number | null;
     currency: string | null;
   };
+  agreement: AdvisoryAgreement | null;
+  appointment: AdvisoryAppointment | null;
+  delivery: AdvisoryDelivery | null;
   createdAt: string;
   updatedAt: string;
 };
 
+export type AdvisoryAppointment = {
+  confirmedWindow: {
+    startAt: string;
+    endAt: string;
+    timezone: string;
+  };
+  confirmedAt: string;
+};
+
+export type AdvisoryAgreement = {
+  id: string;
+  version: number;
+  scope: string;
+  currency: "USD";
+  quotedFeeCents: number;
+  minimumBillableMinutes: number;
+  incrementMinutes: number;
+  rateCentsPerHour: number;
+  cancellationTermsVersion: string;
+  offeredAt: string;
+  acceptedAt: string | null;
+};
+
+export type AdvisoryDelivery = {
+  ownerRef: string;
+  contact: {
+    name: string;
+    channel: string;
+    value: string;
+  };
+  handoffStatus: "pending" | "ready";
+  handedOffAt: string | null;
+};
+
 export type AdvisoryBookingHistoryEntry = {
   id: string;
-  type: "assignment" | "status" | "billing";
+  type: "assignment" | "status" | "appointment" | "delivery" | "billing";
   actorRef: string;
   fromStatus: AdvisoryBooking["status"] | null;
   toStatus: AdvisoryBooking["status"] | null;
   assigneeRef: string | null;
   billing: AdvisoryBooking["billing"];
+  changedFields: string[] | null;
   createdAt: string;
 };
 

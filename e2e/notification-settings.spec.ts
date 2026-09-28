@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
+  await page.route("**/api/account/passkeys", route => route.fulfill({ json: { accountId: "alice", hasPassword: false, passkeys: [] } }));
   await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "alice", enabled: false } }));
 });
 
@@ -36,7 +37,7 @@ test("email preferences save independently and survive reload", async ({ page })
   await expect(page.getByRole("checkbox", { name: /^Completed audits/ })).not.toBeChecked();
   await expect(page.getByRole("checkbox", { name: /^Failed audits/ })).toBeChecked();
   await expect(page.getByRole("checkbox", { name: /^Review updates/ })).toBeChecked();
-  await expect(page.getByRole("link", { name: "Manage optional schedule webhooks" })).toHaveAttribute("href", "/schedules");
+  await expect(page.getByRole("link", { name: "Manage optional schedule webhooks" })).toHaveAttribute("href", "/dashboard/schedules");
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
@@ -77,7 +78,7 @@ test("disabled delivery is explicit while preferences remain editable", async ({
   await expect(page.getByRole("checkbox", { name: /^Completed audits/ })).toBeEnabled();
 });
 
-test("guests see the header sign-in and make no private preference requests", async ({ page }) => {
+test("guests reach the sign-in form and make no private preference requests", async ({ page }) => {
   let privateRequests = 0;
   await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
   await page.route("**/api/account/notifications", (route) => {
@@ -85,8 +86,8 @@ test("guests see the header sign-in and make no private preference requests", as
     return route.fulfill({ status: 401, json: {} });
   });
   await page.goto("/settings");
-  await expect(page.getByText("Use Google sign-in in the header to manage email notifications.")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Sign in with Google", exact: true })).toHaveCount(1);
+  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard%2Fsettings$/);
+  await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   expect(privateRequests).toBe(0);
 });
@@ -131,10 +132,11 @@ test("late preference saves cannot restore private data after logout", async ({ 
   await page.goto("/settings");
   await page.getByRole("checkbox", { name: /^Completed audits/ }).click();
   await expect.poll(() => saving).toBe(true);
+  await page.getByRole("button", { name: "Alice, account menu" }).click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login(?:\?next=.*)?$/);
   release();
   await page.goto("/settings");
-  await expect(page.getByText("Use Google sign-in in the header to manage email notifications.")).toBeVisible();
+  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard%2Fsettings$/);
   await expect(page.getByText("alice@example.com", { exact: true })).toHaveCount(0);
 });

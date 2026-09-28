@@ -1,0 +1,73 @@
+import { expect, test } from "@playwright/test";
+
+test("audit creation and job management use separate pages", async ({ page }) => {
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Test Owner", email: "owner@skaleagents.com" } }));
+  await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "owner", enabled: false } }));
+  await page.route("**/sanctum/csrf-cookie", route => route.fulfill({ status: 204 }));
+  let created = false;
+  await page.route("**/api/jobs", route => {
+    if (route.request().method() === "POST") {
+      created = true;
+      return route.fulfill({ status: 202, json: { id: "new-job", status: "queued", createdAt: new Date().toISOString() } });
+    }
+    return route.fulfill({ json: { jobs: created ? [{ id: "new-job", status: "queued", summary: "Review queued", specialists: ["devsecops"], createdAt: new Date().toISOString() }] : [] } });
+  });
+
+  await page.goto("/dashboard/jobs");
+  await expect(page.getByRole("heading", { name: "Audit jobs", exact: true })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "IaC content" })).toHaveCount(0);
+  await page.getByRole("link", { name: "New audit" }).first().click();
+  await expect(page).toHaveURL(/\/dashboard\/jobs\/new$/);
+  await page.getByRole("textbox", { name: "IaC content" }).fill('resource "aws_security_group" "ssh" {}');
+  await page.getByRole("button", { name: "Queue audit" }).click();
+  await expect(page).toHaveURL(/\/dashboard\/jobs$/);
+  await expect(page.getByText("Review queued")).toBeVisible();
+});
+
+test("signed-in navigation shows the theme control beside an avatar-only account menu", async ({ page }) => {
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Test Owner", email: "owner@skaleagents.com" } }));
+  await page.goto("/dashboard/jobs");
+  const toolbar = page.locator(".dashboard-toolbar");
+  await expect(toolbar.getByRole("button", { name: "Color theme" })).toBeVisible();
+  const account = toolbar.getByRole("button", { name: "Test Owner, account menu" });
+  await expect(account).toBeVisible();
+  await expect(account).not.toContainText("Test Owner");
+  await toolbar.getByRole("button", { name: "Color theme" }).click();
+  const menu = page.getByRole("menu", { name: "Color theme" });
+  for (const choice of ["Light", "Dark", "System"]) await expect(menu.getByRole("menuitemradio", { name: choice })).toBeVisible();
+  await menu.getByRole("menuitemradio", { name: "Dark" }).click();
+  await expect(page.locator("html")).toHaveAttribute("class", /dark/);
+  await account.click();
+  await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+});
+
+test("public navigation shows Dashboard only after sign-in", async ({ page }) => {
+  let signedIn = false;
+  await page.route("**/api/user", route => route.fulfill(signedIn
+    ? { json: { id: "owner", displayName: "Test Owner", email: "owner@skaleagents.com" } }
+    : { status: 401, json: { message: "Unauthenticated" } }));
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Dashboard" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Color theme" })).toBeVisible();
+
+  signedIn = true;
+  await page.reload();
+  await expect(page.getByRole("link", { name: "Dashboard" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Test Owner, account menu" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Sign in" })).toHaveCount(0);
+});
+
+test("audit jobs stay paged as the list grows", async ({ page }) => {
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Test Owner" } }));
+  await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "owner", enabled: false } }));
+  await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: Array.from({ length: 12 }, (_, index) => ({
+    id: `job-${index + 1}`, status: "completed", summary: `Audit ${index + 1}`, specialists: ["sre"], createdAt: new Date().toISOString(),
+  })) } }));
+  await page.goto("/dashboard/jobs");
+  await expect(page.getByText("Audit 1", { exact: true })).toBeVisible();
+  await expect(page.getByText("Audit 11", { exact: true })).toHaveCount(0);
+  await page.getByRole("navigation", { name: "Audit jobs pages" }).getByRole("button", { name: "Next" }).click();
+  await expect(page.getByText("Audit 11", { exact: true })).toBeVisible();
+  await expect(page.getByText("Audit 1", { exact: true })).toHaveCount(0);
+});

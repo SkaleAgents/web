@@ -55,7 +55,7 @@ test("sample findings respond to edits, reject invalid settings, and reset", asy
   await expect(page.getByRole("heading", { name: "0 of 3 sample checks configured" })).toBeVisible();
 });
 
-test("Google authentication starts from the explicit header sign-in action", async ({ page }) => {
+test("Google authentication starts from the sign-in page", async ({ page }) => {
   let authRequests = 0;
   await page.route("**/api/auth/google/redirect", (route) => {
     authRequests++;
@@ -63,7 +63,8 @@ test("Google authentication starts from the explicit header sign-in action", asy
   });
   await page.goto("/");
   expect(authRequests).toBe(0);
-  await page.getByRole("banner").getByRole("link", { name: "Sign in with Google" }).click();
+  await page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true }).click();
+  await page.getByRole("link", { name: "Continue with Google" }).click();
   await expect(page.getByText("Google sign-in handoff")).toBeVisible();
   expect(authRequests).toBe(1);
 });

@@ -21,8 +21,8 @@ const goals = [
     question: "Where do you want the review to happen?",
     options: [
       { label: "Inside my editor", title: "Connect your editor with MCP.", description: "Add the client configuration and ask your assistant to call review_architecture with the relevant source. The first call opens your browser to sign in and approve MCP access.", note: "OAuth handles your connection credentials automatically.", href: "/mcp-config", cta: "See MCP setup" },
-      { label: "In a shared web review", title: "Start an audit, then open Watchtower.", description: "Paste infrastructure text, select specialists, and inspect the findings in a shared review session.", note: "Google sign-in is needed to create and manage audit jobs.", href: "/jobs", cta: "Open audit jobs" },
-      { label: "On a recurring schedule", title: "Give the review a schedule.", description: "Choose the supplied infrastructure scope, a cron expression, and a timezone. Add a webhook if you want completion or failure alerts.", note: "Google sign-in is needed. Schedules rerun the text you supply, not a live repository.", href: "/schedules", cta: "Explore scheduled audits" },
+      { label: "In a shared web review", title: "Start an audit, then open Watchtower.", description: "Paste infrastructure text, select specialists, and inspect the findings in a shared review session.", note: "Sign in to create and manage audit jobs in your dashboard.", href: "/dashboard/jobs", cta: "Open audit jobs" },
+      { label: "On a recurring schedule", title: "Give the review a schedule.", description: "Choose the supplied infrastructure scope, a cron expression, and a timezone. Add a webhook if you want completion or failure alerts.", note: "Sign-in is needed. Schedules rerun the text you supply, not a live repository.", href: "/dashboard/schedules", cta: "Explore scheduled audits" },
     ],
   },
   {
@@ -31,8 +31,8 @@ const goals = [
     description: "Turn your review process into reusable instructions.",
     question: "Who should be able to find it?",
     options: [
-      { label: "Keep it private", title: "Make a private bot in Studio.", description: "Write your instructions, choose a specialty, and select Private in Creator Studio. Refine the bot as a draft before publishing.", note: "Google sign-in is needed. Private bots are available to their owner.", href: "/studio", cta: "Open Creator Studio" },
-      { label: "Share it publicly", title: "Publish a bot for the community.", description: "Write your specialist's instructions and select Public in Creator Studio. Publish when you're ready for it to appear in the directory.", note: "Google sign-in is needed to create and publish a bot.", href: "/studio", cta: "Open Creator Studio" },
+      { label: "Keep it private", title: "Make a private bot in Studio.", description: "Write your instructions, choose a specialty, and select Private in Creator Studio. Refine the bot as a draft before publishing.", note: "Sign-in is needed. Private bots are available to their owner.", href: "/dashboard/studio", cta: "Open Creator Studio" },
+      { label: "Share it publicly", title: "Publish a bot for the community.", description: "Write your specialist's instructions and select Public in Creator Studio. Publish when you're ready for it to appear in the directory.", note: "Sign in to create and publish a bot from your dashboard.", href: "/dashboard/studio", cta: "Open Creator Studio" },
     ],
   },
 ];

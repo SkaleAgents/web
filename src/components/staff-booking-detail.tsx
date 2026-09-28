@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, ApiError, ensureCsrfCookie, type AdvisoryBookingHistoryEntry, type StaffAdvisoryBooking } from "@/lib/api";
-import { bookingStatusLabels, bookingTransitions, isClosedBooking, type BookingStatus } from "@/lib/advisory-bookings";
+import { advisoryAgreementsEnabled, apiFetch, ApiError, ensureCsrfCookie, type AdvisoryBookingHistoryEntry, type StaffAdvisoryBooking } from "@/lib/api";
+import { availableBookingTransitions, bookingStatusLabels, isClosedBooking, type BookingStatus } from "@/lib/advisory-bookings";
 import { useStaffUserId } from "@/components/staff-access";
 import { Button, FieldLabel, LinkButton, Select, TextInput } from "@/components/ui";
+import { StaffAdvisoryAgreementOffer } from "@/components/staff-advisory-agreement-offer";
+import { StaffAdvisoryAppointment } from "@/components/staff-advisory-appointment";
+import { StaffAdvisoryDelivery } from "@/components/staff-advisory-delivery";
 
 type BookingChange =
   | { action: "assignment"; body: { assigneeRef: string } }
@@ -20,11 +23,15 @@ type EditorProps = {
 
 function StatusEditor({ booking, disabled, save }: EditorProps) {
   const [next, setNext] = useState<BookingStatus | "">("");
-  const transitions = bookingTransitions[booking.status];
+  const hasPaidPilot = advisoryAgreementsEnabled() && Boolean(booking.agreement);
+  const canSchedulePaidPilot = Boolean(booking.agreement?.acceptedAt && booking.appointment);
+  const transitions = availableBookingTransitions(booking);
   return (
     <section className="rounded-xl border border-line bg-canvas-elevated p-5">
       <h2 className="text-lg font-semibold">Work status</h2>
-      {transitions.length === 0 ? <p className="mt-3 text-sm text-ink-muted">This booking is closed. Its status cannot change.</p> : (
+      {hasPaidPilot && booking.status === "scheduled" && <p className="mt-3 text-sm text-ink-muted">Work start stays blocked until the delivery handoff is ready.</p>}
+      {hasPaidPilot && booking.status === "accepted" && !canSchedulePaidPilot && <p className="mt-3 text-sm text-ink-muted">Scheduling requires both acceptance of the current agreement and a confirmed appointment.</p>}
+      {transitions.length === 0 ? <p className="mt-3 text-sm text-ink-muted">This booking has no available status changes.</p> : (
         <form className="mt-4 space-y-3" onSubmit={(event) => {
           event.preventDefault();
           if (next && transitions.includes(next)) save({ action: "status", body: { status: next } });
@@ -105,9 +112,11 @@ function BillingEditor({ booking, disabled, save }: EditorProps) {
   );
 }
 
-function HistoryDescription({ entry }: { entry: AdvisoryBookingHistoryEntry }) {
+export function HistoryDescription({ entry }: { entry: AdvisoryBookingHistoryEntry }) {
   if (entry.type === "status") return <p>{entry.fromStatus ? bookingStatusLabels[entry.fromStatus] : "Unknown"} to {entry.toStatus ? bookingStatusLabels[entry.toStatus] : "Unknown"}</p>;
   if (entry.type === "assignment") return <p className="break-all">Assigned to {entry.assigneeRef ?? "unassigned"}</p>;
+  if (entry.type === "appointment") return <p>Confirmed or replaced appointment</p>;
+  if (entry.type === "delivery") return <p>Delivery handoff updated ({(entry.changedFields ?? []).join(", ") || "details omitted"})</p>;
   return <p>{entry.billing.billableMinutes ?? "Not recorded"} minutes · {entry.billing.feeCents ?? "Not recorded"} cents · {entry.billing.currency ?? "No currency"}</p>;
 }
 
@@ -125,7 +134,11 @@ export function StaffBookingDetail({ id }: { id: string }) {
   const update = useMutation({
     mutationFn: async (change: BookingChange) => {
       await ensureCsrfCookie();
-      return apiFetch<StaffAdvisoryBooking>(`${base}/${change.action}`, { method: "PATCH", body: JSON.stringify(change.body) });
+      return apiFetch<StaffAdvisoryBooking>(`${base}/${change.action}`, {
+        method: "PATCH",
+        headers: Number.isSafeInteger(booking.data?.version) ? { "If-Match": String(booking.data?.version) } : undefined,
+        body: JSON.stringify(change.body),
+      });
     },
     onSuccess: (result) => {
       queryClient.setQueryData(queryKey, result);
@@ -143,7 +156,7 @@ export function StaffBookingDetail({ id }: { id: string }) {
 
   return (
     <main className="space-y-6">
-      <LinkButton href="/staff/advisory-bookings" variant="ghost">Back to bookings</LinkButton>
+      <LinkButton href="/dashboard/staff/advisory-bookings" variant="ghost">Back to bookings</LinkButton>
       {denied || notFound ? (
         <div className="space-y-3">
           <h1 className="workspace-heading">{denied ? "Staff access required" : "Booking not found"}</h1>
@@ -170,7 +183,7 @@ export function StaffBookingDetail({ id }: { id: string }) {
             <h2 className="text-lg font-semibold">Requested scope</h2>
             <p className="whitespace-pre-wrap break-words text-sm">{data.scope}</p>
             <dl className="grid gap-4 text-sm sm:grid-cols-2">
-              <div><dt className="text-ink-muted">Preferred window (your timezone)</dt><dd className="mt-1">{new Date(data.preferredWindow.startAt).toLocaleString()} to {new Date(data.preferredWindow.endAt).toLocaleString()}</dd></div>
+              <div><dt className="text-ink-muted">Preferred window (requested, not confirmed)</dt><dd className="mt-1">{new Date(data.preferredWindow.startAt).toLocaleString()} to {new Date(data.preferredWindow.endAt).toLocaleString()} ({Intl.DateTimeFormat().resolvedOptions().timeZone || "local timezone"})</dd></div>
               <div><dt className="text-ink-muted">Source</dt><dd className="mt-1 break-all">{data.source.type === "audit_job" ? "Audit job" : "Watchtower session"}: <span className="font-mono text-xs">{data.source.id}</span></dd></div>
             </dl>
             {data.notes && <div><h3 className="text-sm text-ink-muted">Customer notes</h3><p className="mt-1 whitespace-pre-wrap break-words text-sm">{data.notes}</p></div>}
@@ -185,6 +198,9 @@ export function StaffBookingDetail({ id }: { id: string }) {
             <AssignmentEditor key={data.assigneeRef ?? "unassigned"} booking={data} disabled={update.isPending || booking.isFetching} save={(change) => update.mutate(change)} />
           </div>
           <BillingEditor key={JSON.stringify(data.billing)} booking={data} disabled={update.isPending || booking.isFetching} save={(change) => update.mutate(change)} />
+          <StaffAdvisoryAgreementOffer booking={data} onRefresh={() => void booking.refetch()} />
+          <StaffAdvisoryAppointment booking={data} onRefresh={() => booking.refetch()} />
+          <StaffAdvisoryDelivery booking={data} onRefresh={() => booking.refetch()} />
           <section className="rounded-xl border border-line bg-canvas-elevated p-5">
             <h2 className="text-lg font-semibold">Booking history</h2>
             <p className="mt-1 text-sm text-ink-muted">Recorded changes and staff references. Times use your timezone.</p>
