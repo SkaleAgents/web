@@ -58,7 +58,8 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
           <BrandLogo />
           <div className="flex flex-wrap items-center gap-4">
             <Link href="/" className="text-sm text-ink-muted hover:text-ink">Back to public site</Link>
-            {userQuery.data ? <AccountMenu key={userQuery.data.id} user={userQuery.data} /> : <ThemeSwitcher />}
+            <ThemeSwitcher />
+            {userQuery.data && <AccountMenu key={userQuery.data.id} user={userQuery.data} />}
           </div>
         </div>
       </header>
@@ -76,7 +77,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
           </div>
           <div className="ml-auto flex flex-wrap items-center justify-end gap-3 text-sm sm:ml-0">
             {userQuery.data && <LinkButton href="/dashboard" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>}
-            {!userQuery.data && <ThemeSwitcher />}
+            <ThemeSwitcher />
             {userQuery.isPending ? (
               <span className="text-ink-muted">…</span>
             ) : userQuery.data ? (

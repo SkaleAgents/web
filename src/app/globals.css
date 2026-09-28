@@ -106,7 +106,7 @@ body:has(.get-started-dialog[open]) {
 .product-nav-icon { display: flex; align-items: center; justify-content: center; flex: 0 0 2.25rem; height: 2.25rem; border-radius: 8px; background: var(--accent-soft); color: var(--ink); }
 .product-nav-item:hover, .product-nav-item[aria-current="page"] { background: var(--accent-soft); }
 .account-navigation { position: relative; z-index: 40; }
-.account-nav-trigger { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); cursor: pointer; }
+.account-nav-trigger { display: flex; align-items: center; padding: 0.25rem; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); cursor: pointer; }
 .account-nav-trigger:hover, .account-nav-trigger[aria-expanded="true"], .account-nav-trigger.is-active { background: var(--accent-soft); }
 .account-nav-avatar { display: flex; align-items: center; justify-content: center; flex: 0 0 2rem; height: 2rem; border-radius: 50%; background: var(--accent); color: var(--accent-fg); font-size: 0.7rem; font-weight: 700; }
 .account-nav-panel { position: absolute; top: calc(100% + 0.75rem); right: 0; width: min(16rem, calc(100vw - 3rem)); padding: 0.4rem; border: 1px solid var(--line); border-radius: 12px; background: var(--canvas-elevated); box-shadow: 0 16px 40px rgb(0 0 0 / 12%); }
