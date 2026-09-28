@@ -36,7 +36,7 @@ export function LoginScreen({ reauthenticate = false }: { reauthenticate?: boole
   }, []);
 
   if (user.isError) return <main className="mx-auto space-y-4 px-6 py-16" role="alert"><h1 className="text-xl font-semibold">Could not check your session</h1><Button onClick={() => void user.refetch()}>Try again</Button></main>;
-  if (user.isPending || (user.data && !reauthenticate)) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">{user.data ? "Opening your workspace…" : "Checking your session…"}</main>;
+  if (user.isPending || (user.data && !reauthenticate)) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">{user.data ? "Opening your dashboard…" : "Checking your session…"}</main>;
 
   return (
     <main className="flex flex-1 items-center justify-center py-10 sm:py-16">

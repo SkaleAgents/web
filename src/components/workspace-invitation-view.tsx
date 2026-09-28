@@ -61,7 +61,7 @@ export function WorkspaceInvitationView() {
         setError(reason.status === 422
           ? INVALID_INVITATION
           : reason.status === 409
-            ? "This account already has an active membership in the workspace."
+            ? "This account already has an active membership in the organization."
             : "The invitation could not be accepted. Reopen the original email link and try again.");
       } else {
         setError("Could not reach the invitation service. Try again, or reopen the original email link.");
@@ -74,10 +74,10 @@ export function WorkspaceInvitationView() {
   return (
     <main className="space-y-8">
       <div className="workspace-intro">
-        <p className="workspace-kicker">Team / Invitation</p>
-        <h1 className="workspace-heading">Accept workspace invitation</h1>
+        <p className="workspace-kicker">Organization / Invitation</p>
+        <h1 className="workspace-heading">Accept organization invitation</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-          Join the workspace using the verified email address that received the invitation.
+          Join the organization using the verified email address that received the invitation.
         </p>
       </div>
 
@@ -85,8 +85,8 @@ export function WorkspaceInvitationView() {
         <section className="max-w-2xl rounded-[10px] border border-line bg-canvas-elevated p-5">
           {accepted ? (
             <>
-              <p role="status" className="text-sm text-ink">Invitation accepted. Your workspace membership is active.</p>
-              <LinkButton href="/dashboard/workspaces" className="mt-4">View workspaces</LinkButton>
+              <p role="status" className="text-sm text-ink">Invitation accepted. Your organization membership is active.</p>
+              <LinkButton href="/dashboard/workspaces" className="mt-4">View organizations</LinkButton>
             </>
           ) : error ? (
             <p role="alert" className="text-sm text-danger">{error}</p>
@@ -116,15 +116,15 @@ export function WorkspaceInvitationView() {
       ) : (
         <section className="max-w-2xl rounded-[10px] border border-line bg-canvas-elevated p-5">
           <h2 className="text-lg font-semibold text-ink">Confirm membership</h2>
-          <p className="mt-2 text-sm text-ink-muted">Your signed-in account has a verified email address. Accept to join this workspace.</p>
+          <p className="mt-2 text-sm text-ink-muted">Your signed-in account has a verified email address. Accept to join this organization.</p>
           {error ? <p role="alert" className="mt-3 text-sm text-danger">{error}</p> : null}
           <Button type="button" className="mt-4" disabled={submitting} onClick={() => void acceptInvitation()}>
             {submitting ? "Accepting…" : "Accept invitation"}
           </Button>
-          <p className="mt-4 text-xs text-ink-muted">Workspace membership does not share your personal audits, schedules, or advisory requests.</p>
+          <p className="mt-4 text-xs text-ink-muted">Organization membership does not share your personal audits, schedules, or advisory requests.</p>
         </section>
       )}
-      <Link href="/dashboard/workspaces" className="text-sm text-ink-muted underline underline-offset-4">View your workspaces</Link>
+      <Link href="/dashboard/workspaces" className="text-sm text-ink-muted underline underline-offset-4">View your organizations</Link>
     </main>
   );
 }
