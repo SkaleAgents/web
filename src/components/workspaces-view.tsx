@@ -1,11 +1,12 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useState, type FormEvent } from "react";
 import { Button, TextInput } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
+import { workspaceAuditsEnabled } from "@/lib/workspace-audits";
 
 type Workspace = {
   id: string;
@@ -23,7 +24,7 @@ export function WorkspacesView() {
         <p className="workspace-kicker">Organizations / Memberships</p>
         <h1 className="workspace-heading">Organizations</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-          See the organizations you belong to or create one. Memberships do not change access to your audits, schedules, or advisory requests. Those records remain tied to your account.
+          See the organizations you belong to or create one. Your personal audits, schedules, and advisory requests remain tied to your account.
         </p>
       </div>
 
@@ -116,10 +117,19 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
                 <p className="mt-1 text-sm text-ink-muted">
                   {workspace.role} · Created {new Date(workspace.createdAt).toLocaleDateString()}
                 </p>
-                {workspace.role === "owner" && (
-                  <Link href={`/dashboard/workspaces/${workspace.id}/retention`} className="mt-3 inline-block text-sm font-medium text-accent underline underline-offset-4">
-                    View audit retention notice
-                  </Link>
+                {(workspace.role === "owner" || workspaceAuditsEnabled()) && (
+                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+                    {workspace.role === "owner" && (
+                      <Link href={`/dashboard/workspaces/${workspace.id}/retention`} className="text-sm font-medium text-accent underline underline-offset-4">
+                        View audit retention notice
+                      </Link>
+                    )}
+                    {workspaceAuditsEnabled() && (
+                      <Link className="text-sm font-semibold text-accent underline-offset-4 hover:underline" href={`/dashboard/workspaces/${workspace.id}/jobs`}>
+                        Shared audits
+                      </Link>
+                    )}
+                  </div>
                 )}
               </li>
             ))}

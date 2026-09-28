@@ -142,7 +142,7 @@ test("lists and creates only memberships and leaves personal resources unscoped"
   await page.goto("/workspaces");
   await expect(page.getByRole("heading", { name: "Organizations", exact: true })).toBeVisible();
   await expect(page.getByText("Infra", { exact: true })).toBeVisible();
-  await expect(page.getByText(/audits, schedules, or advisory requests.*remain tied to your account/)).toBeVisible();
+  await expect(page.getByText(/personal audits, schedules, and advisory requests remain tied to your account/)).toBeVisible();
   await expect(page.getByRole("main").getByRole("combobox")).toHaveCount(0);
   await page.getByLabel("Organization name").fill("Platform Team");
   await page.getByRole("button", { name: "Create organization" }).click();
