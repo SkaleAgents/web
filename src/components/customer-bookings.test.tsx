@@ -57,6 +57,41 @@ it("loads only the signed-in caller's list into an account-scoped cache", async 
   expect(client.getQueryData(["customer-advisory-bookings", "customer-b"])).toBeUndefined();
 });
 
+it("shows the portfolio mirror separately and does not infer payment from confirmation", async () => {
+  vi.stubEnv("NEXT_PUBLIC_PORTFOLIO_BOOKING_HANDOFF_ENABLED", "true");
+  const linked = {
+    id: "linked-1",
+    source: null,
+    expiresAt: "2026-10-06T00:00:00Z",
+    bookingPublicId: "01abc",
+    bookingStatus: "confirmed",
+    packageSlug: "pro",
+    amountDueCents: 24900,
+    currency: "USD",
+    startsAt: "2026-10-02T10:00:00Z",
+    endsAt: "2026-10-02T11:00:00Z",
+    paymentStatus: "unpaid",
+    lastSyncedAt: "2026-09-28T00:00:00Z",
+    createdAt: "2026-09-27T00:00:00Z",
+  };
+  const fetcher = vi.fn(async (input: RequestInfo | URL) => {
+    const url = String(input);
+    if (url.endsWith("/api/user")) return accountResponse();
+    if (url.endsWith("/api/advisory-bookings")) return Response.json({ bookings: [] });
+    if (url.endsWith("/api/portfolio-booking-referrals")) return Response.json({ referrals: [linked] });
+    throw new Error(`Unexpected request: ${url}`);
+  }) as typeof fetch;
+  const { client, render: renderPage } = setup(fetcher);
+
+  renderPage(<CustomerBookingList />);
+
+  expect(await screen.findByRole("heading", { name: "Consultations with Harun" })).toBeInTheDocument();
+  expect(await screen.findByText("No payment confirmed")).toBeInTheDocument();
+  await waitFor(() => expect(screen.getByText(/Status may be delayed/)).toBeInTheDocument());
+  expect(client.getQueryData(["customer-portfolio-booking-referrals", "customer-a"])).toEqual([linked]);
+  expect(client.getQueryData(["customer-portfolio-booking-referrals", "customer-b"])).toBeUndefined();
+});
+
 it("keeps customer detail language inside the deployed fields' limits", async () => {
   vi.stubEnv("NEXT_PUBLIC_ADVISORY_AGREEMENTS_ENABLED", "true");
   const withAppointment = {
@@ -127,6 +162,7 @@ it("clears all prior-account cache on sign-out", async () => {
   const client = new QueryClient();
   client.setQueryData(["customer-advisory-bookings", "customer-a"], [fixtureBooking]);
   client.setQueryData(["customer-advisory-booking", "customer-a", fixtureBooking.id], fixtureBooking);
+  client.setQueryData(["customer-portfolio-booking-referrals", "customer-a"], []);
   client.setQueryData(["user"], { id: "customer-a" });
 
   await setSessionUser(client, null);

@@ -38,7 +38,7 @@ export function AdvisoryBookingRequest({
   if (!open) {
     return (
       <div className="space-y-4">
-        <ConsultancyBookingLink />
+        <ConsultancyBookingLink source={source.type === "audit_job" ? { type: "audit_job", id: source.id } : undefined} />
         <Button type="button" variant="secondary" onClick={() => setOpen(true)}>
           Request expert help
         </Button>
