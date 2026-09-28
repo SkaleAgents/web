@@ -81,6 +81,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
     },
   });
   const currentPlan = catalog.data?.find((plan) => plan.key === billing.data?.plan);
+  const pendingPlanName = catalog.data?.find((plan) => plan.key === billing.data?.pendingChange?.toPlan)?.name ?? billing.data?.pendingChange?.toPlan;
   const paidPlans = catalog.data?.filter((plan) => plan.checkoutMode === "self_service") ?? [];
   const currentPrice = currentPlan?.monthlyUsd ?? 0;
   const showingCheckoutReturn = Boolean(checkoutReturnOrganizationId && checkoutReturnOrganizationId === organizationId);
@@ -114,8 +115,8 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
       </section>
       {billing.data.pendingChange ? <p role="status" className="border-l-2 border-ink px-4 text-sm text-ink">
         {billing.data.pendingChange.status === "pending_cycle"
-          ? `${billing.data.pendingChange.toPlan} starts at your next renewal.`
-          : `Your ${billing.data.pendingChange.toPlan} change is waiting for payment confirmation. Your current plan remains active.`}
+          ? `${pendingPlanName} starts at your next renewal.`
+          : `Your ${pendingPlanName} change is waiting for payment confirmation. Your current plan remains active.`}
       </p> : null}
       {billing.data.pendingChange?.paymentUrl && approvedInvoiceUrl(billing.data.pendingChange.paymentUrl) ? <a className="inline-flex rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:opacity-90" href={billing.data.pendingChange.paymentUrl}>Pay prorated invoice</a> : null}
       <section className="space-y-4" aria-labelledby="billing-change-heading">

@@ -14,15 +14,16 @@ const plans = { data: [
   { key: "max", name: "Max", monthlyUsd: 499, auditLimit: 2000, checkoutMode: "self_service" },
 ] };
 
-function showBilling(plan: "free" | "starter", testModeEnabled: boolean, paymentUrl: string | null = null, checkoutReturnOrganizationId: string | null = null) {
+function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean, paymentUrl: string | null = null, checkoutReturnOrganizationId: string | null = null, pendingCyclePlan: string | null = null) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
   vi.mocked(apiFetch).mockImplementation(async (path, init) => {
     if (path === "/api/workspaces") return { data: [{ id: "org-1", name: "Acme", role: "owner" }] } as never;
     if (path === "/api/organization-plans") return plans as never;
     if (path === "/api/workspaces/org-1/billing") return {
-      plan, usage: { used: plan === "free" ? 1 : 7, limit: plan === "free" ? 2 : 25, remaining: plan === "free" ? 1 : 18, periodEnd: "2026-10-01T00:00:00Z" },
-      pendingChange: paymentUrl ? { id: "change-1", toPlan: "pro", status: "pending_payment", effectiveAt: null, paymentUrl } : null, testModeEnabled,
+      plan, usage: { used: plan === "free" ? 1 : 7, limit: plan === "free" ? 2 : plan === "starter" ? 25 : 200, remaining: plan === "free" ? 1 : plan === "starter" ? 18 : 193, periodEnd: "2026-10-01T00:00:00Z" },
+      pendingChange: paymentUrl ? { id: "change-1", toPlan: "pro", status: "pending_payment", effectiveAt: null, paymentUrl }
+        : pendingCyclePlan ? { id: "change-2", toPlan: pendingCyclePlan, status: "pending_cycle", effectiveAt: "2026-10-01T00:00:00Z", paymentUrl: null } : null, testModeEnabled,
     } as never;
     if (path === "/api/workspaces/org-1/billing/change-plan" && init?.method === "POST") return { id: "change-1", status: "effective" } as never;
     if (path === "/api/workspaces/org-1/billing/checkout" && init?.method === "POST") return { url: "https://checkout.stripe.com/c/pay/cs_test_fixture" } as never;
@@ -39,6 +40,11 @@ it("shows payment verification as pending until the organization has a paid plan
 it("confirms the active paid plan after checkout reconciliation", async () => {
   showBilling("starter", true, null, "org-1");
   expect(await screen.findByRole("status", { name: "Checkout status" })).toHaveTextContent("Starter is active");
+});
+
+it("uses the plan name in a scheduled downgrade notice", async () => {
+  showBilling("pro", true, null, null, "starter");
+  expect(await screen.findByText("Starter starts at your next renewal.")).toBeVisible();
 });
 
 it("shows the current allowance but keeps checkout closed when the API gate is off", async () => {
