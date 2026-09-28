@@ -92,9 +92,12 @@ test("public navigation only offers Dashboard and the account avatar to signed-i
     : { status: 401, json: {} }));
   await page.goto("/");
   const header = page.getByRole("banner");
+  const guestAccount = header.getByRole("button", { name: "Account menu" });
+  await expect(guestAccount).toBeVisible();
+  await guestAccount.click();
   await expect(header.getByRole("link", { name: "Sign in", exact: true })).toBeVisible();
   await expect(header.getByRole("link", { name: "Dashboard", exact: true })).toHaveCount(0);
-  await expect(header.getByRole("button", { name: /account menu/ })).toHaveCount(0);
+  await expect(guestAccount).toHaveAttribute("aria-expanded", "true");
   signedIn = true;
   await page.reload();
   await expect(header.getByRole("link", { name: "Dashboard", exact: true })).toBeVisible();

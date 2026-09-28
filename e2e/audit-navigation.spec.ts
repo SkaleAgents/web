@@ -47,6 +47,7 @@ test("public navigation shows Dashboard only after sign-in", async ({ page }) =>
     ? { json: { id: "owner", displayName: "Test Owner", email: "owner@skaleagents.com" } }
     : { status: 401, json: { message: "Unauthenticated" } }));
   await page.goto("/");
+  await page.getByRole("button", { name: "Account menu" }).click();
   await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Dashboard" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Color theme" })).toBeVisible();
