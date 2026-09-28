@@ -57,9 +57,9 @@ test("questions expand by keyboard and public content survives an API outage", a
   await question.scrollIntoViewIfNeeded();
   await question.focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByText(/This site does not currently publish paid plan prices/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "pricing page" })).toHaveAttribute("href", "/pricing");
   await page.keyboard.press("Enter");
-  await expect(page.getByText(/This site does not currently publish paid plan prices/)).toBeHidden();
+  await expect(page.getByRole("link", { name: "pricing page" })).toBeHidden();
   await expect(page.getByRole("link", { name: "Explore the directory" }).first()).toHaveAttribute("href", "/bots");
 });
 
