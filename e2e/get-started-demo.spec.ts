@@ -63,6 +63,7 @@ test("Google authentication starts from the sign-in page", async ({ page }) => {
   });
   await page.goto("/");
   expect(authRequests).toBe(0);
+  await page.getByRole("banner").getByRole("button", { name: "Account menu" }).click();
   await page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true }).click();
   await page.getByRole("link", { name: "Continue with Google" }).click();
   await expect(page.getByText("Google sign-in handoff")).toBeVisible();

@@ -5,9 +5,9 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { currentUserOptions } from "@/lib/session";
-import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { LinkButton } from "@/components/ui";
 import { AccountMenu } from "@/components/account-menu";
+import { GuestAccountMenu } from "@/components/guest-account-menu";
 import { BrandLogo } from "@/components/brand";
 import { ProductNavigation } from "@/components/product-navigation";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -79,11 +79,13 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
             {userQuery.data && <LinkButton href="/dashboard" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>}
             <ThemeSwitcher />
             {userQuery.isPending ? (
-              <span className="text-ink-muted">…</span>
+              <span role="status" aria-label="Checking account" className="account-nav-trigger">
+                <span aria-hidden="true" className="account-nav-avatar" />
+              </span>
             ) : userQuery.data ? (
               <AccountMenu key={userQuery.data.id} user={userQuery.data} />
             ) : (
-              process.env.NEXT_PUBLIC_MOCK_AUTH_ENABLED === "true" ? <GoogleSignInButton /> : <LinkButton href="/login" className="px-3 py-1.5">Sign in</LinkButton>
+              <GuestAccountMenu />
             )}
           </div>
         </div>

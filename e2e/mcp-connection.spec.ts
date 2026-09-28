@@ -67,6 +67,7 @@ test("public headers open sign-in, private links lead to the focused form, and h
   await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
   for (const path of ["/", "/bots", "/prompts", "/mcp-config"]) {
     await page.goto(path);
+    await page.getByRole("banner").getByRole("button", { name: "Account menu" }).click();
     const signIn = page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true });
     await expect(signIn).toHaveCount(1);
     await expect(signIn).toHaveAttribute("href", "/login");
