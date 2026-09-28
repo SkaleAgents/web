@@ -34,10 +34,10 @@ function approvedInvoiceUrl(value: string): boolean {
   }
 }
 
-export function OrganizationBillingView() {
+export function OrganizationBillingView({ checkoutReturnOrganizationId = null }: { checkoutReturnOrganizationId?: string | null }) {
   const user = useQuery(currentUserOptions);
   const client = useQueryClient();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(checkoutReturnOrganizationId);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const organizations = useQuery({
     queryKey: ["billing-organizations", user.data?.id],
@@ -54,6 +54,7 @@ export function OrganizationBillingView() {
     queryKey: ["organization-billing", organizationId],
     enabled: Boolean(organizationId),
     queryFn: ({ signal }) => apiFetch<Billing>(`/api/workspaces/${organizationId}/billing`, { signal }),
+    refetchInterval: (query) => checkoutReturnOrganizationId === organizationId && query.state.data?.plan === "free" ? 5000 : false,
   });
   const change = useMutation({
     mutationFn: async (plan: string) => {
@@ -82,6 +83,7 @@ export function OrganizationBillingView() {
   const currentPlan = catalog.data?.find((plan) => plan.key === billing.data?.plan);
   const paidPlans = catalog.data?.filter((plan) => plan.checkoutMode === "self_service") ?? [];
   const currentPrice = currentPlan?.monthlyUsd ?? 0;
+  const showingCheckoutReturn = Boolean(checkoutReturnOrganizationId && checkoutReturnOrganizationId === organizationId);
 
   return <main className="mx-auto max-w-4xl space-y-8">
     <div>
@@ -98,6 +100,9 @@ export function OrganizationBillingView() {
       </select>
     </div> : null}
     {billing.isError ? <p role="alert" className="text-sm text-danger">The billing record is unavailable. Refresh before changing a plan.</p> : null}
+    {showingCheckoutReturn && billing.data ? <p role="status" aria-label="Checkout status" className="border-l-2 border-accent bg-accent-soft px-4 py-3 text-sm text-ink">
+      {billing.data.plan === "free" ? "Checking your payment. Your plan will update here after verification." : `${currentPlan?.name ?? "Your paid plan"} is active. Your audit allowance is shown below.`}
+    </p> : null}
     {billing.data && currentPlan ? <>
       <section className="border-y border-line py-6" aria-label="Current plan">
         <div className="flex flex-wrap items-end justify-between gap-4">

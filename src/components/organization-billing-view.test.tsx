@@ -14,7 +14,7 @@ const plans = { data: [
   { key: "max", name: "Max", monthlyUsd: 499, auditLimit: 2000, checkoutMode: "self_service" },
 ] };
 
-function showBilling(plan: "free" | "starter", testModeEnabled: boolean, paymentUrl: string | null = null) {
+function showBilling(plan: "free" | "starter", testModeEnabled: boolean, paymentUrl: string | null = null, checkoutReturnOrganizationId: string | null = null) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
   vi.mocked(apiFetch).mockImplementation(async (path, init) => {
@@ -28,8 +28,18 @@ function showBilling(plan: "free" | "starter", testModeEnabled: boolean, payment
     if (path === "/api/workspaces/org-1/billing/checkout" && init?.method === "POST") return { url: "https://checkout.stripe.com/c/pay/cs_test_fixture" } as never;
     throw new Error(`Unexpected request: ${path}`);
   });
-  return render(<QueryClientProvider client={client}><OrganizationBillingView /></QueryClientProvider>);
+  return render(<QueryClientProvider client={client}><OrganizationBillingView checkoutReturnOrganizationId={checkoutReturnOrganizationId} /></QueryClientProvider>);
 }
+
+it("shows payment verification as pending until the organization has a paid plan", async () => {
+  showBilling("free", true, null, "org-1");
+  expect(await screen.findByRole("status", { name: "Checkout status" })).toHaveTextContent("Checking your payment");
+});
+
+it("confirms the active paid plan after checkout reconciliation", async () => {
+  showBilling("starter", true, null, "org-1");
+  expect(await screen.findByRole("status", { name: "Checkout status" })).toHaveTextContent("Starter is active");
+});
 
 it("shows the current allowance but keeps checkout closed when the API gate is off", async () => {
   showBilling("starter", false);

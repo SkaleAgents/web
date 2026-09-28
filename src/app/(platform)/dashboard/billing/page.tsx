@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function BillingPage() {
-  return <OrganizationBillingView />;
+export default async function BillingPage({ searchParams }: { searchParams: Promise<{ checkout?: string; organization?: string }> }) {
+  const params = await searchParams;
+  return <OrganizationBillingView checkoutReturnOrganizationId={params.checkout === "return" && typeof params.organization === "string" ? params.organization : null} />;
 }
