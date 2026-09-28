@@ -12,11 +12,11 @@ import { BrandLogo } from "@/components/brand";
 import { AccountMenu } from "@/components/account-menu";
 
 const sections = [
-  { label: "Workspace", items: [
+  { label: "Your work", items: [
     { href: "/dashboard", label: "Overview" },
     { href: "/dashboard/jobs", label: "Audit jobs" },
     { href: "/dashboard/schedules", label: "Scheduled audits" },
-    { href: "/dashboard/workspaces", label: "Workspaces" },
+    { href: "/dashboard/workspaces", label: "Organizations" },
   ] },
   { label: "Build", items: [
     { href: "/dashboard/bots", label: "My bots" },
@@ -52,7 +52,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const currentSection = [...sections.flatMap(section => section.items),
     { href: "/dashboard/advisory-bookings", label: "Advisory requests" },
     { href: "/dashboard/staff/advisory-bookings", label: "Staff bookings" },
-  ].find(entry => active(entry.href))?.label ?? "Workspace";
+  ].find(entry => active(entry.href))?.label ?? "Dashboard";
   function closeMenu() {
     setMenuOpen(false);
     if (menuOpen) menuToggle.current?.focus();

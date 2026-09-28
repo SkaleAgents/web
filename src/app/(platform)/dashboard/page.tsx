@@ -7,7 +7,7 @@ import { currentUserOptions } from "@/lib/session";
 import { LinkButton } from "@/components/ui";
 
 const tools = [
-  { href: "/dashboard/workspaces", title: "Workspaces", detail: "Manage memberships and invitations." },
+  { href: "/dashboard/workspaces", title: "Organizations", detail: "Manage memberships and invitations." },
   { href: "/dashboard/studio", title: "Creator Studio", detail: "Write a bot, refine its instructions, and publish when ready." },
   { href: "/dashboard/prompts", title: "My prompts", detail: "Save instructions for your next review." },
   { href: "/dashboard/mcp-config", title: "MCP connections", detail: "Connect your editor and manage its access." },
@@ -32,7 +32,7 @@ export default function DashboardPage() {
 
   return <main className="space-y-8">
     <div className="workspace-intro flex flex-wrap items-end justify-between gap-4">
-      <div><p className="workspace-kicker">Your workspace</p><h1 className="workspace-heading">Dashboard</h1>
+      <div><p className="workspace-kicker">Your account</p><h1 className="workspace-heading">Dashboard</h1>
         <p className="mt-3 text-sm text-ink-muted">Welcome back{user.data?.displayName ? `, ${user.data.displayName.split(" ")[0]}` : ""}. What are you working on today?</p></div>
       <LinkButton href="/dashboard/jobs">Start an audit</LinkButton>
     </div>
@@ -49,6 +49,6 @@ export default function DashboardPage() {
         <div className="min-w-0"><Link href="/dashboard/jobs" className="break-words text-sm font-medium hover:underline">{job.summary || `Audit ${job.id}`}</Link><p className="mt-1 text-xs text-ink-muted">{new Date(job.createdAt).toLocaleString()}</p></div><span className="rounded-full border border-line px-3 py-1 text-xs capitalize">{job.status}</span>
       </li>)}</ul>}
     </section>
-    <section aria-labelledby="manage-workspace"><h2 id="manage-workspace" className="mb-4 text-lg font-semibold">Manage your workspace</h2><div className="grid gap-4 sm:grid-cols-2">{tools.map(tool => <Link key={tool.href} href={tool.href} className="rounded-xl border border-line p-5 transition-colors hover:bg-canvas-elevated"><h3 className="font-semibold">{tool.title} <span aria-hidden="true" className="text-accent">↗</span></h3><p className="mt-2 text-sm text-ink-muted">{tool.detail}</p></Link>)}</div></section>
+    <section aria-labelledby="manage-account"><h2 id="manage-account" className="mb-4 text-lg font-semibold">Explore your account</h2><div className="grid gap-4 sm:grid-cols-2">{tools.map(tool => <Link key={tool.href} href={tool.href} className="rounded-xl border border-line p-5 transition-colors hover:bg-canvas-elevated"><h3 className="font-semibold">{tool.title} <span aria-hidden="true" className="text-accent">↗</span></h3><p className="mt-2 text-sm text-ink-muted">{tool.detail}</p></Link>)}</div></section>
   </main>;
 }

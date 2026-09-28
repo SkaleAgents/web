@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { WorkspacesView } from "@/components/workspaces-view";
 
 export const metadata: Metadata = {
-  title: "Workspaces | SkaleAgents",
+  title: "Organizations | SkaleAgents",
   robots: { index: false, follow: false },
 };
 

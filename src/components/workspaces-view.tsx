@@ -19,10 +19,10 @@ export function WorkspacesView() {
   return (
     <main className="space-y-8">
       <div className="workspace-intro">
-        <p className="workspace-kicker">Team / Memberships</p>
-        <h1 className="workspace-heading">Workspaces</h1>
+        <p className="workspace-kicker">Organizations / Memberships</p>
+        <h1 className="workspace-heading">Organizations</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-          See the workspaces you belong to or create one. Memberships do not change access to your audits, schedules, or advisory requests. Those records remain tied to your account.
+          See the organizations you belong to or create one. Memberships do not change access to your audits, schedules, or advisory requests. Those records remain tied to your account.
         </p>
       </div>
 
@@ -33,7 +33,7 @@ export function WorkspacesView() {
       ) : user.data ? (
         <WorkspaceManager key={user.data.id} accountId={user.data.id} />
       ) : (
-        <p className="text-sm text-ink-muted">Use Google sign-in in the header to view or create workspaces.</p>
+        <p className="text-sm text-ink-muted">Use Google sign-in in the header to view or create organizations.</p>
       )}
     </main>
   );
@@ -48,7 +48,7 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
     queryFn: async ({ signal }) => {
       const response = await apiFetch<{ data: Workspace[] }>("/api/workspaces", { signal });
       if (queryClient.getQueryData(currentUserOptions.queryKey)?.id !== accountId) {
-        throw new Error("Your account changed. Reload workspaces before continuing.");
+        throw new Error("Your account changed. Reload organizations before continuing.");
       }
       return response.data;
     },
@@ -56,7 +56,7 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
   const create = useMutation({
     mutationFn: async () => {
       const workspaceName = name.trim();
-      if (!workspaceName) throw new Error("Enter a workspace name.");
+      if (!workspaceName) throw new Error("Enter an organization name.");
       await ensureCsrfCookie();
       const response = await apiFetch<{ data: Workspace }>("/api/workspaces", {
         method: "POST",
@@ -79,8 +79,8 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
   return (
     <div className="space-y-8">
       <form onSubmit={submit} className="max-w-2xl rounded-[10px] border border-line bg-canvas-elevated p-5">
-        <h2 className="text-lg font-semibold text-ink">Create a workspace</h2>
-        <label htmlFor="workspace-name" className="mt-4 block text-sm font-medium text-ink">Workspace name</label>
+        <h2 className="text-lg font-semibold text-ink">Create an organization</h2>
+        <label htmlFor="workspace-name" className="mt-4 block text-sm font-medium text-ink">Organization name</label>
         <TextInput
           id="workspace-name"
           className="mt-2"
@@ -91,7 +91,7 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
           required
         />
         <Button type="submit" disabled={create.isPending || !name.trim()} className="mt-4">
-          {create.isPending ? "Creating…" : "Create workspace"}
+          {create.isPending ? "Creating…" : "Create organization"}
         </Button>
         {create.isError ? <p role="alert" className="mt-3 text-sm text-danger">{create.error.message}</p> : null}
       </form>
@@ -106,7 +106,7 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
         ) : workspaces.isPending ? (
           <p role="status" className="text-sm text-ink-muted">Loading memberships…</p>
         ) : workspaces.data.length === 0 ? (
-          <p className="text-sm text-ink-muted">You do not belong to a workspace yet.</p>
+          <p className="text-sm text-ink-muted">You do not belong to an organization yet.</p>
         ) : (
           <ul className="grid gap-3">
             {workspaces.data.map((workspace) => (
