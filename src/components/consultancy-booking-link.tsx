@@ -42,8 +42,13 @@ export function ConsultancyBookingLink({ source }: { source?: PortfolioBookingRe
         body: JSON.stringify({ source }),
       });
       if (!validBookUrl(referral.bookUrl)) throw new Error("Invalid booking link");
-      if (opened) opened.location.assign(referral.bookUrl);
-      else setPreparedUrl(referral.bookUrl);
+      if (opened) {
+        const link = opened.document.createElement("a");
+        link.href = referral.bookUrl;
+        link.rel = "noreferrer";
+        opened.document.body.append(link);
+        link.click();
+      } else setPreparedUrl(referral.bookUrl);
     } catch {
       opened?.close();
       setError("Could not prepare the booking link. Try again.");
