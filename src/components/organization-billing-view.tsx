@@ -66,13 +66,16 @@ export function OrganizationBillingView() {
         if (!approvedCheckoutUrl(result.url)) throw new Error("The checkout link was not valid. Try again.");
         return result.url;
       }
-      await apiFetch(`/api/workspaces/${organizationId}/billing/change-plan`, {
+      const result = await apiFetch<{ status: string }>(`/api/workspaces/${organizationId}/billing/change-plan`, {
         method: "POST", body: JSON.stringify({ plan }),
       });
+      if (result.status === "expired") throw new Error("The previous upgrade invoice expired. Choose the plan again to start a new payment.");
       return null;
     },
-    onSuccess: async (url) => {
+    onSuccess: (url) => {
       setCheckoutUrl(url);
+    },
+    onSettled: async () => {
       await client.invalidateQueries({ queryKey: ["organization-billing", organizationId] });
     },
   });
