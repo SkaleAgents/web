@@ -1,9 +1,9 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PricingPlans } from "@/components/pricing-plans";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 
-vi.mock("@/lib/api", () => ({ apiFetch: vi.fn() }));
+vi.mock("@/lib/api", () => ({ apiFetch: vi.fn(), ensureCsrfCookie: vi.fn() }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 const catalog = { data: [
@@ -35,7 +35,8 @@ describe("organization pricing", () => {
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "alex@example.com" } });
     fireEvent.click(screen.getByRole("button", { name: "Send inquiry" }));
     await screen.findByText("Inquiry received");
-    expect(apiFetch).toHaveBeenCalledWith("/api/enterprise-inquiries", expect.objectContaining({ method: "POST", credentials: "omit" }));
+    expect(ensureCsrfCookie).toHaveBeenCalledOnce();
+    expect(apiFetch).toHaveBeenCalledWith("/api/enterprise-inquiries", expect.objectContaining({ method: "POST", credentials: "include" }));
   });
 
   it("keeps the form open after an API failure", async () => {

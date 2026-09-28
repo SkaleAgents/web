@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 
 type Plan = {
   key: string;
@@ -46,9 +46,10 @@ export function PricingPlans() {
     setSubmitError(false);
     const form = new FormData(event.currentTarget);
     try {
+      await ensureCsrfCookie();
       const response = await apiFetch<{ id: string; status: string }>("/api/enterprise-inquiries", {
         method: "POST",
-        credentials: "omit",
+        credentials: "include",
         body: JSON.stringify({
           organizationName: form.get("organizationName"),
           contactName: form.get("contactName"),

@@ -8,6 +8,7 @@ test("shows five plans and records an Enterprise inquiry", async ({ page }) => {
     { key: "max", name: "Max", monthlyUsd: 499, auditLimit: 2000, scheduleLimit: 100, minimumIntervalHours: 1, recommended: false, checkoutMode: "self_service" },
     { key: "enterprise", name: "Enterprise", monthlyUsd: null, auditLimit: null, scheduleLimit: null, minimumIntervalHours: null, recommended: false, checkoutMode: "contact" },
   ] } }));
+  await page.route("**/sanctum/csrf-cookie", async (route) => route.fulfill({ status: 204 }));
   await page.route("**/api/enterprise-inquiries", async (route) => route.fulfill({ status: 201, json: { id: "inquiry-1", status: "received" } }));
   await page.goto("/pricing");
   await expect(page.getByRole("note")).toContainText("planned organization lineup");
