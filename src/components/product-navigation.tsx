@@ -11,6 +11,7 @@ const groups = [
   ] },
   { label: "Connect", items: [
     { href: "/mcp-config", label: "MCP config", detail: "Set up SkaleAgents in your editor or AI client.", icon: "plug" },
+    { href: "/pricing", label: "Pricing", detail: "Compare organization audit and monitoring plans.", icon: "team" },
   ] },
 ] as const;
 
