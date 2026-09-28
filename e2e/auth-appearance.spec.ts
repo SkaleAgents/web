@@ -70,13 +70,13 @@ test("theme selection persists and System follows the device while the logo matc
   await expect(page.locator("html")).toHaveClass(/\blight\b/);
 });
 
-test("signed-in users can change theme from their dashboard account menu", async ({ page }) => {
+test("signed-in users can change theme from the dashboard toolbar", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: { id: "appearance-user", displayName: "Appearance User" } }));
   for (const resource of ["jobs", "schedules", "bots"]) {
     await page.route(`**/api/${resource}`, route => route.fulfill({ json: { [resource]: [] } }));
   }
   await page.goto("/dashboard");
-  await page.getByRole("button", { name: "Appearance, account menu" }).click();
+  await expect(page.getByRole("button", { name: "Appearance User, account menu" })).toBeVisible();
   await selectTheme(page, "Dark");
   await expect(page.locator("html")).toHaveClass(/\bdark\b/);
   await selectTheme(page, "Light");
@@ -98,7 +98,7 @@ test("public navigation only offers Dashboard and the account avatar to signed-i
   signedIn = true;
   await page.reload();
   await expect(header.getByRole("link", { name: "Dashboard", exact: true })).toBeVisible();
-  const account = header.getByRole("button", { name: "Test, account menu" });
+  const account = header.getByRole("button", { name: "Test User, account menu" });
   await expect(account).toBeVisible();
   await expect(account).toContainText("TU");
   await expect(header.getByRole("link", { name: "Sign in", exact: true })).toHaveCount(0);
