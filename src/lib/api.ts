@@ -8,6 +8,28 @@ export function advisoryDeliveryHandoffsEnabled(): boolean {
   return process.env.NEXT_PUBLIC_ADVISORY_DELIVERY_HANDOFFS_ENABLED === "true";
 }
 
+export function portfolioBookingHandoffEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_PORTFOLIO_BOOKING_HANDOFF_ENABLED === "true";
+}
+
+export type PortfolioBookingReferralSource = { type: "audit_job" | "advisory_booking"; id: string };
+
+export type PortfolioBookingReferral = {
+  id: string;
+  source: PortfolioBookingReferralSource | null;
+  expiresAt: string;
+  bookingPublicId: string | null;
+  bookingStatus: string | null;
+  packageSlug: string | null;
+  amountDueCents: number | null;
+  currency: string | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  paymentStatus: "unpaid" | "paid" | "refunded";
+  lastSyncedAt: string | null;
+  createdAt: string;
+};
+
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
     super(message);

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { advisoryAgreementsEnabled, advisoryDeliveryHandoffsEnabled, ApiError, apiFetch, type AdvisoryBooking } from "@/lib/api";
+import { advisoryAgreementsEnabled, advisoryDeliveryHandoffsEnabled, portfolioBookingHandoffEnabled, ApiError, apiFetch, type AdvisoryBooking, type PortfolioBookingReferral } from "@/lib/api";
 import { bookingStatusLabels } from "@/lib/advisory-bookings";
 import { useCustomerUser, isSessionError } from "@/components/customer-booking-access";
 import { Button, LinkButton } from "@/components/ui";
@@ -16,6 +16,62 @@ function bookingListKey(accountId: string) {
 
 function bookingDetailKey(accountId: string, bookingId: string) {
   return ["customer-advisory-booking", accountId, bookingId] as const;
+}
+
+function portfolioReferralKey(accountId: string) {
+  return ["customer-portfolio-booking-referrals", accountId] as const;
+}
+
+function portfolioStatusLabel(status: string | null): string {
+  if (!status) return "Awaiting booking submission";
+  return status.replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase());
+}
+
+function PortfolioBookingSection({ accountId }: { accountId: string }) {
+  const queryClient = useQueryClient();
+  const [now, setNow] = useState<number | null>(null);
+  const key = useMemo(() => portfolioReferralKey(accountId), [accountId]);
+  const referrals = useQuery({
+    queryKey: key,
+    queryFn: async ({ signal }) => (await apiFetch<{ referrals: PortfolioBookingReferral[] }>("/api/portfolio-booking-referrals", { signal })).referrals,
+    retry: false,
+    gcTime: 0,
+  });
+  useEffect(() => handleSessionExpiry(queryClient, key, referrals.error), [key, queryClient, referrals.error]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setNow(Date.now()), 0);
+    const interval = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => { window.clearTimeout(timer); window.clearInterval(interval); };
+  }, []);
+
+  return (
+    <section aria-label="Consultations booked with Harun" className="space-y-3">
+      <div>
+        <h2 className="text-lg font-semibold text-ink">Consultations with Harun</h2>
+        <p className="text-sm text-ink-muted">Booking, approval, and payment happen on harun.dev. This page shows the latest status received from there.</p>
+      </div>
+      {referrals.isPending ? <p role="status" className="text-sm text-ink-muted">Loading linked consultations…</p> : referrals.isError ? (
+        <p role="alert" className="text-sm text-danger">Could not load linked consultations. <button type="button" className="underline" onClick={() => void referrals.refetch()}>Try again</button></p>
+      ) : referrals.data.length === 0 ? (
+        <p className="rounded-xl border border-dashed border-line p-5 text-sm text-ink-muted">No linked consultations yet.</p>
+      ) : (
+        <ul className="grid gap-3 md:grid-cols-2">
+          {referrals.data.map((referral) => {
+            const stale = now !== null && referral.lastSyncedAt !== null && now - new Date(referral.lastSyncedAt).getTime() > 15 * 60 * 1000;
+            return (
+              <li key={referral.id} className="space-y-2 rounded-xl border border-line bg-canvas-elevated p-5 text-sm">
+                <p className="font-semibold text-ink">{portfolioStatusLabel(referral.bookingStatus)}</p>
+                <p className="text-ink-muted">{referral.packageSlug ? `${referral.packageSlug.toUpperCase()} package` : "Package chosen on harun.dev"}</p>
+                <p className="text-ink-muted">{referral.paymentStatus === "paid" ? "Payment confirmed" : referral.paymentStatus === "refunded" ? "Payment refunded" : referral.amountDueCents === 0 ? "No payment required" : "No payment confirmed"}</p>
+                {referral.startsAt && <p className="text-ink-muted">Requested time: {new Date(referral.startsAt).toLocaleString()}</p>}
+                <p className="text-xs text-ink-muted">{referral.lastSyncedAt ? `Last update: ${new Date(referral.lastSyncedAt).toLocaleString()}` : "No booking update yet."}{stale ? " Status may be delayed; check your harun.dev booking email." : ""}</p>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
 }
 
 function handleSessionExpiry(queryClient: ReturnType<typeof useQueryClient>, queryKey: readonly unknown[], error: unknown) {
@@ -65,6 +121,7 @@ export function CustomerBookingList() {
         <p className="mt-2 max-w-2xl text-sm text-ink-muted">Track request status, the preferred window you submitted, and any recorded fee.</p>
       </div>
       <ConsultancyBookingLink />
+      {portfolioBookingHandoffEnabled() && <PortfolioBookingSection accountId={user.id} />}
       <div className="flex justify-end">
         <Button variant="secondary" onClick={() => void bookings.refetch()} disabled={bookings.isFetching}>
           {bookings.isFetching ? "Refreshing…" : "Refresh requests"}
@@ -127,7 +184,7 @@ export function CustomerBookingDetail({ id }: { id: string }) {
               <Button variant="secondary" disabled={booking.isFetching} onClick={() => void booking.refetch()}>{booking.isFetching ? "Refreshing…" : "Refresh request"}</Button>
             </div>
           </div>
-          <ConsultancyBookingLink />
+          <ConsultancyBookingLink source={{ type: "advisory_booking", id: data.id }} />
           <section aria-label="Request details" className="space-y-4 rounded-xl border border-line bg-canvas-elevated p-5">
             <h2 className="text-lg font-semibold">Requested scope</h2>
             <p className="whitespace-pre-wrap break-words text-sm">{data.scope}</p>
