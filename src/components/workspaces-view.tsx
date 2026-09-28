@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { Button, TextInput } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
@@ -115,6 +116,11 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
                 <p className="mt-1 text-sm text-ink-muted">
                   {workspace.role} · Created {new Date(workspace.createdAt).toLocaleDateString()}
                 </p>
+                {workspace.role === "owner" && (
+                  <Link href={`/dashboard/workspaces/${workspace.id}/retention`} className="mt-3 inline-block text-sm font-medium text-accent underline underline-offset-4">
+                    View audit retention notice
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
