@@ -34,6 +34,9 @@ export function workspaceAuditPath(workspaceId: string, auditId?: string): strin
 
 export async function listWorkspaceAudits(workspaceId: string, signal?: AbortSignal): Promise<WorkspaceAudit[]> {
   const response = await apiFetch<{ jobs: WorkspaceAudit[] }>(workspaceAuditPath(workspaceId), { signal });
+  if (response.jobs.some((audit) => audit.workspaceId !== workspaceId)) {
+    throw new ApiError("The audit list did not match this organization.", 404);
+  }
   return response.jobs;
 }
 

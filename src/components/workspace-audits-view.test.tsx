@@ -38,6 +38,7 @@ function routeFetch(options: {
   onPurge?: () => Response;
   workspaceIds?: string[];
   workspaceAuditsUnavailable?: boolean;
+  workspaceAuditsWrongTenant?: boolean;
 } = {}) {
   return vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = new URL(String(input));
@@ -50,7 +51,7 @@ function routeFetch(options: {
     if (url.pathname === "/api/workspaces/workspace-a/jobs/audit-a" && init?.method === "DELETE") return options.onDelete?.() ?? Response.json({ cleanupReceiptId: "receipt-delete-a", status: "pending" }, { status: 202 });
     if (/^\/api\/workspaces\/workspace-a\/jobs\/[^/]+$/.test(url.pathname) && init?.method === "DELETE") return options.onDelete?.() ?? Response.json({ cleanupReceiptId: "receipt-delete-a", status: "pending" }, { status: 202 });
     if (/^\/api\/workspaces\/workspace-a\/jobs\/[^/]+$/.test(url.pathname)) return Response.json({ ...audit, id: url.pathname.split("/").at(-1), findings: [{ id: "finding-a", severity: "high", title: "Review permissions", detail: "A broad role is attached.", resource: "module.web", remediation: "Narrow the role.", specialist: "devsecops" }], tasks: [], steps: [{ jobId: "audit-a", stepId: "step-a", agent: "sre", message: "Checked resilience.", ts: "2026-09-25T12:01:00Z" }] });
-    if (url.pathname === "/api/workspaces/workspace-a/jobs") return options.workspaceAuditsUnavailable ? Response.json({ error: "Not found" }, { status: 404 }) : Response.json({ jobs: [audit] });
+    if (url.pathname === "/api/workspaces/workspace-a/jobs") return options.workspaceAuditsUnavailable ? Response.json({ error: "Not found" }, { status: 404 }) : Response.json({ jobs: options.workspaceAuditsWrongTenant ? [audit, { ...audit, id: "audit-b", workspaceId: "workspace-b" }] : [audit] });
     if (url.pathname === "/sanctum/csrf-cookie") return new Response(null, { status: 204 });
     throw new Error(`Unexpected request: ${url.pathname} ${init?.method ?? "GET"}`);
   }) as typeof fetch;
@@ -140,6 +141,17 @@ it("fails closed and clears cached audits when the server rollout endpoint is un
   expect(await screen.findByText(/Shared audits are unavailable/)).toBeInTheDocument();
   expect(screen.queryByRole("link", { name: "New shared audit" })).not.toBeInTheDocument();
   await waitFor(() => expect(client.getQueryData(["workspace-audits", "account-a", "workspace-a"])).toBeUndefined());
+});
+
+it("hides all shared audits and actions when a list contains another organization's job", async () => {
+  const fetcher = routeFetch({ workspaceAuditsWrongTenant: true });
+  const { client, renderPage } = setup(fetcher);
+  renderPage();
+
+  expect(await screen.findByText(/Shared audits are unavailable/)).toBeInTheDocument();
+  expect(screen.queryByText("Review complete")).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "New shared audit" })).not.toBeInTheDocument();
+  expect(client.getQueryData(["workspace-audits", "account-a", "workspace-a"])).toBeUndefined();
 });
 
 it("makes no workspace-audit request when the rollout flag is off", async () => {
