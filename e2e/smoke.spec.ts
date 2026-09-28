@@ -57,6 +57,7 @@ test.describe("Phase 1 page smokes", () => {
     await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
     await page.goto("/jobs");
     await expect(page.getByRole("heading", { name: /Audit jobs/i })).toBeVisible();
+    await page.getByRole("link", { name: "New audit" }).first().click();
     await expect(page.getByRole("heading", { name: /Start an IaC audit/i })).toBeVisible();
     await expect(page.getByRole("textbox", { name: "Telemetry JSON" })).toBeVisible();
     await expect(page.getByRole("group", { name: "Specialists" })).toBeVisible();

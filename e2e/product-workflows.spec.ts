@@ -155,7 +155,7 @@ test("audit specialist choices reach the API and job status filters work", async
       await route.fulfill({ status: 201, json: { id: "new-job" } });
     } else await route.fulfill({ json: { jobs: [{ id: "done", status: "completed", summary: "Review complete", specialists: ["sre"], createdAt: new Date().toISOString() }] } });
   });
-  await page.goto("/jobs");
+  await page.goto("/dashboard/jobs/new");
   await page.getByRole("textbox", { name: "IaC content", exact: true }).fill("kind: Deployment");
   await page.getByRole("checkbox", { name: /^Security/ }).uncheck();
   await page.getByRole("checkbox", { name: /^Scaling & cost/ }).check();
