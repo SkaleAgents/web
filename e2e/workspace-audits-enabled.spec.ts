@@ -117,11 +117,15 @@ test.describe("workspace shared audits with rollout enabled", () => {
     await expect.poll(() => api.auditRequests.some(({ path, method }) => path.endsWith("/jobs") && method === "POST")).toBe(true);
 
     await page.getByRole("button", { name: "Purge source" }).click();
+    expect(api.auditRequests.some(({ path }) => path.endsWith("/purge-source"))).toBe(false);
+    await page.getByRole("button", { name: "Confirm source purge" }).click();
     await expect(page.getByText(/Purge status: pending/)).toBeVisible();
     expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-a/jobs/audit-created/purge-source", method: "POST" });
 
     await page.getByRole("button", { name: "Close details" }).click();
     await page.getByRole("button", { name: "Delete" }).first().click();
+    expect(api.deleteCount()).toBe(0);
+    await page.getByRole("button", { name: "Confirm audit deletion" }).click();
     await expect(page.getByRole("status")).toContainText("Audit deletion pending");
     await expect.poll(() => api.deleteCount(), { timeout: 8_000 }).toBeGreaterThanOrEqual(3);
     await expect(page.getByRole("status")).toContainText("Audit deletion completed");

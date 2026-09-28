@@ -92,6 +92,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
   const accountId = user.data?.id;
   const workspaceKey = ["workspaces", accountId ?? "guest"] as const;
   const [selectedAuditId, setSelectedAuditId] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState<{ kind: "purge" | "delete"; auditId: string } | null>(null);
   const [page, setPage] = useState(1);
   const [deleteStates, setDeleteStates] = useState<Record<string, "pending" | "failed">>({});
   const unavailableKey = useMemo(() => ["workspace-audits-unavailable", accountId ?? "guest", workspaceId] as const, [accountId, workspaceId]);
@@ -135,6 +136,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
     mutationFn: (auditId: string) => purgeWorkspaceAuditSource(workspaceId, auditId),
     onSuccess: (response, auditId) => {
       if (client.getQueryData(currentUserOptions.queryKey)?.id !== accountId) return;
+      setConfirmation(null);
       client.setQueryData<WorkspaceAuditDetail>(["workspace-audit-detail", accountId, workspaceId, auditId], (current) => current ? {
         ...current,
         sourcePurged: response.sourcePurged,
@@ -147,6 +149,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
     mutationFn: (auditId: string) => deleteWorkspaceAudit(workspaceId, auditId),
     onSuccess: (response, auditId) => {
       if (client.getQueryData(currentUserOptions.queryKey)?.id !== accountId) return;
+      setConfirmation(null);
       if (response && response.status !== "pending") setDeleteStates((state) => ({ ...state, [auditId]: response.status }));
       else if (response) setDeleteStates((state) => ({ ...state, [auditId]: "pending" }));
       else setDeleteStates((state) => { const next = { ...state }; delete next[auditId]; return next; });
@@ -208,7 +211,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
           <ul className="divide-y divide-line">
             {visibleAudits?.map((audit) => <li key={audit.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
               <div><p className="font-mono text-xs uppercase tracking-wide text-ink-muted">{audit.status}</p><p className="mt-1 text-sm text-ink">{audit.summary ?? "Waiting for specialist results"}</p><p className="mt-1 text-xs text-ink-muted">{audit.specialists.join(" · ")}{audit.partial ? " · Partial results" : ""} · {new Date(audit.createdAt).toLocaleString()}</p></div>
-              <div className="flex gap-2"><Button variant="secondary" onClick={() => setSelectedAuditId(audit.id)}>Details</Button>{canManage && <Button variant="secondary" disabled={remove.isPending || audit.status === "queued" || audit.status === "running"} onClick={() => remove.mutate(audit.id)}>Delete</Button>}</div>
+              <div className="flex gap-2"><Button variant="secondary" onClick={() => setSelectedAuditId(audit.id)}>Details</Button>{canManage && <Button variant="secondary" disabled={remove.isPending || audit.status === "queued" || audit.status === "running"} onClick={() => setConfirmation({ kind: "delete", auditId: audit.id })}>Delete</Button>}</div>
             </li>)}
           </ul>
           {pageCount > 1 && <nav aria-label="Shared audit pages" className="flex items-center justify-between gap-4 border-t border-line pt-4 text-sm">
@@ -217,10 +220,17 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
             <Button variant="secondary" disabled={currentPage === pageCount} onClick={() => { setSelectedAuditId(null); setPage(currentPage + 1); }}>Next</Button>
           </nav>}
           {Object.entries(deleteStates).map(([auditId, state]) => <WorkspaceAuditDeletionStatus key={auditId} accountId={accountId} workspaceId={workspaceId} auditId={auditId} initialStatus={state} />)}
+          {confirmation && <div className="space-y-2 rounded-[10px] border border-line p-3 text-sm">
+            <p>{confirmation.kind === "delete" ? "Delete this shared audit and its history? This cannot be undone." : "Purge this shared audit's source input? You will need fresh input to run it again."}</p>
+            <div className="flex gap-2">
+              <Button disabled={purge.isPending || remove.isPending} onClick={() => confirmation.kind === "delete" ? remove.mutate(confirmation.auditId) : purge.mutate(confirmation.auditId)}>{confirmation.kind === "delete" ? "Confirm audit deletion" : "Confirm source purge"}</Button>
+              <Button variant="secondary" disabled={purge.isPending || remove.isPending} onClick={() => setConfirmation(null)}>Keep audit</Button>
+            </div>
+          </div>}
           {remove.isError && <p role="alert" className="text-sm text-danger">{remove.error.message}</p>}
         </section>
       )}
-      {selectedAuditId && !unavailable && <AuditDetail detail={detail} canManage={canManage} onPurge={() => purge.mutate(selectedAuditId)} purgePending={purge.isPending} purgeError={purge.error?.message} onClose={() => setSelectedAuditId(null)} />}
+      {selectedAuditId && !unavailable && <AuditDetail detail={detail} canManage={canManage} onPurge={() => setConfirmation({ kind: "purge", auditId: selectedAuditId })} purgePending={purge.isPending} purgeError={purge.error?.message} onClose={() => setSelectedAuditId(null)} />}
     </main>
   );
 }

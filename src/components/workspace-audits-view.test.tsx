@@ -69,9 +69,13 @@ it("lets a workspace owner inspect, purge, and retry pending deletion through wo
   expect(screen.getByText(/Watchtower, exports, and scheduled audits are not available for shared jobs yet/)).toBeInTheDocument();
 
   await userEvent.click(screen.getByRole("button", { name: "Purge source" }));
+  expect(fetcher).not.toHaveBeenCalledWith(expect.stringMatching(/purge-source$/), expect.anything());
+  await userEvent.click(screen.getByRole("button", { name: "Confirm source purge" }));
   expect(await screen.findByText(/Purge status: pending/)).toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: "Close details" }));
   await userEvent.click(await screen.findByRole("button", { name: "Delete" }));
+  expect(fetcher).not.toHaveBeenCalledWith(expect.stringMatching(/\/audit-a$/), expect.objectContaining({ method: "DELETE" }));
+  await userEvent.click(screen.getByRole("button", { name: "Confirm audit deletion" }));
   expect(await screen.findByText(/Audit deletion pending for audit-a/)).toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Retry deletion" })).not.toBeInTheDocument();
   expect(fetcher).toHaveBeenCalledWith(expect.stringMatching(/\/api\/workspaces\/workspace-a\/jobs(?:\/audit-a)?$/), expect.anything());
