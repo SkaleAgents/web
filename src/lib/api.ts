@@ -237,6 +237,20 @@ export type RetentionPolicy = {
   noticeToken: string;
 };
 
+export type WorkspaceRetentionPolicy = {
+  workspaceId: string;
+  acknowledgementEnabled: boolean;
+  automaticRetentionEnabled: boolean;
+  version: string;
+  notice: string[];
+  contentHash: string;
+  activationNotice: string;
+  noticeDeliveredAt: string | null;
+  legacyNotBefore: string | null;
+  noticeArchived: boolean;
+  noticeToken: string;
+};
+
 export type SwarmStep = {
   jobId: string;
   stepId: string;
