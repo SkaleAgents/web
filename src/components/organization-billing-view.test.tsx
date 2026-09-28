@@ -23,9 +23,10 @@ function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean,
     if (path === "/api/workspaces/org-1/billing") return {
       plan, usage: { used: plan === "free" ? 1 : 7, limit: plan === "free" ? 2 : plan === "starter" ? 25 : 200, remaining: plan === "free" ? 1 : plan === "starter" ? 18 : 193, periodEnd: "2026-10-01T00:00:00Z" },
       pendingChange: paymentUrl ? { id: "change-1", toPlan: "pro", status: "pending_payment", effectiveAt: null, paymentUrl }
-        : pendingCyclePlan ? { id: "change-2", toPlan: pendingCyclePlan, status: "pending_cycle", effectiveAt: "2026-10-01T00:00:00Z", paymentUrl: null } : null, testModeEnabled,
+        : pendingCyclePlan ? { id: "change-2", kind: pendingCyclePlan === "free" ? "cancellation" : "downgrade", toPlan: pendingCyclePlan, status: "pending_cycle", effectiveAt: "2026-10-01T00:00:00Z", paymentUrl: null } : null, testModeEnabled,
     } as never;
     if (path === "/api/workspaces/org-1/billing/change-plan" && init?.method === "POST") return { id: "change-1", status: "effective" } as never;
+    if (path === "/api/workspaces/org-1/billing/cancel" && init?.method === "POST") return { id: "change-3", status: "pending_cycle" } as never;
     if (path === "/api/workspaces/org-1/billing/checkout" && init?.method === "POST") return { url: "https://checkout.stripe.com/c/pay/cs_test_fixture" } as never;
     throw new Error(`Unexpected request: ${path}`);
   });
@@ -45,6 +46,19 @@ it("confirms the active paid plan after checkout reconciliation", async () => {
 it("uses the plan name in a scheduled downgrade notice", async () => {
   showBilling("pro", true, null, null, "starter");
   expect(await screen.findByText("Starter starts at your next renewal.")).toBeVisible();
+});
+
+it("lets an owner replace a scheduled downgrade with cycle-end cancellation", async () => {
+  showBilling("pro", true, null, null, "starter");
+  fireEvent.click(await screen.findByRole("button", { name: "Cancel at renewal" }));
+  await waitFor(() => expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1/billing/cancel", expect.objectContaining({ method: "POST" })));
+  expect(ensureCsrfCookie).toHaveBeenCalledOnce();
+});
+
+it("shows scheduled cancellation without offering another cancellation request", async () => {
+  showBilling("pro", true, null, null, "free");
+  expect(await screen.findByText(/Free starts at your next renewal/)).toBeVisible();
+  expect(screen.queryByRole("button", { name: "Cancel at renewal" })).not.toBeInTheDocument();
 });
 
 it("shows the current allowance but keeps checkout closed when the API gate is off", async () => {

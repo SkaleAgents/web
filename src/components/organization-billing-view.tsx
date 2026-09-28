@@ -12,7 +12,7 @@ type Plan = { key: string; name: string; monthlyUsd: number | null; auditLimit: 
 type Billing = {
   plan: string;
   usage: { used: number; limit: number; remaining: number; periodEnd: string };
-  pendingChange: { id: string; toPlan: string; status: string; effectiveAt: string | null; paymentUrl: string | null } | null;
+  pendingChange: { id: string; kind: string; toPlan: string; status: string; effectiveAt: string | null; paymentUrl: string | null } | null;
   testModeEnabled: boolean;
 };
 
@@ -80,6 +80,16 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
       await client.invalidateQueries({ queryKey: ["organization-billing", organizationId] });
     },
   });
+  const cancel = useMutation({
+    mutationFn: async () => {
+      if (!organizationId) throw new Error("Select an organization first.");
+      await ensureCsrfCookie();
+      return apiFetch(`/api/workspaces/${organizationId}/billing/cancel`, { method: "POST" });
+    },
+    onSettled: async () => {
+      await client.invalidateQueries({ queryKey: ["organization-billing", organizationId] });
+    },
+  });
   const currentPlan = catalog.data?.find((plan) => plan.key === billing.data?.plan);
   const pendingPlanName = catalog.data?.find((plan) => plan.key === billing.data?.pendingChange?.toPlan)?.name ?? billing.data?.pendingChange?.toPlan;
   const paidPlans = catalog.data?.filter((plan) => plan.checkoutMode === "self_service") ?? [];
@@ -115,10 +125,17 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
       </section>
       {billing.data.pendingChange ? <p role="status" className="border-l-2 border-ink px-4 text-sm text-ink">
         {billing.data.pendingChange.status === "pending_cycle"
-          ? `${pendingPlanName} starts at your next renewal.`
+          ? billing.data.pendingChange.kind === "cancellation"
+            ? `Cancellation is scheduled. ${pendingPlanName} starts at your next renewal${billing.data.pendingChange.effectiveAt ? ` on ${new Date(billing.data.pendingChange.effectiveAt).toLocaleDateString()}` : ""}. Your current plan stays active until then.`
+            : `${pendingPlanName} starts at your next renewal.`
           : `Your ${pendingPlanName} change is waiting for payment confirmation. Your current plan remains active.`}
       </p> : null}
       {billing.data.pendingChange?.paymentUrl && approvedInvoiceUrl(billing.data.pendingChange.paymentUrl) ? <a className="inline-flex rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:opacity-90" href={billing.data.pendingChange.paymentUrl}>Pay prorated invoice</a> : null}
+      {billing.data.plan !== "free" && billing.data.pendingChange?.kind !== "cancellation" ? <div className="space-y-2">
+        <Button type="button" variant="secondary" disabled={!billing.data.testModeEnabled || cancel.isPending || billing.data.pendingChange?.status === "pending_payment" || billing.data.pendingChange?.status === "creating"} onClick={() => cancel.mutate()}>Cancel at renewal</Button>
+        <p className="text-sm text-ink-muted">Your paid plan stays active through the current billing cycle. A scheduled downgrade will be replaced.</p>
+        {cancel.isError ? <p role="alert" className="text-sm text-danger">{cancel.error.message}</p> : null}
+      </div> : null}
       <section className="space-y-4" aria-labelledby="billing-change-heading">
         <h2 id="billing-change-heading" className="text-xl font-semibold text-ink">Change plan</h2>
         {!billing.data.testModeEnabled ? <p className="text-sm text-ink-muted">Plan changes are not available yet.</p> : <p className="text-sm text-ink-muted">Stripe test mode is active. No real payment will be collected here.</p>}
