@@ -14,6 +14,7 @@ type Billing = {
   usage: { used: number; limit: number; remaining: number; periodEnd: string };
   pendingChange: { id: string; kind: string; toPlan: string; status: string; effectiveAt: string | null; paymentUrl: string | null } | null;
   testModeEnabled: boolean;
+  cancellationEnabled: boolean;
 };
 
 function approvedCheckoutUrl(value: string): boolean {
@@ -34,11 +35,15 @@ function approvedInvoiceUrl(value: string): boolean {
   }
 }
 
+function utcDate(value: string): string {
+  return `${new Date(value).toLocaleDateString("en-US", { timeZone: "UTC" })} UTC`;
+}
+
 export function OrganizationBillingView({ checkoutReturnOrganizationId = null }: { checkoutReturnOrganizationId?: string | null }) {
   const user = useQuery(currentUserOptions);
   const client = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(checkoutReturnOrganizationId);
-  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [checkoutLink, setCheckoutLink] = useState<{ organizationId: string; url: string } | null>(null);
   const organizations = useQuery({
     queryKey: ["billing-organizations", user.data?.id],
     enabled: Boolean(user.data?.id),
@@ -57,37 +62,35 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
     refetchInterval: (query) => checkoutReturnOrganizationId === organizationId && query.state.data?.plan === "free" ? 5000 : false,
   });
   const change = useMutation({
-    mutationFn: async (plan: string) => {
-      if (!organizationId || !billing.data) throw new Error("Select an organization first.");
+    mutationFn: async ({ plan, organizationId: requestedId, fromPlan }: { plan: string; organizationId: string; fromPlan: string }) => {
       await ensureCsrfCookie();
-      if (billing.data.plan === "free") {
-        const result = await apiFetch<{ url: string }>(`/api/workspaces/${organizationId}/billing/checkout`, {
+      if (fromPlan === "free") {
+        const result = await apiFetch<{ url: string }>(`/api/workspaces/${requestedId}/billing/checkout`, {
           method: "POST", body: JSON.stringify({ plan }),
         });
         if (!approvedCheckoutUrl(result.url)) throw new Error("The checkout link was not valid. Try again.");
-        return result.url;
+        return { organizationId: requestedId, url: result.url };
       }
-      const result = await apiFetch<{ status: string }>(`/api/workspaces/${organizationId}/billing/change-plan`, {
+      const result = await apiFetch<{ status: string }>(`/api/workspaces/${requestedId}/billing/change-plan`, {
         method: "POST", body: JSON.stringify({ plan }),
       });
       if (result.status === "expired") throw new Error("The previous upgrade invoice expired. Choose the plan again to start a new payment.");
       return null;
     },
-    onSuccess: (url) => {
-      setCheckoutUrl(url);
+    onSuccess: (link) => {
+      setCheckoutLink(link);
     },
-    onSettled: async () => {
-      await client.invalidateQueries({ queryKey: ["organization-billing", organizationId] });
+    onSettled: async (_result, _error, variables) => {
+      await client.invalidateQueries({ queryKey: ["organization-billing", variables.organizationId] });
     },
   });
   const cancel = useMutation({
-    mutationFn: async () => {
-      if (!organizationId) throw new Error("Select an organization first.");
+    mutationFn: async (requestedId: string) => {
       await ensureCsrfCookie();
-      return apiFetch(`/api/workspaces/${organizationId}/billing/cancel`, { method: "POST" });
+      return apiFetch(`/api/workspaces/${requestedId}/billing/cancel`, { method: "POST" });
     },
-    onSettled: async () => {
-      await client.invalidateQueries({ queryKey: ["organization-billing", organizationId] });
+    onSettled: async (_result, _error, requestedId) => {
+      await client.invalidateQueries({ queryKey: ["organization-billing", requestedId] });
     },
   });
   const currentPlan = catalog.data?.find((plan) => plan.key === billing.data?.plan);
@@ -106,7 +109,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
     {organizations.isSuccess && owned.length === 0 ? <p className="text-sm text-ink-muted">You do not own an organization yet. <Link href="/dashboard/workspaces" className="underline">Create one in Organizations</Link>.</p> : null}
     {owned.length > 0 ? <div className="space-y-2">
       <label className="block max-w-sm text-sm font-medium text-ink" htmlFor="billing-organization">Organization</label>
-      <select id="billing-organization" className="w-full max-w-sm rounded-md border border-line bg-canvas-elevated px-3 py-2 text-ink" value={organizationId} onChange={(event) => { setSelectedId(event.target.value); setCheckoutUrl(null); change.reset(); }}>
+      <select id="billing-organization" className="w-full max-w-sm rounded-md border border-line bg-canvas-elevated px-3 py-2 text-ink" value={organizationId} onChange={(event) => { setSelectedId(event.target.value); setCheckoutLink(null); change.reset(); cancel.reset(); }}>
         {owned.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}
       </select>
     </div> : null}
@@ -121,18 +124,18 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
           <p className="text-sm text-ink-muted">{billing.data.usage.remaining.toLocaleString()} audits remaining</p>
         </div>
         <progress className="mt-5 w-full" max={billing.data.usage.limit} value={billing.data.usage.used} aria-label="Audits used this period" />
-        <p className="mt-2 text-sm text-ink-muted">{billing.data.usage.used.toLocaleString()} of {billing.data.usage.limit.toLocaleString()} audits used. Resets {new Date(billing.data.usage.periodEnd).toLocaleDateString()}.</p>
+        <p className="mt-2 text-sm text-ink-muted">{billing.data.usage.used.toLocaleString()} of {billing.data.usage.limit.toLocaleString()} audits used. Resets {utcDate(billing.data.usage.periodEnd)}.</p>
       </section>
       {billing.data.pendingChange ? <p role="status" className="border-l-2 border-ink px-4 text-sm text-ink">
         {billing.data.pendingChange.status === "pending_cycle"
           ? billing.data.pendingChange.kind === "cancellation"
-            ? `Cancellation is scheduled. ${pendingPlanName} starts at your next renewal${billing.data.pendingChange.effectiveAt ? ` on ${new Date(billing.data.pendingChange.effectiveAt).toLocaleDateString()}` : ""}. Your current plan stays active until then.`
+            ? `Cancellation is scheduled. ${pendingPlanName} starts at your next renewal${billing.data.pendingChange.effectiveAt ? ` on ${utcDate(billing.data.pendingChange.effectiveAt)}` : ""}. Your current plan stays active until then.`
             : `${pendingPlanName} starts at your next renewal.`
           : `Your ${pendingPlanName} change is waiting for payment confirmation. Your current plan remains active.`}
       </p> : null}
-      {billing.data.pendingChange?.paymentUrl && approvedInvoiceUrl(billing.data.pendingChange.paymentUrl) ? <a className="inline-flex rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:opacity-90" href={billing.data.pendingChange.paymentUrl}>Pay prorated invoice</a> : null}
+      {billing.data.testModeEnabled && billing.data.pendingChange?.paymentUrl && approvedInvoiceUrl(billing.data.pendingChange.paymentUrl) ? <a className="inline-flex rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:opacity-90" href={billing.data.pendingChange.paymentUrl}>Pay prorated invoice</a> : null}
       {billing.data.plan !== "free" && billing.data.pendingChange?.kind !== "cancellation" ? <div className="space-y-2">
-        <Button type="button" variant="secondary" disabled={!billing.data.testModeEnabled || cancel.isPending || billing.data.pendingChange?.status === "pending_payment" || billing.data.pendingChange?.status === "creating"} onClick={() => cancel.mutate()}>Cancel at renewal</Button>
+        <Button type="button" variant="secondary" disabled={!billing.data.cancellationEnabled || cancel.isPending || billing.data.pendingChange?.status === "pending_payment" || billing.data.pendingChange?.status === "creating"} onClick={() => cancel.mutate(organizationId)}>Cancel at renewal</Button>
         <p className="text-sm text-ink-muted">Your paid plan stays active through the current billing cycle. A scheduled downgrade will be replaced.</p>
         {cancel.isError ? <p role="alert" className="text-sm text-danger">{cancel.error.message}</p> : null}
       </div> : null}
@@ -146,12 +149,12 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
             const label = billing.data.plan === "free" ? `Start ${plan.name}` : isUpgrade ? `Upgrade to ${plan.name}` : `Schedule ${plan.name} at renewal`;
             return <div key={plan.key} className="flex flex-wrap items-center justify-between gap-4 py-4">
               <div><h3 className="font-semibold text-ink">{plan.name}</h3><p className="text-sm text-ink-muted">${plan.monthlyUsd} per month · {plan.auditLimit?.toLocaleString()} audits</p></div>
-              {isCurrent ? <span className="text-sm text-ink-muted">Current plan</span> : <Button type="button" variant="secondary" disabled={!billing.data.testModeEnabled || change.isPending || Boolean(billing.data.pendingChange)} onClick={() => change.mutate(plan.key)}>{label}</Button>}
+              {isCurrent ? <span className="text-sm text-ink-muted">Current plan</span> : <Button type="button" variant="secondary" disabled={!billing.data.testModeEnabled || change.isPending || Boolean(billing.data.pendingChange)} onClick={() => change.mutate({ plan: plan.key, organizationId, fromPlan: billing.data.plan })}>{label}</Button>}
             </div>;
           })}
         </div>
         {change.isError ? <p role="alert" className="text-sm text-danger">{change.error.message}</p> : null}
-        {checkoutUrl ? <a className="inline-flex rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:opacity-90" href={checkoutUrl}>Continue to secure checkout</a> : null}
+        {billing.data.testModeEnabled && checkoutLink?.organizationId === organizationId ? <a className="inline-flex rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:opacity-90" href={checkoutLink.url}>Continue to secure checkout</a> : null}
       </section>
     </> : null}
   </main>;
