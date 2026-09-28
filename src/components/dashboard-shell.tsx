@@ -10,6 +10,7 @@ import { isStaff } from "@/lib/advisory-bookings";
 import { Button } from "@/components/ui";
 import { BrandLogo } from "@/components/brand";
 import { AccountMenu } from "@/components/account-menu";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 const sections = [
   { label: "Your work", items: [
@@ -109,7 +110,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <span aria-hidden="true" className="hidden text-line sm:inline">/</span>
           <span className="truncate font-semibold">{currentSection}</span>
         </div>
-        <AccountMenu key={user.data.id} user={user.data} />
+        <div className="flex items-center gap-2"><ThemeSwitcher /><AccountMenu key={user.data.id} user={user.data} /></div>
       </header>
       <div className="dashboard-content" key={user.data.id}>{children}</div>
     </div>

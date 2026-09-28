@@ -84,14 +84,16 @@ test("an account change isolates private queries and clears local form state", a
   await page.route("**/api/jobs", (route) => route.fulfill({ json: { jobs: [job(owner)] } }));
   await page.goto("/jobs");
   await expect(page.getByText("Alice private audit", { exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "New audit" }).first().click();
   await page.getByRole("textbox", { name: "IaC content", exact: true }).fill("Alice unsaved private source");
   owner = "Bob";
   await page.clock.fastForward(46_000);
   await page.evaluate(() => window.dispatchEvent(new Event("visibilitychange")));
   await expect(page.getByRole("button", { name: "Bob, account menu" })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "IaC content", exact: true })).toHaveValue("");
+  await page.getByRole("link", { name: "Back to audit jobs" }).click();
   await expect(page.getByText("Bob private audit", { exact: true })).toBeVisible();
   await expect(page.getByText("Alice private audit", { exact: true })).toHaveCount(0);
-  await expect(page.getByRole("textbox", { name: "IaC content", exact: true })).toHaveValue("");
 });
 
 test("failed logout keeps the current account and lets the user retry", async ({ page }) => {

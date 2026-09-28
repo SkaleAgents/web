@@ -119,7 +119,7 @@ test("dashboard has its own navigation and keeps the public shell on public page
   await expect(page.getByRole("navigation", { name: "Main navigation" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Dashboard", exact: true })).toBeVisible();
   await expect(page.getByRole("contentinfo")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Dashboard, account menu" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Dashboard Owner, account menu" })).toBeVisible();
   const sidebar = page.getByRole("navigation", { name: "Dashboard navigation" });
   const before = await sidebar.boundingBox();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));

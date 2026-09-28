@@ -19,7 +19,7 @@ test("audit creation submits paired source metadata and job reads distinguish un
     ] } });
   });
 
-  await page.goto("/jobs");
+  await page.goto("/dashboard/jobs/new");
   await page.getByLabel("IaC content").fill('resource "test" {}');
   await page.getByLabel("Source revision").fill("commit-audit");
   await page.getByLabel("Source observed at").fill("2026-09-25T10:30");
@@ -46,7 +46,7 @@ test("audit form rejects one-sided metadata before sending a request", async ({ 
     return route.fulfill({ json: { jobs: [] } });
   });
 
-  await page.goto("/jobs");
+  await page.goto("/dashboard/jobs/new");
   await page.getByLabel("IaC content").fill('resource "test" {}');
   await page.getByLabel("Source revision").fill("only-revision");
   await page.getByRole("button", { name: "Queue audit" }).click();
