@@ -14,6 +14,7 @@ type Workspace = {
   createdAt: string;
   role: "owner" | "member" | "viewer";
   kind: "personal" | "team";
+  cutoverNoticeAvailable?: boolean;
 };
 
 export function WorkspacesView() {
@@ -123,6 +124,11 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
                     {workspace.role === "owner" && (
                       <Link href={`/org/${workspace.id}/settings/retention`} className="text-sm font-medium text-accent underline underline-offset-4">
                         View audit retention notice
+                      </Link>
+                    )}
+                    {workspace.role === "owner" && workspace.cutoverNoticeAvailable && (
+                      <Link href={`/org/${workspace.id}/settings/cutover-notice`} className="text-sm font-medium text-accent underline underline-offset-4">
+                        Review Free plan notice
                       </Link>
                     )}
                     {workspaceAuditsEnabled() && (

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 
-type Organization = { id: string; name: string; role: "owner" | "member" | "viewer"; kind: "personal" | "team" };
+type Organization = { id: string; name: string; role: "owner" | "member" | "viewer"; kind: "personal" | "team"; cutoverNoticeAvailable?: boolean };
 type Plan = { key: string; name: string; monthlyUsd: number | null; auditLimit: number | null; checkoutMode: string };
 type Billing = {
   plan: string;
@@ -107,6 +107,11 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
     <div>
       <h1 className="text-3xl font-semibold tracking-tight text-ink">Organization billing</h1>
       <p className="mt-2 text-sm text-ink-muted">Check your audit allowance and manage the plan for an organization you own.</p>
+      {organizationId && owned.find((organization) => organization.id === organizationId)?.cutoverNoticeAvailable ? (
+        <Link className="mt-3 inline-block text-sm font-medium text-accent underline underline-offset-4" href={`/org/${organizationId}/settings/cutover-notice`}>
+          Review Free plan notice
+        </Link>
+      ) : null}
     </div>
     {user.isError || organizations.isError || catalog.isError ? <p role="alert" className="text-sm text-danger">Billing details could not be loaded. Refresh the page and try again.</p> : null}
     {organizations.isPending || catalog.isPending || user.isPending ? <p role="status" className="text-sm text-ink-muted">Loading billing details…</p> : null}
