@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+
+const subscribeToClient = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 const directoryBadges = [
   ["TopAITools4U", "https://www.topaitools4u.site", "https://www.topaitools4u.site/logo.svg", 64, 64],
@@ -53,19 +57,80 @@ const directoryLinks = [
   ["Best AI Tools", "https://bestaitools.me/"],
 ] as const;
 
-function BadgeImage({ name, src, width, height }: { name: string; src: string; width: number; height: number }) {
+type DirectoryBadgeEntry = {
+  name: string;
+  href: string;
+  src: string | null;
+  width?: number;
+  height?: number;
+  alt?: string;
+  title?: string;
+  rel?: string;
+  displayWidth: number;
+  variant?: "agenthunter";
+};
+
+const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
+  { name: "DoForAI", href: "https://doforai.tools/", src: "https://doforai.tools/badge.svg", alt: "Listed on doforai", title: "doforai", displayWidth: 136 },
+  { name: "Web Review", href: "https://web-review.com", src: "https://web-review.com/badge.png", width: 200, height: 54, alt: "Featured on Web Review", rel: "dofollow", displayWidth: 153.6 },
+  { name: "SaaSHunt", href: "https://saashunt.best/projects/skaleagents?utm_source=badge", src: "https://saashunt.best/images/badges/featured-on-light.svg", alt: "Featured on SaasHunt", rel: "noopener noreferrer", displayWidth: 153.6 },
+  { name: "Startup Fame", href: "https://startupfa.me/s/skaleagents?utm_source=skaleagents.com", src: "https://startupfa.me/badges/featured-badge.webp", width: 171, height: 54, alt: "SkaleAgents - Featured on Startup Fame", displayWidth: 121.6 },
+  { name: "AI旋风", href: "https://www.aixuanfeng.com", src: null, displayWidth: 96 },
+  { name: "StartupTrusted", href: "https://startuptrusted.com?ref=skaleagents.com", src: "https://startuptrusted.com/api/badge?type=featured&style=light", width: 240, height: 54, alt: "SkaleAgents on StartupTrusted", rel: "noopener", displayWidth: 153.6 },
+  { name: "Neeed", href: "https://neeed.directory", src: "https://neeed.directory/badges/neeed-badge-light.svg", width: 139, alt: "Featured on neeed.directory", rel: "noopener", displayWidth: 112 },
+  { name: "Findly", href: "https://findly.tools/skaleagents?utm_source=skaleagents", src: "https://findly.tools/badges/findly-tools-badge-light.svg", width: 175, height: 55, alt: "Featured on Findly.tools", rel: "noopener noreferrer", displayWidth: 122.2 },
+  { name: "Launch Llama", href: "https://tools.launchllama.co?utm_source=badge&utm_medium=referral", src: "https://tools.launchllama.co/featured-badge.png?v=2", width: 200, height: 52, alt: "Featured on Launch Llama Tools", rel: "noopener noreferrer", displayWidth: 147.7 },
+  { name: "AgentHunter", href: "https://www.agenthunter.io", src: "https://www.agenthunter.io/logo-light.svg", width: 40, height: 40, alt: "AgentHunter Badge", rel: "noopener noreferrer", displayWidth: 180, variant: "agenthunter" },
+  { name: "Twelve Tools", href: "https://twelve.tools", src: "https://twelve.tools/badge0-white.svg", width: 148, height: 40, alt: "Featured on Twelve Tools", displayWidth: 142.1 },
+];
+
+const directoryBadgeEntries: DirectoryBadgeEntry[] = [
+  ...directoryBadges.map(([name, href, src, width, height]) => ({
+    name,
+    href,
+    src,
+    width,
+    height,
+    title: name,
+    rel: "noopener noreferrer",
+    displayWidth: Math.min(153.6, (width / height) * 38.4),
+  })),
+  ...pendingDirectoryBadges,
+];
+
+function BadgeImage({ name, src, width, height, alt }: { name: string; src: string | null; width?: number; height?: number; alt?: string }) {
   const [failed, setFailed] = useState(false);
 
-  if (failed) return <span className="footer-badge-fallback">{name}</span>;
+  if (!src || failed) return <span className="footer-badge-fallback">{name}</span>;
 
   // Remote directory badges include SVGs and dynamic endpoints; retain their original URLs.
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={`Listed on ${name}`} width={width} height={height} loading="lazy" decoding="async" onError={() => setFailed(true)} />;
+  return <img src={src} alt={alt ?? `Listed on ${name}`} width={width} height={height} loading="lazy" decoding="async" onError={() => setFailed(true)} />;
+}
+
+function AgentHunterBadge() {
+  const [failed, setFailed] = useState(false);
+
+  return (
+    <span style={{ display: "flex", alignItems: "center", gap: 8, boxSizing: "border-box", width: "100%", height: "100%", border: "1px solid #e5e7eb", borderRadius: 8, background: "#fff", padding: "2px 6px 2px 2px", color: "#111827" }}>
+      {failed ? (
+        <span style={{ display: "inline-flex", flex: "0 0 34px", width: 34, height: 34, alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600 }}>AH</span>
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img alt="AgentHunter Badge" width={40} height={40} src="https://www.agenthunter.io/logo-light.svg" loading="lazy" decoding="async" onError={() => setFailed(true)} style={{ width: 34, height: 34, maxWidth: 34, flex: "0 0 34px", objectFit: "contain" }} />
+      )}
+      <span>
+        <span style={{ display: "block", fontSize: 12, color: "#4b5563" }}>AgentHunter</span>
+        <span style={{ display: "block", fontSize: 14, fontWeight: 600, color: "#111827" }}>Featured AI Agent</span>
+      </span>
+    </span>
+  );
 }
 
 export function FooterBadges() {
   const slider = useRef<HTMLDivElement>(null);
   const [manual, setManual] = useState(false);
+  const clientReady = useSyncExternalStore(subscribeToClient, getClientSnapshot, getServerSnapshot);
 
   useEffect(() => {
     if (!manual) return;
@@ -82,12 +147,12 @@ export function FooterBadges() {
         <p className="font-medium">Find us on</p>
       </div>
       <div ref={slider} className="footer-badge-slider" role="region" aria-label="Directory badges" tabIndex={0} data-manual={manual} onMouseLeave={() => setManual(false)} onTouchStart={() => setManual(true)} onWheel={(event) => { if (event.deltaX !== 0) setManual(true); }}>
-        <div className="footer-badge-track">
-          {[false, true].map((duplicate) => (
+        <div className="footer-badge-track" style={clientReady ? undefined : { animation: "none" }}>
+          {(clientReady ? [false, true] : [false]).map((duplicate) => (
             <div key={String(duplicate)} className="footer-badge-group" aria-hidden={duplicate ? true : undefined}>
-              {directoryBadges.map(([name, href, src, width, height]) => (
-                <a key={href} href={href} target="_blank" rel="noopener noreferrer" title={name} tabIndex={duplicate ? -1 : undefined} style={{ width: Math.min(153.6, width / height * 38.4) }} data-topaitools4u-badge={name === "TopAITools4U" ? "verified-listing" : undefined}>
-                  <BadgeImage name={name} src={src} width={width} height={height} />
+              {directoryBadgeEntries.map((badge) => (
+                <a key={badge.href} href={badge.href} target="_blank" rel={badge.rel} title={badge.title} tabIndex={duplicate ? -1 : undefined} style={{ width: badge.displayWidth }} data-topaitools4u-badge={badge.name === "TopAITools4U" ? "verified-listing" : undefined}>
+                  {badge.variant === "agenthunter" ? <AgentHunterBadge /> : <BadgeImage name={badge.name} src={badge.src} width={badge.width} height={badge.height} alt={badge.alt} />}
                 </a>
               ))}
             </div>
