@@ -150,7 +150,17 @@ function AInexfinderBadge() {
         <span style={{ color: "#fff", fontSize: 14, fontWeight: 600 }}>AInexfinder</span>
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src="https://ainexfinder.com/brand/ainexfinder-logo-white.png" alt="AInexfinder AI Tools Directory" height={22} style={{ display: "block", height: 22, width: "auto" }} onError={() => setFailed(true)} />
+        <img
+          src="https://ainexfinder.com/brand/ainexfinder-logo-white.png"
+          alt="AInexfinder AI Tools Directory"
+          width={143}
+          height={22}
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+          style={{ display: "block", height: 22, width: "auto" }}
+          onError={() => setFailed(true)}
+        />
       )}
     </>
   );
