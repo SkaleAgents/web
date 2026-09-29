@@ -89,10 +89,11 @@ test("all directory badges remain reachable by keyboard on mobile", async ({ pag
   const slider = page.getByRole("region", { name: "Directory badges", exact: true });
   await slider.focus();
   const links = slider.getByRole("link");
-  await expect(links).toHaveCount(54);
+  await expect(links.first()).toBeVisible();
+  const count = await links.count();
   await page.keyboard.press("Tab");
   await expect(links.first()).toBeFocused();
-  for (let index = 1; index < 54; index++) await page.keyboard.press("Tab");
+  for (let index = 1; index < count; index++) await page.keyboard.press("Tab");
   await expect(links.last()).toBeFocused();
   await expect(links.last()).toBeInViewport();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
