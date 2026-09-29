@@ -57,16 +57,16 @@ test("examples cycle through all four topics and pause during interaction", asyn
   await expect(explorer).toHaveAttribute("data-playing", "false");
 });
 
-test("all original badges remain reachable by keyboard on mobile", async ({ page }) => {
+test("all directory badges remain reachable by keyboard on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto("/");
   const slider = page.getByRole("region", { name: "Directory badges", exact: true });
   await slider.focus();
   const links = slider.getByRole("link");
-  await expect(links).toHaveCount(35);
+  await expect(links).toHaveCount(46);
   await page.keyboard.press("Tab");
   await expect(links.first()).toBeFocused();
-  for (let index = 1; index < 35; index++) await page.keyboard.press("Tab");
+  for (let index = 1; index < 46; index++) await page.keyboard.press("Tab");
   await expect(links.last()).toBeFocused();
   await expect(links.last()).toBeInViewport();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
