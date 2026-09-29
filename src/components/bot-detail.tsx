@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { BotPromptActions } from "@/components/bot-prompt-actions";
 import { apiFetch, type Bot } from "@/lib/api";
 import { LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
+import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
 export function BotDetail({ manage = false }: { manage?: boolean }) {
+  const pathname = usePathname();
   const params = useParams<{ id: string }>();
   const id = params.id;
   const user = useQuery(currentUserOptions);
@@ -17,7 +19,7 @@ export function BotDetail({ manage = false }: { manage?: boolean }) {
     queryFn: ({ signal }) => apiFetch<Bot>(`/api/bots/${id}`, { signal, credentials: manage ? "include" : "omit" }),
     enabled: Boolean(id) && (!manage || Boolean(user.data)),
   });
-  const directory = manage ? "/me/bots" : "/bots";
+  const directory = manage ? personalDestinationFromPath(pathname, "bots") : "/bots";
 
   if (botQuery.isPending) {
     return <p className="text-sm text-ink-muted">Loading bot…</p>;

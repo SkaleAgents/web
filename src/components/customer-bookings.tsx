@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { advisoryAgreementsEnabled, advisoryDeliveryHandoffsEnabled, portfolioBookingHandoffEnabled, nativeConsultancyEnabled, ApiError, apiFetch, type AdvisoryBooking, type PortfolioBookingReferral } from "@/lib/api";
@@ -9,6 +10,7 @@ import { useCustomerUser, isSessionError } from "@/components/customer-booking-a
 import { Button, LinkButton } from "@/components/ui";
 import { AdvisoryAgreementReview } from "@/components/advisory-agreement-review";
 import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
+import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
 function bookingListKey(accountId: string) {
   return ["customer-advisory-bookings", accountId] as const;
@@ -81,8 +83,9 @@ function handleSessionExpiry(queryClient: ReturnType<typeof useQueryClient>, que
 }
 
 function BookingSummary({ booking }: { booking: AdvisoryBooking }) {
+  const pathname = usePathname();
   return (
-    <Link href={`/me/advisory-bookings/${encodeURIComponent(booking.id)}`} className="block space-y-3 p-5 hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent">
+    <Link href={personalDestinationFromPath(pathname, `advisory-bookings/${encodeURIComponent(booking.id)}`)} className="block space-y-3 p-5 hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent">
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="rounded-full bg-accent-soft px-2 py-1 font-semibold text-ink">{bookingStatusLabels[booking.status]}</span>
         <span className="text-ink-muted">{booking.urgency} priority</span>
@@ -144,6 +147,7 @@ export function CustomerBookingList() {
 }
 
 export function CustomerBookingDetail({ id }: { id: string }) {
+  const pathname = usePathname();
   const user = useCustomerUser();
   const queryClient = useQueryClient();
   const key = useMemo(() => bookingDetailKey(user.id, id), [user.id, id]);
@@ -161,7 +165,7 @@ export function CustomerBookingDetail({ id }: { id: string }) {
 
   return (
     <main className="space-y-6">
-      <LinkButton href="/me/advisory-bookings" variant="ghost">Back to advisory requests</LinkButton>
+      <LinkButton href={personalDestinationFromPath(pathname, "advisory-bookings")} variant="ghost">Back to advisory requests</LinkButton>
       {denied || notFound ? (
         <div className="space-y-3">
           <h1 className="workspace-heading">{denied ? "Sign in required" : "Request unavailable"}</h1>
@@ -198,7 +202,7 @@ export function CustomerBookingDetail({ id }: { id: string }) {
                 <dt className="text-ink-muted">Source</dt>
                 <dd className="mt-1 break-all">
                   {data.source.type === "watchtower_session" ? (
-                    <Link className="text-accent underline" href={`/me/watchtower/${encodeURIComponent(data.source.id)}`}>Open source Watchtower session</Link>
+                    <Link className="text-accent underline" href={personalDestinationFromPath(pathname, `watchtower/${encodeURIComponent(data.source.id)}`)}>Open source Watchtower session</Link>
                   ) : <span>Audit job reference (no direct source page available)</span>}
                   <span className="mt-1 block font-mono text-xs text-ink-muted">{data.source.id}</span>
                 </dd>

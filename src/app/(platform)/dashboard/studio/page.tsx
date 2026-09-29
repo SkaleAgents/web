@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { studioStarters } from "@/lib/studio-starters";
+import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 import {
   apiFetch,
   ensureCsrfCookie,
@@ -40,6 +41,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function StudioCreatePage() {
+  const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [starterIndex, setStarterIndex] = useState("0");
@@ -65,7 +67,7 @@ export default function StudioCreatePage() {
     onSuccess: (bot) => {
       void queryClient.invalidateQueries({ queryKey: ["bots"] });
       toast.success("Draft created");
-      router.push(`/me/studio/${bot.id}`);
+      router.push(personalDestinationFromPath(pathname, `studio/${bot.id}`));
     },
     onError: (err: Error) => toast.error(err.message),
   });
