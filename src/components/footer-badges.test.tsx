@@ -15,6 +15,21 @@ const requestedBadges = [
   ["https://tools.launchllama.co?utm_source=badge&utm_medium=referral", "Featured on Launch Llama Tools"],
   ["https://www.agenthunter.io", "AgentHunter Badge"],
   ["https://twelve.tools", "Featured on Twelve Tools"],
+  ["https://huzzler.so/products/hJHZDJxqO5/skaleagents?utm_source=huzzler_product_website&utm_medium=badge&utm_campaign=free_listing", "Huzzler Embed Badge"],
+  ["https://turbo0.com/item/skaleagents", "Listed on Turbo0"],
+  ["https://sumodir.com", "Featured on SumoDir"],
+  ["https://postmake.io", "Featured on the Postmake directory"],
+  ["https://ainexfinder.com", "AInexfinder AI Tools Directory"],
+  ["https://nicklaunches.com/products/skaleagents/?utm_source=skaleagents.com&utm_medium=badge&utm_campaign=featured", "Featured on Nick Launches"],
+  ["https://bowora.com/", null],
+  ["https://navfolders.com/", "Featured on NavFolders"],
+] as const;
+
+const requestedLinks = [
+  ["https://newaiforyou.com", "NewAIForYou"],
+  ["https://www.launch-list.org", "Launch List"],
+  ["https://www.launchboard.dev/", "LaunchBoard"],
+  ["https://startupproject.org/", "Startup Project"],
 ] as const;
 
 describe("FooterBadges", () => {
@@ -23,7 +38,7 @@ describe("FooterBadges", () => {
     const page = new DOMParser().parseFromString(markup, "text/html");
     const links = Array.from(page.querySelectorAll("a[href]"));
 
-    for (const [href] of requestedBadges) {
+    for (const [href] of [...requestedBadges, ...requestedLinks]) {
       expect(links.filter((link) => link.getAttribute("href") === href), href).toHaveLength(1);
     }
   });
@@ -45,6 +60,9 @@ describe("FooterBadges", () => {
 
       if (alt) {
         expect(matchingLinks[0].querySelector("img"), href).toHaveAttribute("alt", alt);
+      } else if (href === "https://bowora.com/") {
+        expect(matchingLinks[0]).toHaveTextContent(/Featured on\s*Bowora/);
+        expect(matchingLinks[0].querySelector("svg")).not.toBeNull();
       } else {
         expect(matchingLinks[0], href).toHaveTextContent("AI旋风");
       }
@@ -52,5 +70,17 @@ describe("FooterBadges", () => {
 
     const agentHunter = links.find((link) => link.getAttribute("href") === "https://www.agenthunter.io");
     expect(agentHunter).toHaveTextContent("Featured AI Agent");
+  });
+
+  it("renders the remaining submissions as plain links outside the badge slider", () => {
+    const { container } = render(<FooterBadges />);
+    const allLinks = Array.from(container.querySelectorAll("a[href]"));
+
+    for (const [href, label] of requestedLinks) {
+      const matchingLinks = allLinks.filter((link) => link.getAttribute("href") === href);
+      expect(matchingLinks, href).toHaveLength(1);
+      expect(matchingLinks[0]).toHaveTextContent(label);
+      expect(matchingLinks[0].closest(".footer-badge-group")).toBeNull();
+    }
   });
 });
