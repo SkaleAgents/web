@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 const publisherScript = "https://news.google.com/swg/js/v1/publisher.js";
 
@@ -15,8 +16,14 @@ function loadPublisherScript() {
 
 export function PreferredSourceControl() {
   const control = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
+    if (pathname === "/workspace-invitations/accept") {
+      loadPublisherScript();
+      return;
+    }
+
     const element = control.current;
     if (!element) return;
 
@@ -33,7 +40,7 @@ export function PreferredSourceControl() {
 
     observer.observe(element);
     return () => observer.disconnect();
-  }, []);
+  }, [pathname]);
 
   return (
     <div

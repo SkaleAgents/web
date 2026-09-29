@@ -1,6 +1,9 @@
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { usePathname } from "next/navigation";
 import { PreferredSourceControl } from "./preferred-source-control";
+
+vi.mock("next/navigation", () => ({ usePathname: vi.fn() }));
 
 const publisherScript = "https://news.google.com/swg/js/v1/publisher.js";
 
@@ -33,6 +36,7 @@ describe("PreferredSourceControl", () => {
   beforeEach(() => {
     TestIntersectionObserver.instance = undefined;
     vi.stubGlobal("IntersectionObserver", TestIntersectionObserver);
+    vi.mocked(usePathname).mockReturnValue("/");
   });
 
   afterEach(() => {
@@ -58,5 +62,14 @@ describe("PreferredSourceControl", () => {
 
     TestIntersectionObserver.instance?.enter(control!);
     expect(document.querySelectorAll(`script[src="${publisherScript}"]`)).toHaveLength(1);
+  });
+
+  it("loads the publisher script on the invitation route after the token-cleanup script runs", () => {
+    vi.mocked(usePathname).mockReturnValue("/workspace-invitations/accept");
+
+    render(<PreferredSourceControl />);
+
+    expect(document.querySelector(`script[src="${publisherScript}"]`)).not.toBeNull();
+    expect(TestIntersectionObserver.instance).toBeUndefined();
   });
 });
