@@ -14,11 +14,11 @@ const plans = { data: [
   { key: "max", name: "Max", monthlyUsd: 499, auditLimit: 2000, checkoutMode: "self_service" },
 ] };
 
-function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean, paymentUrl: string | null = null, checkoutReturnOrganizationId: string | null = null, pendingCyclePlan: string | null = null, renewalPayment: { status: "grace" | "access_paused"; graceEndsAt: string; paymentUrl: string | null } | null = null) {
+function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean, paymentUrl: string | null = null, checkoutReturnOrganizationId: string | null = null, pendingCyclePlan: string | null = null, renewalPayment: { status: "grace" | "access_paused"; graceEndsAt: string; paymentUrl: string | null } | null = null, cutoverNoticeAvailable = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
   vi.mocked(apiFetch).mockImplementation(async (path, init) => {
-    if (path === "/api/workspaces") return { data: [{ id: "org-1", name: "Acme", kind: "team", role: "owner" }] } as never;
+    if (path === "/api/workspaces") return { data: [{ id: "org-1", name: "Acme", kind: "team", role: "owner", cutoverNoticeAvailable }] } as never;
     if (path === "/api/organization-plans") return plans as never;
     if (path === "/api/workspaces/org-1/billing") return {
       plan, usage: { used: plan === "free" ? 1 : 7, limit: plan === "free" ? 2 : plan === "starter" ? 25 : 200, remaining: plan === "free" ? 1 : plan === "starter" ? 18 : 193, periodEnd: "2026-10-01T00:00:00Z" },
@@ -33,6 +33,12 @@ function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean,
   });
   return { ...render(<QueryClientProvider client={client}><OrganizationBillingView checkoutReturnOrganizationId={checkoutReturnOrganizationId} /></QueryClientProvider>), client };
 }
+
+it("links an owner to a published Free organization notice only when available", async () => {
+  showBilling("free", false, null, null, null, null, true);
+  const link = await screen.findByRole("link", { name: "Review Free plan notice" });
+  expect(link).toHaveAttribute("href", "/org/org-1/settings/cutover-notice");
+});
 
 it("shows payment verification as pending until the organization has a paid plan", async () => {
   showBilling("free", true, null, "org-1");

@@ -312,6 +312,19 @@ export type WorkspaceRetentionPolicy = {
   noticeToken: string;
 };
 
+export type WorkspaceCutoverNotice = {
+  workspaceId: string;
+  version: string;
+  contentHash: string;
+  effectiveAt: string;
+  body: string;
+  billingUrl: string;
+  supportUrl: string;
+  acknowledgementEnabled: boolean;
+  acknowledgedAt: string | null;
+  noticeToken: string;
+};
+
 export type SwarmStep = {
   jobId: string;
   stepId: string;
