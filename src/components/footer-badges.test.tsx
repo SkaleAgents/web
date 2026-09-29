@@ -15,7 +15,8 @@ const requestedBadges = [
   ["https://tools.launchllama.co?utm_source=badge&utm_medium=referral", "Featured on Launch Llama Tools"],
   ["https://www.agenthunter.io", "AgentHunter Badge"],
   ["https://twelve.tools", "Featured on Twelve Tools"],
-  ["https://huzzler.so/products/hJHZDJxqO5/skaleagents?utm_source=huzzler_product_website&utm_medium=badge&utm_campaign=free_listing", "Huzzler Embed Badge"],
+  ["https://huzzler.so/products/8hF0LarShp/skaleagents-1?utm_source=huzzler_product_website&utm_medium=badge&utm_campaign=free_listing", "Huzzler Embed Badge"],
+  ["https://codehype.ai/product/skaleagents?utm_source=codehype_badge", "Featured on CodeHype"],
   ["https://turbo0.com/item/skaleagents", "Listed on Turbo0"],
   ["https://sumodir.com", "Featured on SumoDir"],
   ["https://postmake.io", "Featured on the Postmake directory"],
@@ -41,6 +42,8 @@ describe("FooterBadges", () => {
     for (const [href] of [...requestedBadges, ...requestedLinks]) {
       expect(links.filter((link) => link.getAttribute("href") === href), href).toHaveLength(1);
     }
+
+    expect(markup).not.toContain("hJHZDJxqO5");
   });
 
   it("renders each missing directory once in the primary slider group", () => {
@@ -70,6 +73,19 @@ describe("FooterBadges", () => {
 
     const agentHunter = links.find((link) => link.getAttribute("href") === "https://www.agenthunter.io");
     expect(agentHunter).toHaveTextContent("Featured AI Agent");
+
+    const huzzler = links.find((link) => link.getAttribute("href")?.includes("huzzler.so"));
+    expect(huzzler?.querySelector("img")).not.toHaveAttribute("loading");
+    expect(huzzler?.querySelector("img")).not.toHaveAttribute("decoding");
+
+    const codeHype = links.find((link) => link.getAttribute("href")?.includes("codehype.ai"));
+    const codeHypeImage = codeHype?.querySelector("img");
+    expect(codeHypeImage).toHaveAttribute("src", "https://codehype.ai/badges/skaleagents.svg?variant=find-us&v=20");
+    expect(codeHypeImage).toHaveAttribute("width", "180");
+    expect(codeHypeImage).toHaveAttribute("height", "65");
+    expect(codeHypeImage).toHaveAttribute("loading", "lazy");
+    expect(codeHypeImage).toHaveAttribute("decoding", "async");
+    expect(codeHypeImage).toHaveAttribute("style", "display: inline-block; border: 0px; width: 100%; max-width: 180px; height: auto; max-height: 65px;");
   });
 
   it("renders the remaining submissions as plain links outside the badge slider", () => {

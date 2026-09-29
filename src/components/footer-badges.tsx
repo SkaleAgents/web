@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 
 const subscribeToClient = () => () => {};
 const getClientSnapshot = () => true;
@@ -73,6 +73,9 @@ type DirectoryBadgeEntry = {
   displayWidth: number;
   ariaLabel?: string;
   variant?: "agenthunter" | "ainexfinder" | "bowora";
+  loading?: "eager" | "lazy" | null;
+  decoding?: "async" | "auto" | "sync" | null;
+  imageStyle?: CSSProperties;
 };
 
 const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
@@ -87,7 +90,8 @@ const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "Launch Llama", href: "https://tools.launchllama.co?utm_source=badge&utm_medium=referral", src: "https://tools.launchllama.co/featured-badge.png?v=2", width: 200, height: 52, alt: "Featured on Launch Llama Tools", rel: "noopener noreferrer", displayWidth: 147.7 },
   { name: "AgentHunter", href: "https://www.agenthunter.io", src: "https://www.agenthunter.io/logo-light.svg", width: 40, height: 40, alt: "AgentHunter Badge", rel: "noopener noreferrer", displayWidth: 180, variant: "agenthunter" },
   { name: "Twelve Tools", href: "https://twelve.tools", src: "https://twelve.tools/badge0-white.svg", width: 148, height: 40, alt: "Featured on Twelve Tools", displayWidth: 142.1 },
-  { name: "Huzzler", href: "https://huzzler.so/products/hJHZDJxqO5/skaleagents?utm_source=huzzler_product_website&utm_medium=badge&utm_campaign=free_listing", src: "https://huzzler.so/assets/images/embeddable-badges/featured.png", width: 159, height: 55, alt: "Huzzler Embed Badge", rel: "noopener noreferrer", displayWidth: 111 },
+  { name: "Huzzler", href: "https://huzzler.so/products/8hF0LarShp/skaleagents-1?utm_source=huzzler_product_website&utm_medium=badge&utm_campaign=free_listing", src: "https://huzzler.so/assets/images/embeddable-badges/featured.png", width: 159, height: 55, alt: "Huzzler Embed Badge", rel: "noopener noreferrer", displayWidth: 111, loading: null, decoding: null },
+  { name: "CodeHype", href: "https://codehype.ai/product/skaleagents?utm_source=codehype_badge", src: "https://codehype.ai/badges/skaleagents.svg?variant=find-us&v=20", width: 180, height: 65, alt: "Featured on CodeHype", rel: "noopener noreferrer", displayWidth: 118, loading: "lazy", decoding: "async", imageStyle: { display: "inline-block", border: 0, width: "100%", maxWidth: 180, height: "auto", maxHeight: 65 } },
   { name: "Turbo0", href: "https://turbo0.com/item/skaleagents", src: "https://img.turbo0.com/badge-listed-light.svg", alt: "Listed on Turbo0", rel: "noopener noreferrer", displayWidth: 153.6 },
   { name: "SumoDir", href: "https://sumodir.com", src: "https://sumodir.com/badge.png", width: 200, height: 54, alt: "Featured on SumoDir", rel: "noopener noreferrer", displayWidth: 142.2 },
   { name: "Postmake", href: "https://postmake.io", src: "https://postmake.io/postmake_badge_light.png", width: 240, alt: "Featured on the Postmake directory", rel: "noopener noreferrer", displayWidth: 153.6 },
@@ -111,14 +115,14 @@ const directoryBadgeEntries: DirectoryBadgeEntry[] = [
   ...pendingDirectoryBadges,
 ];
 
-function BadgeImage({ name, src, width, height, alt }: { name: string; src: string | null; width?: number; height?: number; alt?: string }) {
+function BadgeImage({ name, src, width, height, alt, loading = "lazy", decoding = "async", imageStyle }: { name: string; src: string | null; width?: number; height?: number; alt?: string; loading?: "eager" | "lazy" | null; decoding?: "async" | "auto" | "sync" | null; imageStyle?: CSSProperties }) {
   const [failed, setFailed] = useState(false);
 
   if (!src || failed) return <span className="footer-badge-fallback">{name}</span>;
 
   // Remote directory badges include SVGs and dynamic endpoints; retain their original URLs.
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={alt ?? `Listed on ${name}`} width={width} height={height} loading="lazy" decoding="async" onError={() => setFailed(true)} />;
+  return <img src={src} alt={alt ?? `Listed on ${name}`} width={width} height={height} loading={loading ?? undefined} decoding={decoding ?? undefined} style={imageStyle} onError={() => setFailed(true)} />;
 }
 
 function AgentHunterBadge() {
@@ -208,7 +212,7 @@ export function FooterBadges() {
             <div key={String(duplicate)} className="footer-badge-group" aria-hidden={duplicate ? true : undefined}>
               {directoryBadgeEntries.map((badge) => (
                 <a key={badge.href} href={badge.href} target="_blank" rel={badge.rel} title={badge.title} aria-label={badge.ariaLabel} tabIndex={duplicate ? -1 : undefined} style={badge.variant === "bowora" ? { display: "inline-flex", alignItems: "center", gap: 10, width: 170, height: 50, backgroundColor: "#fff", color: "#000", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", padding: "8px 14px", borderRadius: 8, textDecoration: "none", border: "1px solid #E8E8E8" } : badge.variant === "ainexfinder" ? { display: "inline-flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "#7150E6", border: "1px solid #6347D1", borderRadius: 10, textDecoration: "none", fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif", lineHeight: 1 } : { width: badge.displayWidth }} data-topaitools4u-badge={badge.name === "TopAITools4U" ? "verified-listing" : undefined}>
-                  {badge.variant === "agenthunter" ? <AgentHunterBadge /> : badge.variant === "ainexfinder" ? <AInexfinderBadge /> : badge.variant === "bowora" ? <BoworaBadge /> : <BadgeImage name={badge.name} src={badge.src} width={badge.width} height={badge.height} alt={badge.alt} />}
+                  {badge.variant === "agenthunter" ? <AgentHunterBadge /> : badge.variant === "ainexfinder" ? <AInexfinderBadge /> : badge.variant === "bowora" ? <BoworaBadge /> : <BadgeImage name={badge.name} src={badge.src} width={badge.width} height={badge.height} alt={badge.alt} loading={badge.loading} decoding={badge.decoding} imageStyle={badge.imageStyle} />}
                 </a>
               ))}
             </div>
