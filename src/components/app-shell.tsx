@@ -76,7 +76,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
   );
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className={`flex min-h-0 flex-1 flex-col ${pathname === "/" ? "homepage-shell" : ""}`}>
       <header className="border-b border-line border-t-2 border-t-accent bg-canvas-elevated">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-3">
           <div className="contents">
