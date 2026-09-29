@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HeroActions } from "@/components/marketing/hero-actions";
-import { ExampleExplorer } from "@/components/marketing/example-explorer";
+import { DeferredMarketingWidget } from "@/components/marketing/deferred-marketing-widget";
+import { ExampleExplorerPreview, SampleReviewDemoPreview, StartPickerPreview } from "@/components/marketing/marketing-widget-previews";
 import { WorkflowExplorer } from "@/components/marketing/workflow-explorer";
-import { StartPicker } from "@/components/marketing/start-picker";
 import { HeroSignal } from "@/components/marketing/hero-signal";
-import { SampleReviewDemo } from "@/components/marketing/sample-review-demo";
 
 export const metadata: Metadata = {
   title: "SkaleAgents | DevOps bots and infrastructure reviews",
@@ -67,11 +66,11 @@ export default function MarketingHome() {
           <div><p className="marketing-eyebrow">01 / Put it to work</p><h2 id="examples-heading" className="marketing-heading">What would you like<br className="hidden sm:block" /> a second pair of eyes on?</h2></div>
           <p className="max-w-sm leading-relaxed text-ink-muted">A useful review connects a finding to the code behind it. Pick a focus to see the input, the concern, and a practical next step.</p>
         </div>
-        <ExampleExplorer />
+        <DeferredMarketingWidget name="examples" fallback={<ExampleExplorerPreview />} />
       </section>
 
       <section id="sample-demo" className="marketing-section border-t border-line" aria-labelledby="sample-demo-heading">
-        <SampleReviewDemo />
+        <DeferredMarketingWidget name="sample" fallback={<SampleReviewDemoPreview />} />
       </section>
 
       <div className="border-y border-line bg-accent-soft/30">
@@ -113,7 +112,7 @@ export default function MarketingHome() {
       </div>
 
       <section className="marketing-section" aria-labelledby="next-step-heading">
-        <StartPicker />
+        <DeferredMarketingWidget name="start" fallback={<StartPickerPreview />} />
       </section>
     </main>
   );

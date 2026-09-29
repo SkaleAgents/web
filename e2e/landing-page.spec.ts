@@ -7,6 +7,9 @@ test.beforeEach(async ({ page }) => {
 test("examples work with the keyboard and copy the selected prompt", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/");
+  const explorer = page.locator(".example-explorer");
+  await explorer.scrollIntoViewIfNeeded();
+  await expect(explorer.getByRole("radio", { name: "Security", exact: true })).toBeEnabled();
   const security = page.getByRole("radio", { name: "Security", exact: true });
   await security.focus();
   await page.keyboard.press("ArrowRight");
@@ -30,6 +33,9 @@ test("clipboard failure reveals a selectable prompt", async ({ page }) => {
     });
   });
   await page.goto("/");
+  const explorer = page.locator(".example-explorer");
+  await explorer.scrollIntoViewIfNeeded();
+  await expect(explorer.getByRole("radio", { name: "Security", exact: true })).toBeEnabled();
   await page.getByRole("button", { name: "Copy starter prompt" }).click();
   await expect(page.getByRole("status")).toContainText("Select and copy");
   await expect(page.getByText(/^Review my Terraform for exposed ports/)).toBeVisible();
@@ -77,6 +83,9 @@ for (const colorScheme of ["light", "dark"] as const) {
     await page.setViewportSize({ width: 320, height: 740 });
     await page.goto("/");
     await expect(page.locator("html")).toHaveClass(new RegExp(colorScheme));
+    const explorer = page.locator(".example-explorer");
+    await explorer.scrollIntoViewIfNeeded();
+    await expect(explorer.getByRole("radio", { name: "Security", exact: true })).toBeEnabled();
     await page.getByText("Scaling & cost", { exact: true }).click();
     await page.getByText("In your editor", { exact: true }).click();
     await expect(page.getByRole("heading", { name: /Good questions.*Straight answers/ })).toBeVisible();
