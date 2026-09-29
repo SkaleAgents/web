@@ -15,7 +15,7 @@ describe("native consultancy entry", () => {
     vi.stubEnv("NEXT_PUBLIC_CONSULTANCY_BOOKING_ENABLED", "true");
     render(<ConsultancyBookingLink source={{ type: "audit_job", id: "private-job-id" }} />);
     expect(screen.getByRole("link", { name: "Book a consultancy session" }))
-      .toHaveAttribute("href", "/me/consultancy?sourceType=audit_job&sourceId=private-job-id");
+      .toHaveAttribute("href", "/dashboard/consultancy?sourceType=audit_job&sourceId=private-job-id");
     expect(screen.getByText(/Payment opens only after Harun approves it/)).toBeVisible();
   });
 });

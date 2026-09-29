@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ApiError, nativeConsultancyEnabled, type ConsultancyBooking, type ConsultancyPackage } from "@/lib/api";
@@ -9,6 +9,7 @@ import { currentUserOptions } from "@/lib/session";
 import { ConsultancyBookingForm, type ConsultancyRequestInput } from "@/components/consultancy-booking-form";
 import { ConsultancyBookingDetail } from "@/components/consultancy-booking-detail";
 import { Button } from "@/components/ui";
+import { scopeFromPath, organizationPath } from "@/lib/dashboard-routes";
 
 type Source = { type: "audit_job" | "advisory_booking"; id: string };
 
@@ -19,6 +20,8 @@ function unavailable() {
 
 export function CustomerConsultancyPage({ source }: { source?: Source }) {
   const router = useRouter();
+  const scope = scopeFromPath(usePathname());
+  const consultancyPath = scope?.kind === "organization" ? organizationPath(scope.id, "consultancy") : "/dashboard/consultancy";
   const client = useQueryClient();
   const user = useQuery(currentUserOptions);
   const [packageSlug, setPackageSlug] = useState<ConsultancyPackage["slug"]>("light");
@@ -51,7 +54,7 @@ export function CustomerConsultancyPage({ source }: { source?: Source }) {
     onSuccess: booking => {
       requestKey.current = null;
       void client.invalidateQueries({ queryKey: ["consultancy-bookings", accountId] });
-      router.push(`/me/consultancy/${booking.id}`);
+      router.push(`${consultancyPath}/${booking.id}`);
     },
   });
 
@@ -84,7 +87,7 @@ export function CustomerConsultancyPage({ source }: { source?: Source }) {
         <p role="alert" className="text-sm text-danger">Could not load your bookings. <button type="button" className="underline" onClick={() => void bookings.refetch()}>Try again</button></p>
       ) : bookings.data.length === 0 ? <p className="text-sm text-ink-muted">No requests yet.</p> : (
         <ul className="divide-y divide-line">{bookings.data.map(booking => <li key={booking.id} className="py-4">
-          <Link className="flex flex-wrap justify-between gap-2 font-medium text-ink hover:text-accent" href={`/me/consultancy/${booking.id}`}>
+          <Link className="flex flex-wrap justify-between gap-2 font-medium text-ink hover:text-accent" href={`${consultancyPath}/${booking.id}`}>
             <span>{booking.package.name} · {new Date(booking.requestedWindow.startAt).toLocaleString()}</span>
             <span className="text-sm text-ink-muted">{booking.status.replaceAll("_", " ")}</span>
           </Link>
@@ -96,6 +99,8 @@ export function CustomerConsultancyPage({ source }: { source?: Source }) {
 
 export function CustomerConsultancyDetailPage({ id, checkoutReturned = false }: { id: string; checkoutReturned?: boolean }) {
   const user = useQuery(currentUserOptions);
+  const scope = scopeFromPath(usePathname());
+  const consultancyPath = scope?.kind === "organization" ? organizationPath(scope.id, "consultancy") : "/dashboard/consultancy";
   const accountId = user.data?.id;
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -132,10 +137,10 @@ export function CustomerConsultancyDetailPage({ id, checkoutReturned = false }: 
   if (!accountId || booking.isPending) return <p role="status" className="text-sm text-ink-muted">Loading booking…</p>;
   if (booking.isError) return <main className="space-y-3"><h1 className="workspace-heading">Booking unavailable</h1>
     <p role="alert" className="text-sm text-ink-muted">This booking could not be opened from your account.</p>
-    <Link href="/me/consultancy" className="text-accent underline">Back to consultancy</Link></main>;
+    <Link href={consultancyPath} className="text-accent underline">Back to consultancy</Link></main>;
 
   return <main className="max-w-3xl space-y-6">
-    <Link href="/me/consultancy" className="text-sm text-accent underline">All consultancy bookings</Link>
+    <Link href={consultancyPath} className="text-sm text-accent underline">All consultancy bookings</Link>
     <ConsultancyBookingDetail booking={booking.data} checkoutReturned={checkoutReturned} busy={action.isPending}
       onPay={() => action.mutate({ path: "checkout", version: booking.data.version })}
       onCancel={() => {
