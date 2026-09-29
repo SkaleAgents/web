@@ -11,8 +11,9 @@ type Organization = { id: string; name: string; role: "owner" | "member" | "view
 type Plan = { key: string; name: string; monthlyUsd: number | null; auditLimit: number | null; checkoutMode: string };
 type Billing = {
   plan: string;
-  usage: { used: number; limit: number; remaining: number; periodEnd: string };
+  usage: { used: number; limit: number; remaining: number; periodEnd: string } | null;
   pendingChange: { id: string; kind: string; toPlan: string; status: string; effectiveAt: string | null; paymentUrl: string | null } | null;
+  renewalPayment: { status: "grace" | "access_paused"; graceEndsAt: string; paymentUrl: string | null } | null;
   testModeEnabled: boolean;
   cancellationEnabled: boolean;
 };
@@ -118,14 +119,22 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
       {billing.data.plan === "free" ? "Checking your payment. Your plan will update here after verification." : `${currentPlan?.name ?? "Your paid plan"} is active. Your audit allowance is shown below.`}
     </p> : null}
     {billing.data && currentPlan ? <>
-      <section className="border-y border-line py-6" aria-label="Current plan">
+      {billing.data.renewalPayment ? <section role="status" aria-label="Renewal payment" className="border-l-2 border-danger bg-canvas-elevated px-4 py-3 text-sm text-ink">
+        <p className="font-semibold">{billing.data.renewalPayment.status === "grace" ? "Renewal payment is overdue." : "Paid audit access is paused."}</p>
+        <p className="mt-1">{billing.data.renewalPayment.status === "grace"
+          ? `Your paid audit limits remain available through ${utcDate(billing.data.renewalPayment.graceEndsAt)} while Stripe retries. Pay the renewal invoice to avoid an interruption.`
+          : `The seven-day payment grace period ended ${utcDate(billing.data.renewalPayment.graceEndsAt)}. Pay the renewal invoice to request restored access after verification.`}</p>
+        <p className="mt-1 text-ink-muted">Stripe test mode is active. No real payment will be collected.</p>
+        {billing.data.renewalPayment.paymentUrl && approvedInvoiceUrl(billing.data.renewalPayment.paymentUrl) ? <a className="mt-3 inline-flex rounded-md bg-ink px-4 py-2 font-semibold text-canvas hover:opacity-90" href={billing.data.renewalPayment.paymentUrl}>Pay renewal invoice</a> : null}
+      </section> : null}
+      {billing.data.usage ? <section className="border-y border-line py-6" aria-label="Current plan">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div><p className="text-sm text-ink-muted">Current plan</p><p className="mt-1 text-3xl font-semibold text-ink">{currentPlan.name}</p></div>
           <p className="text-sm text-ink-muted">{billing.data.usage.remaining.toLocaleString()} audits remaining</p>
         </div>
         <progress className="mt-5 w-full" max={billing.data.usage.limit} value={billing.data.usage.used} aria-label="Audits used this period" />
         <p className="mt-2 text-sm text-ink-muted">{billing.data.usage.used.toLocaleString()} of {billing.data.usage.limit.toLocaleString()} audits used. Resets {utcDate(billing.data.usage.periodEnd)}.</p>
-      </section>
+      </section> : <p role="status" className="text-sm text-ink-muted">Audit allowance is unavailable until renewal payment is verified.</p>}
       {billing.data.pendingChange ? <p role="status" className="border-l-2 border-ink px-4 text-sm text-ink">
         {billing.data.pendingChange.status === "pending_cycle"
           ? billing.data.pendingChange.kind === "cancellation"
@@ -149,7 +158,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
             const label = billing.data.plan === "free" ? `Start ${plan.name}` : isUpgrade ? `Upgrade to ${plan.name}` : `Schedule ${plan.name} at renewal`;
             return <div key={plan.key} className="flex flex-wrap items-center justify-between gap-4 py-4">
               <div><h3 className="font-semibold text-ink">{plan.name}</h3><p className="text-sm text-ink-muted">${plan.monthlyUsd} per month · {plan.auditLimit?.toLocaleString()} audits</p></div>
-              {isCurrent ? <span className="text-sm text-ink-muted">Current plan</span> : <Button type="button" variant="secondary" disabled={!billing.data.testModeEnabled || change.isPending || Boolean(billing.data.pendingChange)} onClick={() => change.mutate({ plan: plan.key, organizationId, fromPlan: billing.data.plan })}>{label}</Button>}
+              {isCurrent ? <span className="text-sm text-ink-muted">Current plan</span> : <Button type="button" variant="secondary" disabled={!billing.data.testModeEnabled || change.isPending || Boolean(billing.data.pendingChange) || Boolean(billing.data.renewalPayment)} onClick={() => change.mutate({ plan: plan.key, organizationId, fromPlan: billing.data.plan })}>{label}</Button>}
             </div>;
           })}
         </div>
