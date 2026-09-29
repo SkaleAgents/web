@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
+import { OrganizationSettingsManager } from "@/components/organization-settings-manager";
 
 type Organization = { id: string; name: string; role: "owner" | "member" | "viewer" };
 
@@ -25,11 +26,11 @@ function useOrganization(workspaceId: string) {
   return { account, organization };
 }
 
-function OrganizationGate({ workspaceId, children }: { workspaceId: string; children: (organization: Organization) => React.ReactNode }) {
+function OrganizationGate({ workspaceId, children }: { workspaceId: string; children: (organization: Organization, accountId: string) => React.ReactNode }) {
   const { account, organization } = useOrganization(workspaceId);
   if (account.isPending || organization.isPending) return <main role="status">Checking organization access…</main>;
-  if (account.isError || organization.isError || !organization.data) return <main role="alert">Organization unavailable.</main>;
-  return children(organization.data);
+  if (account.isError || !account.data || organization.isError || !organization.data) return <main role="alert">Organization unavailable.</main>;
+  return children(organization.data, account.data.id);
 }
 
 export function OrganizationOverview({ workspaceId }: { workspaceId: string }) {
@@ -57,16 +58,12 @@ export function OrganizationOverview({ workspaceId }: { workspaceId: string }) {
 }
 
 export function OrganizationSettings({ workspaceId }: { workspaceId: string }) {
-  return <OrganizationGate workspaceId={workspaceId}>{organization => <main className="space-y-7">
+  return <OrganizationGate workspaceId={workspaceId}>{(organization, accountId) => <main className="space-y-7">
     <div className="workspace-intro">
       <p className="workspace-kicker">Organization / Settings</p>
       <h1 className="workspace-heading">Organization settings</h1>
     </div>
-    <section className="rounded-lg border border-line bg-canvas-elevated p-5" aria-label="Organization details">
-      <h2 className="font-semibold">{organization.name}</h2>
-      <p className="mt-1 text-sm text-ink-muted">Your role: {organization.role}</p>
-      <p className="mt-3 break-all text-xs text-ink-muted">Organization ID: {organization.id}</p>
-    </section>
+    <OrganizationSettingsManager key={`${accountId}:${workspaceId}`} organization={organization} accountId={accountId} />
     {organization.role === "owner" && <Link href={`/org/${workspaceId}/settings/retention`} className="inline-flex text-sm font-semibold text-accent underline underline-offset-4">
       Audit retention notice
     </Link>}
