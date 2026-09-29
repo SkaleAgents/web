@@ -14,7 +14,7 @@ const plans = { data: [
   { key: "max", name: "Max", monthlyUsd: 499, auditLimit: 2000, checkoutMode: "self_service" },
 ] };
 
-function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean, paymentUrl: string | null = null, checkoutReturnOrganizationId: string | null = null, pendingCyclePlan: string | null = null) {
+function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean, paymentUrl: string | null = null, checkoutReturnOrganizationId: string | null = null, pendingCyclePlan: string | null = null, renewalPayment: { status: "grace" | "access_paused"; graceEndsAt: string; paymentUrl: string | null } | null = null) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
   vi.mocked(apiFetch).mockImplementation(async (path, init) => {
@@ -24,6 +24,7 @@ function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean,
       plan, usage: { used: plan === "free" ? 1 : 7, limit: plan === "free" ? 2 : plan === "starter" ? 25 : 200, remaining: plan === "free" ? 1 : plan === "starter" ? 18 : 193, periodEnd: "2026-10-01T00:00:00Z" },
       pendingChange: paymentUrl ? { id: "change-1", toPlan: "pro", status: "pending_payment", effectiveAt: null, paymentUrl }
         : pendingCyclePlan ? { id: "change-2", kind: pendingCyclePlan === "free" ? "cancellation" : "downgrade", toPlan: pendingCyclePlan, status: "pending_cycle", effectiveAt: "2026-10-01T00:00:00Z", paymentUrl: null } : null, testModeEnabled, cancellationEnabled: true,
+      renewalPayment,
     } as never;
     if (path === "/api/workspaces/org-1/billing/change-plan" && init?.method === "POST") return { id: "change-1", status: "effective" } as never;
     if (path === "/api/workspaces/org-1/billing/cancel" && init?.method === "POST") return { id: "change-3", status: "pending_cycle" } as never;
@@ -36,6 +37,32 @@ function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean,
 it("shows payment verification as pending until the organization has a paid plan", async () => {
   showBilling("free", true, null, "org-1");
   expect(await screen.findByRole("status", { name: "Checkout status" })).toHaveTextContent("Checking your payment");
+});
+
+it("explains renewal grace and offers a verified invoice when new checkout is closed", async () => {
+  showBilling("pro", false, null, null, null, { status: "grace", graceEndsAt: "2026-10-08T00:00:00Z", paymentUrl: "https://invoice.stripe.com/i/renewal_fixture" });
+  expect(await screen.findByText(/Renewal payment is overdue/)).toBeVisible();
+  expect(screen.getByText(/10\/8\/2026 UTC/)).toBeVisible();
+  expect(screen.getByRole("link", { name: "Pay renewal invoice" })).toHaveAttribute("href", "https://invoice.stripe.com/i/renewal_fixture");
+});
+
+it("does not offer an untrusted renewal invoice", async () => {
+  showBilling("pro", true, null, null, null, { status: "grace", graceEndsAt: "2026-10-08T00:00:00Z", paymentUrl: "https://evil.example/i/renewal_fixture" });
+  await screen.findByText(/Renewal payment is overdue/);
+  expect(screen.queryByRole("link", { name: "Pay renewal invoice" })).not.toBeInTheDocument();
+});
+
+it("shows payment recovery without claiming an audit allowance after grace", async () => {
+  const { client } = showBilling("pro", false);
+  await screen.findByText("193 audits remaining");
+  client.setQueryData(["organization-billing", "org-1"], {
+    plan: "pro", usage: null, pendingChange: null, testModeEnabled: false, cancellationEnabled: true,
+    renewalPayment: { status: "access_paused", graceEndsAt: "2026-10-08T00:00:00Z", paymentUrl: "https://invoice.stripe.com/i/renewal_fixture" },
+  });
+  expect(await screen.findByText("Paid audit access is paused.")).toBeVisible();
+  expect(screen.queryByText("193 audits remaining")).not.toBeInTheDocument();
+  expect(screen.getByText("Audit allowance is unavailable until renewal payment is verified.")).toBeVisible();
+  expect(screen.getByRole("link", { name: "Pay renewal invoice" })).toBeVisible();
 });
 
 it("confirms the active paid plan after checkout reconciliation", async () => {
