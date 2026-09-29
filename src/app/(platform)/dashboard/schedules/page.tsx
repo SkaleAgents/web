@@ -162,8 +162,8 @@ export default function SchedulesPage() {
                 <p className="font-semibold text-ink">{schedule.name}</p>
                 <p className="mt-1 font-mono text-xs text-ink-muted">{schedule.cronExpression} · {schedule.timezone} · {schedule.enabled ? "enabled" : "paused"}</p>
                 <p className="mt-1 text-xs text-ink-muted">Next run: {schedule.nextRunAt ? new Date(schedule.nextRunAt).toLocaleString() : "paused"}{schedule.webhookConfigured ? " · webhook enabled" : ""}</p>
-                {schedule.scope.kind === "repo_ref" && typeof schedule.scope.ref === "string" && <p className="mt-1 break-all font-mono text-xs text-ink-muted">{schedule.scope.ref}</p>}
-                <SourceMetadata sourceRevision={schedule.sourceRevision} sourceObservedAt={schedule.sourceObservedAt} inputAvailable={schedule.retention?.inputAvailable} verified={schedule.scope.kind === "repo_ref"} />
+                {schedule.scope?.kind === "repo_ref" && typeof schedule.scope.ref === "string" && <p className="mt-1 break-all font-mono text-xs text-ink-muted">{schedule.scope.ref}</p>}
+                <SourceMetadata sourceRevision={schedule.sourceRevision} sourceObservedAt={schedule.sourceObservedAt} inputAvailable={schedule.retention?.inputAvailable} verified={schedule.scope?.kind === "repo_ref"} />
                 {schedule.lastError && <p className="mt-1 text-xs text-danger">{schedule.lastError}</p>}
               </div>
               {user.data && <ScheduleRetentionControls schedule={schedule} accountId={user.data.id} onDeletion={(id, status) => setDeletions(current => ({ ...current, [id]: status }))} />}
