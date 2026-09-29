@@ -60,7 +60,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
           <div>
             <h3 className="text-sm font-semibold text-ink">Source and coverage</h3>
             <p className="mt-1 text-sm text-ink-muted">Specialists: {job.data.specialists.join(", ") || "none"}</p>
-            <SourceMetadata sourceRevision={job.data.sourceRevision} sourceObservedAt={job.data.sourceObservedAt} inputAvailable={job.data.retention?.inputAvailable} />
+            <SourceMetadata sourceRevision={job.data.sourceRevision} sourceObservedAt={job.data.sourceObservedAt} inputAvailable={job.data.retention?.inputAvailable} verified={job.data.sourceMetadataProvenance === "github_fetched"} />
           </div>
         </section>
         <section className="rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Audit data and report">
