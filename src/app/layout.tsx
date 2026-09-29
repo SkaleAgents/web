@@ -5,7 +5,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 import { AppShell } from "@/components/app-shell";
-import { FooterBadges } from "@/components/footer-badges";
+import { DeferredFooterBadges } from "@/components/deferred-footer-badges";
+import { FooterBadgesFallback } from "@/components/footer-badges-fallback";
 import { InvitationPublisherScript, PreferredSourceControl } from "@/components/preferred-source-control";
 import { captureWorkspaceInvitationScript } from "@/lib/workspace-invitations";
 import { captureEmailLinkScript } from "@/lib/email-auth";
@@ -96,7 +97,7 @@ export default function RootLayout({
                     <span className="flex flex-wrap gap-4"><Link href="/terms">Terms of Service</Link><Link href="/privacy">Privacy Policy</Link></span>
                   </div>
                   <PreferredSourceControl />
-                  <FooterBadges />
+                  <DeferredFooterBadges fallback={<FooterBadgesFallback />} />
                 </div>
               </footer>
             }>

@@ -9,6 +9,7 @@ test.beforeEach(async ({ page }) => {
 test("badges move automatically, pause on hover, and allow touch scrolling", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
+  await page.locator(".deferred-footer-badges").scrollIntoViewIfNeeded();
   const slider = page.getByRole("region", { name: "Directory badges", exact: true });
   const track = slider.locator(".footer-badge-track");
   const position = () => track.evaluate((element) => element.getBoundingClientRect().x);
@@ -86,6 +87,7 @@ test("starting point choices activate when the section approaches", async ({ pag
 test("all directory badges remain reachable by keyboard on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto("/");
+  await page.locator(".deferred-footer-badges").scrollIntoViewIfNeeded();
   const slider = page.getByRole("region", { name: "Directory badges", exact: true });
   await slider.focus();
   const links = slider.getByRole("link");
@@ -102,6 +104,7 @@ test("all directory badges remain reachable by keyboard on mobile", async ({ pag
 test("reduced motion leaves a static, manually scrollable badge strip", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  await page.locator(".deferred-footer-badges").scrollIntoViewIfNeeded();
   const explorer = page.locator(".example-explorer");
   await explorer.scrollIntoViewIfNeeded();
   await expect(explorer.locator(".example-countdown")).toBeAttached();
