@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { advisoryAgreementsEnabled, advisoryDeliveryHandoffsEnabled, portfolioBookingHandoffEnabled, ApiError, apiFetch, type AdvisoryBooking, type PortfolioBookingReferral } from "@/lib/api";
+import { advisoryAgreementsEnabled, advisoryDeliveryHandoffsEnabled, portfolioBookingHandoffEnabled, nativeConsultancyEnabled, ApiError, apiFetch, type AdvisoryBooking, type PortfolioBookingReferral } from "@/lib/api";
 import { bookingStatusLabels } from "@/lib/advisory-bookings";
 import { useCustomerUser, isSessionError } from "@/components/customer-booking-access";
 import { Button, LinkButton } from "@/components/ui";
@@ -121,7 +121,7 @@ export function CustomerBookingList() {
         <p className="mt-2 max-w-2xl text-sm text-ink-muted">Track request status, the preferred window you submitted, and any recorded fee.</p>
       </div>
       <ConsultancyBookingLink />
-      {portfolioBookingHandoffEnabled() && <PortfolioBookingSection accountId={user.id} />}
+      {portfolioBookingHandoffEnabled() && !nativeConsultancyEnabled() && <PortfolioBookingSection accountId={user.id} />}
       <div className="flex justify-end">
         <Button variant="secondary" onClick={() => void bookings.refetch()} disabled={bookings.isFetching}>
           {bookings.isFetching ? "Refreshing…" : "Refresh requests"}

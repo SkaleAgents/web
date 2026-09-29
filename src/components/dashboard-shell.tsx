@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { currentUserOptions } from "@/lib/session";
-import { advisoryAgreementsEnabled } from "@/lib/api";
+import { advisoryAgreementsEnabled, nativeConsultancyEnabled } from "@/lib/api";
 import { isStaff } from "@/lib/advisory-bookings";
 import { Button } from "@/components/ui";
 import { BrandLogo } from "@/components/brand";
@@ -71,8 +71,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   if (scope.kind === "personal" && advisoryAgreementsEnabled()) sections.push({ label: "Advisory", items: [
     { href: `${root}/advisory-bookings`, label: "Advisory requests" },
   ] });
+  if (scope.kind === "personal" && nativeConsultancyEnabled()) sections.push({ label: "Consultancy", items: [
+    { href: `${root}/consultancy`, label: "My bookings" },
+  ] });
   if (user.data && isStaff(user.data)) sections.push({ label: "Staff", items: [
     { href: "/staff/advisory-bookings", label: "Staff bookings" },
+    ...(nativeConsultancyEnabled() ? [{ href: "/staff/consultancy", label: "Consultancy requests" }] : []),
   ] });
 
   const active = (href: string) => pathname === href || (href !== root && pathname.startsWith(`${href}/`)) ||
