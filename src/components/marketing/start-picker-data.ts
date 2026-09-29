@@ -17,7 +17,7 @@ export const goals = [
     options: [
       { label: "Inside my editor", title: "Connect your editor with MCP.", description: "Add the client configuration and ask your assistant to call review_architecture with the relevant source. The first call opens your browser to sign in and approve MCP access.", note: "OAuth handles your connection credentials automatically.", href: "/mcp-config", cta: "See MCP setup" },
       { label: "In a shared web review", title: "Start an audit, then open Watchtower.", description: "Paste infrastructure text, select specialists, and inspect the findings in a shared review session.", note: "Sign in to create and manage audit jobs in your dashboard.", href: "/dashboard/jobs", cta: "Open audit jobs" },
-      { label: "On a recurring schedule", title: "Give the review a schedule.", description: "Choose the supplied infrastructure scope, a cron expression, and a timezone. Add a webhook if you want completion or failure alerts.", note: "Sign-in is needed. Schedules rerun the text you supply, not a live repository.", href: "/dashboard/schedules", cta: "Explore scheduled audits" },
+      { label: "On a recurring schedule", title: "Give the review a schedule.", description: "Choose saved infrastructure text or a file in a public GitHub repository. Set the time and add a webhook if you want audit alerts.", note: "Sign-in is needed. GitHub files are checked for a new commit on each due run; private repositories aren't connected yet.", href: "/dashboard/schedules", cta: "Explore scheduled audits" },
     ],
   },
   {

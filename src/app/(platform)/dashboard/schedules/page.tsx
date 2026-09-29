@@ -13,6 +13,7 @@ import { SourceMetadata } from "@/components/source-metadata";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
 import { buildSourceMetadata } from "@/lib/source-metadata";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
+import { buildGithubScheduleScope, type GithubScheduleFormat } from "@/lib/github-schedule-source";
 
 const timezones = ["UTC", "America/Los_Angeles", "America/New_York", "Europe/London", "Europe/Berlin", "Asia/Dhaka", "Asia/Kolkata", "Asia/Singapore", "Asia/Tokyo", "Australia/Sydney"];
 const cadencePresets = [
@@ -32,6 +33,11 @@ export default function SchedulesPage() {
   const [cronExpression, setCronExpression] = useState("0 * * * *");
   const [timezone, setTimezone] = useState("UTC");
   const [content, setContent] = useState("");
+  const [sourceMode, setSourceMode] = useState<"text" | "github">("text");
+  const [repository, setRepository] = useState("");
+  const [sourcePath, setSourcePath] = useState("");
+  const [branch, setBranch] = useState("main");
+  const [sourceFormat, setSourceFormat] = useState<GithubScheduleFormat>("auto");
   const [sourceRevision, setSourceRevision] = useState("");
   const [sourceObservedAt, setSourceObservedAt] = useState("");
   const [webhookUrl, setWebhookUrl] = useState("");
@@ -41,7 +47,7 @@ export default function SchedulesPage() {
     queryKey: schedulesKey,
     enabled: Boolean(user.data),
     queryFn: async ({ signal }) => (await apiFetch<{ schedules: SwarmSchedule[] }>("/api/schedules", { signal })).schedules,
-    refetchInterval: query => query.state.data?.some(schedule => ["pending", "failed"].includes(schedule.retention?.inputPurgeStatus ?? "")) ? 5000 : false,
+    refetchInterval: query => query.state.data?.some(schedule => ["pending", "failed"].includes(schedule.retention?.inputPurgeStatus ?? "")) ? 5000 : query.state.data?.some(schedule => schedule.enabled) ? 60000 : false,
   });
 
   const create = useMutation({
@@ -53,14 +59,18 @@ export default function SchedulesPage() {
           name,
           cronExpression,
           timezone,
-          scope: { kind: "iac_text", format: "auto", content },
-          ...buildSourceMetadata(sourceRevision, sourceObservedAt),
+          scope: sourceMode === "github"
+            ? buildGithubScheduleScope(repository, sourcePath, branch, sourceFormat)
+            : { kind: "iac_text", format: "auto", content },
+          ...(sourceMode === "text" ? buildSourceMetadata(sourceRevision, sourceObservedAt) : {}),
           webhookUrl: webhookUrl || null,
         }),
       });
     },
     onSuccess: () => {
       setContent("");
+      setRepository("");
+      setSourcePath("");
       setSourceRevision("");
       setSourceObservedAt("");
       void queryClient.invalidateQueries({ queryKey: schedulesKey });
@@ -74,7 +84,7 @@ export default function SchedulesPage() {
         <p className="workspace-kicker">Review / Make it repeatable</p>
         <h1 className="workspace-heading">Scheduled audits</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-          Rerun a saved infrastructure scope on your timetable. Choose a cadence and timezone,
+          Review saved infrastructure text or the current file from a public GitHub repository. Choose a cadence and timezone,
           then manage email preferences in <Link href="/account/settings" className="text-accent underline">Settings</Link>.
           Webhooks are optional.
         </p>
@@ -107,20 +117,26 @@ export default function SchedulesPage() {
           <p className="text-sm font-semibold">{cadencePresets.find((preset) => preset.cron === cronExpression)?.description ?? "Custom cron schedule"} · {timezone}</p>
           <p className="mt-1 text-xs text-ink-muted">{cadencePresets.some((preset) => preset.cron === cronExpression) ? "Scheduled times use the timezone you selected." : "Five fields: minute, hour, day of month, month, day of week. The server validates custom expressions when you save."} Dispatch can run up to five minutes after the target time.</p>
         </div>
-        <label className="mt-4 block">
-          <FieldLabel>IaC content</FieldLabel>
-          <TextArea value={content} onChange={(event) => setContent(event.target.value)} className="mt-1 min-h-32" placeholder={'resource "aws_security_group" "web" {}'} aria-label="Scheduled IaC content" />
-          <span className="mt-2 block text-xs text-ink-muted">Each run reviews this saved text. It does not pull fresh configuration from your repository or cloud account.</span>
-        </label>
-        <SourceMetadataFields
-          idPrefix="schedule-source"
-          revision={sourceRevision}
-          observedAt={sourceObservedAt}
-          onRevisionChange={setSourceRevision}
-          onObservedAtChange={setSourceObservedAt}
-        />
+        <fieldset className="mt-4"><legend className="text-sm font-medium">Source</legend><div className="mt-2 flex gap-2">
+          <Button type="button" variant={sourceMode === "text" ? "primary" : "secondary"} aria-pressed={sourceMode === "text"} onClick={() => setSourceMode("text")}>Saved text</Button>
+          <Button type="button" variant={sourceMode === "github" ? "primary" : "secondary"} aria-pressed={sourceMode === "github"} onClick={() => setSourceMode("github")}>Public GitHub file</Button>
+        </div></fieldset>
+        {sourceMode === "text" ? <>
+          <label className="mt-4 block">
+            <FieldLabel>IaC content</FieldLabel>
+            <TextArea value={content} onChange={(event) => setContent(event.target.value)} className="mt-1 min-h-32" placeholder={'resource "aws_security_group" "web" {}'} aria-label="Scheduled IaC content" />
+            <span className="mt-2 block text-xs text-ink-muted">Each run reviews this saved text.</span>
+          </label>
+          <SourceMetadataFields idPrefix="schedule-source" revision={sourceRevision} observedAt={sourceObservedAt} onRevisionChange={setSourceRevision} onObservedAtChange={setSourceObservedAt} />
+        </> : <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label><FieldLabel>Public repository</FieldLabel><TextInput className="mt-1" value={repository} onChange={event => setRepository(event.target.value)} placeholder="owner/repository" /></label>
+          <label><FieldLabel>File path</FieldLabel><TextInput className="mt-1" value={sourcePath} onChange={event => setSourcePath(event.target.value)} placeholder="k8s/deployment.yaml" /></label>
+          <label><FieldLabel>Branch</FieldLabel><TextInput className="mt-1" value={branch} onChange={event => setBranch(event.target.value)} placeholder="main" /></label>
+          <label><FieldLabel>Format</FieldLabel><Select className="mt-1" value={sourceFormat} onChange={event => setSourceFormat(event.target.value as GithubScheduleFormat)}><option value="auto">Auto</option><option value="kubernetes">Kubernetes</option><option value="terraform">Terraform</option><option value="cloudformation">CloudFormation</option></Select></label>
+          <p className="text-xs text-ink-muted sm:col-span-2">Each due run fetches this file at the current branch commit. A failed fetch skips the audit and shows an error. Unchanged commits do not create another audit. Public repositories only; maximum file size 256 KiB.</p>
+        </div>}
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <Button type="button" disabled={!user.data || !name.trim() || !cronExpression.trim() || !content.trim() || create.isPending} onClick={() => create.mutate()}>
+          <Button type="button" disabled={!user.data || !name.trim() || !cronExpression.trim() || (sourceMode === "text" ? !content.trim() : !repository.trim() || !sourcePath.trim() || !branch.trim()) || create.isPending} onClick={() => create.mutate()}>
             {create.isPending ? "Saving…" : "Create schedule"}
           </Button>
           {create.isError && <p className="text-sm text-danger">{create.error.message}</p>}
@@ -146,7 +162,8 @@ export default function SchedulesPage() {
                 <p className="font-semibold text-ink">{schedule.name}</p>
                 <p className="mt-1 font-mono text-xs text-ink-muted">{schedule.cronExpression} · {schedule.timezone} · {schedule.enabled ? "enabled" : "paused"}</p>
                 <p className="mt-1 text-xs text-ink-muted">Next run: {schedule.nextRunAt ? new Date(schedule.nextRunAt).toLocaleString() : "paused"}{schedule.webhookConfigured ? " · webhook enabled" : ""}</p>
-                <SourceMetadata sourceRevision={schedule.sourceRevision} sourceObservedAt={schedule.sourceObservedAt} inputAvailable={schedule.retention?.inputAvailable} />
+                {schedule.scope.kind === "repo_ref" && typeof schedule.scope.ref === "string" && <p className="mt-1 break-all font-mono text-xs text-ink-muted">{schedule.scope.ref}</p>}
+                <SourceMetadata sourceRevision={schedule.sourceRevision} sourceObservedAt={schedule.sourceObservedAt} inputAvailable={schedule.retention?.inputAvailable} verified={schedule.scope.kind === "repo_ref"} />
                 {schedule.lastError && <p className="mt-1 text-xs text-danger">{schedule.lastError}</p>}
               </div>
               {user.data && <ScheduleRetentionControls schedule={schedule} accountId={user.data.id} onDeletion={(id, status) => setDeletions(current => ({ ...current, [id]: status }))} />}
