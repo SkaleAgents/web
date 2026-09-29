@@ -13,7 +13,7 @@ type Billing = {
   plan: string;
   usage: { used: number; limit: number; remaining: number; periodEnd: string } | null;
   pendingChange: { id: string; kind: string; toPlan: string; status: string; effectiveAt: string | null; paymentUrl: string | null } | null;
-  renewalPayment: { status: "grace" | "access_paused"; graceEndsAt: string; paymentUrl: string | null } | null;
+  renewalPayment: { status: "grace" | "access_paused" | "finalizing" | "finalization_paused"; graceEndsAt: string | null; finalizationEndsAt: string | null; paymentUrl: string | null } | null;
   testModeEnabled: boolean;
   cancellationEnabled: boolean;
 };
@@ -120,12 +120,20 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
     </p> : null}
     {billing.data && currentPlan ? <>
       {billing.data.renewalPayment ? <section role="status" aria-label="Renewal payment" className="border-l-2 border-danger bg-canvas-elevated px-4 py-3 text-sm text-ink">
-        <p className="font-semibold">{billing.data.renewalPayment.status === "grace" ? "Renewal payment is overdue." : "Paid audit access is paused."}</p>
-        <p className="mt-1">{billing.data.renewalPayment.status === "grace"
-          ? `Your paid audit limits remain available through ${utcDate(billing.data.renewalPayment.graceEndsAt)} while Stripe retries. Pay the renewal invoice to avoid an interruption.`
-          : `The seven-day payment grace period ended ${utcDate(billing.data.renewalPayment.graceEndsAt)}. Pay the renewal invoice to request restored access after verification.`}</p>
+        <p className="font-semibold">{{
+          grace: "Renewal payment is overdue.", access_paused: "Paid audit access is paused.",
+          finalizing: "Stripe is finalizing your renewal invoice.",
+          finalization_paused: "Waiting for Stripe to finalize your renewal invoice.",
+        }[billing.data.renewalPayment.status]}</p>
+        <p className="mt-1">{billing.data.renewalPayment.status === "finalizing"
+          ? `Your remaining temporary audits are available through ${utcDate(billing.data.renewalPayment.finalizationEndsAt!)}. They will count toward the new cycle after Stripe verifies the invoice.`
+          : billing.data.renewalPayment.status === "finalization_paused"
+            ? `The temporary audit window ended ${utcDate(billing.data.renewalPayment.finalizationEndsAt!)}. New audits are paused until Stripe verifies the invoice.`
+            : billing.data.renewalPayment.status === "grace"
+              ? `Your paid audit limits remain available through ${utcDate(billing.data.renewalPayment.graceEndsAt!)} while Stripe retries. Pay the renewal invoice to avoid an interruption.`
+              : `The seven-day payment grace period ended ${utcDate(billing.data.renewalPayment.graceEndsAt!)}. Pay the renewal invoice to request restored access after verification.`}</p>
         <p className="mt-1 text-ink-muted">Stripe test mode is active. No real payment will be collected.</p>
-        {billing.data.renewalPayment.paymentUrl && approvedInvoiceUrl(billing.data.renewalPayment.paymentUrl) ? <a className="mt-3 inline-flex rounded-md bg-ink px-4 py-2 font-semibold text-canvas hover:opacity-90" href={billing.data.renewalPayment.paymentUrl}>Pay renewal invoice</a> : null}
+        {(billing.data.renewalPayment.status === "grace" || billing.data.renewalPayment.status === "access_paused") && billing.data.renewalPayment.paymentUrl && approvedInvoiceUrl(billing.data.renewalPayment.paymentUrl) ? <a className="mt-3 inline-flex rounded-md bg-ink px-4 py-2 font-semibold text-canvas hover:opacity-90" href={billing.data.renewalPayment.paymentUrl}>Pay renewal invoice</a> : null}
       </section> : null}
       {billing.data.usage ? <section className="border-y border-line py-6" aria-label="Current plan">
         <div className="flex flex-wrap items-end justify-between gap-4">
@@ -133,8 +141,8 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
           <p className="text-sm text-ink-muted">{billing.data.usage.remaining.toLocaleString()} audits remaining</p>
         </div>
         <progress className="mt-5 w-full" max={billing.data.usage.limit} value={billing.data.usage.used} aria-label="Audits used this period" />
-        <p className="mt-2 text-sm text-ink-muted">{billing.data.usage.used.toLocaleString()} of {billing.data.usage.limit.toLocaleString()} audits used. Resets {utcDate(billing.data.usage.periodEnd)}.</p>
-      </section> : <p role="status" className="text-sm text-ink-muted">Audit allowance is unavailable until renewal payment is verified.</p>}
+        <p className="mt-2 text-sm text-ink-muted">{billing.data.usage.used.toLocaleString()} of {billing.data.usage.limit.toLocaleString()} audits used. {billing.data.renewalPayment?.status === "finalizing" ? `Temporary access ends ${utcDate(billing.data.usage.periodEnd)}.` : `Resets ${utcDate(billing.data.usage.periodEnd)}.`}</p>
+      </section> : <p role="status" className="text-sm text-ink-muted">{billing.data.renewalPayment?.status === "finalization_paused" ? "Audit allowance is paused until Stripe verifies the renewal invoice." : "Audit allowance is unavailable until renewal payment is verified."}</p>}
       {billing.data.pendingChange ? <p role="status" className="border-l-2 border-ink px-4 text-sm text-ink">
         {billing.data.pendingChange.status === "pending_cycle"
           ? billing.data.pendingChange.kind === "cancellation"
