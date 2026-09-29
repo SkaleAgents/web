@@ -28,6 +28,10 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500"],
 });
 
+const apiOrigin = process.env.NEXT_PUBLIC_API_URL
+  ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
+  : undefined;
+
 export const metadata: Metadata = {
   title: "SkaleAgents",
   description: "The control plane for AI DevOps agents, audits, and collaborative remediation.",
@@ -63,6 +67,7 @@ export default function RootLayout({
       className={`${syne.variable} ${sourceSans.variable} ${plexMono.variable} h-full antialiased`}
     >
       <head>
+        {apiOrigin ? <link rel="preconnect" href={apiOrigin} crossOrigin="use-credentials" /> : null}
         <script id="capture-email-link" dangerouslySetInnerHTML={{ __html: captureEmailLinkScript }} />
         <script
           id="capture-workspace-invitation"
