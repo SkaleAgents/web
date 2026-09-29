@@ -92,11 +92,11 @@ test("audit history opens one job at a time for review and management", async ({
   await expect(page.getByRole("button", { name: "Export report" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await page.getByRole("link", { name: "View audit" }).click();
-  await expect(page).toHaveURL(new RegExp(`/me/jobs/${id}$`));
+  await expect(page).toHaveURL(new RegExp(`/org/[^/]+/jobs/${id}$`));
   await expect(page.getByRole("heading", { name: "Audit details" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Open Watchtower" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Export report" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Back to audit jobs" })).toHaveAttribute("href", "/me/jobs");
+  await expect(page.getByRole("link", { name: "Back to audit jobs" })).toHaveAttribute("href", /\/org\/[^/]+\/jobs$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 

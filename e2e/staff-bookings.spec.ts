@@ -143,13 +143,13 @@ test("staff revocation during editing hides cached details and controls", async 
 
 test("staff list handles failures and empty results; missing details are explicit", async ({ page }) => {
   await account(page, staff);
-  let attempts = 0;
+  let failing = true;
   await page.route("**/api/staff/advisory-bookings", (route) => {
-    attempts++;
-    return route.fulfill(attempts === 1 ? { status: 503, json: { error: "Booking service unavailable" } } : { json: { bookings: [] } });
+    return route.fulfill(failing ? { status: 503, json: { error: "Booking service unavailable" } } : { json: { bookings: [] } });
   });
   await page.goto(root);
   await expect(page.getByRole("main").getByRole("alert")).toContainText("Booking service unavailable");
+  failing = false;
   await page.getByRole("button", { name: "Refresh bookings" }).click();
   await expect(page.getByText("No advisory requests yet.")).toBeVisible();
   await page.route("**/api/staff/advisory-bookings/**", (route) => route.fulfill({ status: 404, json: { error: "Not found" } }));

@@ -1,4 +1,5 @@
 import { test, expect } from "./fixtures";
+import { installPersonalOrganizationRoutes } from "./personal-organization-fixture";
 
 test.describe("Phase 1 page smokes", () => {
   test.beforeEach(async ({ page }) => {
@@ -150,6 +151,8 @@ test.describe("Phase 1 page smokes", () => {
       await setup(contextTwo, users[1]);
       const pageOne = await contextOne.newPage();
       const pageTwo = await contextTwo.newPage();
+      await installPersonalOrganizationRoutes(pageOne);
+      await installPersonalOrganizationRoutes(pageTwo);
       await pageOne.goto("/jobs");
       await pageOne.getByRole("link", { name: "View audit" }).click();
       await pageOne.getByRole("button", { name: "Open Watchtower" }).click();
