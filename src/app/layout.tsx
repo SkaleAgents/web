@@ -5,7 +5,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { AppShell } from "@/components/app-shell";
 import { FooterBadges } from "@/components/footer-badges";
-import { PreferredSourceControl } from "@/components/preferred-source-control";
+import { InvitationPublisherScript, PreferredSourceControl } from "@/components/preferred-source-control";
 import { captureWorkspaceInvitationScript } from "@/lib/workspace-invitations";
 import { captureEmailLinkScript } from "@/lib/email-auth";
 
@@ -81,6 +81,7 @@ export default function RootLayout({
         ) : null}
         <div className="flex min-h-0 flex-1 flex-col">
           <Providers>
+            <InvitationPublisherScript />
             <AppShell publicFooter={
               <footer className="border-t border-line bg-canvas-elevated">
                 <div className="mx-auto w-full max-w-5xl px-6 py-5">

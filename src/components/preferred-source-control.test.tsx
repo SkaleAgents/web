@@ -1,7 +1,7 @@
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { usePathname } from "next/navigation";
-import { PreferredSourceControl } from "./preferred-source-control";
+import { InvitationPublisherScript, PreferredSourceControl } from "./preferred-source-control";
 
 vi.mock("next/navigation", () => ({ usePathname: vi.fn() }));
 
@@ -67,9 +67,14 @@ describe("PreferredSourceControl", () => {
   it("loads the publisher script on the invitation route after the token-cleanup script runs", () => {
     vi.mocked(usePathname).mockReturnValue("/workspace-invitations/accept");
 
-    render(<PreferredSourceControl />);
+    render(<InvitationPublisherScript />);
 
     expect(document.querySelector(`script[src="${publisherScript}"]`)).not.toBeNull();
-    expect(TestIntersectionObserver.instance).toBeUndefined();
+  });
+
+  it("does not load the route-specific script elsewhere", () => {
+    render(<InvitationPublisherScript />);
+
+    expect(document.querySelector(`script[src="${publisherScript}"]`)).toBeNull();
   });
 });

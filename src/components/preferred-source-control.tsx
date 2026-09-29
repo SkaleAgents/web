@@ -16,14 +16,8 @@ function loadPublisherScript() {
 
 export function PreferredSourceControl() {
   const control = useRef<HTMLDivElement>(null);
-  const pathname = usePathname();
 
   useEffect(() => {
-    if (pathname === "/workspace-invitations/accept") {
-      loadPublisherScript();
-      return;
-    }
-
     const element = control.current;
     if (!element) return;
 
@@ -40,7 +34,7 @@ export function PreferredSourceControl() {
 
     observer.observe(element);
     return () => observer.disconnect();
-  }, [pathname]);
+  }, []);
 
   return (
     <div
@@ -49,4 +43,14 @@ export function PreferredSourceControl() {
       google-add-preferred-source-btn=""
     />
   );
+}
+
+export function InvitationPublisherScript() {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (pathname === "/workspace-invitations/accept") loadPublisherScript();
+  }, [pathname]);
+
+  return null;
 }
