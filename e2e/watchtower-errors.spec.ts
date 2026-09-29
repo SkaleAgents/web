@@ -21,7 +21,7 @@ for (const status of [403, 404, 503]) {
     await expect(page.getByRole("main").getByRole("alert")).toHaveText(`Session request failed (${status})`);
     await expect(page.getByText("Loading Watchtower…", { exact: true })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Try again" })).toBeEnabled();
-    await expect(page.getByRole("link", { name: "Back to audits" })).toHaveAttribute("href", "/me/jobs");
+    await expect(page.getByRole("link", { name: "Back to audits" })).toHaveAttribute("href", "/org/0198f0b0-0000-7000-8000-000000000001/jobs");
     expect(jobRequests).toBe(0);
   });
 }
