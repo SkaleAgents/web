@@ -54,6 +54,10 @@ body {
   font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+.homepage-lcp-copy {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
 .homepage-shell .brand-wordmark {
   font-family: ui-sans-serif, system-ui, sans-serif;
 }
