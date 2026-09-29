@@ -97,7 +97,7 @@ function EmailSettings({ accountId }: { accountId: string }) {
         {update.isPending ? "Saving…" : update.isError ? <span role="alert" className="text-danger">Could not save preferences. {update.error.message}</span> : update.isSuccess ? "Preferences saved." : "Changes save automatically."}
       </div>
       <p className="mt-4 text-sm text-ink-muted">Emails include a status update and a sign-in link. Source code and review details stay in your account.</p>
-      <div className="mt-4"><LinkButton href="/me/schedules" variant="secondary">Manage optional schedule webhooks</LinkButton></div>
+      <div className="mt-4"><LinkButton href="/dashboard/schedules" variant="secondary">Manage optional schedule webhooks</LinkButton></div>
     </section>
   );
 }

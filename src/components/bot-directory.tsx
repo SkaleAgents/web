@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch, type Bot } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { Button, LinkButton, TextInput } from "@/components/ui";
+import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
 export function BotDirectory({ manage = false }: { manage?: boolean }) {
+  const pathname = usePathname();
+  const personalHref = (section: string) => personalDestinationFromPath(pathname, section);
   const [search, setSearch] = useState("");
   const [specialty, setSpecialty] = useState("all");
   const userQuery = useQuery(currentUserOptions);
@@ -22,7 +26,7 @@ export function BotDirectory({ manage = false }: { manage?: boolean }) {
   });
 
   const bots = botsQuery.data?.filter(bot => manage ? bot.ownerUserId === userQuery.data?.id : bot.visibility === "public" && bot.status === "published");
-  const basePath = manage ? "/me/bots" : "/bots";
+  const basePath = manage ? personalHref("bots") : "/bots";
   const specialties = [...new Set(bots?.map((bot) => bot.specialty) ?? [])].sort();
   const filteredBots = bots?.filter((bot) =>
     (specialty === "all" || bot.specialty === specialty) &&
@@ -42,7 +46,7 @@ export function BotDirectory({ manage = false }: { manage?: boolean }) {
             then take it to Grok, Claude, Codex, or your preferred assistant.
           </p>
         </div>
-        <LinkButton href={manage ? "/me/studio" : "/me/bots"}>{manage ? "Create bot" : "Manage your bots"}</LinkButton>
+        <LinkButton href={manage ? personalHref("studio") : "/dashboard/bots"}>{manage ? "Create bot" : "Manage your bots"}</LinkButton>
       </div>
 
       <section aria-label="Find a bot" className="space-y-4">
@@ -96,7 +100,7 @@ export function BotDirectory({ manage = false }: { manage?: boolean }) {
               </LinkButton>
               {manage && userQuery.data?.id === bot.ownerUserId && (
                 <Link
-                  href={`/me/studio/${bot.id}`}
+                  href={personalHref(`studio/${bot.id}`)}
                   className="text-sm font-semibold text-ink-muted hover:text-ink"
                 >
                   Edit in Studio

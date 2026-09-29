@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +15,7 @@ import {
 import { parsePromptTags } from "@/lib/tags";
 import { Button, LinkButton, TextInput } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
+import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
 const schema = z.object({
   title: z.string().min(1, "Title required"),
@@ -24,6 +26,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function PromptLibrary({ manage = false }: { manage?: boolean }) {
+  const pathname = usePathname();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [tag, setTag] = useState<string | null>(null);
@@ -149,7 +152,7 @@ export function PromptLibrary({ manage = false }: { manage?: boolean }) {
         </form>
         </details>
       ) : (
-        <LinkButton href="/me/prompts" variant="secondary">Manage your prompts</LinkButton>
+        <LinkButton href={manage ? personalDestinationFromPath(pathname, "prompts") : "/dashboard/prompts"} variant="secondary">Manage your prompts</LinkButton>
       )}
 
       {promptsQuery.isPending && (

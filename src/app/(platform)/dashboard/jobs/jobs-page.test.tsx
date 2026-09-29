@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import JobsPage from "./page";
 import { setSessionUser } from "@/lib/session";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("next/navigation", () => ({ usePathname: () => "/org/00000000-0000-4000-8000-000000000002/jobs", useRouter: () => ({ push: vi.fn() }) }));
 
 afterEach(() => {
   cleanup();
@@ -30,7 +30,7 @@ it("keeps the audit history scannable and opens full controls on a detail page",
   render(<QueryClientProvider client={client}><JobsPage /></QueryClientProvider>);
 
   expect(await screen.findByText("Ingress review")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "View audit" })).toHaveAttribute("href", `/me/jobs/${jobId}`);
+  expect(screen.getByRole("link", { name: "View audit" })).toHaveAttribute("href", `/org/00000000-0000-4000-8000-000000000002/jobs/${jobId}`);
   expect(screen.queryByRole("button", { name: "Export report" })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Delete audit" })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Open Watchtower" })).not.toBeInTheDocument();
