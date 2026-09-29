@@ -5,6 +5,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { AppShell } from "@/components/app-shell";
 import { FooterBadges } from "@/components/footer-badges";
+import { InvitationPublisherScript, PreferredSourceControl } from "@/components/preferred-source-control";
 import { captureWorkspaceInvitationScript } from "@/lib/workspace-invitations";
 import { captureEmailLinkScript } from "@/lib/email-auth";
 
@@ -67,10 +68,6 @@ export default function RootLayout({
           id="capture-workspace-invitation"
           dangerouslySetInnerHTML={{ __html: captureWorkspaceInvitationScript }}
         />
-        <script
-          defer
-          src="https://news.google.com/swg/js/v1/publisher.js"
-        />
       </head>
       <body className="flex min-h-screen flex-col bg-canvas text-ink">
         {showDevelopmentWarning ? (
@@ -84,6 +81,7 @@ export default function RootLayout({
         ) : null}
         <div className="flex min-h-0 flex-1 flex-col">
           <Providers>
+            <InvitationPublisherScript />
             <AppShell publicFooter={
               <footer className="border-t border-line bg-canvas-elevated">
                 <div className="mx-auto w-full max-w-5xl px-6 py-5">
@@ -91,10 +89,7 @@ export default function RootLayout({
                     <span>© 2026 SkaleAgents</span>
                     <span>AI DevOps control plane</span>
                   </div>
-                  <div
-                    className="google-add-preferred-source-btn mb-5"
-                    google-add-preferred-source-btn=""
-                  />
+                  <PreferredSourceControl />
                   <FooterBadges />
                 </div>
               </footer>

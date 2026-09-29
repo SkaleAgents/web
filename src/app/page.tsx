@@ -4,7 +4,6 @@ import { HeroActions } from "@/components/marketing/hero-actions";
 import { ExampleExplorer } from "@/components/marketing/example-explorer";
 import { WorkflowExplorer } from "@/components/marketing/workflow-explorer";
 import { StartPicker } from "@/components/marketing/start-picker";
-import { MarketingMotion } from "@/components/marketing/marketing-motion";
 import { HeroSignal } from "@/components/marketing/hero-signal";
 import { SampleReviewDemo } from "@/components/marketing/sample-review-demo";
 
@@ -36,7 +35,7 @@ const faqs = [
 
 export default function MarketingHome() {
   return (
-    <MarketingMotion>
+    <main className="marketing-home">
       <section className="marketing-hero relative border-b border-line" aria-labelledby="hero-heading">
         <div className="hero-ambient" aria-hidden="true" />
         <div className="motion-enter relative mx-auto w-full max-w-5xl px-6 py-24 sm:py-32">
@@ -116,6 +115,6 @@ export default function MarketingHome() {
       <section className="marketing-section" aria-labelledby="next-step-heading">
         <StartPicker />
       </section>
-    </MarketingMotion>
+    </main>
   );
 }
