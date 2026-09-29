@@ -71,6 +71,43 @@ it("shows payment recovery without claiming an audit allowance after grace", asy
   expect(screen.getByRole("link", { name: "Pay renewal invoice" })).toBeVisible();
 });
 
+it("shows an unpaid organization as paused with a verified recovery link", async () => {
+  const { client } = showBilling("pro", true);
+  await screen.findByText("193 audits remaining");
+  client.setQueryData(["organization-billing", "org-1"], {
+    plan: "pro", usage: null, pendingChange: null, testModeEnabled: true, cancellationEnabled: true,
+    renewalPayment: { status: "unpaid", graceEndsAt: "2026-10-08T00:00:00Z", finalizationEndsAt: null, paymentUrl: "https://invoice.stripe.com/i/unpaid_fixture" },
+  });
+  expect(await screen.findByText(/new audits and schedules are paused/i)).toBeVisible();
+  expect(screen.queryByText("193 audits remaining")).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Pay renewal invoice" })).toHaveAttribute("href", "https://invoice.stripe.com/i/unpaid_fixture");
+});
+
+it("offers support without a payment link when renewal verification is unavailable", async () => {
+  const { client } = showBilling("pro", true);
+  await screen.findByText("193 audits remaining");
+  client.setQueryData(["organization-billing", "org-1"], {
+    plan: "pro", usage: null, pendingChange: null, testModeEnabled: true, cancellationEnabled: true,
+    renewalPayment: { status: "verification_unavailable", graceEndsAt: "2026-10-08T00:00:00Z", finalizationEndsAt: null, paymentUrl: null },
+  });
+  expect(await screen.findByText(/could not verify your renewal/i)).toBeVisible();
+  expect(screen.queryByRole("link", { name: "Pay renewal invoice" })).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Contact support" })).toHaveAttribute("href", "mailto:info@skaleagents.com");
+});
+
+it("asks the owner to review schedules after verified payment", async () => {
+  const { client } = showBilling("pro", true);
+  await screen.findByText("193 audits remaining");
+  client.setQueryData(["organization-billing", "org-1"], {
+    plan: "pro", usage: { used: 7, limit: 200, remaining: 193, periodEnd: "2026-10-01T00:00:00Z" },
+    pendingChange: null, testModeEnabled: true, cancellationEnabled: true,
+    renewalPayment: { status: "recovered", graceEndsAt: null, finalizationEndsAt: null, paymentUrl: null },
+  });
+  expect(await screen.findByText(/payment verified/i)).toBeVisible();
+  expect(screen.getByRole("link", { name: "Review paused schedules" })).toHaveAttribute("href", "/org/org-1/schedules");
+  expect(screen.getByText("193 audits remaining")).toBeVisible();
+});
+
 it("explains the temporary draft allowance without offering payment", async () => {
   const { client } = showBilling("pro", true);
   await screen.findByText("193 audits remaining");
