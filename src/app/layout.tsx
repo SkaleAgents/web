@@ -10,7 +10,7 @@ import { captureWorkspaceInvitationScript } from "@/lib/workspace-invitations";
 import { captureEmailLinkScript } from "@/lib/email-auth";
 
 const syne = localFont({
-  src: "./fonts/Syne.ttf",
+  src: "./fonts/Syne.woff2",
   variable: "--font-syne",
   weight: "600 700",
   display: "swap",
