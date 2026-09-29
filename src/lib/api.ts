@@ -436,6 +436,7 @@ export type ProposalGenerationResult = {
 
 export type ApiUser = {
   id: string;
+  agreementRequired?: boolean;
   email: string | null;
   displayName: string;
   googleSubject?: string | null;

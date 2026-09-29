@@ -18,7 +18,7 @@ function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean,
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
   vi.mocked(apiFetch).mockImplementation(async (path, init) => {
-    if (path === "/api/workspaces") return { data: [{ id: "org-1", name: "Acme", role: "owner" }] } as never;
+    if (path === "/api/workspaces") return { data: [{ id: "org-1", name: "Acme", kind: "team", role: "owner" }] } as never;
     if (path === "/api/organization-plans") return plans as never;
     if (path === "/api/workspaces/org-1/billing") return {
       plan, usage: { used: plan === "free" ? 1 : 7, limit: plan === "free" ? 2 : plan === "starter" ? 25 : 200, remaining: plan === "free" ? 1 : plan === "starter" ? 18 : 193, periodEnd: "2026-10-01T00:00:00Z" },
@@ -167,7 +167,7 @@ it("keeps an in-flight Checkout link with the organization that requested it", a
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
   vi.mocked(apiFetch).mockImplementation(async (path, init) => {
-    if (path === "/api/workspaces") return { data: [{ id: "org-1", name: "First", role: "owner" }, { id: "org-2", name: "Second", role: "owner" }] } as never;
+    if (path === "/api/workspaces") return { data: [{ id: "org-1", name: "First", kind: "team", role: "owner" }, { id: "org-2", name: "Second", kind: "team", role: "owner" }] } as never;
     if (path === "/api/organization-plans") return plans as never;
     if (path.endsWith("/billing") && !init?.method) return { plan: "free", usage: { used: 0, limit: 2, remaining: 2, periodEnd: "2026-10-01T00:00:00Z" }, pendingChange: null, testModeEnabled: true, cancellationEnabled: true } as never;
     if (path === "/api/workspaces/org-1/billing/checkout") return new Promise((resolve) => { completeCheckout = resolve; }) as never;
@@ -190,7 +190,7 @@ it("does not substitute another owner's billing when the URL names an unavailabl
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
   vi.mocked(apiFetch).mockImplementation(async (path) => {
-    if (path === "/api/workspaces") return { data: [{ id: "org-1", name: "Acme", role: "owner" }] } as never;
+    if (path === "/api/workspaces") return { data: [{ id: "org-1", name: "Acme", kind: "team", role: "owner" }] } as never;
     if (path === "/api/organization-plans") return plans as never;
     throw new Error(`Unexpected request: ${path}`);
   });

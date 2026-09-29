@@ -1,6 +1,8 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
+import { personalOrganization, personalOrganizationId } from "./personal-organization-fixture";
 
-const org = "0198f0b0-0000-7000-8000-000000000001";
+const org = "0198f0b0-0000-7000-8000-000000000002";
+const team = { id: org, name: "Platform Team", kind: "team", role: "owner", createdAt: "2026-09-29T00:00:00Z" };
 const owner = { id: "account-1", displayName: "Harun", email: "owner@example.com" };
 
 test("personal home has its own shareable URL", async ({ page }) => {
@@ -10,12 +12,13 @@ test("personal home has its own shareable URL", async ({ page }) => {
   await page.route("**/api/bots", route => route.fulfill({ json: { bots: [] } }));
   await page.goto("/me");
   await expect(page.getByRole("heading", { name: "Dashboard", exact: true })).toBeVisible();
-  await expect(page).toHaveURL(/\/me$/);
+  await expect(page).toHaveURL(`/org/${personalOrganizationId}`);
 });
 
 test("organization audits keep organization in URL", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: owner }));
-  await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [{ id: org, name: "Platform Team", role: "owner" }] } }));
+  await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [personalOrganization, team] } }));
+  await page.route(`**/api/workspaces/${org}`, route => route.fulfill({ json: { data: team } }));
   await page.route(`**/api/workspaces/${org}/jobs`, route => route.fulfill({ json: { jobs: [] } }));
   await page.goto(`/org/${org}/jobs`);
   await expect(page.getByRole("heading", { name: "Shared audits" })).toBeVisible();
@@ -25,7 +28,8 @@ test("organization audits keep organization in URL", async ({ page }) => {
 test("switcher names the organization and sidebar groups can collapse", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: owner }));
   await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: [] } }));
-  await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [{ id: org, name: "Platform Team", role: "owner" }] } }));
+  await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [personalOrganization, team] } }));
+  await page.route(`**/api/workspaces/${org}`, route => route.fulfill({ json: { data: team } }));
   await page.route(`**/api/workspaces/${org}/jobs`, route => route.fulfill({ json: { jobs: [] } }));
   await page.goto("/me/jobs");
   await page.getByRole("button", { name: "Personal, switch scope" }).click();
@@ -43,8 +47,7 @@ test("switcher names the organization and sidebar groups can collapse", async ({
 
 test("legacy dashboard links redirect to the right scope", async ({ request }) => {
   const personal = await request.get("/dashboard/jobs", { maxRedirects: 0 });
-  expect(personal.status()).toBe(307);
-  expect(personal.headers().location).toBe("/me/jobs");
+  expect(personal.status()).toBe(200);
 
   const organization = await request.get(`/dashboard/workspaces/${org}/jobs`, { maxRedirects: 0 });
   expect(organization.status()).toBe(307);
@@ -58,8 +61,8 @@ test("legacy dashboard links redirect to the right scope", async ({ request }) =
 
 test("organization overview and settings keep their scope", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: owner }));
-  await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [{ id: org, name: "Platform Team", role: "owner" }] } }));
-  await page.route(`**/api/workspaces/${org}`, route => route.fulfill({ json: { data: { id: org, name: "Platform Team", role: "owner" } } }));
+  await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [personalOrganization, team] } }));
+  await page.route(`**/api/workspaces/${org}`, route => route.fulfill({ json: { data: team } }));
   await page.goto(`/org/${org}`);
   await expect(page.getByRole("heading", { name: "Platform Team" })).toBeVisible();
   await page.getByRole("link", { name: "Organization settings" }).click();
@@ -70,7 +73,7 @@ test("organization overview and settings keep their scope", async ({ page }) => 
 
 test("personal organizations page stays under personal scope", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: owner }));
-  await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [{ id: org, name: "Platform Team", role: "owner", createdAt: "2026-09-29T00:00:00Z" }] } }));
+  await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [personalOrganization, team] } }));
   await page.goto("/me/organizations");
   await expect(page.getByRole("heading", { name: "Organizations" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Platform Team" })).toHaveAttribute("href", `/org/${org}`);
@@ -78,7 +81,8 @@ test("personal organizations page stays under personal scope", async ({ page }) 
 
 test("organization billing opens directly at its scoped URL", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: owner }));
-  await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [{ id: org, name: "Platform Team", role: "owner" }] } }));
+  await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [personalOrganization, team] } }));
+  await page.route(`**/api/workspaces/${org}`, route => route.fulfill({ json: { data: team } }));
   await page.route("**/api/organization-plans", route => route.fulfill({ json: { data: [{ key: "free", name: "Free", monthlyUsd: 0, auditLimit: 2, checkoutMode: "included" }] } }));
   await page.route(`**/api/workspaces/${org}/billing`, route => route.fulfill({ json: {
     plan: "free", usage: { used: 0, limit: 2, remaining: 2, periodEnd: "2026-10-01T00:00:00Z" },
@@ -91,12 +95,15 @@ test("organization billing opens directly at its scoped URL", async ({ page }) =
 });
 
 test("switching organizations keeps the section and drops a foreign detail ID", async ({ page }) => {
-  const second = "0198f0b0-0000-7000-8000-000000000002";
+  const second = "0198f0b0-0000-7000-8000-000000000003";
   await page.route("**/api/user", route => route.fulfill({ json: owner }));
   await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [
-    { id: org, name: "Platform Team", role: "owner" },
-    { id: second, name: "Research Team", role: "member" },
+    personalOrganization,
+    team,
+    { id: second, name: "Research Team", kind: "team", role: "member" },
   ] } }));
+  await page.route(`**/api/workspaces/${org}`, route => route.fulfill({ json: { data: team } }));
+  await page.route(`**/api/workspaces/${second}`, route => route.fulfill({ json: { data: { id: second, name: "Research Team", kind: "team", role: "member" } } }));
   await page.route(`**/api/workspaces/${org}/jobs`, route => route.fulfill({ json: { jobs: [] } }));
   await page.route(`**/api/workspaces/${second}/jobs`, route => route.fulfill({ json: { jobs: [] } }));
   await page.goto(`/org/${org}/jobs`);

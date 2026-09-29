@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import type { RetentionPolicy } from "../src/lib/api";
 
 test.use({ timezoneId: "Asia/Dhaka" });

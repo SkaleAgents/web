@@ -64,8 +64,8 @@ describe("organization retention notice", () => {
 
   it("links owners to their notice without adding the link for members", async () => {
     vi.mocked(apiFetch).mockResolvedValueOnce({ data: [
-      { id: workspaceId, name: "Owned organization", role: "owner", createdAt: "2026-09-28T11:00:00Z" },
-      { id: "00000000-0000-4000-8000-000000000002", name: "Member organization", role: "member", createdAt: "2026-09-28T11:00:00Z" },
+      { id: workspaceId, name: "Owned organization", kind: "team", role: "owner", createdAt: "2026-09-28T11:00:00Z" },
+      { id: "00000000-0000-4000-8000-000000000002", name: "Member organization", kind: "team", role: "member", createdAt: "2026-09-28T11:00:00Z" },
     ] });
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     client.setQueryData(["user"], { id: "owner-a", name: "Owner A" });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { AdvisoryBookingRequest } from "@/components/advisory-booking-request";
@@ -9,9 +9,12 @@ import { SourceMetadata } from "@/components/source-metadata";
 import { Button, LinkButton } from "@/components/ui";
 import { apiFetch, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
+import { organizationPath, scopeFromPath } from "@/lib/dashboard-routes";
 
 export function PersonalJobDetail({ id }: { id: string }) {
   const router = useRouter();
+  const scope = scopeFromPath(usePathname());
+  const root = scope?.kind === "organization" ? organizationPath(scope.id) : "/dashboard";
   const user = useQuery(currentUserOptions);
   const accountId = user.data?.id;
   const [deletion, setDeletion] = useState<"pending" | "processing" | "failed" | "completed" | null>(null);
@@ -26,12 +29,12 @@ export function PersonalJobDetail({ id }: { id: string }) {
       method: "POST",
       body: JSON.stringify({ jobId: id }),
     }),
-    onSuccess: (session) => router.push(`/me/watchtower/${session.id}`),
+    onSuccess: (session) => router.push(`${root}/watchtower/${session.id}`),
   });
 
   return (
     <main className="space-y-6">
-      <LinkButton href="/me/jobs" variant="ghost">Back to audit jobs</LinkButton>
+      <LinkButton href={`${root}/jobs`} variant="ghost">Back to audit jobs</LinkButton>
       <div className="workspace-intro">
         <h1 className="workspace-heading">Audit details</h1>
         <p className="mt-2 text-sm text-ink-muted">Review this audit and manage its retained data.</p>

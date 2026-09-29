@@ -3,6 +3,12 @@ export type DashboardScope = { kind: "personal" } | { kind: "organization"; id: 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const sharedSections = new Set(["jobs", "schedules", "settings"]);
 
+export type OrganizationIdentity = { id: string; kind: "personal" | "team" };
+
+export function personalOrganizationId(memberships: OrganizationIdentity[]): string | null {
+  return memberships.find(item => item.kind === "personal" && uuidPattern.test(item.id))?.id ?? null;
+}
+
 export function personalPath(section = ""): string {
   return section ? `/me/${section}` : "/me";
 }
@@ -45,17 +51,37 @@ export function legacyDashboardPath(pathname: string): string | null {
   return personalPath(suffix);
 }
 
-export function dashboardDestination(value: string | null): string {
-  if (!value || value.startsWith("//")) return "/me";
+export function dashboardDestination(value: string | null, personalId?: string | null, memberships?: OrganizationIdentity[]): string {
+  const fallback = personalId && uuidPattern.test(personalId) ? organizationPath(personalId) : "/me";
+  if (!value || value.startsWith("//")) return fallback;
   try {
     const base = "https://skaleagents.com";
     const url = new URL(value, base);
-    if (url.origin !== base) return "/me";
+    if (url.origin !== base) return fallback;
+    if (personalId && uuidPattern.test(personalId)) {
+      const path = url.pathname;
+      let destination: string | null = null;
+      if (path === "/me" || path === "/dashboard") destination = fallback;
+      else if (path === "/me/settings" || path === "/dashboard/settings") destination = "/account/settings";
+      else if (path === "/me/organizations" || path === "/dashboard/workspaces") destination = organizationPath(personalId, "organizations");
+      else if (path.startsWith("/me/")) destination = organizationPath(personalId, path.slice(4));
+      else if (path.startsWith("/dashboard/workspaces/")) {
+        const match = path.match(/^\/dashboard\/workspaces\/([^/]+)(?:\/(.*))?$/);
+        if (match && uuidPattern.test(match[1])) destination = organizationPath(match[1], match[2] === "retention" ? "settings/retention" : match[2] ?? "");
+      } else if (path.startsWith("/dashboard/")) destination = organizationPath(personalId, path.slice(11));
+      else if (path === "/account/settings" || path === "/staff" || path.startsWith("/staff/")) destination = path;
+      else if (scopeFromPath(path)) destination = path;
+      if (destination?.startsWith("/org/")) {
+        const scope = scopeFromPath(destination);
+        if (!scope || scope.kind !== "organization" || memberships && !memberships.some(item => item.id === scope.id)) return fallback;
+      }
+      return destination ? `${destination}${url.search}${url.hash}` : fallback;
+    }
     const legacy = legacyDashboardPath(url.pathname);
     if (legacy) return `${legacy}${url.search}${url.hash}`;
     if (scopeFromPath(url.pathname) || url.pathname === "/staff" || url.pathname.startsWith("/staff/")) {
       return `${url.pathname}${url.search}${url.hash}`;
     }
   } catch { /* Invalid destinations open personal home. */ }
-  return "/me";
+  return fallback;
 }

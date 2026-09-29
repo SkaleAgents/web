@@ -8,7 +8,7 @@ export function ConsultancyBookingLink({ source }: { source?: PortfolioBookingRe
 
   const query = source ? `?sourceType=${encodeURIComponent(source.type)}&sourceId=${encodeURIComponent(source.id)}` : "";
   return <div className="space-y-2 text-sm">
-    <Link href={`/me/consultancy${query}`}
+    <Link href={`/dashboard/consultancy${query}`}
       className="inline-flex rounded-[10px] border border-line px-3 py-2 font-semibold text-ink hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent">
       Book a consultancy session
     </Link>

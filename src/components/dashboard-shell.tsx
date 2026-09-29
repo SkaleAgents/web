@@ -12,7 +12,7 @@ import { BrandLogo } from "@/components/brand";
 import { AccountMenu } from "@/components/account-menu";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { apiFetch } from "@/lib/api";
-import { organizationPath, personalPath, scopeFromPath } from "@/lib/dashboard-routes";
+import { dashboardDestination, organizationPath, personalOrganizationId, scopeFromPath } from "@/lib/dashboard-routes";
 import { OrganizationSwitcher, type OrganizationMembership } from "@/components/organization-switcher";
 
 type NavigationItem = { href: string; label: string };
@@ -31,7 +31,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     queryKey: ["workspaces", user.data?.id ?? "guest"],
     enabled: Boolean(user.data?.id),
     queryFn: async ({ signal }) => (await apiFetch<{ data: OrganizationMembership[] }>("/api/workspaces", { signal })).data,
-    refetchInterval: scope.kind === "organization" ? 60_000 : false,
+    refetchInterval: 60_000,
+  });
+  const access = useQuery({
+    queryKey: ["workspace-access", user.data?.id ?? "guest", scope.kind === "organization" ? scope.id : "legacy"],
+    enabled: Boolean(user.data?.id && scope.kind === "organization"),
+    queryFn: async ({ signal }) => (await apiFetch<{ data: OrganizationMembership }>(`/api/workspaces/${scope.kind === "organization" ? scope.id : ""}`, { signal })).data,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
   useEffect(() => {
     if (user.isSuccess && !user.data) {
@@ -39,9 +46,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, router, user.isSuccess, user.data]);
 
+  const personalId = personalOrganizationId(memberships.data ?? []);
+  const legacy = pathname === "/me" || pathname.startsWith("/me/") || pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  useEffect(() => {
+    if (!user.data || !legacy || !memberships.isSuccess || !personalId) return;
+    const next = new URLSearchParams(window.location.search).get("next");
+    router.replace(dashboardDestination(next ?? pathname + window.location.search, personalId, memberships.data));
+  }, [user.data, legacy, memberships.isSuccess, memberships.data, pathname, personalId, router]);
+
   const workspace = scope.kind === "organization" ? memberships.data?.find(item => item.id === scope.id) : null;
-  const root = scope.kind === "organization" ? organizationPath(scope.id) : personalPath();
-  const sections: NavigationSection[] = scope.kind === "organization" ? [
+  const isPersonal = workspace?.kind === "personal";
+  const root = scope.kind === "organization" ? organizationPath(scope.id) : personalId ? organizationPath(personalId) : "/dashboard";
+  const sections: NavigationSection[] = !isPersonal ? [
     { label: "Your work", items: [
       { href: root, label: "Overview" },
       { href: `${root}/jobs`, label: "Audit jobs" },
@@ -65,13 +81,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     ] },
     { label: "Account", items: [
       { href: `${root}/mcp-config`, label: "MCP connections" },
-      { href: `${root}/settings`, label: "Settings" },
+      { href: "/account/settings", label: "Account settings" },
     ] },
   ];
-  if (scope.kind === "personal" && advisoryAgreementsEnabled()) sections.push({ label: "Advisory", items: [
+  if (isPersonal && advisoryAgreementsEnabled()) sections.push({ label: "Advisory", items: [
     { href: `${root}/advisory-bookings`, label: "Advisory requests" },
   ] });
-  if (scope.kind === "personal" && nativeConsultancyEnabled()) sections.push({ label: "Consultancy", items: [
+  if (isPersonal && nativeConsultancyEnabled()) sections.push({ label: "Consultancy", items: [
     { href: `${root}/consultancy`, label: "My bookings" },
   ] });
   if (user.data && isStaff(user.data)) sections.push({ label: "Staff", items: [
@@ -92,10 +108,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <Button onClick={() => void user.refetch()}>Try again</Button>
   </main>;
   if (!user.data) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">Checking your session…</main>;
+  if (legacy) return <main role="status" className="px-6 py-16">Opening your organization…</main>;
   if (pathname.startsWith("/org/") && !scopeFromPath(pathname)) return <main role="alert" className="px-6 py-16">Organization unavailable.</main>;
   if (scope.kind === "organization" && memberships.isPending) return <main role="status" className="px-6 py-16">Checking organization access…</main>;
   if (scope.kind === "organization" && memberships.isError) return <main role="alert" className="px-6 py-16">Could not check organization access. <Button onClick={() => void memberships.refetch()}>Try again</Button></main>;
-  if (scope.kind === "organization" && !workspace) return <main role="alert" className="px-6 py-16">Organization unavailable. <Link href="/me">Open personal home</Link></main>;
+  if (scope.kind === "organization" && (access.isPending || access.isFetching)) return <main role="status" className="px-6 py-16">Checking organization access…</main>;
+  if (scope.kind === "organization" && (access.isError || access.data?.id !== scope.id || access.data?.kind !== workspace?.kind)) return <main role="alert" className="px-6 py-16">Organization unavailable. {personalId && <Link href={organizationPath(personalId)}>Open Personal</Link>}</main>;
+  if (scope.kind === "organization" && !workspace) return <main role="alert" className="px-6 py-16">Organization unavailable. {personalId && <Link href={organizationPath(personalId)}>Open Personal</Link>}</main>;
 
   function closeMenu() {
     setMenuOpen(false);

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 
-type Organization = { id: string; name: string; role: "owner" | "member" | "viewer" };
+type Organization = { id: string; name: string; role: "owner" | "member" | "viewer"; kind: "personal" | "team" };
 type Plan = { key: string; name: string; monthlyUsd: number | null; auditLimit: number | null; checkoutMode: string };
 type Billing = {
   plan: string;
@@ -54,7 +54,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
     queryKey: ["organization-plans"],
     queryFn: async ({ signal }) => (await apiFetch<{ data: Plan[] }>("/api/organization-plans", { signal })).data,
   });
-  const owned = organizations.data?.filter((organization) => organization.role === "owner") ?? [];
+  const owned = organizations.data?.filter((organization) => organization.kind === "team" && organization.role === "owner") ?? [];
   const fixedOrganizationUnavailable = Boolean(fixedOrganizationId && organizations.isSuccess && !owned.some((organization) => organization.id === fixedOrganizationId));
   const organizationId = fixedOrganizationId
     ? owned.find((organization) => organization.id === fixedOrganizationId)?.id

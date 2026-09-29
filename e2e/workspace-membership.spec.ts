@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
+import { personalOrganization } from "./personal-organization-fixture";
 
 const invitationToken = "browser-fixture-invitation-credential";
 const account = { id: "member-1", displayName: "Riley", email: "riley@example.com" };
@@ -131,11 +132,12 @@ test("lists and creates only memberships and leaves personal resources unscoped"
     if (route.request().method() === "POST") {
       expect(route.request().postDataJSON()).toEqual({ name: "Platform Team" });
       return route.fulfill({ json: { data: {
-        id: "workspace-2", name: "Platform Team", createdAt: "2026-09-25T12:00:00Z", role: "owner",
+        id: "workspace-2", name: "Platform Team", kind: "team", createdAt: "2026-09-25T12:00:00Z", role: "owner",
       } }, status: 201 });
     }
     return route.fulfill({ json: { data: [
-      { id: "workspace-1", name: "Infra", createdAt: "2026-09-24T12:00:00Z", role: "member" },
+      personalOrganization,
+      { id: "workspace-1", name: "Infra", kind: "team", createdAt: "2026-09-24T12:00:00Z", role: "member" },
     ] } });
   });
 
@@ -154,7 +156,8 @@ test("workspace membership queries switch with the signed-in account", async ({ 
   await page.clock.install();
   await page.route("**/api/user", (route) => route.fulfill({ json: { id: owner, displayName: owner } }));
   await page.route("**/api/workspaces", (route) => route.fulfill({ json: { data: [
-    { id: `workspace-${owner}`, name: `${owner} workspace`, createdAt: "2026-09-24T12:00:00Z", role: "member" },
+    personalOrganization,
+    { id: `workspace-${owner}`, name: `${owner} workspace`, kind: "team", createdAt: "2026-09-24T12:00:00Z", role: "member" },
   ] } }));
   await page.goto("/workspaces");
   await expect(page.getByRole("heading", { name: "alice workspace" })).toBeVisible();

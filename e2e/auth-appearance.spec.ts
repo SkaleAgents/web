@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 
 async function selectTheme(page: Page, name: string) {
   await page.getByRole("button", { name: "Color theme" }).click();
@@ -72,6 +72,10 @@ test("theme selection persists and System follows the device while the logo matc
 
 test("signed-in users can change theme from the dashboard toolbar", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: { id: "appearance-user", displayName: "Appearance User" } }));
+  const personalId = "0198f0b0-0000-7000-8000-000000000001";
+  const personal = { id: personalId, name: "Personal", kind: "personal", role: "owner" };
+  await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [personal] } }));
+  await page.route(`**/api/workspaces/${personalId}`, route => route.fulfill({ json: { data: personal } }));
   for (const resource of ["jobs", "schedules", "bots"]) {
     await page.route(`**/api/${resource}`, route => route.fulfill({ json: { [resource]: [] } }));
   }

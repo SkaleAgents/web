@@ -462,3 +462,9 @@ body:has(.get-started-dialog[open]) {
   .dashboard-toolbar { padding-inline: 1rem; }
   .dashboard-content { padding: 1.5rem 1rem; }
 }
+
+.policy-page { max-width: 76ch; margin-inline: auto; padding-bottom: 4rem; }
+.policy-page h1 { max-width: 18ch; margin: 0.5rem 0 1.5rem; line-height: 1.1; }
+.policy-page h2 { margin: 2.25rem 0 0.7rem; font-family: var(--font-syne), sans-serif; font-size: 1.35rem; font-weight: 700; line-height: 1.25; }
+.policy-page p { margin-block: 0.85rem; line-height: 1.7; }
+.policy-page a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }

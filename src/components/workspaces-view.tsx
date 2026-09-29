@@ -13,6 +13,7 @@ type Workspace = {
   name: string;
   createdAt: string;
   role: "owner" | "member" | "viewer";
+  kind: "personal" | "team";
 };
 
 export function WorkspacesView() {
@@ -107,11 +108,11 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
           </div>
         ) : workspaces.isPending ? (
           <p role="status" className="text-sm text-ink-muted">Loading memberships…</p>
-        ) : workspaces.data.length === 0 ? (
+        ) : workspaces.data.filter(workspace => workspace.kind === "team").length === 0 ? (
           <p className="text-sm text-ink-muted">You do not belong to an organization yet.</p>
         ) : (
           <ul className="grid gap-3">
-            {workspaces.data.map((workspace) => (
+            {workspaces.data.filter(workspace => workspace.kind === "team").map((workspace) => (
               <li key={workspace.id} className="rounded-[10px] border border-line bg-canvas-elevated p-4">
                 <h3 className="font-semibold text-ink"><Link href={`/org/${workspace.id}`} className="hover:underline">{workspace.name}</Link></h3>
                 <p className="mt-1 text-sm text-ink-muted">

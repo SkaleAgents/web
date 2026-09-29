@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("shared history stays readable when creation is disabled", async ({ page }) => {
   test.skip(process.env.WORKSPACE_AUDIT_TEST_MODE !== "readonly", "Requires history-on, creation-off build");

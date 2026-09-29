@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
+import { personalOrganizationId } from "./personal-organization-fixture";
 
 test("audit creation and job management use separate pages", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Test Owner", email: "owner@skaleagents.com" } }));
@@ -17,10 +18,10 @@ test("audit creation and job management use separate pages", async ({ page }) =>
   await expect(page.getByRole("heading", { name: "Audit jobs", exact: true })).toBeVisible();
   await expect(page.getByRole("textbox", { name: "IaC content" })).toHaveCount(0);
   await page.getByRole("link", { name: "New audit" }).first().click();
-  await expect(page).toHaveURL(/\/me\/jobs\/new$/);
+  await expect(page).toHaveURL(`/org/${personalOrganizationId}/jobs/new`);
   await page.getByRole("textbox", { name: "IaC content" }).fill('resource "aws_security_group" "ssh" {}');
   await page.getByRole("button", { name: "Queue audit" }).click();
-  await expect(page).toHaveURL(/\/me\/jobs$/);
+  await expect(page).toHaveURL(`/org/${personalOrganizationId}/jobs`);
   await expect(page.getByText("Review queued")).toBeVisible();
 });
 
@@ -91,11 +92,11 @@ test("audit history opens one job at a time for review and management", async ({
   await expect(page.getByRole("button", { name: "Export report" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await page.getByRole("link", { name: "View audit" }).click();
-  await expect(page).toHaveURL(new RegExp(`/me/jobs/${id}$`));
+  await expect(page).toHaveURL(new RegExp(`/org/[^/]+/jobs/${id}$`));
   await expect(page.getByRole("heading", { name: "Audit details" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Open Watchtower" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Export report" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Back to audit jobs" })).toHaveAttribute("href", "/me/jobs");
+  await expect(page.getByRole("link", { name: "Back to audit jobs" })).toHaveAttribute("href", /\/org\/[^/]+\/jobs$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 

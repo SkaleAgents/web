@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/account/passkeys", route => route.fulfill({ json: { accountId: "alice", hasPassword: false, passkeys: [] } }));
@@ -86,7 +86,7 @@ test("guests reach the sign-in form and make no private preference requests", as
     return route.fulfill({ status: 401, json: {} });
   });
   await page.goto("/settings");
-  await expect(page).toHaveURL(/\/login\?next=%2Fme%2Fsettings$/);
+  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard%2Fsettings$/);
   await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   expect(privateRequests).toBe(0);
@@ -137,6 +137,6 @@ test("late preference saves cannot restore private data after logout", async ({ 
   await expect(page).toHaveURL(/\/login(?:\?next=.*)?$/);
   release();
   await page.goto("/settings");
-  await expect(page).toHaveURL(/\/login\?next=%2Fme%2Fsettings$/);
+  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard%2Fsettings$/);
   await expect(page.getByText("alice@example.com", { exact: true })).toHaveCount(0);
 });

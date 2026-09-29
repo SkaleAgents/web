@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IBM_Plex_Mono, Source_Sans_3 } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -92,7 +93,7 @@ export default function RootLayout({
                 <div className="mx-auto w-full max-w-5xl px-6 py-5">
                   <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
                     <span>© 2026 SkaleAgents</span>
-                    <span>AI DevOps control plane</span>
+                    <span className="flex flex-wrap gap-4"><Link href="/terms">Terms of Service</Link><Link href="/privacy">Privacy Policy</Link></span>
                   </div>
                   <PreferredSourceControl />
                   <FooterBadges />
