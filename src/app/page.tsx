@@ -37,7 +37,7 @@ export default function MarketingHome() {
     <main className="marketing-home">
       <section className="marketing-hero relative border-b border-line" aria-labelledby="hero-heading">
         <div className="hero-ambient" aria-hidden="true" />
-        <div className="motion-enter relative mx-auto w-full max-w-5xl px-6 py-24 sm:py-32">
+        <div className="relative mx-auto w-full max-w-5xl px-6 py-24 sm:py-32">
           <p className="marketing-eyebrow mb-8 flex items-center gap-2"><span aria-hidden="true" className="size-1.5 rounded-full bg-accent" /> Built for the work behind the deploy</p>
           <p className="font-display text-[clamp(2.75rem,8vw,5.5rem)] font-bold leading-[0.95] tracking-tight">SkaleAgents</p>
           <div className="mt-6 grid items-center gap-10 md:grid-cols-[1.6fr_1fr]">
