@@ -1,7 +1,17 @@
-"use client";
-
-import { useState } from "react";
 import { LinkButton } from "@/components/ui";
+
+type Workflow = {
+  id: string;
+  label: string;
+  heading: string;
+  description: string;
+  steps: readonly [string, string][];
+  note: string;
+  href: string;
+  cta: string;
+  codeTitle: string;
+  code: string;
+};
 
 const workflows = [
   {
@@ -52,46 +62,45 @@ const workflows = [
     codeTitle: "Your review checklist",
     code: "Scope       Infrastructure text\nSpecialists Selected for the task\nContext     Optional telemetry\n\nInspect findings in Watchtower.\nDiscuss the proposed remediation.\nValidate changes in your own workflow.",
   },
-];
+] satisfies Workflow[];
 
 export function WorkflowExplorer() {
-  const [selected, setSelected] = useState(0);
-  const workflow = workflows[selected];
-
   return (
-    <div className="mt-9">
+    <div className="workflow-explorer mt-9">
       <fieldset>
         <legend className="sr-only">Choose where to work</legend>
         <div className="flex flex-wrap gap-2 border-b border-line pb-4">
           {workflows.map((item, index) => (
             <label key={item.id} className="cursor-pointer">
-              <input type="radio" name="workflow" value={item.id} checked={selected === index} onChange={() => setSelected(index)} className="peer sr-only" />
+              <input id={`workflow-${item.id}`} type="radio" name="workflow" value={item.id} defaultChecked={index === 0} aria-controls={`workflow-panel-${item.id}`} className="peer sr-only" />
               <span className="block rounded-md px-4 py-3 text-sm font-semibold text-ink-muted hover:bg-accent-soft peer-checked:bg-ink peer-checked:text-canvas peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent">{item.label}</span>
             </label>
           ))}
         </div>
       </fieldset>
-      <div key={workflow.id} className="motion-enter mt-8 grid gap-10 lg:grid-cols-[1.3fr_1fr]" role="region" aria-label={workflow.label}>
-        <div>
-          <h3 className="font-display text-2xl font-semibold tracking-tight">{workflow.heading}</h3>
-          <p className="mt-3 leading-relaxed text-ink-muted">{workflow.description}</p>
-          <ol className="mt-7 space-y-6">
-            {workflow.steps.map(([title, description], index) => (
-              <li key={title} className="flex gap-4">
-                <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-md border border-line font-mono text-xs text-ink-muted">0{index + 1}</span>
-                <div><h4 className="font-semibold">{title}</h4><p className="mt-1 text-sm leading-relaxed text-ink-muted">{description}</p></div>
-              </li>
-            ))}
-          </ol>
-          <LinkButton href={workflow.href} className="mt-8 px-5 py-3">{workflow.cta}<span aria-hidden="true" className="ml-3">↗</span></LinkButton>
+      {workflows.map((workflow) => (
+        <div key={workflow.id} id={`workflow-panel-${workflow.id}`} data-workflow-panel={workflow.id} className="motion-enter mt-8 grid gap-10 lg:grid-cols-[1.3fr_1fr]" role="region" aria-labelledby={`workflow-${workflow.id}`}>
+          <div>
+            <h3 className="font-display text-2xl font-semibold tracking-tight">{workflow.heading}</h3>
+            <p className="mt-3 leading-relaxed text-ink-muted">{workflow.description}</p>
+            <ol className="mt-7 space-y-6">
+              {workflow.steps.map(([title, description], index) => (
+                <li key={title} className="flex gap-4">
+                  <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-md border border-line font-mono text-xs text-ink-muted">0{index + 1}</span>
+                  <div><h4 className="font-semibold">{title}</h4><p className="mt-1 text-sm leading-relaxed text-ink-muted">{description}</p></div>
+                </li>
+              ))}
+            </ol>
+            <LinkButton href={workflow.href} className="mt-8 px-5 py-3">{workflow.cta}<span aria-hidden="true" className="ml-3">↗</span></LinkButton>
+          </div>
+          <aside className="min-w-0 self-start rounded-[10px] border border-line bg-canvas-elevated p-6 sm:p-8">
+            <div aria-hidden="true" className="mb-8 flex gap-1.5"><span className="size-2 rounded-full bg-accent" /><span className="size-2 rounded-full bg-line" /><span className="size-2 rounded-full bg-line" /></div>
+            <p className="marketing-eyebrow">{workflow.codeTitle}</p>
+            <pre className="mt-5 whitespace-pre-wrap break-words font-mono text-xs leading-7 sm:text-sm"><code>{workflow.code}</code></pre>
+            <p className="mt-7 border-t border-line pt-5 text-sm leading-relaxed text-ink-muted">{workflow.note}</p>
+          </aside>
         </div>
-        <aside className="min-w-0 self-start rounded-[10px] border border-line bg-canvas-elevated p-6 sm:p-8">
-          <div aria-hidden="true" className="mb-8 flex gap-1.5"><span className="size-2 rounded-full bg-accent" /><span className="size-2 rounded-full bg-line" /><span className="size-2 rounded-full bg-line" /></div>
-          <p className="marketing-eyebrow">{workflow.codeTitle}</p>
-          <pre className="mt-5 whitespace-pre-wrap break-words font-mono text-xs leading-7 sm:text-sm"><code>{workflow.code}</code></pre>
-          <p className="mt-7 border-t border-line pt-5 text-sm leading-relaxed text-ink-muted">{workflow.note}</p>
-        </aside>
-      </div>
+      ))}
     </div>
   );
 }

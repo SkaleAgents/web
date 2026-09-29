@@ -168,6 +168,14 @@ body:has(.get-started-dialog[open]) {
   text-underline-offset: 3px;
 }
 
+.workflow-explorer [data-workflow-panel] { display: grid; }
+.workflow-explorer:has(#workflow-editor:checked) [data-workflow-panel="assistant"],
+.workflow-explorer:has(#workflow-team:checked) [data-workflow-panel="assistant"],
+.workflow-explorer:has(#workflow-assistant:checked) [data-workflow-panel="editor"],
+.workflow-explorer:has(#workflow-team:checked) [data-workflow-panel="editor"],
+.workflow-explorer:has(#workflow-assistant:checked) [data-workflow-panel="team"],
+.workflow-explorer:has(#workflow-editor:checked) [data-workflow-panel="team"] { display: none; }
+
 .example-countdown {
   position: absolute;
   inset: auto 0 0;
