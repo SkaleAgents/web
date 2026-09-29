@@ -43,7 +43,7 @@ export default function MarketingHome() {
           <div className="mt-6 grid items-center gap-10 md:grid-cols-[1.6fr_1fr]">
             <div>
               <h1 id="hero-heading" className="max-w-xl text-2xl font-medium leading-snug sm:text-3xl">Control plane for AI DevOps agents</h1>
-              <p className="homepage-lcp-copy mt-5 max-w-xl text-lg leading-relaxed text-ink-muted">Connect your editor through MCP to review code and infrastructure where you work. Explore specialist bots, reuse prompts, or bring findings into a shared team review.</p>
+              <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-muted">Connect your editor through MCP to review code and infrastructure where you work. Explore specialist bots, reuse prompts, or bring findings into a shared team review.</p>
               <HeroActions />
               <a href="#examples" className="mt-10 inline-flex items-center gap-3 text-sm font-semibold text-ink-muted hover:text-ink">See what a review looks like <span className="hero-scroll-cue" aria-hidden="true">↓</span></a>
             </div>

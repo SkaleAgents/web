@@ -69,7 +69,7 @@ export default function RootLayout({
       className={`${syne.variable} ${sourceSans.variable} ${plexMono.variable} h-full antialiased`}
     >
       <head>
-        {apiOrigin ? <link rel="preconnect" href={apiOrigin} crossOrigin="use-credentials" /> : null}
+        {apiOrigin ? <link rel="dns-prefetch" href={apiOrigin} /> : null}
         <script id="capture-email-link" dangerouslySetInnerHTML={{ __html: captureEmailLinkScript }} />
         <script
           id="capture-workspace-invitation"
