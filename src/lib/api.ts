@@ -12,6 +12,45 @@ export function portfolioBookingHandoffEnabled(): boolean {
   return process.env.NEXT_PUBLIC_PORTFOLIO_BOOKING_HANDOFF_ENABLED === "true";
 }
 
+export function nativeConsultancyEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_CONSULTANCY_BOOKING_ENABLED === "true";
+}
+
+export type ConsultancyPackage = {
+  slug: "light" | "pro" | "max";
+  name: string;
+  durationMinutes: number;
+  priceCents: number;
+  currency: "USD";
+  features: string[];
+};
+
+export type ConsultancyBooking = {
+  id: string;
+  version: number;
+  status: "requested" | "slot_proposed" | "approved_awaiting_payment" | "paid_pending_confirmation" |
+    "payment_review_required" | "cancellation_pending" | "confirmed" | "declined" | "cancelled" | "completed";
+  paymentStatus: "unpaid" | "pending" | "paid" | "refund_review" | "refunded";
+  package: ConsultancyPackage;
+  requestedWindow: { startAt: string; endAt: string };
+  approvedWindow: { startAt: string; endAt: string } | null;
+  proposedWindow: { startAt: string; endAt: string } | null;
+  scope: string;
+  notes: string | null;
+  source: { type: "audit_job" | "advisory_booking"; id: string } | null;
+  termsVersion: string | null;
+  approvedAt: string | null;
+  paidAt: string | null;
+  confirmedAt: string | null;
+  meetingUrl: string | null;
+  cancelledAt: string | null;
+  refundStatus: "creating" | "pending_verification" | "review_required" | "refunded" | null;
+  refundedAt: string | null;
+  deliveredAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type PortfolioBookingReferralSource = { type: "audit_job" | "advisory_booking"; id: string };
 
 export type PortfolioBookingReferral = {
