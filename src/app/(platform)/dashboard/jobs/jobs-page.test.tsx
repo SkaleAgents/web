@@ -30,7 +30,7 @@ it("keeps the audit history scannable and opens full controls on a detail page",
   render(<QueryClientProvider client={client}><JobsPage /></QueryClientProvider>);
 
   expect(await screen.findByText("Ingress review")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "View audit" })).toHaveAttribute("href", `/dashboard/jobs/${jobId}`);
+  expect(screen.getByRole("link", { name: "View audit" })).toHaveAttribute("href", `/me/jobs/${jobId}`);
   expect(screen.queryByRole("button", { name: "Export report" })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Delete audit" })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Open Watchtower" })).not.toBeInTheDocument();

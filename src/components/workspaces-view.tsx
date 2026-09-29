@@ -113,19 +113,19 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
           <ul className="grid gap-3">
             {workspaces.data.map((workspace) => (
               <li key={workspace.id} className="rounded-[10px] border border-line bg-canvas-elevated p-4">
-                <h3 className="font-semibold text-ink">{workspace.name}</h3>
+                <h3 className="font-semibold text-ink"><Link href={`/org/${workspace.id}`} className="hover:underline">{workspace.name}</Link></h3>
                 <p className="mt-1 text-sm text-ink-muted">
                   {workspace.role} · Created {new Date(workspace.createdAt).toLocaleDateString()}
                 </p>
                 {(workspace.role === "owner" || workspaceAuditsEnabled()) && (
                   <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
                     {workspace.role === "owner" && (
-                      <Link href={`/dashboard/workspaces/${workspace.id}/retention`} className="text-sm font-medium text-accent underline underline-offset-4">
+                      <Link href={`/org/${workspace.id}/settings/retention`} className="text-sm font-medium text-accent underline underline-offset-4">
                         View audit retention notice
                       </Link>
                     )}
                     {workspaceAuditsEnabled() && (
-                      <Link className="text-sm font-semibold text-accent underline-offset-4 hover:underline" href={`/dashboard/workspaces/${workspace.id}/jobs`}>
+                      <Link className="text-sm font-semibold text-accent underline-offset-4 hover:underline" href={`/org/${workspace.id}/jobs`}>
                         Shared audits
                       </Link>
                     )}

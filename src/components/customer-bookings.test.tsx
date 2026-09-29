@@ -118,7 +118,7 @@ it("keeps customer detail language inside the deployed fields' limits", async ()
   expect(screen.getByText(/internal reference, not a contact detail/)).toBeInTheDocument();
   expect(screen.getByText("250.00 USD")).toBeInTheDocument();
   expect(screen.getByText(/not a payment confirmation/)).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "Open source Watchtower session" })).toHaveAttribute("href", "/dashboard/watchtower/session-source-1");
+  expect(screen.getByRole("link", { name: "Open source Watchtower session" })).toHaveAttribute("href", "/me/watchtower/session-source-1");
   expect(fetcher).toHaveBeenCalledWith(expect.stringMatching(/\/api\/advisory-bookings\/booking-customer-a$/), expect.objectContaining({ credentials: "include" }));
   expect(client.getQueryData(["customer-advisory-booking", "customer-a", fixtureBooking.id])).toEqual(withAppointment);
 });

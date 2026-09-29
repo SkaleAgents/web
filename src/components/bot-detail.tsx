@@ -17,7 +17,7 @@ export function BotDetail({ manage = false }: { manage?: boolean }) {
     queryFn: ({ signal }) => apiFetch<Bot>(`/api/bots/${id}`, { signal, credentials: manage ? "include" : "omit" }),
     enabled: Boolean(id) && (!manage || Boolean(user.data)),
   });
-  const directory = manage ? "/dashboard/bots" : "/bots";
+  const directory = manage ? "/me/bots" : "/bots";
 
   if (botQuery.isPending) {
     return <p className="text-sm text-ink-muted">Loading bot…</p>;

@@ -185,3 +185,16 @@ it("shows UTC renewal dates consistently", async () => {
   showBilling("pro", true, null, null, "free");
   expect(await screen.findByText(/Free starts at your next renewal on 10\/1\/2026 UTC/)).toBeVisible();
 });
+
+it("does not substitute another owner's billing when the URL names an unavailable organization", async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
+  vi.mocked(apiFetch).mockImplementation(async (path) => {
+    if (path === "/api/workspaces") return { data: [{ id: "org-1", name: "Acme", role: "owner" }] } as never;
+    if (path === "/api/organization-plans") return plans as never;
+    throw new Error(`Unexpected request: ${path}`);
+  });
+  render(<QueryClientProvider client={client}><OrganizationBillingView organizationId="org-2" /></QueryClientProvider>);
+  expect(await screen.findByRole("alert")).toHaveTextContent("Billing unavailable");
+  expect(apiFetch).not.toHaveBeenCalledWith("/api/workspaces/org-1/billing", expect.anything());
+});

@@ -11,37 +11,76 @@ import { Button } from "@/components/ui";
 import { BrandLogo } from "@/components/brand";
 import { AccountMenu } from "@/components/account-menu";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { apiFetch } from "@/lib/api";
+import { organizationPath, personalPath, scopeFromPath } from "@/lib/dashboard-routes";
+import { OrganizationSwitcher, type OrganizationMembership } from "@/components/organization-switcher";
 
-const sections = [
-  { label: "Your work", items: [
-    { href: "/dashboard", label: "Overview" },
-    { href: "/dashboard/jobs", label: "Audit jobs" },
-    { href: "/dashboard/schedules", label: "Scheduled audits" },
-    { href: "/dashboard/workspaces", label: "Organizations" },
-    { href: "/dashboard/billing", label: "Billing" },
-  ] },
-  { label: "Build", items: [
-    { href: "/dashboard/bots", label: "My bots" },
-    { href: "/dashboard/studio", label: "Creator Studio" },
-    { href: "/dashboard/prompts", label: "My prompts" },
-  ] },
-  { label: "Account", items: [
-    { href: "/dashboard/mcp-config", label: "MCP connections" },
-    { href: "/dashboard/settings", label: "Settings" },
-  ] },
-];
+type NavigationItem = { href: string; label: string };
+type NavigationSection = { label: string; items: NavigationItem[] };
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const user = useQuery(currentUserOptions);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const menuToggle = useRef<HTMLButtonElement>(null);
+  const scope = scopeFromPath(pathname) ?? { kind: "personal" as const };
+  const memberships = useQuery({
+    queryKey: ["workspaces", user.data?.id ?? "guest"],
+    enabled: Boolean(user.data?.id),
+    queryFn: async ({ signal }) => (await apiFetch<{ data: OrganizationMembership[] }>("/api/workspaces", { signal })).data,
+    refetchInterval: scope.kind === "organization" ? 60_000 : false,
+  });
   useEffect(() => {
     if (user.isSuccess && !user.data) {
       router.replace(`/login?next=${encodeURIComponent(pathname + window.location.search)}`);
     }
   }, [pathname, router, user.isSuccess, user.data]);
+
+  const workspace = scope.kind === "organization" ? memberships.data?.find(item => item.id === scope.id) : null;
+  const root = scope.kind === "organization" ? organizationPath(scope.id) : personalPath();
+  const sections: NavigationSection[] = scope.kind === "organization" ? [
+    { label: "Your work", items: [
+      { href: root, label: "Overview" },
+      { href: `${root}/jobs`, label: "Audit jobs" },
+      { href: `${root}/schedules`, label: "Scheduled audits" },
+    ] },
+    { label: "Organization", items: [
+      { href: `${root}/settings`, label: "Settings" },
+      ...(workspace?.role === "owner" ? [{ href: `${root}/billing`, label: "Billing" }] : []),
+    ] },
+  ] : [
+    { label: "Your work", items: [
+      { href: root, label: "Overview" },
+      { href: `${root}/jobs`, label: "Audit jobs" },
+      { href: `${root}/schedules`, label: "Scheduled audits" },
+      { href: `${root}/organizations`, label: "Organizations" },
+    ] },
+    { label: "Build", items: [
+      { href: `${root}/bots`, label: "My bots" },
+      { href: `${root}/studio`, label: "Creator Studio" },
+      { href: `${root}/prompts`, label: "My prompts" },
+    ] },
+    { label: "Account", items: [
+      { href: `${root}/mcp-config`, label: "MCP connections" },
+      { href: `${root}/settings`, label: "Settings" },
+    ] },
+  ];
+  if (scope.kind === "personal" && advisoryAgreementsEnabled()) sections.push({ label: "Advisory", items: [
+    { href: `${root}/advisory-bookings`, label: "Advisory requests" },
+  ] });
+  if (user.data && isStaff(user.data)) sections.push({ label: "Staff", items: [
+    { href: "/staff/advisory-bookings", label: "Staff bookings" },
+  ] });
+
+  const active = (href: string) => pathname === href || (href !== root && pathname.startsWith(`${href}/`)) ||
+    (href === `${root}/jobs` && pathname.startsWith(`${root}/watchtower/`));
+  const activeGroup = sections.find(section => section.items.some(entry => active(entry.href)))?.label ?? "Your work";
+  const currentSection = sections.flatMap(section => section.items).find(entry => active(entry.href))?.label ?? "Overview";
+  const groupKey = (label: string) => `${pathname}:${label}`;
+  const groupExpanded = (label: string) => expandedGroups[groupKey(label)] ?? label === activeGroup;
 
   if (user.isError) return <main className="mx-auto max-w-lg space-y-4 px-6 py-16" role="alert">
     <h1 className="text-xl font-semibold">Could not check your session</h1>
@@ -49,26 +88,26 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <Button onClick={() => void user.refetch()}>Try again</Button>
   </main>;
   if (!user.data) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">Checking your session…</main>;
+  if (pathname.startsWith("/org/") && !scopeFromPath(pathname)) return <main role="alert" className="px-6 py-16">Organization unavailable.</main>;
+  if (scope.kind === "organization" && memberships.isPending) return <main role="status" className="px-6 py-16">Checking organization access…</main>;
+  if (scope.kind === "organization" && memberships.isError) return <main role="alert" className="px-6 py-16">Could not check organization access. <Button onClick={() => void memberships.refetch()}>Try again</Button></main>;
+  if (scope.kind === "organization" && !workspace) return <main role="alert" className="px-6 py-16">Organization unavailable. <Link href="/me">Open personal home</Link></main>;
 
-  const active = (href: string) => pathname === href || (href !== "/dashboard" && pathname.startsWith(`${href}/`)) || (href === "/dashboard/jobs" && pathname.startsWith("/dashboard/watchtower/"));
-  const currentSection = [...sections.flatMap(section => section.items),
-    { href: "/dashboard/advisory-bookings", label: "Advisory requests" },
-    { href: "/dashboard/staff/advisory-bookings", label: "Staff bookings" },
-  ].find(entry => active(entry.href))?.label ?? "Dashboard";
   function closeMenu() {
     setMenuOpen(false);
     if (menuOpen) menuToggle.current?.focus();
   }
-  const item = ({ href, label }: { href: string; label: string }) => (
+  const item = ({ href, label }: NavigationItem) => (
     <Link key={href} href={href} onClick={closeMenu}
+      aria-label={label}
       aria-current={active(href) ? "page" : undefined}
       className={`dashboard-nav-item ${active(href) ? "is-active" : ""}`}>
       <DashboardIcon href={href} />
-      <span>{label}</span>
+      <span className="dashboard-nav-text">{label}</span>
     </Link>
   );
 
-  return <div className="dashboard-frame">
+  return <div className={`dashboard-frame ${collapsed ? "is-collapsed" : ""}`}>
     <aside className="dashboard-sidebar">
       <nav aria-label="Dashboard navigation" className="dashboard-navigation" onKeyDown={event => {
         if (event.key === "Escape" && menuOpen) {
@@ -77,7 +116,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         }
       }}>
         <div className="dashboard-brand">
-          <BrandLogo href="/dashboard" />
+          <span className="dashboard-brand-logo"><BrandLogo href={root} /></span>
+          <button type="button" className="dashboard-collapse-toggle" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            onClick={() => setCollapsed(value => !value)}>{collapsed ? "»" : "«"}</button>
           <button ref={menuToggle} type="button" className="dashboard-menu-toggle"
             aria-expanded={menuOpen} aria-controls="dashboard-sections"
             onClick={() => setMenuOpen(!menuOpen)}>
@@ -87,14 +128,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div id="dashboard-sections" className={`dashboard-sections ${menuOpen ? "is-open" : ""}`}>
           <div className="dashboard-section-list">
             {sections.map(section => <div key={section.label} className="dashboard-nav-group">
-              <p className="dashboard-nav-label">{section.label}</p>
-              {section.items.map(item)}
+              <button type="button" className="dashboard-nav-label" aria-expanded={collapsed || groupExpanded(section.label)}
+                onClick={() => { if (collapsed) setCollapsed(false); else setExpandedGroups(current => ({ ...current, [groupKey(section.label)]: !groupExpanded(section.label) })); }}>
+                {section.label}<span aria-hidden="true">⌄</span>
+              </button>
+              <div className="dashboard-nav-items" hidden={!collapsed && !groupExpanded(section.label)}>
+                {section.items.map(item)}
+              </div>
             </div>)}
-            {advisoryAgreementsEnabled() && <div className="dashboard-nav-group">
-              <p className="dashboard-nav-label">Advisory</p>
-              {item({ href: "/dashboard/advisory-bookings", label: "Advisory requests" })}
-              {isStaff(user.data) && item({ href: "/dashboard/staff/advisory-bookings", label: "Staff bookings" })}
-            </div>}
           </div>
           <div className="dashboard-site-link">
             <Link href="/" onClick={closeMenu} className="flex items-center justify-between gap-3 text-sm text-ink-muted hover:text-ink">
@@ -107,13 +148,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="min-w-0">
       <header className="dashboard-toolbar">
         <div className="flex min-w-0 items-center gap-2 text-sm">
-          <Link href="/dashboard" className="hidden text-ink-muted hover:text-ink sm:inline">Dashboard</Link>
-          <span aria-hidden="true" className="hidden text-line sm:inline">/</span>
+          <OrganizationSwitcher scope={scope} pathname={pathname} memberships={memberships.data ?? []} />
+          <span aria-hidden="true" className="text-line">{" / "}</span>
           <span className="truncate font-semibold">{currentSection}</span>
         </div>
         <div className="flex items-center gap-2"><ThemeSwitcher /><AccountMenu key={user.data.id} user={user.data} /></div>
       </header>
-      <div className="dashboard-content" key={user.data.id}>{children}</div>
+      <div className="dashboard-content" key={`${user.data.id}:${root}`}>{children}</div>
     </div>
   </div>;
 }

@@ -1,0 +1,61 @@
+export type DashboardScope = { kind: "personal" } | { kind: "organization"; id: string };
+
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const sharedSections = new Set(["jobs", "schedules", "settings"]);
+
+export function personalPath(section = ""): string {
+  return section ? `/me/${section}` : "/me";
+}
+
+export function organizationPath(id: string, section = ""): string {
+  if (!uuidPattern.test(id)) throw new Error("Invalid organization ID.");
+  return section ? `/org/${id}/${section}` : `/org/${id}`;
+}
+
+export function scopeFromPath(pathname: string): DashboardScope | null {
+  if (pathname === "/me" || pathname.startsWith("/me/")) return { kind: "personal" };
+  const match = pathname.match(/^\/org\/([^/]+)(?:\/|$)/);
+  return match && uuidPattern.test(match[1]) ? { kind: "organization", id: match[1] } : null;
+}
+
+export function switchScopePath(pathname: string, target: DashboardScope): string {
+  const source = scopeFromPath(pathname);
+  const suffix = source?.kind === "organization"
+    ? pathname.slice(`/org/${source.id}`.length)
+    : source?.kind === "personal" ? pathname.slice(3) : "";
+  const section = suffix.split("/")[1] ?? "";
+  const base = target.kind === "personal" ? personalPath() : organizationPath(target.id);
+  if (target.kind === "organization" && !sharedSections.has(section)) return base;
+  if (!section) return base;
+  return `${base}/${section}`;
+}
+
+export function legacyDashboardPath(pathname: string): string | null {
+  if (pathname === "/dashboard") return "/me";
+  if (!pathname.startsWith("/dashboard/")) return null;
+  const suffix = pathname.slice("/dashboard/".length);
+  if (suffix === "workspaces") return "/me/organizations";
+  const organization = suffix.match(/^workspaces\/([^/]+)(?:\/(.*))?$/);
+  if (organization?.[1] && uuidPattern.test(organization[1])) {
+    const section = organization[2] === "retention" ? "settings/retention" : organization[2] ?? "";
+    return organizationPath(organization[1], section);
+  }
+  if (suffix === "billing") return "/me/organizations";
+  if (suffix === "staff" || suffix.startsWith("staff/")) return `/${suffix}`;
+  return personalPath(suffix);
+}
+
+export function dashboardDestination(value: string | null): string {
+  if (!value || value.startsWith("//")) return "/me";
+  try {
+    const base = "https://skaleagents.com";
+    const url = new URL(value, base);
+    if (url.origin !== base) return "/me";
+    const legacy = legacyDashboardPath(url.pathname);
+    if (legacy) return `${legacy}${url.search}${url.hash}`;
+    if (scopeFromPath(url.pathname) || url.pathname === "/staff" || url.pathname.startsWith("/staff/")) {
+      return `${url.pathname}${url.search}${url.hash}`;
+    }
+  } catch { /* Invalid destinations open personal home. */ }
+  return "/me";
+}

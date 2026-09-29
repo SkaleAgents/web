@@ -37,7 +37,7 @@ test("email preferences save independently and survive reload", async ({ page })
   await expect(page.getByRole("checkbox", { name: /^Completed audits/ })).not.toBeChecked();
   await expect(page.getByRole("checkbox", { name: /^Failed audits/ })).toBeChecked();
   await expect(page.getByRole("checkbox", { name: /^Review updates/ })).toBeChecked();
-  await expect(page.getByRole("link", { name: "Manage optional schedule webhooks" })).toHaveAttribute("href", "/dashboard/schedules");
+  await expect(page.getByRole("link", { name: "Manage optional schedule webhooks" })).toHaveAttribute("href", "/me/schedules");
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
@@ -86,7 +86,7 @@ test("guests reach the sign-in form and make no private preference requests", as
     return route.fulfill({ status: 401, json: {} });
   });
   await page.goto("/settings");
-  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard%2Fsettings$/);
+  await expect(page).toHaveURL(/\/login\?next=%2Fme%2Fsettings$/);
   await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   expect(privateRequests).toBe(0);
@@ -137,6 +137,6 @@ test("late preference saves cannot restore private data after logout", async ({ 
   await expect(page).toHaveURL(/\/login(?:\?next=.*)?$/);
   release();
   await page.goto("/settings");
-  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard%2Fsettings$/);
+  await expect(page).toHaveURL(/\/login\?next=%2Fme%2Fsettings$/);
   await expect(page.getByText("alice@example.com", { exact: true })).toHaveCount(0);
 });

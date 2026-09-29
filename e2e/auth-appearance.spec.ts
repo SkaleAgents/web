@@ -75,7 +75,7 @@ test("signed-in users can change theme from the dashboard toolbar", async ({ pag
   for (const resource of ["jobs", "schedules", "bots"]) {
     await page.route(`**/api/${resource}`, route => route.fulfill({ json: { [resource]: [] } }));
   }
-  await page.goto("/dashboard");
+  await page.goto("/me");
   await expect(page.getByRole("button", { name: "Appearance User, account menu" })).toBeVisible();
   await selectTheme(page, "Dark");
   await expect(page.locator("html")).toHaveClass(/\bdark\b/);

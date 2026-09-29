@@ -23,7 +23,7 @@ test("a signed-in customer opens a prepared portfolio link without leaking the d
     body: "<h1>Portfolio booking fixture</h1>",
   }));
 
-  await page.goto("/dashboard/advisory-bookings");
+  await page.goto("/me/advisory-bookings");
   await expect(page.getByRole("heading", { name: "Advisory requests" })).toBeVisible();
   await expect(page.getByText("No linked consultations yet.")).toBeVisible();
   const popupPromise = context.waitForEvent("page");
