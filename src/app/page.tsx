@@ -88,7 +88,7 @@ export default function MarketingHome() {
         <div className="mt-10 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
             <article key={feature.href} className="marketing-feature flex flex-col border-t border-line py-7">
-              <p className="marketing-eyebrow flex justify-between gap-3"><span>{feature.label}</span><span className="opacity-60">{feature.number}</span></p>
+              <p className="marketing-eyebrow flex justify-between gap-3"><span>{feature.label}</span><span >{feature.number}</span></p>
               <h3 className="mt-5 text-lg font-semibold">{feature.title}</h3>
               <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-muted">{feature.description}</p>
               <Link href={feature.href} className="mt-5 inline-flex w-fit items-center gap-3 text-sm font-semibold hover:underline">{feature.cta}<span aria-hidden="true">↗</span></Link>
