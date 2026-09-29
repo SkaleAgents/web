@@ -8,6 +8,9 @@ test.beforeEach(async ({ page }) => {
 test("customized prompts update, copy, and reset without leaving the page", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/");
+  const explorer = page.locator(".example-explorer");
+  await explorer.scrollIntoViewIfNeeded();
+  await expect(explorer.getByRole("radio", { name: "Security", exact: true })).toBeEnabled();
   await page.locator("summary").filter({ hasText: "Read or customize the prompt" }).click();
   await page.getByRole("textbox", { name: "What are you working on?" }).fill("A Node.js API on Kubernetes preparing for production.");
   await page.getByLabel("How should the answer look?").selectOption("Pull request checklist");
@@ -27,6 +30,8 @@ test("customized prompts update, copy, and reset without leaving the page", asyn
 test("the starting-point picker recommends the matching route and can be reset", async ({ page }) => {
   await page.goto("/");
   const picker = page.getByRole("region", { name: "Find your starting point." });
+  await picker.scrollIntoViewIfNeeded();
+  await expect(picker.getByRole("radio", { name: "Try a specialist", exact: true })).toBeEnabled();
   const choices = [
     ["Try a specialist", "Find a specialist bot", "/bots"],
     ["Try a specialist", "Grab a ready-made prompt", "/prompts"],
@@ -51,10 +56,15 @@ test("the prompt builder and recommendation fit on a narrow mobile screen", asyn
   await page.setViewportSize({ width: 320, height: 740 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  const explorer = page.locator(".example-explorer");
+  await explorer.scrollIntoViewIfNeeded();
+  await expect(explorer.getByRole("radio", { name: "Security", exact: true })).toBeEnabled();
   await page.locator("summary").filter({ hasText: "Read or customize the prompt" }).click();
   await page.getByRole("textbox", { name: "What are you working on?" }).fill("LongProjectName".repeat(20));
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
   const picker = page.getByRole("region", { name: "Find your starting point." });
+  await picker.scrollIntoViewIfNeeded();
+  await expect(picker.getByRole("radio", { name: "Try a specialist", exact: true })).toBeEnabled();
   await picker.getByText("Review infrastructure", { exact: true }).click();
   await picker.getByText("On a recurring schedule", { exact: true }).click();
   await expect(picker.getByRole("link", { name: "Explore scheduled audits" })).toBeVisible();

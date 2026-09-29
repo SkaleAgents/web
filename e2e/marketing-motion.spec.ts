@@ -101,6 +101,9 @@ test("all directory badges remain reachable by keyboard on mobile", async ({ pag
 test("reduced motion leaves a static, manually scrollable badge strip", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  const explorer = page.locator(".example-explorer");
+  await explorer.scrollIntoViewIfNeeded();
+  await expect(explorer.locator(".example-countdown")).toBeAttached();
   const slider = page.getByRole("region", { name: "Directory badges", exact: true });
   await slider.scrollIntoViewIfNeeded();
   await expect(page.getByRole("button", { name: "Pause badges" })).toBeHidden();
