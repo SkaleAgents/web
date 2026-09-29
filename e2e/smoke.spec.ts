@@ -20,7 +20,7 @@ test.describe("Phase 1 page smokes", () => {
       page.getByRole("heading", { name: /Bot directory/i }),
     ).toBeVisible();
     await expect(
-      page.getByRole("banner").getByRole("button", { name: "Account menu" }),
+      page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true }),
     ).toBeVisible();
     await expect(page.getByText("Deferred", { exact: true })).not.toBeVisible();
   });
@@ -40,7 +40,7 @@ test.describe("Phase 1 page smokes", () => {
       page.getByRole("heading", { name: /Control plane for AI DevOps agents/i }),
     ).toBeVisible();
     await expect(
-      page.getByRole("banner").getByRole("button", { name: "Account menu" }),
+      page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true }),
     ).toBeVisible();
     await expect(page.getByRole("contentinfo")).toContainText("SkaleAgents");
   });
@@ -70,7 +70,7 @@ test.describe("Phase 1 page smokes", () => {
     await expect(page.getByRole("heading", { name: /Create a schedule/i })).toBeVisible();
   });
 
-  test("every public route uses the shared menu and sign-in action", async ({ page }) => {
+  test("every public route shows a direct sign-in action", async ({ page }) => {
     await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
     for (const path of ["/", "/bots", "/prompts", "/mcp-config"]) {
       await page.goto(path);
@@ -78,7 +78,8 @@ test.describe("Phase 1 page smokes", () => {
       await expect(page.getByRole("navigation").getByRole("button")).toHaveCount(2);
       await expect(page.getByRole("navigation").getByRole("link", { name: "Home", exact: true })).toHaveCount(0);
       await expect(page.getByRole("link", { name: "SkaleAgents home" })).toHaveAttribute("href", "/");
-      await expect(page.getByRole("banner").getByRole("button", { name: "Account menu" })).toBeVisible();
+      await expect(page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true })).toBeVisible();
+      await expect(page.getByRole("banner").getByRole("button", { name: "Account menu" })).toHaveCount(0);
     }
   });
 

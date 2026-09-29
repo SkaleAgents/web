@@ -7,11 +7,17 @@ import { useQuery } from "@tanstack/react-query";
 import { currentUserOptions } from "@/lib/session";
 import { LinkButton } from "@/components/ui";
 import { AccountMenu } from "@/components/account-menu";
-import { GuestAccountMenu } from "@/components/guest-account-menu";
 import { BrandLogo } from "@/components/brand";
 import { ProductNavigation } from "@/components/product-navigation";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
+import type { ApiUser } from "@/lib/api";
+
+function SessionAccountAction({ user, pending }: { user: ApiUser | null | undefined; pending: boolean }) {
+  if (pending) return <span role="status" aria-label="Checking account" className="h-9 w-20 animate-pulse rounded-[10px] bg-canvas" />;
+  if (user) return <AccountMenu key={user.id} user={user} />;
+  return <LinkButton href="/login" variant="secondary" className="px-3 py-1.5">Sign in</LinkButton>;
+}
 
 export function AppShell({ children, publicFooter }: { children: React.ReactNode; publicFooter: React.ReactNode }) {
   const pathname = usePathname();
@@ -61,7 +67,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
           <div className="flex flex-wrap items-center gap-4">
             <Link href="/" className="text-sm text-ink-muted hover:text-ink">Back to public site</Link>
             <ThemeSwitcher />
-            {userQuery.data && <AccountMenu key={userQuery.data.id} user={userQuery.data} />}
+            <SessionAccountAction user={userQuery.data} pending={userQuery.isPending} />
           </div>
         </div>
       </header>
@@ -80,15 +86,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
           <div className="ml-auto flex flex-wrap items-center justify-end gap-3 text-sm sm:ml-0">
             {userQuery.data && <LinkButton href="/me" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>}
             <ThemeSwitcher />
-            {userQuery.isPending ? (
-              <span role="status" aria-label="Checking account" className="account-nav-trigger">
-                <span aria-hidden="true" className="account-nav-avatar" />
-              </span>
-            ) : userQuery.data ? (
-              <AccountMenu key={userQuery.data.id} user={userQuery.data} />
-            ) : (
-              <GuestAccountMenu />
-            )}
+            <SessionAccountAction user={userQuery.data} pending={userQuery.isPending} />
           </div>
         </div>
       </header>
