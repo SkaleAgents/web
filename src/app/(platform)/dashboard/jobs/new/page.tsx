@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { apiFetch, ensureCsrfCookie, type SwarmJob } from "@/lib/api";
@@ -8,6 +8,7 @@ import { Button, LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
 import { buildSourceMetadata } from "@/lib/source-metadata";
+import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
 const AUDIT_SPECIALISTS = ["devsecops", "sre", "mlops", "scaling"] as const;
 const specialistDetails = {
@@ -19,6 +20,8 @@ const specialistDetails = {
 type AuditSpecialist = (typeof AUDIT_SPECIALISTS)[number];
 
 export default function NewJobPage() {
+  const pathname = usePathname();
+  const jobsPath = personalDestinationFromPath(pathname, "jobs");
   const router = useRouter();
   const queryClient = useQueryClient();
   const user = useQuery(currentUserOptions);
@@ -55,13 +58,13 @@ export default function NewJobPage() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["swarm-jobs", user.data?.id ?? "guest"] });
-      router.push("/me/jobs");
+      router.push(jobsPath);
     },
   });
 
   return <main className="mx-auto max-w-3xl space-y-6">
     <div className="workspace-intro">
-      <LinkButton href="/me/jobs" variant="ghost">Back to audit jobs</LinkButton>
+      <LinkButton href={jobsPath} variant="ghost">Back to audit jobs</LinkButton>
       <h1 className="workspace-heading mt-3">New audit</h1>
       <p className="mt-2 text-sm text-ink-muted">Add configuration, choose what to review, then queue the audit.</p>
     </div>

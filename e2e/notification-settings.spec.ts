@@ -37,7 +37,7 @@ test("email preferences save independently and survive reload", async ({ page })
   await expect(page.getByRole("checkbox", { name: /^Completed audits/ })).not.toBeChecked();
   await expect(page.getByRole("checkbox", { name: /^Failed audits/ })).toBeChecked();
   await expect(page.getByRole("checkbox", { name: /^Review updates/ })).toBeChecked();
-  await expect(page.getByRole("link", { name: "Manage optional schedule webhooks" })).toHaveAttribute("href", "/me/schedules");
+  await expect(page.getByRole("link", { name: "Manage optional schedule webhooks" })).toHaveAttribute("href", "/dashboard/schedules");
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

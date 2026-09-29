@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { currentUserOptions } from "@/lib/session";
+import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 import {
   apiFetch,
   ensureCsrfCookie,
@@ -33,6 +34,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function StudioEditPage() {
+  const pathname = usePathname();
   const params = useParams<{ id: string }>();
   const id = params.id;
   const router = useRouter();
@@ -108,7 +110,7 @@ export default function StudioEditPage() {
       void queryClient.invalidateQueries({ queryKey: ["bots"] });
       void queryClient.invalidateQueries({ queryKey: botKey });
       toast.success("Published");
-      router.push("/me/bots");
+      router.push(personalDestinationFromPath(pathname, "bots"));
     },
     onError: (err: Error) => toast.error(err.message),
   });

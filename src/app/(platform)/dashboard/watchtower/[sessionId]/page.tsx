@@ -1,12 +1,13 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, API_URL, type PatchProposal, type ProposalGenerationResult, type SwarmFinding, type SwarmJob, type SwarmStep, type WatchtowerRedirect, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
 import { AdvisoryBookingRequest } from "@/components/advisory-booking-request";
 import { currentUserOptions } from "@/lib/session";
+import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
 export default function WatchtowerPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -14,6 +15,8 @@ export default function WatchtowerPage() {
 }
 
 function SessionReview({ sessionId }: { sessionId: string }) {
+  const pathname = usePathname();
+  const jobsPath = personalDestinationFromPath(pathname, "jobs");
   const queryClient = useQueryClient();
   const user = useQuery(currentUserOptions);
   const userId = user.data?.id ?? "guest";
@@ -91,7 +94,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
         <p role="alert" className="text-sm text-danger">{error instanceof Error ? error.message : "Could not load this review."}</p>
         <div className="flex gap-3">
           <Button type="button" disabled={session.isFetching || job.isFetching} onClick={() => void (session.isError ? session.refetch() : job.refetch())}>Try again</Button>
-          <LinkButton href="/me/jobs" variant="secondary">Back to audits</LinkButton>
+          <LinkButton href={jobsPath} variant="secondary">Back to audits</LinkButton>
         </div>
       </main>
     );
@@ -131,7 +134,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
             </Button>
           )}
           <AdvisoryBookingRequest source={{ type: "watchtower_session", id: sessionId }} />
-          <LinkButton href="/me/jobs" className="bg-transparent">Back to audits</LinkButton>
+          <LinkButton href={jobsPath} className="bg-transparent">Back to audits</LinkButton>
         </div>
       </div>
 

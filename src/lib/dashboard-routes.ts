@@ -18,6 +18,11 @@ export function organizationPath(id: string, section = ""): string {
   return section ? `/org/${id}/${section}` : `/org/${id}`;
 }
 
+export function personalDestinationFromPath(pathname: string, section = ""): string {
+  const scope = scopeFromPath(pathname);
+  return scope?.kind === "organization" ? organizationPath(scope.id, section) : personalPath(section);
+}
+
 export function scopeFromPath(pathname: string): DashboardScope | null {
   if (pathname === "/me" || pathname.startsWith("/me/")) return { kind: "personal" };
   const match = pathname.match(/^\/org\/([^/]+)(?:\/|$)/);

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie, type SwarmSchedule } from "@/lib/api";
 import { Button, FieldLabel, LinkButton, Select, TextArea, TextInput } from "@/components/ui";
@@ -11,6 +12,7 @@ import { RetentionNotice } from "@/components/retention-notice";
 import { SourceMetadata } from "@/components/source-metadata";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
 import { buildSourceMetadata } from "@/lib/source-metadata";
+import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
 const timezones = ["UTC", "America/Los_Angeles", "America/New_York", "Europe/London", "Europe/Berlin", "Asia/Dhaka", "Asia/Kolkata", "Asia/Singapore", "Asia/Tokyo", "Australia/Sydney"];
 const cadencePresets = [
@@ -21,6 +23,8 @@ const cadencePresets = [
 ];
 
 export default function SchedulesPage() {
+  const pathname = usePathname();
+  const href = (section: string) => personalDestinationFromPath(pathname, section);
   const queryClient = useQueryClient();
   const user = useQuery(currentUserOptions);
   const schedulesKey = ["swarm-schedules", user.data?.id ?? "guest"];
@@ -71,7 +75,7 @@ export default function SchedulesPage() {
         <h1 className="workspace-heading">Scheduled audits</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
           Rerun a saved infrastructure scope on your timetable. Choose a cadence and timezone,
-          then manage email preferences in <Link href="/me/settings" className="text-accent underline">Settings</Link>.
+          then manage email preferences in <Link href="/account/settings" className="text-accent underline">Settings</Link>.
           Webhooks are optional.
         </p>
       </div>
@@ -124,7 +128,7 @@ export default function SchedulesPage() {
       </section>
 
       <section className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your schedules</h2><LinkButton href="/me/jobs" variant="secondary">View audit results</LinkButton></div>
+        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your schedules</h2><LinkButton href={href("jobs")} variant="secondary">View audit results</LinkButton></div>
         {Object.entries(deletions).map(([id, initialStatus]) => <ScheduleDeletionStatus key={id} id={id} initialStatus={initialStatus} />)}
         {(user.isPending || user.data && schedules.isPending) && <p className="text-sm text-ink-muted">Loading schedules…</p>}
         {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Sign in in the header to manage your schedules.</p>}
