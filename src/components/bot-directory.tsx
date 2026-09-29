@@ -22,7 +22,7 @@ export function BotDirectory({ manage = false }: { manage?: boolean }) {
   });
 
   const bots = botsQuery.data?.filter(bot => manage ? bot.ownerUserId === userQuery.data?.id : bot.visibility === "public" && bot.status === "published");
-  const basePath = manage ? "/dashboard/bots" : "/bots";
+  const basePath = manage ? "/me/bots" : "/bots";
   const specialties = [...new Set(bots?.map((bot) => bot.specialty) ?? [])].sort();
   const filteredBots = bots?.filter((bot) =>
     (specialty === "all" || bot.specialty === specialty) &&
@@ -42,7 +42,7 @@ export function BotDirectory({ manage = false }: { manage?: boolean }) {
             then take it to Grok, Claude, Codex, or your preferred assistant.
           </p>
         </div>
-        <LinkButton href={manage ? "/dashboard/studio" : "/dashboard/bots"}>{manage ? "Create bot" : "Manage your bots"}</LinkButton>
+        <LinkButton href={manage ? "/me/studio" : "/me/bots"}>{manage ? "Create bot" : "Manage your bots"}</LinkButton>
       </div>
 
       <section aria-label="Find a bot" className="space-y-4">
@@ -96,7 +96,7 @@ export function BotDirectory({ manage = false }: { manage?: boolean }) {
               </LinkButton>
               {manage && userQuery.data?.id === bot.ownerUserId && (
                 <Link
-                  href={`/dashboard/studio/${bot.id}`}
+                  href={`/me/studio/${bot.id}`}
                   className="text-sm font-semibold text-ink-muted hover:text-ink"
                 >
                   Edit in Studio

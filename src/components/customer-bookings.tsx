@@ -82,7 +82,7 @@ function handleSessionExpiry(queryClient: ReturnType<typeof useQueryClient>, que
 
 function BookingSummary({ booking }: { booking: AdvisoryBooking }) {
   return (
-    <Link href={`/dashboard/advisory-bookings/${encodeURIComponent(booking.id)}`} className="block space-y-3 p-5 hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent">
+    <Link href={`/me/advisory-bookings/${encodeURIComponent(booking.id)}`} className="block space-y-3 p-5 hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent">
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="rounded-full bg-accent-soft px-2 py-1 font-semibold text-ink">{bookingStatusLabels[booking.status]}</span>
         <span className="text-ink-muted">{booking.urgency} priority</span>
@@ -161,7 +161,7 @@ export function CustomerBookingDetail({ id }: { id: string }) {
 
   return (
     <main className="space-y-6">
-      <LinkButton href="/dashboard/advisory-bookings" variant="ghost">Back to advisory requests</LinkButton>
+      <LinkButton href="/me/advisory-bookings" variant="ghost">Back to advisory requests</LinkButton>
       {denied || notFound ? (
         <div className="space-y-3">
           <h1 className="workspace-heading">{denied ? "Sign in required" : "Request unavailable"}</h1>
@@ -198,7 +198,7 @@ export function CustomerBookingDetail({ id }: { id: string }) {
                 <dt className="text-ink-muted">Source</dt>
                 <dd className="mt-1 break-all">
                   {data.source.type === "watchtower_session" ? (
-                    <Link className="text-accent underline" href={`/dashboard/watchtower/${encodeURIComponent(data.source.id)}`}>Open source Watchtower session</Link>
+                    <Link className="text-accent underline" href={`/me/watchtower/${encodeURIComponent(data.source.id)}`}>Open source Watchtower session</Link>
                   ) : <span>Audit job reference (no direct source page available)</span>}
                   <span className="mt-1 block font-mono text-xs text-ink-muted">{data.source.id}</span>
                 </dd>

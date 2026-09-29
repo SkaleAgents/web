@@ -93,7 +93,7 @@ function WorkspaceSchedules({ workspaceId }: { workspaceId: string }) {
       <p className="workspace-kicker">Organizations / Scheduled audits</p>
       <h1 className="workspace-heading">{workspace.name} schedules</h1>
       <p className="mt-1 max-w-2xl text-sm text-ink-muted">Shared schedules belong to this organization. Current members can see them even if the creator leaves.</p>
-      <Link href={`/dashboard/workspaces/${workspaceId}/jobs`} className="mt-3 inline-flex text-sm font-semibold text-accent hover:underline">Shared audit history</Link>
+      <Link href={`/org/${workspaceId}/jobs`} className="mt-3 inline-flex text-sm font-semibold text-accent hover:underline">Shared audit history</Link>
     </div>
     {canEdit && <div><Button onClick={() => setFormOpen((value) => !value)}>{formOpen ? "Close form" : "Create schedule"}</Button></div>}
     {formOpen && canEdit && <form onSubmit={submit} className="max-w-3xl space-y-4 rounded-[10px] border border-line bg-canvas-elevated p-5">
@@ -110,7 +110,7 @@ function WorkspaceSchedules({ workspaceId }: { workspaceId: string }) {
       {schedules.data?.length === 0 && <p className="text-sm text-ink-muted">No shared schedules yet.</p>}
       <ul className="divide-y divide-line">{schedules.data?.map((item: WorkspaceSchedule) => <li key={item.id} className="space-y-3 py-5">
         <div className="flex flex-wrap items-start justify-between gap-4"><div><h2 className="font-semibold text-ink">{item.name}</h2><p className="mt-1 text-sm text-ink-muted">{item.enabled ? "Active" : "Paused"} · {item.cronExpression} · {item.timezone}</p>{item.lastError && <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">{item.lastError}</p>}{item.retention?.inputPurgeStatus !== "retained" && <p className="mt-1 text-sm text-ink-muted">Input cleanup: {item.retention?.inputPurgeStatus ?? "unknown"}</p>}</div>
-        <div className="flex flex-wrap gap-2">{item.lastJobId && <Link href={`/dashboard/workspaces/${workspaceId}/jobs`} className="inline-flex items-center text-sm font-semibold text-accent hover:underline">Open last audit</Link>}{canEdit && <Button variant="secondary" disabled={update.isPending} onClick={() => update.mutate({ id: item.id, changes: { enabled: !item.enabled } })}>{item.enabled ? "Pause" : "Resume"}</Button>}{canClean && <><Button variant="secondary" onClick={() => setConfirm({ kind: "purge", id: item.id })}>Purge input</Button><Button variant="secondary" onClick={() => setConfirm({ kind: "delete", id: item.id })}>Delete schedule</Button></>}</div></div>
+        <div className="flex flex-wrap gap-2">{item.lastJobId && <Link href={`/org/${workspaceId}/jobs`} className="inline-flex items-center text-sm font-semibold text-accent hover:underline">Open last audit</Link>}{canEdit && <Button variant="secondary" disabled={update.isPending} onClick={() => update.mutate({ id: item.id, changes: { enabled: !item.enabled } })}>{item.enabled ? "Pause" : "Resume"}</Button>}{canClean && <><Button variant="secondary" onClick={() => setConfirm({ kind: "purge", id: item.id })}>Purge input</Button><Button variant="secondary" onClick={() => setConfirm({ kind: "delete", id: item.id })}>Delete schedule</Button></>}</div></div>
         {canEdit && <ScheduleEdit item={item} busy={update.isPending} onSave={(changes) => update.mutate({ id: item.id, changes })} />}
       </li>)}</ul>
     </section>

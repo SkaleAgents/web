@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 type Role = "owner" | "member" | "viewer";
 
 const account = { id: "account-a", displayName: "Account A", email: "a@example.test", grokSubject: null };
-const roles: Record<string, Role> = { "workspace-a": "owner", "workspace-b": "viewer" };
+const roles: Record<string, Role> = { "0198f0b0-0000-7000-8000-000000000001": "owner", "0198f0b0-0000-7000-8000-000000000002": "viewer" };
 
 function workspace(id: string, role: Role = roles[id] ?? "member") {
   return { id, name: `Team ${id}`, createdAt: "2026-09-25T12:00:00Z", role };
@@ -45,7 +45,7 @@ async function mockSharedAuditApi(page: Page, options: {
     const path = url.pathname;
     const method = route.request().method();
     if (path === "/api/workspaces") {
-      return route.fulfill({ json: { data: options.memberships?.() ?? [workspace("workspace-a")] } });
+      return route.fulfill({ json: { data: options.memberships?.() ?? [workspace("0198f0b0-0000-7000-8000-000000000001")] } });
     }
     auditRequests.push({ path, method });
     const match = path.match(/^\/api\/workspaces\/([^/]+)\/jobs(?:\/([^/]+))?(?:\/(purge-source))?$/);
@@ -88,8 +88,8 @@ async function mockSharedAuditApi(page: Page, options: {
   return { auditRequests, deleteCount: () => deletes };
 }
 
-async function openWorkspaceAudits(page: Page, workspaceId = "workspace-a") {
-  await page.goto(`/dashboard/workspaces/${workspaceId}/jobs`);
+async function openWorkspaceAudits(page: Page, workspaceId = "0198f0b0-0000-7000-8000-000000000001") {
+  await page.goto(`/org/${workspaceId}/jobs`);
   await expect(page.getByRole("heading", { name: new RegExp(`Team ${workspaceId} audits`) })).toBeVisible();
 }
 
@@ -105,11 +105,11 @@ test.describe("workspace shared audits with rollout enabled", () => {
         : { status: 204 },
     });
     await openWorkspaceAudits(page);
-    await expect(page.getByText("Shared history workspace-a")).toBeVisible();
+    await expect(page.getByText("Shared history 0198f0b0-0000-7000-8000-000000000001")).toBeVisible();
     await page.getByRole("link", { name: "New shared audit" }).click();
     await page.getByLabel("Infrastructure configuration").fill("resource config");
     await page.getByRole("button", { name: "Queue shared audit" }).click();
-    await expect(page).toHaveURL(/\/dashboard\/workspaces\/workspace-a\/jobs$/);
+    await expect(page).toHaveURL(/\/org\/0198f0b0-0000-7000-8000-000000000001\/jobs$/);
     await page.getByRole("button", { name: "Details" }).last().click();
     await expect(page.getByRole("heading", { name: "Audit details" })).toBeVisible();
     await expect(page.getByText(/Review permissions/)).toBeVisible();
@@ -120,7 +120,7 @@ test.describe("workspace shared audits with rollout enabled", () => {
     expect(api.auditRequests.some(({ path }) => path.endsWith("/purge-source"))).toBe(false);
     await page.getByRole("button", { name: "Confirm source purge" }).click();
     await expect(page.getByText(/Purge status: pending/)).toBeVisible();
-    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-a/jobs/audit-created/purge-source", method: "POST" });
+    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/0198f0b0-0000-7000-8000-000000000001/jobs/audit-created/purge-source", method: "POST" });
 
     await page.getByRole("button", { name: "Close details" }).click();
     await page.getByRole("button", { name: "Delete" }).first().click();
@@ -129,11 +129,11 @@ test.describe("workspace shared audits with rollout enabled", () => {
     await expect(page.getByRole("status")).toContainText("Audit deletion pending");
     await expect.poll(() => api.deleteCount(), { timeout: 8_000 }).toBeGreaterThanOrEqual(3);
     await expect(page.getByRole("status")).toContainText("Audit deletion completed");
-    expect(api.auditRequests.filter(({ method, path }) => method === "DELETE" && path === "/api/workspaces/workspace-a/jobs/audit-workspace-a").length).toBeGreaterThanOrEqual(3);
+    expect(api.auditRequests.filter(({ method, path }) => method === "DELETE" && path === "/api/workspaces/0198f0b0-0000-7000-8000-000000000001/jobs/audit-0198f0b0-0000-7000-8000-000000000001").length).toBeGreaterThanOrEqual(3);
   });
 
   test("members can create and read but do not get owner purge or delete controls", async ({ page }) => {
-    const api = await mockSharedAuditApi(page, { memberships: () => [workspace("workspace-a", "member")] });
+    const api = await mockSharedAuditApi(page, { memberships: () => [workspace("0198f0b0-0000-7000-8000-000000000001", "member")] });
     await openWorkspaceAudits(page);
     await expect(page.getByRole("link", { name: "New shared audit" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Details" })).toBeVisible();
@@ -141,7 +141,7 @@ test.describe("workspace shared audits with rollout enabled", () => {
     await page.getByRole("link", { name: "New shared audit" }).click();
     await page.getByLabel("Infrastructure configuration").fill("member source");
     await page.getByRole("button", { name: "Queue shared audit" }).click();
-    await expect(page).toHaveURL(/\/dashboard\/workspaces\/workspace-a\/jobs$/);
+    await expect(page).toHaveURL(/\/org\/0198f0b0-0000-7000-8000-000000000001\/jobs$/);
     await page.getByRole("button", { name: "Details" }).last().click();
     await expect(page.getByRole("heading", { name: "Audit details" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Purge source" })).toHaveCount(0);
@@ -150,9 +150,9 @@ test.describe("workspace shared audits with rollout enabled", () => {
   });
 
   test("viewers can read details but cannot create or run owner cleanup actions", async ({ page }) => {
-    await mockSharedAuditApi(page, { memberships: () => [workspace("workspace-a", "viewer")] });
+    await mockSharedAuditApi(page, { memberships: () => [workspace("0198f0b0-0000-7000-8000-000000000001", "viewer")] });
     await openWorkspaceAudits(page);
-    await expect(page.getByText("Shared history workspace-a")).toBeVisible();
+    await expect(page.getByText("Shared history 0198f0b0-0000-7000-8000-000000000001")).toBeVisible();
     await expect(page.getByRole("link", { name: "New shared audit" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Delete" })).toHaveCount(0);
     await page.getByRole("button", { name: "Details" }).click();
@@ -161,22 +161,22 @@ test.describe("workspace shared audits with rollout enabled", () => {
   });
 
   test("keeps audit lists separate across workspace route changes", async ({ page }) => {
-    const api = await mockSharedAuditApi(page, { memberships: () => [workspace("workspace-a", "member"), workspace("workspace-b", "viewer")] });
-    await page.goto("/dashboard/workspaces");
+    const api = await mockSharedAuditApi(page, { memberships: () => [workspace("0198f0b0-0000-7000-8000-000000000001", "member"), workspace("0198f0b0-0000-7000-8000-000000000002", "viewer")] });
+    await page.goto("/me/organizations");
     await page.getByRole("link", { name: "Shared audits" }).nth(0).click();
-    await expect(page.getByText("Shared history workspace-a")).toBeVisible();
+    await expect(page.getByText("Shared history 0198f0b0-0000-7000-8000-000000000001")).toBeVisible();
     await page.getByRole("link", { name: "All organizations" }).click();
     await page.getByRole("link", { name: "Shared audits" }).nth(1).click();
-    await expect(page.getByText("Shared history workspace-b")).toBeVisible();
-    await expect(page.getByText("Shared history workspace-a")).toHaveCount(0);
-    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-a/jobs", method: "GET" });
-    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-b/jobs", method: "GET" });
+    await expect(page.getByText("Shared history 0198f0b0-0000-7000-8000-000000000002")).toBeVisible();
+    await expect(page.getByText("Shared history 0198f0b0-0000-7000-8000-000000000001")).toHaveCount(0);
+    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/0198f0b0-0000-7000-8000-000000000001/jobs", method: "GET" });
+    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/0198f0b0-0000-7000-8000-000000000002/jobs", method: "GET" });
   });
 
   test("removes cached detail when refreshed membership no longer includes the workspace", async ({ page }) => {
     await page.clock.install();
     let active = true;
-    await mockSharedAuditApi(page, { memberships: () => active ? [workspace("workspace-a", "member")] : [] });
+    await mockSharedAuditApi(page, { memberships: () => active ? [workspace("0198f0b0-0000-7000-8000-000000000001", "member")] : [] });
     await openWorkspaceAudits(page);
     await page.getByRole("button", { name: "Details" }).click();
     await expect(page.getByText(/Review permissions/)).toBeVisible();
@@ -193,6 +193,6 @@ test.describe("workspace shared audits with rollout enabled", () => {
     await expect(page.getByText("Shared audits are unavailable. Confirm the feature is enabled and that you still belong to this organization.")).toBeVisible();
     await expect(page.getByRole("link", { name: "New shared audit" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Delete" })).toHaveCount(0);
-    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/workspace-a/jobs", method: "GET" });
+    expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/0198f0b0-0000-7000-8000-000000000001/jobs", method: "GET" });
   });
 });

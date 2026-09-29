@@ -41,10 +41,10 @@ test("logout removes cached jobs and schedules across client navigation", async 
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/login(?:\?next=.*)?$/);
 
-  await page.goto("/dashboard/jobs");
+  await page.goto("/me/jobs");
   await expect(page).toHaveURL(/\/login\?next=/);
   await expect(page.getByText("Alice private audit", { exact: true })).toHaveCount(0);
-  await page.goto("/dashboard/schedules");
+  await page.goto("/me/schedules");
   await expect(page).toHaveURL(/\/login\?next=/);
   await expect(page.getByText("Alice private schedule", { exact: true })).toHaveCount(0);
   expect(guestRequests).toBe(0);
@@ -72,7 +72,7 @@ test("a late private response cannot repopulate the cache after logout", async (
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/login(?:\?next=.*)?$/);
   release();
-  await page.goto("/dashboard/schedules");
+  await page.goto("/me/schedules");
   await expect(page).toHaveURL(/\/login\?next=/);
   await expect(page.getByText("Alice private schedule", { exact: true })).toHaveCount(0);
 });

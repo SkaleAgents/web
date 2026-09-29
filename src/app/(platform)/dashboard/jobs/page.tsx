@@ -31,11 +31,11 @@ export default function JobsPage() {
           <h1 className="workspace-heading">Audit jobs</h1>
           <p className="mt-2 text-sm text-ink-muted">Track your reviews and open findings in Watchtower.</p>
         </div>
-        <LinkButton href="/dashboard/jobs/new">New audit</LinkButton>
+        <LinkButton href="/me/jobs/new">New audit</LinkButton>
       </div>
 
       <section className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your jobs</h2><LinkButton href="/dashboard/schedules" variant="secondary">Set up recurring reviews</LinkButton></div>
+        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your jobs</h2><LinkButton href="/me/schedules" variant="secondary">Set up recurring reviews</LinkButton></div>
         <div className="flex flex-wrap gap-2">{["all", "queued", "running", "completed", "failed"].map((item) => <button key={item} type="button" className="filter-chip capitalize" aria-pressed={status === item} onClick={() => { setStatus(item); setPage(1); }}>{item === "all" ? "All jobs" : item} {jobs.data ? `(${jobs.data.filter((job) => item === "all" || job.status === item).length})` : ""}</button>)}</div>
         {(user.isPending || user.data && jobs.isPending) && <p className="text-sm text-ink-muted">Loading jobs…</p>}
         {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Sign in in the header to access your audit jobs.</p>}
@@ -45,7 +45,7 @@ export default function JobsPage() {
             <p className="mt-2 text-sm text-ink-muted">Use Sign in in the header to access your audit jobs.</p>
           </div>
         )}
-        {jobs.data?.length === 0 && <div className="rounded-xl border border-dashed border-line p-6 text-sm text-ink-muted"><p>No audits yet. Create one to review your infrastructure.</p><LinkButton href="/dashboard/jobs/new" className="mt-4">New audit</LinkButton></div>}
+        {jobs.data?.length === 0 && <div className="rounded-xl border border-dashed border-line p-6 text-sm text-ink-muted"><p>No audits yet. Create one to review your infrastructure.</p><LinkButton href="/me/jobs/new" className="mt-4">New audit</LinkButton></div>}
         {Boolean(jobs.data?.length) && !jobs.data?.some((job) => status === "all" || job.status === status) && <p className="text-sm text-ink-muted">No {status} jobs. Choose another status to see your reviews.</p>}
         <ul className="divide-y divide-line">
           {visibleJobs.map((job) => (
@@ -55,7 +55,7 @@ export default function JobsPage() {
                 <p className="mt-1 line-clamp-2 text-sm font-medium text-ink">{job.summary ?? "Waiting for specialist results"}</p>
                 <p className="mt-1 text-xs text-ink-muted">{job.specialists.join(" · ")} · {new Date(job.createdAt).toLocaleString()}</p>
               </div>
-              <LinkButton href={`/dashboard/jobs/${job.id}`} variant="secondary">View audit</LinkButton>
+              <LinkButton href={`/me/jobs/${job.id}`} variant="secondary">View audit</LinkButton>
             </li>
           ))}
         </ul>

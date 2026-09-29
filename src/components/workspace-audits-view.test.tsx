@@ -62,7 +62,7 @@ it("lets a workspace owner inspect, purge, and retry pending deletion through wo
   const { renderPage, client } = setup(fetcher);
   renderPage();
 
-  expect(await screen.findByRole("link", { name: "New shared audit" })).toHaveAttribute("href", "/dashboard/workspaces/workspace-a/jobs/new");
+  expect(await screen.findByRole("link", { name: "New shared audit" })).toHaveAttribute("href", "/org/workspace-a/jobs/new");
   await userEvent.click(await screen.findByRole("button", { name: "Details" }));
   expect(await screen.findByRole("heading", { name: "Audit details" })).toBeInTheDocument();
   expect(screen.getByText(/Review permissions/)).toBeInTheDocument();

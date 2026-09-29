@@ -71,7 +71,7 @@ describe("organization retention notice", () => {
     client.setQueryData(["user"], { id: "owner-a", name: "Owner A" });
     render(<QueryClientProvider client={client}><WorkspacesView /></QueryClientProvider>);
     const link = await screen.findByRole("link", { name: "View audit retention notice" });
-    expect(link).toHaveAttribute("href", `/dashboard/workspaces/${workspaceId}/retention`);
+    expect(link).toHaveAttribute("href", `/org/${workspaceId}/settings/retention`);
     expect(screen.getAllByRole("link", { name: "View audit retention notice" })).toHaveLength(1);
   });
 });

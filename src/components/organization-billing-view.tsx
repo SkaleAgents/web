@@ -40,7 +40,7 @@ function utcDate(value: string): string {
   return `${new Date(value).toLocaleDateString("en-US", { timeZone: "UTC" })} UTC`;
 }
 
-export function OrganizationBillingView({ checkoutReturnOrganizationId = null }: { checkoutReturnOrganizationId?: string | null }) {
+export function OrganizationBillingView({ checkoutReturnOrganizationId = null, organizationId: fixedOrganizationId }: { checkoutReturnOrganizationId?: string | null; organizationId?: string }) {
   const user = useQuery(currentUserOptions);
   const client = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(checkoutReturnOrganizationId);
@@ -55,7 +55,10 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
     queryFn: async ({ signal }) => (await apiFetch<{ data: Plan[] }>("/api/organization-plans", { signal })).data,
   });
   const owned = organizations.data?.filter((organization) => organization.role === "owner") ?? [];
-  const organizationId = owned.find((organization) => organization.id === selectedId)?.id ?? owned[0]?.id;
+  const fixedOrganizationUnavailable = Boolean(fixedOrganizationId && organizations.isSuccess && !owned.some((organization) => organization.id === fixedOrganizationId));
+  const organizationId = fixedOrganizationId
+    ? owned.find((organization) => organization.id === fixedOrganizationId)?.id
+    : owned.find((organization) => organization.id === selectedId)?.id ?? owned[0]?.id;
   const billing = useQuery({
     queryKey: ["organization-billing", organizationId],
     enabled: Boolean(organizationId),
@@ -107,8 +110,9 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
     </div>
     {user.isError || organizations.isError || catalog.isError ? <p role="alert" className="text-sm text-danger">Billing details could not be loaded. Refresh the page and try again.</p> : null}
     {organizations.isPending || catalog.isPending || user.isPending ? <p role="status" className="text-sm text-ink-muted">Loading billing details…</p> : null}
-    {organizations.isSuccess && owned.length === 0 ? <p className="text-sm text-ink-muted">You do not own an organization yet. <Link href="/dashboard/workspaces" className="underline">Create one in Organizations</Link>.</p> : null}
-    {owned.length > 0 ? <div className="space-y-2">
+    {fixedOrganizationUnavailable ? <p role="alert" className="text-sm text-danger">Billing unavailable for this organization.</p> : null}
+    {organizations.isSuccess && owned.length === 0 && !fixedOrganizationId ? <p className="text-sm text-ink-muted">You do not own an organization yet. <Link href="/me/organizations" className="underline">Create one in Organizations</Link>.</p> : null}
+    {owned.length > 0 && !fixedOrganizationId ? <div className="space-y-2">
       <label className="block max-w-sm text-sm font-medium text-ink" htmlFor="billing-organization">Organization</label>
       <select id="billing-organization" className="w-full max-w-sm rounded-md border border-line bg-canvas-elevated px-3 py-2 text-ink" value={organizationId} onChange={(event) => { setSelectedId(event.target.value); setCheckoutLink(null); change.reset(); cancel.reset(); }}>
         {owned.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}
@@ -118,7 +122,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
     {showingCheckoutReturn && billing.data ? <p role="status" aria-label="Checkout status" className="border-l-2 border-accent bg-accent-soft px-4 py-3 text-sm text-ink">
       {billing.data.plan === "free" ? "Checking your payment. Your plan will update here after verification." : `${currentPlan?.name ?? "Your paid plan"} is active. Your audit allowance is shown below.`}
     </p> : null}
-    {billing.data && currentPlan ? <>
+    {billing.data && currentPlan && organizationId ? <>
       {billing.data.renewalPayment ? <section role="status" aria-label="Renewal payment" className="border-l-2 border-danger bg-canvas-elevated px-4 py-3 text-sm text-ink">
         <p className="font-semibold">{{
           grace: "Renewal payment is overdue.", access_paused: "Paid audit access is paused.",
@@ -171,7 +175,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null }:
           })}
         </div>
         {change.isError ? <p role="alert" className="text-sm text-danger">{change.error.message}</p> : null}
-        {billing.data.testModeEnabled && checkoutLink?.organizationId === organizationId ? <a className="inline-flex rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:opacity-90" href={checkoutLink.url}>Continue to secure checkout</a> : null}
+        {billing.data.testModeEnabled && checkoutLink?.organizationId === organizationId ? <a className="inline-flex rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:opacity-90" href={checkoutLink?.url}>Continue to secure checkout</a> : null}
       </section>
     </> : null}
   </main>;

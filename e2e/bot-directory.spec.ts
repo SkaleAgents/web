@@ -90,12 +90,12 @@ test("a signed-in creator can publish a bot into the directory", async ({ page }
   await expect(page.getByText(description)).toBeVisible();
   await expect(page.getByRole("link", { name: "View prompt" })).toHaveAttribute(
     "href",
-    `/dashboard/bots/${botId}`,
+    `/me/bots/${botId}`,
   );
   await expect(page.getByText(prompt)).not.toBeVisible();
   await expect(page.getByRole("link", { name: botName })).toHaveAttribute(
     "href",
-    `/dashboard/bots/${botId}`,
+    `/me/bots/${botId}`,
   );
   await page.getByRole("link", { name: botName }).click();
   await expect(page).toHaveURL(new RegExp(`/bots/${botId}$`));

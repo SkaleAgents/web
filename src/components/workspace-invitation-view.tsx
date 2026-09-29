@@ -86,7 +86,7 @@ export function WorkspaceInvitationView() {
           {accepted ? (
             <>
               <p role="status" className="text-sm text-ink">Invitation accepted. Your organization membership is active.</p>
-              <LinkButton href="/dashboard/workspaces" className="mt-4">View organizations</LinkButton>
+              <LinkButton href="/me/organizations" className="mt-4">View organizations</LinkButton>
             </>
           ) : error ? (
             <p role="alert" className="text-sm text-danger">{error}</p>
@@ -124,7 +124,7 @@ export function WorkspaceInvitationView() {
           <p className="mt-4 text-xs text-ink-muted">Organization membership does not share your personal audits, schedules, or advisory requests.</p>
         </section>
       )}
-      <Link href="/dashboard/workspaces" className="text-sm text-ink-muted underline underline-offset-4">View your organizations</Link>
+      <Link href="/me/organizations" className="text-sm text-ink-muted underline underline-offset-4">View your organizations</Link>
     </main>
   );
 }

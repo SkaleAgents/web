@@ -29,7 +29,9 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
     }
   }, [pathname, router, userQuery.data]);
 
-  const dashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const dashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/") ||
+    pathname === "/me" || pathname.startsWith("/me/") || pathname.startsWith("/org/") ||
+    pathname === "/staff" || pathname.startsWith("/staff/");
   const invitation = pathname === WORKSPACE_INVITATION_PATH;
   const authentication = pathname === "/login" || pathname.startsWith("/auth/");
 
@@ -76,7 +78,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
             <ProductNavigation key={pathname} />
           </div>
           <div className="ml-auto flex flex-wrap items-center justify-end gap-3 text-sm sm:ml-0">
-            {userQuery.data && <LinkButton href="/dashboard" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>}
+            {userQuery.data && <LinkButton href="/me" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>}
             <ThemeSwitcher />
             {userQuery.isPending ? (
               <span role="status" aria-label="Checking account" className="account-nav-trigger">

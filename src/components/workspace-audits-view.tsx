@@ -61,7 +61,7 @@ export function WorkspaceNewAuditPage({ workspaceId }: { workspaceId: string }) 
     onSuccess: (audit) => {
       if (client.getQueryData(currentUserOptions.queryKey)?.id !== accountId || audit.workspaceId !== workspaceId) return;
       void client.invalidateQueries({ queryKey: ["workspace-audits", accountId, workspaceId] });
-      router.push(`/dashboard/workspaces/${workspaceId}/jobs`);
+      router.push(`/org/${workspaceId}/jobs`);
     },
   });
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -73,7 +73,7 @@ export function WorkspaceNewAuditPage({ workspaceId }: { workspaceId: string }) 
   if (user.isError || !accountId || workspaceQuery.isError || !workspace || !canCreate) return <main><h1 className="workspace-heading">Organization unavailable</h1><p role="alert" className="mt-3 text-sm text-ink-muted">You cannot create audits in this organization.</p></main>;
   return <main className="mx-auto max-w-3xl space-y-6">
     <div className="workspace-intro">
-      <Link href={`/dashboard/workspaces/${workspaceId}/jobs`} className="text-sm font-semibold text-accent hover:underline">Back to shared audits</Link>
+      <Link href={`/org/${workspaceId}/jobs`} className="text-sm font-semibold text-accent hover:underline">Back to shared audits</Link>
       <h1 className="workspace-heading mt-3">New shared audit</h1>
       <p className="mt-2 text-sm text-ink-muted">Add configuration for {workspace.name}. Members of this organization can see the result.</p>
     </div>
@@ -200,10 +200,10 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
         <p className="workspace-kicker">Organizations / Shared review</p>
         <h1 className="workspace-heading">{workspace.name} audits</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">Shared audit history for current organization members. Watchtower and exports are not available for shared jobs yet.</p>
-        <Link className="mt-3 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href="/dashboard/workspaces">All organizations</Link>
-        {workspaceSchedulesEnabled() && <Link className="ml-4 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href={`/dashboard/workspaces/${workspaceId}/schedules`}>Shared schedules</Link>}
+        <Link className="mt-3 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href="/me/organizations">All organizations</Link>
+        {workspaceSchedulesEnabled() && <Link className="ml-4 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href={`/org/${workspaceId}/schedules`}>Shared schedules</Link>}
       </div>
-      {canCreate && !unavailable && <Link href={`/dashboard/workspaces/${workspaceId}/jobs/new`} className="inline-flex rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-fg hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">New shared audit</Link>}
+      {canCreate && !unavailable && <Link href={`/org/${workspaceId}/jobs/new`} className="inline-flex rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-fg hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">New shared audit</Link>}
       {unavailable ? <p role="alert" className="text-sm text-ink-muted">Shared audits are unavailable. Confirm the feature is enabled and that you still belong to this organization.</p> : (
         <section className="space-y-4">
           <h2 className="text-lg font-semibold text-ink">Shared audit history</h2>

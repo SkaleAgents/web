@@ -149,7 +149,7 @@ export function PromptLibrary({ manage = false }: { manage?: boolean }) {
         </form>
         </details>
       ) : (
-        <LinkButton href="/dashboard/prompts" variant="secondary">Manage your prompts</LinkButton>
+        <LinkButton href="/me/prompts" variant="secondary">Manage your prompts</LinkButton>
       )}
 
       {promptsQuery.isPending && (

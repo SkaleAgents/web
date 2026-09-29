@@ -148,7 +148,7 @@ test("staff controls are unavailable to a customer account", async ({ page }) =>
 test("agreement navigation stays hidden while the web rollout flag is off", async ({ page }) => {
   test.skip(process.env.NEXT_PUBLIC_ADVISORY_AGREEMENTS_ENABLED === "true");
   await page.route("**/api/user", (route) => route.fulfill({ json: customer }));
-  await page.goto("/dashboard/jobs", { waitUntil: "domcontentloaded" });
+  await page.goto("/me/jobs", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("link", { name: "Advisory requests" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Staff bookings" })).toHaveCount(0);
 });

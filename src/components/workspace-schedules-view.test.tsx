@@ -41,7 +41,7 @@ it("keeps viewers read-only and shows a creator-independent schedule and downgra
   setup("viewer");
   expect(await screen.findByText("Weekly security review")).toBeInTheDocument();
   expect(screen.getByText(/active schedule plan limit/)).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "Open last audit" })).toHaveAttribute("href", "/dashboard/workspaces/workspace-a/jobs");
+  expect(screen.getByRole("link", { name: "Open last audit" })).toHaveAttribute("href", "/org/workspace-a/jobs");
   expect(screen.queryByRole("button", { name: "Resume" })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Purge input" })).not.toBeInTheDocument();
 });

@@ -38,7 +38,7 @@ function MockGoogleSignInButton() {
     onSuccess: async (session) => {
       await setSessionUser(queryClient, session.user);
       toast.success(`Signed in as ${session.user.displayName}`);
-      router.push("/dashboard");
+      router.push("/me");
     },
     onError: (error: Error) => toast.error(error.message),
   });

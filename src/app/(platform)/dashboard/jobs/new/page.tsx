@@ -55,13 +55,13 @@ export default function NewJobPage() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["swarm-jobs", user.data?.id ?? "guest"] });
-      router.push("/dashboard/jobs");
+      router.push("/me/jobs");
     },
   });
 
   return <main className="mx-auto max-w-3xl space-y-6">
     <div className="workspace-intro">
-      <LinkButton href="/dashboard/jobs" variant="ghost">Back to audit jobs</LinkButton>
+      <LinkButton href="/me/jobs" variant="ghost">Back to audit jobs</LinkButton>
       <h1 className="workspace-heading mt-3">New audit</h1>
       <p className="mt-2 text-sm text-ink-muted">Add configuration, choose what to review, then queue the audit.</p>
     </div>

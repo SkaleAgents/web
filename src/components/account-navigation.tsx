@@ -48,7 +48,7 @@ export function AccountNavigation({ user, settingsActive, signingOut, onSignOut 
           <p className="break-words font-semibold text-ink">{name}</p>
           {user.email && <p className="mt-1 break-all text-xs text-ink-muted">{user.email}</p>}
         </div>
-        <Link href="/dashboard/settings" aria-current={settingsActive ? "page" : undefined}
+        <Link href="/me/settings" aria-current={settingsActive ? "page" : undefined}
           className="account-nav-item" onClick={() => setOpen(false)}>
           <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2" fill="var(--canvas-elevated)" /><circle cx="15" cy="17" r="2" fill="var(--canvas-elevated)" /></svg>
           Settings

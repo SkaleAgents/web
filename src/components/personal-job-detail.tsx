@@ -26,12 +26,12 @@ export function PersonalJobDetail({ id }: { id: string }) {
       method: "POST",
       body: JSON.stringify({ jobId: id }),
     }),
-    onSuccess: (session) => router.push(`/dashboard/watchtower/${session.id}`),
+    onSuccess: (session) => router.push(`/me/watchtower/${session.id}`),
   });
 
   return (
     <main className="space-y-6">
-      <LinkButton href="/dashboard/jobs" variant="ghost">Back to audit jobs</LinkButton>
+      <LinkButton href="/me/jobs" variant="ghost">Back to audit jobs</LinkButton>
       <div className="workspace-intro">
         <h1 className="workspace-heading">Audit details</h1>
         <p className="mt-2 text-sm text-ink-muted">Review this audit and manage its retained data.</p>

@@ -13,20 +13,20 @@ test("audit creation and job management use separate pages", async ({ page }) =>
     return route.fulfill({ json: { jobs: created ? [{ id: "new-job", status: "queued", summary: "Review queued", specialists: ["devsecops"], createdAt: new Date().toISOString() }] : [] } });
   });
 
-  await page.goto("/dashboard/jobs");
+  await page.goto("/me/jobs");
   await expect(page.getByRole("heading", { name: "Audit jobs", exact: true })).toBeVisible();
   await expect(page.getByRole("textbox", { name: "IaC content" })).toHaveCount(0);
   await page.getByRole("link", { name: "New audit" }).first().click();
-  await expect(page).toHaveURL(/\/dashboard\/jobs\/new$/);
+  await expect(page).toHaveURL(/\/me\/jobs\/new$/);
   await page.getByRole("textbox", { name: "IaC content" }).fill('resource "aws_security_group" "ssh" {}');
   await page.getByRole("button", { name: "Queue audit" }).click();
-  await expect(page).toHaveURL(/\/dashboard\/jobs$/);
+  await expect(page).toHaveURL(/\/me\/jobs$/);
   await expect(page.getByText("Review queued")).toBeVisible();
 });
 
 test("signed-in navigation shows the theme control beside an avatar-only account menu", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Test Owner", email: "owner@skaleagents.com" } }));
-  await page.goto("/dashboard/jobs");
+  await page.goto("/me/jobs");
   const toolbar = page.locator(".dashboard-toolbar");
   await expect(toolbar.getByRole("button", { name: "Color theme" })).toBeVisible();
   const account = toolbar.getByRole("button", { name: "Test Owner, account menu" });
@@ -65,7 +65,7 @@ test("audit jobs stay paged as the list grows", async ({ page }) => {
   await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: Array.from({ length: 12 }, (_, index) => ({
     id: `job-${index + 1}`, status: "completed", summary: `Audit ${index + 1}`, specialists: ["sre"], createdAt: new Date().toISOString(),
   })) } }));
-  await page.goto("/dashboard/jobs");
+  await page.goto("/me/jobs");
   await expect(page.getByText("Audit 1", { exact: true })).toBeVisible();
   await expect(page.getByText("Audit 11", { exact: true })).toHaveCount(0);
   await page.getByRole("navigation", { name: "Audit jobs pages" }).getByRole("button", { name: "Next" }).click();
@@ -86,23 +86,23 @@ test("audit history opens one job at a time for review and management", async ({
   await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: [job] } }));
   await page.route(`**/api/jobs/${id}`, route => route.fulfill({ json: job }));
 
-  await page.goto("/dashboard/jobs");
+  await page.goto("/me/jobs");
   await expect(page.getByText("Ingress review")).toBeVisible();
   await expect(page.getByRole("button", { name: "Export report" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await page.getByRole("link", { name: "View audit" }).click();
-  await expect(page).toHaveURL(new RegExp(`/dashboard/jobs/${id}$`));
+  await expect(page).toHaveURL(new RegExp(`/me/jobs/${id}$`));
   await expect(page.getByRole("heading", { name: "Audit details" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Open Watchtower" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Export report" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Back to audit jobs" })).toHaveAttribute("href", "/dashboard/jobs");
+  await expect(page.getByRole("link", { name: "Back to audit jobs" })).toHaveAttribute("href", "/me/jobs");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 
 test("a guessed audit detail ID stays unavailable without exposing source data", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
   await page.route("**/api/jobs/unknown", route => route.fulfill({ status: 404, json: { message: "Another account owns private-revision" } }));
-  await page.goto("/dashboard/jobs/unknown");
+  await page.goto("/me/jobs/unknown");
   await expect(page.getByRole("main").getByRole("alert")).toHaveText("This audit is unavailable or has been removed.");
   await expect(page.getByText("private-revision")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Export report" })).toHaveCount(0);

@@ -46,7 +46,7 @@ test("workflow choices lead to their matching product entry points", async ({ pa
   const web = page.getByRole("region", { name: "In the web app", exact: true });
   await expect(web).toContainText("don't automatically track changes");
   await web.getByRole("link", { name: "Open audit jobs" }).click();
-  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard%2Fjobs$/);
+  await expect(page).toHaveURL(/\/login\?next=%2Fme%2Fjobs$/);
   await expect(page.getByRole("button", { name: "Sign in with password" })).toBeVisible();
 });
 
