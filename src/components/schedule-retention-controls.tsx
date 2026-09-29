@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie, type DeletionPendingResponse, type InputCleanupResponse, type SwarmSchedule } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
-import { Button, TextArea } from "@/components/ui";
+import { Button, Select, TextArea, TextInput } from "@/components/ui";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
 import { buildSourceMetadata } from "@/lib/source-metadata";
+import { buildGithubScheduleScope, type GithubScheduleFormat } from "@/lib/github-schedule-source";
 
 export function ScheduleRetentionControls({ schedule, accountId, onDeletion }: {
   schedule: SwarmSchedule;
@@ -17,6 +18,11 @@ export function ScheduleRetentionControls({ schedule, accountId, onDeletion }: {
   const [confirm, setConfirm] = useState<"purge" | "delete" | null>(null);
   const [replacing, setReplacing] = useState(false);
   const [content, setContent] = useState("");
+  const [replacementMode, setReplacementMode] = useState<"text" | "github">("text");
+  const [repository, setRepository] = useState("");
+  const [sourcePath, setSourcePath] = useState("");
+  const [branch, setBranch] = useState("main");
+  const [sourceFormat, setSourceFormat] = useState<GithubScheduleFormat>("auto");
   const [sourceRevision, setSourceRevision] = useState("");
   const [sourceObservedAt, setSourceObservedAt] = useState("");
   const available = schedule.retention?.inputAvailable ?? true;
@@ -27,7 +33,7 @@ export function ScheduleRetentionControls({ schedule, accountId, onDeletion }: {
       if (kind === "purge") return apiFetch<InputCleanupResponse>(`/api/schedules/${schedule.id}/purge-source`, { method: "POST" });
       return apiFetch<SwarmSchedule>(`/api/schedules/${schedule.id}`, {
         method: "PATCH", body: JSON.stringify(kind === "replace"
-          ? { scope: { kind: "iac_text", format: "auto", content }, telemetry: {}, enabled: false, ...buildSourceMetadata(sourceRevision, sourceObservedAt) }
+          ? { scope: replacementMode === "github" ? buildGithubScheduleScope(repository, sourcePath, branch, sourceFormat) : { kind: "iac_text", format: "auto", content }, telemetry: {}, enabled: false, ...(replacementMode === "text" ? buildSourceMetadata(sourceRevision, sourceObservedAt) : {}) }
           : { enabled: kind === "resume" }),
       });
     },
@@ -54,7 +60,12 @@ export function ScheduleRetentionControls({ schedule, accountId, onDeletion }: {
         {state !== "purged" && <Button variant="secondary" disabled={change.isPending} onClick={() => setConfirm("purge")}>Purge saved input</Button>}
         <Button variant="ghost" disabled={change.isPending} onClick={() => setConfirm("delete")}>Delete schedule</Button>
       </div>
-      {replacing && <div className="space-y-2"><label className="block">Fresh IaC input<TextArea className="mt-1 min-h-28" value={content} onChange={event => setContent(event.target.value)} /></label><SourceMetadataFields idPrefix={`schedule-replacement-${schedule.id}`} revision={sourceRevision} observedAt={sourceObservedAt} onRevisionChange={setSourceRevision} onObservedAtChange={setSourceObservedAt} /><p className="text-xs text-ink-muted">Replacing input removes the previous saved snapshot and telemetry. The schedule stays paused until you resume it. Leaving both metadata fields blank clears prior source metadata.</p><Button disabled={change.isPending || !content.trim()} onClick={() => change.mutate("replace")}>Replace input and keep paused</Button></div>}
+      {replacing && <div className="space-y-2">
+        <div className="flex gap-2"><Button variant={replacementMode === "text" ? "primary" : "secondary"} aria-pressed={replacementMode === "text"} onClick={() => setReplacementMode("text")}>Saved text</Button><Button variant={replacementMode === "github" ? "primary" : "secondary"} aria-pressed={replacementMode === "github"} onClick={() => setReplacementMode("github")}>Public GitHub file</Button></div>
+        {replacementMode === "text" ? <><label className="block">Fresh IaC input<TextArea className="mt-1 min-h-28" value={content} onChange={event => setContent(event.target.value)} /></label><SourceMetadataFields idPrefix={`schedule-replacement-${schedule.id}`} revision={sourceRevision} observedAt={sourceObservedAt} onRevisionChange={setSourceRevision} onObservedAtChange={setSourceObservedAt} /></> : <div className="grid gap-2 sm:grid-cols-2"><label>Public repository<TextInput className="mt-1" value={repository} onChange={event => setRepository(event.target.value)} placeholder="owner/repository" /></label><label>File path<TextInput className="mt-1" value={sourcePath} onChange={event => setSourcePath(event.target.value)} placeholder="k8s/deployment.yaml" /></label><label>Branch<TextInput className="mt-1" value={branch} onChange={event => setBranch(event.target.value)} /></label><label>Format<Select className="mt-1" value={sourceFormat} onChange={event => setSourceFormat(event.target.value as GithubScheduleFormat)}><option value="auto">Auto</option><option value="kubernetes">Kubernetes</option><option value="terraform">Terraform</option><option value="cloudformation">CloudFormation</option></Select></label></div>}
+        <p className="text-xs text-ink-muted">Replacing input removes the previous saved snapshot and telemetry. The schedule stays paused until you resume it.</p>
+        <Button disabled={change.isPending || (replacementMode === "text" ? !content.trim() : !repository.trim() || !sourcePath.trim() || !branch.trim())} onClick={() => change.mutate("replace")}>Replace input and keep paused</Button>
+      </div>}
       {confirm && <div className="space-y-2 rounded-lg border border-line p-3"><p>{confirm === "purge" ? "Pause this schedule and permanently remove its saved source and telemetry?" : "Delete this schedule and its saved input? This cannot be undone."} Already dispatched audits remain separate.</p><div className="flex gap-2"><Button disabled={change.isPending} onClick={() => change.mutate(confirm)}>{confirm === "purge" ? "Confirm saved input purge" : "Confirm schedule deletion"}</Button><Button variant="secondary" disabled={change.isPending} onClick={() => setConfirm(null)}>Keep schedule</Button></div></div>}
       {change.isError && <p role="alert" className="text-danger">{change.error.message}</p>}
     </div>

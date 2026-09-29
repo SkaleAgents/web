@@ -238,6 +238,7 @@ export type SwarmJob = {
   sourcePurged: boolean;
   sourceRevision?: string | null;
   sourceObservedAt?: string | null;
+  sourceMetadataProvenance?: "caller_reported" | "github_fetched";
   retention?: {
     inputAvailable?: boolean;
     inputPurgeStatus: "retained" | "pending" | "purged" | "failed";
