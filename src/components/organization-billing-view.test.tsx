@@ -65,6 +65,32 @@ it("shows payment recovery without claiming an audit allowance after grace", asy
   expect(screen.getByRole("link", { name: "Pay renewal invoice" })).toBeVisible();
 });
 
+it("explains the temporary draft allowance without offering payment", async () => {
+  const { client } = showBilling("pro", true);
+  await screen.findByText("193 audits remaining");
+  client.setQueryData(["organization-billing", "org-1"], {
+    plan: "pro", usage: { used: 2, limit: 25, remaining: 23, periodEnd: "2026-10-01T02:00:00Z" },
+    pendingChange: null, testModeEnabled: true, cancellationEnabled: true,
+    renewalPayment: { status: "finalizing", graceEndsAt: null, finalizationEndsAt: "2026-10-01T02:00:00Z", paymentUrl: null },
+  });
+  expect(await screen.findByText(/Stripe is finalizing your renewal invoice/)).toBeVisible();
+  expect(screen.getByText("23 audits remaining")).toBeVisible();
+  expect(screen.getByRole("status", { name: "Renewal payment" })).toHaveTextContent("10/1/2026 UTC");
+  expect(screen.queryByRole("link", { name: "Pay renewal invoice" })).not.toBeInTheDocument();
+});
+
+it("pauses new audits after the draft cutoff without implying payment failure", async () => {
+  const { client } = showBilling("pro", true);
+  await screen.findByText("193 audits remaining");
+  client.setQueryData(["organization-billing", "org-1"], {
+    plan: "pro", usage: null, pendingChange: null, testModeEnabled: true, cancellationEnabled: true,
+    renewalPayment: { status: "finalization_paused", graceEndsAt: null, finalizationEndsAt: "2026-10-01T02:00:00Z", paymentUrl: null },
+  });
+  expect(await screen.findByText(/Waiting for Stripe to finalize your renewal invoice/)).toBeVisible();
+  expect(screen.queryByText("193 audits remaining")).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Pay renewal invoice" })).not.toBeInTheDocument();
+});
+
 it("confirms the active paid plan after checkout reconciliation", async () => {
   showBilling("starter", true, null, "org-1");
   expect(await screen.findByRole("status", { name: "Checkout status" })).toHaveTextContent("Starter is active");
