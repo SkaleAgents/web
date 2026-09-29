@@ -9,11 +9,12 @@ import { currentUserOptions } from "@/lib/session";
 
 type Organization = { id: string; name: string; role: "owner" | "member" | "viewer"; kind: "personal" | "team"; cutoverNoticeAvailable?: boolean };
 type Plan = { key: string; name: string; monthlyUsd: number | null; auditLimit: number | null; checkoutMode: string };
+type RenewalStatus = "grace" | "access_paused" | "finalizing" | "finalization_paused" | "unpaid" | "verification_unavailable" | "recovered" | "canceled";
 type Billing = {
   plan: string;
   usage: { used: number; limit: number; remaining: number; periodEnd: string } | null;
   pendingChange: { id: string; kind: string; toPlan: string; status: string; effectiveAt: string | null; paymentUrl: string | null } | null;
-  renewalPayment: { status: "grace" | "access_paused" | "finalizing" | "finalization_paused"; graceEndsAt: string | null; finalizationEndsAt: string | null; paymentUrl: string | null } | null;
+  renewalPayment: { status: RenewalStatus; graceEndsAt: string | null; finalizationEndsAt: string | null; paymentUrl: string | null } | null;
   testModeEnabled: boolean;
   cancellationEnabled: boolean;
 };
@@ -128,11 +129,15 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
       {billing.data.plan === "free" ? "Checking your payment. Your plan will update here after verification." : `${currentPlan?.name ?? "Your paid plan"} is active. Your audit allowance is shown below.`}
     </p> : null}
     {billing.data && currentPlan && organizationId ? <>
-      {billing.data.renewalPayment ? <section role="status" aria-label="Renewal payment" className="border-l-2 border-danger bg-canvas-elevated px-4 py-3 text-sm text-ink">
+      {billing.data.renewalPayment ? <section role="status" aria-label="Renewal payment" className={`border-l-2 bg-canvas-elevated px-4 py-3 text-sm text-ink ${billing.data.renewalPayment.status === "recovered" || billing.data.renewalPayment.status === "canceled" ? "border-accent" : "border-danger"}`}>
         <p className="font-semibold">{{
           grace: "Renewal payment is overdue.", access_paused: "Paid audit access is paused.",
           finalizing: "Stripe is finalizing your renewal invoice.",
           finalization_paused: "Waiting for Stripe to finalize your renewal invoice.",
+          unpaid: "Renewal payment is still unpaid.",
+          verification_unavailable: "We could not verify your renewal.",
+          recovered: "Payment verified.",
+          canceled: "Subscription ended.",
         }[billing.data.renewalPayment.status]}</p>
         <p className="mt-1">{billing.data.renewalPayment.status === "finalizing"
           ? `Your remaining temporary audits are available through ${utcDate(billing.data.renewalPayment.finalizationEndsAt!)}. They will count toward the new cycle after Stripe verifies the invoice.`
@@ -140,9 +145,19 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
             ? `The temporary audit window ended ${utcDate(billing.data.renewalPayment.finalizationEndsAt!)}. New audits are paused until Stripe verifies the invoice.`
             : billing.data.renewalPayment.status === "grace"
               ? `Your paid audit limits remain available through ${utcDate(billing.data.renewalPayment.graceEndsAt!)} while Stripe retries. Pay the renewal invoice to avoid an interruption.`
-              : `The seven-day payment grace period ended ${utcDate(billing.data.renewalPayment.graceEndsAt!)}. Pay the renewal invoice to request restored access after verification.`}</p>
+              : billing.data.renewalPayment.status === "access_paused"
+                ? `The seven-day payment grace period ended ${utcDate(billing.data.renewalPayment.graceEndsAt!)}. New audits and schedules are paused until Stripe verifies payment.`
+                : billing.data.renewalPayment.status === "unpaid"
+                  ? "New audits and schedules are paused. Pay the renewal invoice to restore audit access after verification. Paused schedules stay off until you re-enable them."
+                  : billing.data.renewalPayment.status === "verification_unavailable"
+                    ? "Refresh to check payment status. New audits and schedules are paused if your allowance is unavailable."
+                    : billing.data.renewalPayment.status === "recovered"
+                      ? "Paid audits are available again. Schedules paused during nonpayment are still off until you review and re-enable them."
+                      : "This organization is now on Free."}</p>
         <p className="mt-1 text-ink-muted">Stripe test mode is active. No real payment will be collected.</p>
-        {(billing.data.renewalPayment.status === "grace" || billing.data.renewalPayment.status === "access_paused") && billing.data.renewalPayment.paymentUrl && approvedInvoiceUrl(billing.data.renewalPayment.paymentUrl) ? <a className="mt-3 inline-flex rounded-md bg-ink px-4 py-2 font-semibold text-canvas hover:opacity-90" href={billing.data.renewalPayment.paymentUrl}>Pay renewal invoice</a> : null}
+        {(["grace", "access_paused", "unpaid"] as RenewalStatus[]).includes(billing.data.renewalPayment.status) && billing.data.renewalPayment.paymentUrl && approvedInvoiceUrl(billing.data.renewalPayment.paymentUrl) ? <a className="mt-3 inline-flex rounded-md bg-ink px-4 py-2 font-semibold text-canvas hover:opacity-90" href={billing.data.renewalPayment.paymentUrl}>Pay renewal invoice</a> : null}
+        {(["access_paused", "unpaid", "verification_unavailable"] as RenewalStatus[]).includes(billing.data.renewalPayment.status) && !billing.data.renewalPayment.paymentUrl ? <a className="mt-3 inline-block font-medium text-accent underline underline-offset-4" href="mailto:info@skaleagents.com">Contact support</a> : null}
+        {billing.data.renewalPayment.status === "recovered" ? <Link className="mt-3 inline-block font-medium text-accent underline underline-offset-4" href={`/org/${organizationId}/schedules`}>Review paused schedules</Link> : null}
       </section> : null}
       {billing.data.usage ? <section className="border-y border-line py-6" aria-label="Current plan">
         <div className="flex flex-wrap items-end justify-between gap-4">
