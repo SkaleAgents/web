@@ -57,6 +57,32 @@ test("examples cycle through all four topics and pause during interaction", asyn
   await expect(explorer).toHaveAttribute("data-playing", "false");
 });
 
+test("sample preview stays in the page while its editor loads on approach", async ({ page }) => {
+  await page.goto("/");
+  const demo = page.locator("#sample-demo");
+  await expect(demo.getByRole("heading", { name: "Change a setting. See why it matters." })).toBeVisible();
+  const editor = demo.getByRole("textbox", { name: "Sample deployment settings (JSON)" });
+  await expect(editor).toBeDisabled();
+
+  await demo.scrollIntoViewIfNeeded();
+  await expect(editor).toBeEnabled();
+  await demo.getByRole("button", { name: "Apply example improvements" }).click();
+  await expect(demo.getByRole("heading", { name: "3 of 3 sample checks configured" })).toBeVisible();
+});
+
+test("starting point choices activate when the section approaches", async ({ page }) => {
+  await page.goto("/");
+  const picker = page.locator("#next-step-heading").locator("xpath=..");
+  const goal = picker.getByRole("radio", { name: "Try a specialist", exact: true });
+  await expect(goal).toBeDisabled();
+
+  await picker.scrollIntoViewIfNeeded();
+  await expect(goal).toBeEnabled();
+  await picker.getByText("Try a specialist", { exact: true }).click();
+  await expect(goal).toBeChecked();
+  await expect(picker.getByRole("radio", { name: "Find a specialist bot", exact: true })).toBeVisible();
+});
+
 test("all directory badges remain reachable by keyboard on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto("/");

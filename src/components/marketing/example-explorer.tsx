@@ -3,60 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, LinkButton } from "@/components/ui";
 
-const examples = [
-  {
-    id: "security",
-    label: "Security",
-    specialty: "DevSecOps",
-    title: "Catch the open door before you ship.",
-    description: "Bring a Terraform snippet or a Kubernetes manifest. Ask for exposed services, broad permissions, and the smallest useful fix.",
-    filename: "security-group.tf",
-    input: 'ingress {\n  from_port   = 22\n  to_port     = 22\n  protocol    = "tcp"\n  cidr_blocks = ["0.0.0.0/0"]\n}',
-    finding: "SSH is reachable from any IPv4 address.",
-    evidence: "Port 22 accepts traffic from 0.0.0.0/0. Any host on the internet can attempt a connection if the instance is publicly reachable.",
-    fix: "Restrict ingress to your approved access network, or use a session-based access method. Confirm the access path before removing the rule.",
-    prompt: "Review my Terraform for exposed ports and overly broad IAM permissions. Cite the exact configuration behind each finding, propose the smallest fix, and include a validation step. Ask for missing context before making assumptions.",
-  },
-  {
-    id: "reliability",
-    label: "Reliability",
-    specialty: "SRE",
-    title: "Find the weak point in your recovery plan.",
-    description: "Review deployment configuration and failure symptoms together. Look for single points of failure and checks that miss an unhealthy service.",
-    filename: "deployment.yaml",
-    input: 'spec:\n  replicas: 1\n  template:\n    spec:\n      containers:\n        - name: api\n          image: api:1.4\n          ports:\n            - containerPort: 8080',
-    finding: "One replica, with no readiness probe shown.",
-    evidence: "The supplied configuration has a single API replica. It does not define a readiness check to tell Kubernetes when the app can serve traffic.",
-    fix: "Define a readiness endpoint and test it during startup and dependency failures. Evaluate additional replicas against your availability needs and budget.",
-    prompt: "Review my Kubernetes deployment for availability risks. Check replica count, health probes, rollout behavior, and recovery paths. Separate confirmed findings from missing context, then propose changes and a failure test for each.",
-  },
-  {
-    id: "ai-workloads",
-    label: "AI workloads",
-    specialty: "MLOps",
-    title: "Give every model call a budget.",
-    description: "Bring model-routing settings and workload context. Review where retries, token use, or slow requests could make an AI feature expensive to operate.",
-    filename: "model-client.json",
-    input: '{\n  "requestTimeoutMs": 120000,\n  "maxRetries": 8,\n  "cacheEnabled": false\n}',
-    finding: "Long timeouts and repeated retries can compound latency.",
-    evidence: "Each attempt may wait up to two minutes, with eight retries configured. Actual request time depends on the client and its retry policy.",
-    fix: "Set an end-to-end deadline and retry only transient failures. Measure token usage and tail latency before changing model routes or adding a cache.",
-    prompt: "Review my AI application's model client and routing configuration. Check retry limits, request deadlines, token budgets, and cache suitability. Explain latency and cost tradeoffs, and list the measurements needed to validate each recommendation.",
-  },
-  {
-    id: "scaling",
-    label: "Scaling & cost",
-    specialty: "Performance",
-    title: "Make scaling decisions with context.",
-    description: "Inspect resource requests and scaling policies before adding more capacity. Turn a vague performance concern into something you can measure.",
-    filename: "autoscaler.yaml",
-    input: 'spec:\n  minReplicas: 1\n  maxReplicas: 1\n  metrics:\n    - type: Resource\n      resource:\n        name: cpu\n        target:\n          averageUtilization: 70',
-    finding: "The autoscaler cannot add a second replica.",
-    evidence: "Both minReplicas and maxReplicas are set to 1. The CPU target cannot trigger additional capacity above that limit.",
-    fix: "Choose a maximum based on load tests, cluster capacity, and spend limits. Check resource requests and downstream bottlenecks before raising it.",
-    prompt: "Review my autoscaling policy and resource configuration. Identify limits that prevent scaling, explain likely bottlenecks, and suggest a load test. Include cost tradeoffs and avoid recommending more capacity without supporting measurements.",
-  },
-];
+import { examples } from "@/components/marketing/example-data";
 
 export function ExampleExplorer() {
   const root = useRef<HTMLDivElement>(null);
