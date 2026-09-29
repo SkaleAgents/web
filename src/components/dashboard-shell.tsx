@@ -87,7 +87,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   if (isPersonal && advisoryAgreementsEnabled()) sections.push({ label: "Advisory", items: [
     { href: `${root}/advisory-bookings`, label: "Advisory requests" },
   ] });
-  if (scope.kind === "personal" && nativeConsultancyEnabled()) sections.push({ label: "Consultancy", items: [
+  if (isPersonal && nativeConsultancyEnabled()) sections.push({ label: "Consultancy", items: [
     { href: `${root}/consultancy`, label: "My bookings" },
   ] });
   if (user.data && isStaff(user.data)) sections.push({ label: "Staff", items: [
