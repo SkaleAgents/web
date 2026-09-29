@@ -7,7 +7,7 @@ export function BrandLogo({ href = "/" }: { href?: string }) {
         <rect width="64" height="64" rx="14" fill="#0e1518" />
         <path d="M47 16H24c-7 0-12 4-12 10s5 10 12 10h16c7 0 12 4 12 10s-5 10-12 10H17" stroke="#00c2a8" strokeLinecap="round" strokeWidth="8" />
       </svg>
-      <span className="brand-wordmark font-display text-lg font-bold tracking-tight text-ink">SkaleAgents</span>
+      <span className="font-display text-lg font-bold tracking-tight text-ink">SkaleAgents</span>
     </Link>
   );
 }
