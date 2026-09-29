@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("flag off hides shared-audit entry and direct route without sending audit requests", async ({ page }) => {
   test.skip(process.env.WORKSPACE_AUDIT_TEST_MODE !== "disabled", "Requires a feature-off production build");

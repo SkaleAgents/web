@@ -34,7 +34,7 @@ it("keeps local preview sign-in working from the header and populates the shared
 
   await userEvent.click(screen.getByRole("button", { name: "Sign in with Google" }));
 
-  await waitFor(() => expect(push).toHaveBeenCalledWith("/me"));
+  await waitFor(() => expect(push).toHaveBeenCalledWith("/dashboard"));
   expect(client.getQueryData(["user"])).toEqual(user);
   expect(client.getQueryData(["swarm-jobs", "previous-user"])).toBeUndefined();
   expect(client.getQueryData(["bot", "private-bot", "previous-user"])).toBeUndefined();

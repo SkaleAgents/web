@@ -1,5 +1,4 @@
 import { apiFetch, ensureCsrfCookie } from "./api";
-import { dashboardDestination } from "./dashboard";
 
 export type AuthResult = { ok: boolean; redirect: string };
 export type EmailLink = { token: string; purpose: "signin" | "password" | "register" };
@@ -27,8 +26,15 @@ export async function authPost<T>(path: string, body: unknown): Promise<T> {
 export function completeSignIn(result: AuthResult) {
   delete window.__skaleEmailLink;
   const destination = new URL(result.redirect, window.location.origin);
+  if (destination.origin === window.location.origin && destination.pathname === "/auth/agreements") {
+    const next = new URLSearchParams(window.location.search).get("next");
+    if (next && !destination.searchParams.has("oauth")) destination.searchParams.set("next", next);
+    window.location.assign(destination.toString());
+    return;
+  }
   if (destination.origin === window.location.origin && destination.pathname === "/dashboard") {
-    window.location.assign(dashboardDestination(new URLSearchParams(window.location.search).get("next")));
+    const next = new URLSearchParams(window.location.search).get("next");
+    window.location.assign(next ? `/dashboard?next=${encodeURIComponent(next)}` : "/dashboard");
   } else {
     window.location.assign(result.redirect);
   }

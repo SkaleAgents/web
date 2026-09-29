@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
+import { personalOrganizationId } from "./personal-organization-fixture";
 
 test("audit creation and job management use separate pages", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Test Owner", email: "owner@skaleagents.com" } }));
@@ -17,10 +18,10 @@ test("audit creation and job management use separate pages", async ({ page }) =>
   await expect(page.getByRole("heading", { name: "Audit jobs", exact: true })).toBeVisible();
   await expect(page.getByRole("textbox", { name: "IaC content" })).toHaveCount(0);
   await page.getByRole("link", { name: "New audit" }).first().click();
-  await expect(page).toHaveURL(/\/me\/jobs\/new$/);
+  await expect(page).toHaveURL(`/org/${personalOrganizationId}/jobs/new`);
   await page.getByRole("textbox", { name: "IaC content" }).fill('resource "aws_security_group" "ssh" {}');
   await page.getByRole("button", { name: "Queue audit" }).click();
-  await expect(page).toHaveURL(/\/me\/jobs$/);
+  await expect(page).toHaveURL(`/org/${personalOrganizationId}/jobs`);
   await expect(page.getByText("Review queued")).toBeVisible();
 });
 

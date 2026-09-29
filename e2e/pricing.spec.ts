@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("shows five plans and records an Enterprise inquiry", async ({ page }) => {
   await page.route("**/api/organization-plans", async (route) => route.fulfill({ json: { data: [

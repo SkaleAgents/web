@@ -1,6 +1,13 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 
 const owner = { id: "dashboard-owner", displayName: "Dashboard Owner", email: "owner@example.com" };
+const personalId = "0198f0b0-0000-7000-8000-000000000001";
+const personal = { id: personalId, name: "Personal", kind: "personal", role: "owner" };
+
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [personal] } }));
+  await page.route(`**/api/workspaces/${personalId}`, route => route.fulfill({ json: { data: personal } }));
+});
 
 async function overview(page: Page) {
   await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: [{ id: "job-1", summary: "Review complete", status: "completed", createdAt: "2026-09-26T00:00:00Z" }] } }));
@@ -17,7 +24,7 @@ test("login waits for the session, then opens the dashboard without showing the 
   await expect(page.getByRole("status")).toHaveText("Checking your session…");
   await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
   release();
-  await expect(page).toHaveURL(/\/me$/);
+  await expect(page).toHaveURL(`/org/${personalId}`);
   await expect(page.getByRole("heading", { name: "Dashboard", exact: true })).toBeVisible();
   await expect(page.getByRole("region", { name: "Account overview" }).getByRole("link", { name: /^Audit jobs/ })).toContainText("1");
   await expect(page.getByRole("link", { name: "Review complete" })).toBeVisible();
@@ -26,7 +33,7 @@ test("login waits for the session, then opens the dashboard without showing the 
     const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
     if (width < 1024) await nav.getByRole("button", { name: "Open menu" }).click();
     if (await nav.getByRole("button", { name: "Account" }).getAttribute("aria-expanded") === "false") await nav.getByRole("button", { name: "Account" }).click();
-    await expect(nav.getByRole("link", { name: "Settings", exact: true })).toHaveAttribute("href", "/me/settings");
+    await expect(nav.getByRole("link", { name: "Account settings", exact: true })).toHaveAttribute("href", "/account/settings");
     await expect(nav.getByRole("link", { name: "Overview", exact: true })).toHaveAttribute("aria-current", "page");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     if (width < 1024) await nav.getByRole("button", { name: "Close menu" }).click();
@@ -105,9 +112,9 @@ test("login accepts dashboard destinations and rejects external redirects", asyn
   await page.route("**/api/user", route => route.fulfill({ json: owner }));
   await overview(page);
   await page.goto("/login?next=%2Fdashboard%2Fstudio");
-  await expect(page).toHaveURL(/\/me\/studio$/);
+  await expect(page).toHaveURL(`/org/${personalId}/studio`);
   await page.goto("/login?next=https%3A%2F%2Fevil.example%2Fdashboard");
-  await expect(page).toHaveURL(/\/me$/);
+  await expect(page).toHaveURL(`/org/${personalId}`);
   await page.goto("/auth/reauth?next=%2Fdashboard%2Fsettings");
   await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/auth\/reauth\?next=/);
@@ -162,7 +169,7 @@ test("mobile dashboard menu closes on Escape and after navigation", async ({ pag
   await expect(nav.getByRole("link", { name: "My bots", exact: true })).toBeHidden();
   await nav.getByRole("button", { name: "Open menu" }).click();
   await nav.getByRole("link", { name: "My bots", exact: true }).click();
-  await expect(page).toHaveURL(/\/me\/bots$/);
+  await expect(page).toHaveURL(`/org/${personalId}/bots`);
   await expect(nav.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
   await nav.getByRole("button", { name: "Open menu" }).click();
   await expect(nav.getByRole("link", { name: "My bots", exact: true })).toHaveAttribute("aria-current", "page");

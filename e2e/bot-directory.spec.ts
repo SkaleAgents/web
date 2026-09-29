@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test("a signed-in creator can publish a bot into the directory", async ({ page }) => {
   const user = {

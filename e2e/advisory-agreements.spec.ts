@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const bookingId = "00000000-0000-4000-8000-000000000101";
 const customer = { id: "customer-a", displayName: "Customer A", email: "a@example.test", grokSubject: null };

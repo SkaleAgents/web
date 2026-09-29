@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const bookUrl = "https://harun.dev/book?sa_ref=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 

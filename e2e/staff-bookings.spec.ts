@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import type { ApiUser, StaffAdvisoryBooking } from "../src/lib/api";
 
 const id = "11111111-1111-4111-8111-111111111111";

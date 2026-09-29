@@ -6,23 +6,37 @@ import { EmailSignIn } from "@/components/email-sign-in";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { currentUserOptions } from "@/lib/session";
-import { API_URL } from "@/lib/api";
-import { dashboardDestination } from "@/lib/dashboard";
+import { API_URL, apiFetch } from "@/lib/api";
+import { dashboardDestination, personalOrganizationId } from "@/lib/dashboard-routes";
+import type { OrganizationMembership } from "@/components/organization-switcher";
 import { hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
 import { Button } from "@/components/ui";
 
 export function LoginScreen({ reauthenticate = false }: { reauthenticate?: boolean }) {
   const user = useQuery(currentUserOptions);
+  const memberships = useQuery({
+    queryKey: ["workspaces", user.data?.id ?? "guest"],
+    enabled: Boolean(user.data?.id && !user.data.agreementRequired && !reauthenticate),
+    queryFn: async ({ signal }) => (await apiFetch<{ data: OrganizationMembership[] }>("/api/workspaces", { signal })).data,
+  });
   const router = useRouter();
   useEffect(() => {
     if (!user.data || user.isError || reauthenticate) return;
     const params = new URLSearchParams(window.location.search);
+    if (user.data.agreementRequired) {
+      const next = params.get("next");
+      router.replace(`/auth/agreements${params.get("oauth") === "1" ? "?oauth=1" : next ? `?next=${encodeURIComponent(next)}` : ""}`);
+      return;
+    }
     if (params.get("oauth") === "1") {
       window.location.replace(`${API_URL}/oauth/authorize`);
-    } else {
-      router.replace(hasWorkspaceInvitation() ? WORKSPACE_INVITATION_PATH : dashboardDestination(params.get("next")));
+    } else if (hasWorkspaceInvitation()) {
+      router.replace(WORKSPACE_INVITATION_PATH);
+    } else if (memberships.data) {
+      const personalId = personalOrganizationId(memberships.data);
+      if (personalId) router.replace(dashboardDestination(params.get("next"), personalId, memberships.data));
     }
-  }, [router, user.data, user.isError, reauthenticate]);
+  }, [router, user.data, user.isError, reauthenticate, memberships.data]);
   useEffect(() => {
     const error = new URLSearchParams(window.location.search).get("error");
     if (!error) return;
@@ -36,6 +50,7 @@ export function LoginScreen({ reauthenticate = false }: { reauthenticate?: boole
   }, []);
 
   if (user.isError) return <main className="mx-auto space-y-4 px-6 py-16" role="alert"><h1 className="text-xl font-semibold">Could not check your session</h1><Button onClick={() => void user.refetch()}>Try again</Button></main>;
+  if (user.data && memberships.isError) return <main className="mx-auto space-y-4 px-6 py-16" role="alert"><h1 className="text-xl font-semibold">Could not find your organization</h1><Button onClick={() => void memberships.refetch()}>Try again</Button></main>;
   if (user.isPending || (user.data && !reauthenticate)) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">{user.data ? "Opening your dashboard…" : "Checking your session…"}</main>;
 
   return (

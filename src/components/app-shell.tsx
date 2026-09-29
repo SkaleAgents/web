@@ -26,8 +26,14 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
   const userQuery = useQuery(currentUserOptions);
 
   useEffect(() => {
+    if (userQuery.data?.agreementRequired && pathname !== "/auth/agreements" &&
+      (pathname === "/me" || pathname.startsWith("/me/") || pathname === "/dashboard" || pathname.startsWith("/dashboard/") || pathname.startsWith("/org/") || pathname.startsWith("/staff/") || pathname === "/account/settings")) {
+      router.replace(`/auth/agreements?next=${encodeURIComponent(pathname)}`);
+      return;
+    }
     if (
       userQuery.data &&
+      !userQuery.data.agreementRequired &&
       pathname !== WORKSPACE_INVITATION_PATH &&
       hasWorkspaceInvitation()
     ) {
@@ -36,10 +42,12 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
   }, [pathname, router, userQuery.data]);
 
   const dashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/") ||
-    pathname === "/me" || pathname.startsWith("/me/") || pathname.startsWith("/org/") ||
+    pathname === "/me" || pathname.startsWith("/me/") || pathname.startsWith("/org/") || pathname === "/account/settings" ||
     pathname === "/staff" || pathname.startsWith("/staff/");
   const invitation = pathname === WORKSPACE_INVITATION_PATH;
   const authentication = pathname === "/login" || pathname.startsWith("/auth/");
+
+  if (dashboard && userQuery.data?.agreementRequired) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">Opening account agreement…</main>;
 
   if (dashboard) return <div key={userQuery.data?.id ?? "guest"} className="flex min-h-0 flex-1 flex-col">{children}</div>;
 
@@ -53,6 +61,8 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
         <div className="mt-2 flex flex-wrap justify-center gap-x-5 gap-y-2">
           <Link href="/" className="hover:text-ink hover:underline underline-offset-4">Back to public site</Link>
           <Link href="/bots" className="hover:text-ink hover:underline underline-offset-4">Browse the directory</Link>
+          <Link href="/terms" className="hover:text-ink hover:underline underline-offset-4">Terms of Service</Link>
+          <Link href="/privacy" className="hover:text-ink hover:underline underline-offset-4">Privacy Policy</Link>
         </div>
         <div className="mt-5"><ThemeSwitcher side="top" /></div>
       </footer>
@@ -84,7 +94,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
             <ProductNavigation key={pathname} />
           </div>
           <div className="ml-auto flex flex-wrap items-center justify-end gap-3 text-sm sm:ml-0">
-            {userQuery.data && <LinkButton href="/me" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>}
+            {userQuery.data && <LinkButton href="/dashboard" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>}
             <ThemeSwitcher />
             <SessionAccountAction user={userQuery.data} pending={userQuery.isPending} />
           </div>

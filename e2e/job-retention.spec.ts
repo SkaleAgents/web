@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "owner", enabled: false } }));
