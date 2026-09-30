@@ -94,6 +94,7 @@ test("audit findings and report action stay clear across dashboard layouts", asy
   await page.getByRole("button", { name: "Color theme" }).click();
   await page.getByRole("menuitemradio", { name: "Dark", exact: true }).click();
   await expect(page.locator("html")).toHaveClass(/dark/);
+  await expect(page.getByRole("button", { name: "Export report", exact: true })).toHaveCSS("background-color", "rgb(237, 237, 237)");
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.screenshot({ path: testInfo.outputPath("dashboard-dark.png"), fullPage: true });
 });
