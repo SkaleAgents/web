@@ -77,8 +77,9 @@ export function JobRetentionControls({ job, accountId, onDeletion }: {
             {retention?.historyExpiresAt && `History deadline: ${new Date(retention.historyExpiresAt).toLocaleString()}.`}
           </p>
           {job.scheduleId && <p className="text-xs text-ink-muted">The recurring schedule keeps a separate input copy. Cleaning this job does not clean its schedule or other runs.</p>}
+          <p className="text-sm text-ink-muted">Optional: download structured data for a developer or another tool. The findings and recommended actions are readable on this page.</p>
           <div className="audit-report-actions flex flex-wrap gap-2">
-            <Button type="button" disabled={report.isPending} onClick={() => report.mutate()}>{report.isPending ? "Preparing report…" : "Export report"}</Button>
+            <Button type="button" disabled={report.isPending} onClick={() => report.mutate()}>{report.isPending ? "Preparing JSON…" : "Download JSON (technical)"}</Button>
           </div>
           <details className="audit-data-actions"><summary>Manage retained data</summary>
           <div className="mt-3 flex flex-wrap gap-2">

@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retention-controls";
+import { AuditResultSummary } from "@/components/audit-result-summary";
 import { AuditCoveragePanel } from "@/components/audit-coverage";
 import { SourceMetadata } from "@/components/source-metadata";
 import { Button, LinkButton } from "@/components/ui";
@@ -38,7 +39,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
       <LinkButton href={`${root}/jobs`} variant="ghost">Back to audit jobs</LinkButton>
       <div className="workspace-intro">
         <h1 className="workspace-heading">Audit details</h1>
-        <p className="mt-2 text-sm text-ink-muted">Review findings, inspect check coverage, or export the report.</p>
+        <p className="mt-2 text-sm text-ink-muted">Read the results and recommended actions here. You do not need to download a file.</p>
       </div>
       {user.isPending && <p className="text-sm text-ink-muted">Loading account…</p>}
       {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Sign in to view this audit.</p>}
@@ -51,7 +52,8 @@ export function PersonalJobDetail({ id }: { id: string }) {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               <p className="audit-status text-xs font-semibold capitalize text-ink-muted">{job.data.status}{job.data.partial ? " · Partial results" : ""}</p>
-              <h2 className="mt-2 text-xl font-semibold text-ink">{job.data.summary ?? "Waiting for specialist results"}</h2>
+              <AuditResultSummary job={job.data} />
+              {job.data.summary && <p className="mt-2 text-sm text-ink-muted">{job.data.summary}</p>}
               <p className="mt-2 text-sm text-ink-muted">Started {new Date(job.data.createdAt).toLocaleString()}</p>
             </div>
             <Button type="button" variant="secondary" disabled={openReview.isPending} onClick={() => openReview.mutate()}>Open Watchtower</Button>
@@ -70,13 +72,13 @@ export function PersonalJobDetail({ id }: { id: string }) {
             <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
             <div><h3 className="font-semibold">{finding.title}</h3><p className="mt-1 text-sm text-ink-muted">{finding.detail}</p>
               {finding.resource && <p className="mt-2 break-all font-mono text-xs text-ink-muted">{finding.resource}</p>}
-              {finding.remediation && <p className="mt-3 text-sm"><strong>Next step: </strong>{finding.remediation}</p>}
+              <p className="mt-3 text-sm"><strong>Recommended action: </strong>{finding.remediation || "No specific fix was recorded. Ask the person responsible for this resource to review the issue before changing it."}</p>
             </div>
           </article>)}
         </section>}
         <AuditCoveragePanel key={job.data.id} coverage={job.data.coverage} tasks={job.data.tasks} status={job.data.status} />
         <section className="rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Audit data and report">
-          <h2 className="text-lg font-semibold text-ink">Audit data and report</h2>
+          <h2 className="text-lg font-semibold text-ink">Download and data controls</h2>
           <div className="mt-3"><JobRetentionControls job={job.data} accountId={accountId} onDeletion={(_, state) => setDeletion(state)} /></div>
         </section>
         {(job.data.status === "completed" || job.data.status === "failed") && <section className="space-y-3 rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Expert help">
