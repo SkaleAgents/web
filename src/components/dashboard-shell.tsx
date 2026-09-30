@@ -64,7 +64,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     router.replace(dashboardDestination(next ?? pathname + window.location.search + window.location.hash, personalId, memberships.data));
   }, [user.data, legacy, memberships.isSuccess, memberships.data, pathname, personalId, router]);
 
-  const isPersonal = workspace?.kind === "personal";
+  const isAccount = pathname.startsWith("/account/");
+  const isPersonal = isAccount || workspace?.kind === "personal";
   const root = workspace ? organizationHref(workspace) : personalId ? personalRoot : "/dashboard";
   useEffect(() => {
     if (!workspace || access.isPending || access.isFetching || access.isError || access.data?.id !== workspace.id || access.data?.kind !== workspace.kind || !routeReference) return;
@@ -81,6 +82,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       { href: `${root}/settings`, label: "Settings" },
       ...(workspace?.role === "owner" ? [{ href: `${root}/billing`, label: "Billing" }] : []),
     ] },
+    { label: "Account", items: [{ href: "/account/settings", label: "Account settings" }] },
   ] : [
     { label: "Your work", items: [
       { href: root, label: "Dashboard" },
@@ -162,15 +164,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               </div>
             </div>)}
           </div>
-          <div className="dashboard-site-link">
-            <Link href="/" onClick={closeMenu} className="flex items-center justify-between gap-3 text-sm text-ink-muted hover:text-ink">
-              Visit public site <span aria-hidden="true">↗</span>
-            </Link>
+          <div className="dashboard-sidebar-footer" aria-label="Resources">
+            <a href="https://github.com/SkaleAgents/mcp-server#readme" target="_blank" rel="noreferrer" className="dashboard-nav-item" aria-label="Docs (opens in a new tab)" title="Docs">
+              <DashboardIcon href="/docs" /><span className="dashboard-nav-text">Docs</span>
+            </a>
+            <Link href="/contact" onClick={closeMenu} className="dashboard-nav-item" aria-label="Help" title="Help"><DashboardIcon href="/help" /><span className="dashboard-nav-text">Help</span></Link>
+            <Link href="/" onClick={closeMenu} className="dashboard-nav-item" aria-label="Visit public site" title="Visit public site"><DashboardIcon href="/site" /><span className="dashboard-nav-text">Visit public site</span></Link>
           </div>
         </div>
       </nav>
     </aside>
-    <div className="min-w-0">
+    <div className="dashboard-main">
       <header className="dashboard-toolbar">
         <div className="flex min-w-0 items-center gap-2 text-sm">
           <button type="button" className="dashboard-collapse-toggle" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -181,13 +185,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <span className="sr-only">{menuOpen ? "Close menu" : "Open menu"}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d={menuOpen ? "m6 6 12 12M6 18 18 6" : "M4 6h16M4 12h16M4 18h16"} /></svg>
           </button>
           <span className="dashboard-toolbar-divider" aria-hidden="true" />
-          <OrganizationSwitcher scope={scope} pathname={pathname} memberships={memberships.data ?? []} />
+          {isAccount ? <span className="px-2 font-medium">Personal account</span> : <OrganizationSwitcher scope={scope} pathname={pathname} memberships={memberships.data ?? []} />}
           <span aria-hidden="true" className="text-line">{" / "}</span>
           <span className="truncate font-semibold">{currentSection}</span>
         </div>
         <div className="flex items-center gap-2"><ThemeSwitcher /><AccountMenu key={user.data.id} user={user.data} /></div>
       </header>
       <div className="dashboard-content" key={`${user.data.id}:${root}`}>{workspace ? <OrganizationScopeContext.Provider value={{ organization: workspace, root }}>{content}</OrganizationScopeContext.Provider> : content}</div>
+      <footer className="dashboard-footer"><span>© {new Date().getFullYear()} Binary Labs LLC</span><nav aria-label="Legal"><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></nav></footer>
     </div>
   </div>;
 }
@@ -195,6 +200,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 function DashboardIcon({ href }: { href: string }) {
   const name = href.split("/").at(-1);
   const paths: Record<string, React.ReactNode> = {
+    docs: <><path d="M12 5C8 2 4 3 3 4v15c3-2 6-1 9 1 3-2 6-3 9-1V4c-1-1-5-2-9 1Zm0 0v15" /></>,
+    help: <><circle cx="12" cy="12" r="9" /><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 4m0 3h.01" /></>,
+    site: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a18 18 0 0 1 0 18 18 18 0 0 1 0-18Z" /></>,
     dashboard: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>,
     jobs: <><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V2h6v2m-7 8 3 3 5-6" /></>,
     schedules: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 2v6m10-6v6M3 10h18m-13 5h2m4 0h2" /></>,
