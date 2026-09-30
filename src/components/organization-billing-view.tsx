@@ -3,8 +3,7 @@
 import { useOrganizationRoot } from "./organization-scope";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { EmbeddedStripeCheckout } from "@/components/embedded-stripe-checkout";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
@@ -21,7 +20,17 @@ type Billing = {
   cancellationEnabled: boolean;
 };
 
-type Checkout = { organizationId: string; uiMode: "embedded_page"; clientSecret: string; publishableKey: string };
+type Checkout = { organizationId: string; url: string };
+
+function approvedCheckoutUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname === "checkout.stripe.com"
+      && !url.username && !url.password && !url.port;
+  } catch {
+    return false;
+  }
+}
 
 function approvedInvoiceUrl(value: string): boolean {
   try {
@@ -41,7 +50,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
   const client = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(checkoutReturnOrganizationId);
   const [checkoutLink, setCheckoutLink] = useState<Checkout | null>(null);
-  const [completedOrganizationId, setCompletedOrganizationId] = useState<string | null>(null);
+  const redirectedCheckout = useRef<string | null>(null);
   const organizations = useQuery({
     queryKey: ["billing-organizations", user.data?.id],
     enabled: Boolean(user.data?.id),
@@ -61,22 +70,19 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
     queryKey: ["organization-billing", organizationId],
     enabled: Boolean(organizationId),
     queryFn: ({ signal }) => apiFetch<Billing>(`/api/workspaces/${organizationId}/billing`, { signal }),
-    refetchInterval: (query) => (checkoutReturnOrganizationId === organizationId || completedOrganizationId === organizationId) && query.state.data?.plan === "free" ? 5000 : false,
+    refetchInterval: (query) => (checkoutReturnOrganizationId === organizationId) && query.state.data?.plan === "free" ? 5000 : false,
   });
   const change = useMutation({
     mutationFn: async ({ plan, organizationId: requestedId, fromPlan }: { plan: string; organizationId: string; fromPlan: string }) => {
       await ensureCsrfCookie();
       if (fromPlan === "free") {
-        const result = await apiFetch<{ uiMode?: string; url?: string; clientSecret?: string; publishableKey?: string }>(`/api/workspaces/${requestedId}/billing/checkout`, {
-          method: "POST", body: JSON.stringify({ plan, uiMode: "embedded_page" }),
+        const result = await apiFetch<{ uiMode?: string; url?: string }>(`/api/workspaces/${requestedId}/billing/checkout`, {
+          method: "POST", body: JSON.stringify({ plan, uiMode: "hosted_page" }),
         });
-        if (result.uiMode === "embedded_page") {
-          if (!result.clientSecret?.startsWith("cs_test_") || !result.clientSecret.includes("_secret_") || !result.publishableKey?.startsWith("pk_test_")) {
-            throw new Error("The payment session was not valid. Try again.");
-          }
-          return { organizationId: requestedId, uiMode: "embedded_page" as const, clientSecret: result.clientSecret, publishableKey: result.publishableKey };
+        if ((result.uiMode === undefined || result.uiMode === "hosted_page") && result.url && approvedCheckoutUrl(result.url)) {
+          return { organizationId: requestedId, url: result.url };
         }
-        throw new Error("Embedded checkout is unavailable. Please try again or contact support.");
+        throw new Error("Stripe checkout is unavailable. Please try again or contact support.");
       }
       const result = await apiFetch<{ status: string }>(`/api/workspaces/${requestedId}/billing/change-plan`, {
         method: "POST", body: JSON.stringify({ plan }),
@@ -91,12 +97,13 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
       await client.invalidateQueries({ queryKey: ["organization-billing", variables.organizationId] });
     },
   });
-  const checkoutComplete = () => {
-    if (!organizationId) return;
-    setCompletedOrganizationId(organizationId);
-    setCheckoutLink(null);
-    void client.invalidateQueries({ queryKey: ["organization-billing", organizationId] });
-  };
+  useEffect(() => {
+    if (checkoutLink && checkoutLink.organizationId === organizationId && billing.data?.testModeEnabled
+      && billing.data.plan === "free" && redirectedCheckout.current !== checkoutLink.url) {
+      redirectedCheckout.current = checkoutLink.url;
+      window.location.assign(checkoutLink.url);
+    }
+  }, [checkoutLink, organizationId, billing.data?.testModeEnabled, billing.data?.plan]);
   const cancel = useMutation({
     mutationFn: async (requestedId: string) => {
       await ensureCsrfCookie();
@@ -110,7 +117,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
   const pendingPlanName = catalog.data?.find((plan) => plan.key === billing.data?.pendingChange?.toPlan)?.name ?? billing.data?.pendingChange?.toPlan;
   const paidPlans = catalog.data?.filter((plan) => plan.checkoutMode === "self_service") ?? [];
   const currentPrice = currentPlan?.monthlyUsd ?? 0;
-  const showingCheckoutReturn = Boolean(organizationId && (checkoutReturnOrganizationId === organizationId || completedOrganizationId === organizationId));
+  const showingCheckoutReturn = Boolean(organizationId && (checkoutReturnOrganizationId === organizationId));
 
   return <main className="mx-auto max-w-4xl space-y-8">
     <div>
@@ -204,7 +211,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
           })}
         </div>
         {change.isError ? <p role="alert" className="text-sm text-danger">{change.error.message}</p> : null}
-        {billing.data.testModeEnabled && billing.data.plan === "free" && checkoutLink?.organizationId === organizationId && checkoutLink.uiMode === "embedded_page" ? <EmbeddedStripeCheckout key={checkoutLink.clientSecret} clientSecret={checkoutLink.clientSecret} publishableKey={checkoutLink.publishableKey} onComplete={checkoutComplete} /> : null}
+        {billing.data.testModeEnabled && billing.data.plan === "free" && checkoutLink?.organizationId === organizationId ? <p role="status" className="text-sm text-ink-muted">Opening the secure Stripe payment page. <a className="underline" href={checkoutLink.url}>Continue to Stripe</a></p> : null}
       </section>
     </> : null}
   </main>;
