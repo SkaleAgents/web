@@ -41,7 +41,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const workspace = routeScope.kind === "organization" ? resolveOrganization(routeScope.id, memberships.data ?? []) : undefined;
   const scope = workspace ? { kind: "organization" as const, id: workspace.id } : { kind: "personal" as const };
   const access = useQuery({
-    queryKey: ["workspace-access", user.data?.id ?? "guest", scope.kind === "organization" ? scope.id : "legacy"],
+    queryKey: ["workspace-access", user.data?.id ?? "guest", scope.kind === "organization" ? scope.id : "legacy", pathname],
     enabled: Boolean(user.data?.id && scope.kind === "organization"),
     queryFn: async ({ signal }) => (await apiFetch<{ data: OrganizationMembership }>(`/api/workspaces/${scope.kind === "organization" ? scope.id : ""}`, { signal })).data,
     staleTime: 0,

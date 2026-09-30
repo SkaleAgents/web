@@ -101,3 +101,26 @@ test("switching slugs clears the previous organization before access resolves", 
   await expect(page.getByRole("heading", { name: "Other Team", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Organization settings" })).toHaveAttribute("href", "/org/other-team/settings");
 });
+
+test("warm settings cache stays hidden after same-organization access is revoked", async ({ page }) => {
+  let revoked = false;
+  let checksAfterRevocation = 0;
+  await page.route(`**/api/workspaces/${id}`, route => {
+    if (revoked) checksAfterRevocation++;
+    return route.fulfill(revoked ? { status: 404, json: { error: "Unavailable" } } : { json: { data: team } });
+  });
+  await page.route(`**/api/workspaces/${id}/members`, route => route.fulfill({ json: { data: [
+    { userId: "member-a", email: "sensitive@example.test", name: "Private Member", role: "member", joinedAt: "2026-09-30T00:00:00Z" },
+  ] } }));
+  await page.goto("/org/binary-labs/settings");
+  await expect(page.getByText("sensitive@example.test", { exact: true })).toBeVisible();
+  await page.locator('.dashboard-brand a').click();
+  await expect(page).toHaveURL("/org/binary-labs");
+  await expect(page.getByRole("heading", { name: "Binary Labs", exact: true })).toBeVisible();
+  revoked = true;
+  await page.getByRole("link", { name: "Organization settings" }).click();
+  await expect(page).toHaveURL("/org/binary-labs/settings");
+  await expect(page.locator("main[role=alert]")).toContainText("Organization unavailable");
+  await expect(page.getByText("sensitive@example.test", { exact: true })).toHaveCount(0);
+  expect(checksAfterRevocation).toBeGreaterThan(0);
+});
