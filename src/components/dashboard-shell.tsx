@@ -110,7 +110,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   }
   const item = ({ href, label }: NavigationItem) => (
     <Link key={href} href={href} onClick={closeMenu}
-      aria-label={label}
+      aria-label={label} title={collapsed ? label : undefined}
       aria-current={active(href) ? "page" : undefined}
       className={`dashboard-nav-item ${active(href) ? "is-active" : ""}`}>
       <DashboardIcon href={href} />
@@ -129,7 +129,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div className="dashboard-brand">
           <span className="dashboard-brand-logo"><BrandLogo href={root} /></span>
           <button type="button" className="dashboard-collapse-toggle" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            onClick={() => setCollapsed(value => !value)}>{collapsed ? "»" : "«"}</button>
+            onClick={() => setCollapsed(value => !value)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M9 4v16" /></svg></button>
           <button ref={menuToggle} type="button" className="dashboard-menu-toggle"
             aria-expanded={menuOpen} aria-controls="dashboard-sections"
             onClick={() => setMenuOpen(!menuOpen)}>

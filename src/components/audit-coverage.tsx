@@ -8,8 +8,9 @@ export function AuditCoveragePanel({ coverage, tasks = [], status }: {
   const recorded = coverage?.ruleLevelChecksAvailable;
   const rows = coverage?.tasks ?? tasks;
   const pending = (value: string) => value === "queued" || value === "running";
-  return <section className="space-y-3 rounded-[10px] border border-line p-4" aria-label="Check coverage">
+  return <section className="audit-coverage space-y-3 rounded-[10px] border border-line p-4" aria-label="Check coverage">
     <h3 className="text-sm font-semibold text-ink">Check coverage</h3>
+    {!recorded && !pending(status) && <p className="coverage-notice">Check details weren’t recorded for this audit. Its findings are still available, but individual checks can’t be reconstructed.</p>}
     {recorded && coverage && <div className="text-sm text-ink">
       <p>{coverage.counts.evaluated} evaluated · {coverage.counts.skipped} skipped · {coverage.counts.failed} failed</p>
       {coverage.counts.partial > 0 && <p className="mt-1 text-ink-muted">{coverage.counts.partial} evaluated {coverage.counts.partial === 1 ? "check has" : "checks have"} partial coverage.</p>}

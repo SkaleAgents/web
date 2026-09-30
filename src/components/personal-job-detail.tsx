@@ -34,11 +34,11 @@ export function PersonalJobDetail({ id }: { id: string }) {
   });
 
   return (
-    <main className="space-y-6">
+    <main className="audit-detail space-y-6">
       <LinkButton href={`${root}/jobs`} variant="ghost">Back to audit jobs</LinkButton>
       <div className="workspace-intro">
         <h1 className="workspace-heading">Audit details</h1>
-        <p className="mt-2 text-sm text-ink-muted">Review this audit and manage its retained data.</p>
+        <p className="mt-2 text-sm text-ink-muted">Review findings, inspect check coverage, or export the report.</p>
       </div>
       {user.isPending && <p className="text-sm text-ink-muted">Loading account…</p>}
       {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Sign in to view this audit.</p>}
@@ -47,10 +47,10 @@ export function PersonalJobDetail({ id }: { id: string }) {
       {!deletion && accountId && job.isPending && <p className="text-sm text-ink-muted">Loading audit…</p>}
       {!deletion && accountId && job.isError && <p role="alert" className="text-sm text-danger">This audit is unavailable or has been removed.</p>}
       {!deletion && accountId && job.data && <>
-        <section className="space-y-4 rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Audit overview">
+        <section className="audit-overview space-y-4 rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Audit overview">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold capitalize text-ink-muted">{job.data.status}{job.data.partial ? " · Partial results" : ""}</p>
+              <p className="audit-status text-xs font-semibold capitalize text-ink-muted">{job.data.status}{job.data.partial ? " · Partial results" : ""}</p>
               <h2 className="mt-2 text-xl font-semibold text-ink">{job.data.summary ?? "Waiting for specialist results"}</h2>
               <p className="mt-2 text-sm text-ink-muted">Started {new Date(job.data.createdAt).toLocaleString()}</p>
             </div>
@@ -64,6 +64,16 @@ export function PersonalJobDetail({ id }: { id: string }) {
             <SourceMetadata sourceRevision={job.data.sourceRevision} sourceObservedAt={job.data.sourceObservedAt} inputAvailable={job.data.retention?.inputAvailable} verified={job.data.sourceMetadataProvenance === "github_fetched"} />
           </div>
         </section>
+        {job.data.findings && <section className="audit-findings" aria-label="Findings">
+          <div className="audit-section-heading"><h2>Findings</h2><span>{job.data.findings.length} recorded</span></div>
+          {job.data.findings.length === 0 ? <p className="text-sm text-ink-muted">No findings were recorded. Review check coverage below to understand the limits.</p> : job.data.findings.map((finding, index) => <article key={index} className="audit-finding">
+            <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
+            <div><h3 className="font-semibold">{finding.title}</h3><p className="mt-1 text-sm text-ink-muted">{finding.detail}</p>
+              {finding.resource && <p className="mt-2 break-all font-mono text-xs text-ink-muted">{finding.resource}</p>}
+              {finding.remediation && <p className="mt-3 text-sm"><strong>Next step: </strong>{finding.remediation}</p>}
+            </div>
+          </article>)}
+        </section>}
         <AuditCoveragePanel key={job.data.id} coverage={job.data.coverage} tasks={job.data.tasks} status={job.data.status} />
         <section className="rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Audit data and report">
           <h2 className="text-lg font-semibold text-ink">Audit data and report</h2>
