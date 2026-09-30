@@ -169,7 +169,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <DashboardIcon href="/docs" /><span className="dashboard-nav-text">Docs</span>
             </a>
             <Link href="/contact" onClick={closeMenu} className="dashboard-nav-item" aria-label="Help" title="Help"><DashboardIcon href="/help" /><span className="dashboard-nav-text">Help</span></Link>
-            <Link href="/" onClick={closeMenu} className="dashboard-nav-item" aria-label="Visit public site" title="Visit public site"><DashboardIcon href="/site" /><span className="dashboard-nav-text">Visit public site</span></Link>
+            <a href="/" target="_blank" rel="noopener noreferrer" onClick={closeMenu} className="dashboard-nav-item" aria-label="Visit public site (opens in a new tab)" title="Visit public site (opens in a new tab)"><DashboardIcon href="/site" /><span className="dashboard-nav-text">Visit public site <span aria-hidden="true">↗</span></span></a>
           </div>
         </div>
       </nav>
