@@ -1,5 +1,7 @@
 "use client";
 
+import { DashboardPageLoader } from "@/components/dashboard-page-loader";
+
 import { useOrganizationRoot } from "./organization-scope";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,7 +31,7 @@ function useOrganization(workspaceId: string) {
 
 function OrganizationGate({ workspaceId, children }: { workspaceId: string; children: (organization: Organization, accountId: string) => React.ReactNode }) {
   const { account, organization } = useOrganization(workspaceId);
-  if (account.isPending || organization.isPending) return <main role="status">Checking organization access…</main>;
+  if (account.isPending || organization.isPending) return <DashboardPageLoader />;
   if (account.isError || !account.data || organization.isError || !organization.data) return <main role="alert">Organization unavailable.</main>;
   return children(organization.data, account.data.id);
 }

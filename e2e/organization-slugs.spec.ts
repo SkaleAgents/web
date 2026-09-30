@@ -95,7 +95,8 @@ test("switching slugs clears the previous organization before access resolves", 
   await page.getByRole("button", { name: "Binary Labs, switch scope" }).click();
   await page.getByRole("link", { name: "Other Team", exact: true }).click();
   await expect(page).toHaveURL("/org/other-team");
-  await expect(page.getByRole("status")).toContainText("Checking organization access");
+  await expect(page.getByRole("status", { name: "Loading page" })).toBeVisible();
+  await expect(page.getByText("Checking organization access", { exact: false })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Binary Labs", exact: true })).toHaveCount(0);
   release();
   await expect(page.getByRole("heading", { name: "Other Team", exact: true })).toBeVisible();
@@ -139,7 +140,10 @@ test("navigation keeps the dashboard frame while access loads only inside conten
   hold = true;
   await page.getByRole("link", { name: "Organization settings" }).click();
   await expect(page).toHaveURL("/org/binary-labs/settings");
-  await expect(page.locator('.dashboard-content [role=status]')).toContainText("Checking organization access");
+  await expect(page.getByRole("status", { name: "Loading page" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
+  await page.screenshot({ path: test.info().outputPath("dashboard-loading.png") });
+  await expect(page.getByText("Checking organization access", { exact: false })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Dashboard navigation" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Expand sidebar", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Binary Labs, switch scope" })).toBeVisible();
