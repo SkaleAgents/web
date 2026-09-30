@@ -124,3 +124,27 @@ test("warm settings cache stays hidden after same-organization access is revoked
   await expect(page.getByText("sensitive@example.test", { exact: true })).toHaveCount(0);
   expect(checksAfterRevocation).toBeGreaterThan(0);
 });
+
+test("navigation keeps the dashboard frame while access loads only inside content", async ({ page }) => {
+  let hold = false;
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route(`**/api/workspaces/${id}`, async route => {
+    if (hold) await gate;
+    await route.fulfill({ json: { data: team } });
+  });
+  await page.goto("/org/binary-labs");
+  await expect(page.getByRole("heading", { name: "Binary Labs", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Collapse sidebar", exact: true }).click();
+  hold = true;
+  await page.getByRole("link", { name: "Organization settings" }).click();
+  await expect(page).toHaveURL("/org/binary-labs/settings");
+  await expect(page.locator('.dashboard-content [role=status]')).toContainText("Checking organization access");
+  await expect(page.getByRole("navigation", { name: "Dashboard navigation" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Expand sidebar", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Binary Labs, switch scope" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Binary Labs", exact: true })).toHaveCount(0);
+  release();
+  await expect(page.getByRole("heading", { name: "Organization settings", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Expand sidebar", exact: true })).toBeVisible();
+});

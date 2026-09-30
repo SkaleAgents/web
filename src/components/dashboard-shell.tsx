@@ -115,9 +115,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   if (pathname.startsWith("/org/") && !scopeFromPath(pathname)) return <main role="alert" className="px-6 py-16">Organization unavailable.</main>;
   if (routeScope.kind === "organization" && memberships.isPending) return <main role="status" className="px-6 py-16">Checking organization access…</main>;
   if (routeScope.kind === "organization" && memberships.isError) return <main role="alert" className="px-6 py-16">Could not check organization access. <Button onClick={() => void memberships.refetch()}>Try again</Button></main>;
-  if (scope.kind === "organization" && (access.isPending || access.isFetching)) return <main role="status" className="px-6 py-16">Checking organization access…</main>;
-  if (scope.kind === "organization" && (access.isError || access.data?.id !== scope.id || access.data?.kind !== workspace?.kind)) return <main role="alert" className="px-6 py-16">Organization unavailable. {personalId && <Link href={personalRoot}>Open Personal</Link>}</main>;
   if (routeScope.kind === "organization" && !workspace) return <main role="alert" className="px-6 py-16">Organization unavailable. {personalId && <Link href={personalRoot}>Open Personal</Link>}</main>;
+
+  let content = children;
+  if (scope.kind === "organization") {
+    if (access.isPending || access.isFetching) {
+      content = <main role="status" className="py-8 text-sm text-ink-muted">Checking organization access…</main>;
+    } else if (access.isError || access.data?.id !== scope.id || access.data?.kind !== workspace?.kind) {
+      content = <main role="alert" className="py-8">Organization unavailable. {personalId && <Link href={personalRoot}>Open Personal</Link>}</main>;
+    }
+  }
 
   function closeMenu() {
     setMenuOpen(false);
@@ -179,7 +186,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="flex items-center gap-2"><ThemeSwitcher /><AccountMenu key={user.data.id} user={user.data} /></div>
       </header>
-      <div className="dashboard-content" key={`${user.data.id}:${root}`}>{workspace ? <OrganizationScopeContext.Provider value={{ organization: workspace, root }}>{children}</OrganizationScopeContext.Provider> : children}</div>
+      <div className="dashboard-content" key={`${user.data.id}:${root}`}>{workspace ? <OrganizationScopeContext.Provider value={{ organization: workspace, root }}>{content}</OrganizationScopeContext.Provider> : content}</div>
     </div>
   </div>;
 }
