@@ -24,7 +24,8 @@ export default function JobsPage() {
     queryFn: async ({ signal }) => (await apiFetch<{ jobs: SwarmJob[] }>("/api/jobs", { signal })).jobs,
     refetchInterval: (query) => query.state.data?.some((job) => job.status === "queued" || job.status === "running" || job.retention?.inputPurgeStatus === "pending" || job.retention?.inputPurgeStatus === "failed") ? 5000 : false,
   });
-  const filteredJobs = jobs.data?.filter((job) => status === "all" || job.status === status) ?? [];
+  const matchesFilter = (job: SwarmJob, filter: string) => filter === "all" || (filter === "issues" ? (job.findingSummary?.total ?? 0) > 0 : job.status === filter);
+  const filteredJobs = jobs.data?.filter((job) => matchesFilter(job, status)) ?? [];
   const pageCount = Math.max(1, Math.ceil(filteredJobs.length / 10));
   const currentPage = Math.min(page, pageCount);
   const visibleJobs = filteredJobs.slice((currentPage - 1) * 10, currentPage * 10);
@@ -41,7 +42,7 @@ export default function JobsPage() {
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your jobs</h2><LinkButton href={href("schedules")} variant="secondary">Set up recurring reviews</LinkButton></div>
-        <div className="flex flex-wrap gap-2">{["all", "queued", "running", "completed", "failed"].map((item) => <button key={item} type="button" className="filter-chip capitalize" aria-pressed={status === item} onClick={() => { setStatus(item); setPage(1); }}>{item === "all" ? "All jobs" : item} {jobs.data ? `(${jobs.data.filter((job) => item === "all" || job.status === item).length})` : ""}</button>)}</div>
+        <div className="flex flex-wrap gap-2">{["all", "issues", "queued", "running", "completed", "failed"].map((item) => <button key={item} type="button" className="filter-chip capitalize" aria-pressed={status === item} onClick={() => { setStatus(item); setPage(1); }}>{item === "all" ? "All jobs" : item === "issues" ? "Issues found" : item} {jobs.data ? `(${jobs.data.filter((job) => matchesFilter(job, item)).length})` : ""}</button>)}</div>
         {(user.isPending || user.data && jobs.isPending) && <p className="text-sm text-ink-muted">Loading jobs…</p>}
         {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Sign in in the header to access your audit jobs.</p>}
         {jobs.isError && (
@@ -51,7 +52,7 @@ export default function JobsPage() {
           </div>
         )}
         {jobs.data?.length === 0 && <div className="rounded-xl border border-dashed border-line p-6 text-sm text-ink-muted"><p>No audits yet. Create one to review your infrastructure.</p><LinkButton href={href("jobs/new")} className="mt-4">New audit</LinkButton></div>}
-        {Boolean(jobs.data?.length) && !jobs.data?.some((job) => status === "all" || job.status === status) && <p className="text-sm text-ink-muted">No {status} jobs. Choose another status to see your reviews.</p>}
+        {Boolean(jobs.data?.length) && filteredJobs.length === 0 && <p className="text-sm text-ink-muted">{status === "issues" ? "No audits with recorded findings. Audits with unavailable results may still need review." : `No ${status} jobs. Choose another status to see your reviews.`}</p>}
         <ul className="divide-y divide-line">
           {visibleJobs.map((job) => (
             <li key={job.id} className="flex flex-wrap items-center justify-between gap-4 py-4">

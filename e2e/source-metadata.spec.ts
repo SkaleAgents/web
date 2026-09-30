@@ -21,20 +21,23 @@ test("audit creation submits paired source metadata and job reads distinguish un
   });
   await page.route("**/api/jobs/*", route => {
     const id = route.request().url().split("/").at(-1);
-    return route.fulfill({ json: jobRows.find(job => job.id === id) });
+    return route.fulfill({ json: jobRows.find(job => job.id === id) ?? { ...jobRows[0], id: "created", status: "queued" } });
   });
 
   await page.goto("/me/jobs/new");
+  await page.getByText("Advanced options", { exact: true }).click();
   await page.getByLabel("IaC content").fill('resource "test" {}');
   await page.getByLabel("Source revision").fill("commit-audit");
   await page.getByLabel("Source observed at").fill("2026-09-25T10:30");
-  await page.getByRole("button", { name: "Queue audit" }).click();
+  await page.getByRole("button", { name: "Start audit" }).click();
 
   await expect.poll(() => createdBody).toMatchObject({
     scope: { kind: "iac_text", content: 'resource "test" {}' },
     sourceRevision: "commit-audit",
     sourceObservedAt: "2026-09-25T04:30:00Z",
   });
+  await expect(page).toHaveURL(/\/jobs\/created$/);
+  await page.getByRole("link", { name: "Back to audit jobs" }).click();
   await page.getByRole("link", { name: "View audit" }).nth(0).click();
   await expect(page.getByText("Caller-reported source revision: unknown")).toBeVisible();
   await page.getByRole("link", { name: "Back to audit jobs" }).click();
@@ -57,12 +60,15 @@ test("audit form rejects one-sided metadata before sending a request", async ({ 
   });
 
   await page.goto("/me/jobs/new");
+  await page.getByText("Advanced options", { exact: true }).click();
   await page.getByLabel("IaC content").fill('resource "test" {}');
   await page.getByLabel("Source revision").fill("only-revision");
-  await page.getByRole("button", { name: "Queue audit" }).click();
+  await page.getByRole("button", { name: "Start audit" }).click();
 
   await expect(page.getByText("Enter both a source revision and observation time, or leave both blank")).toBeVisible();
   expect(createCalls).toBe(0);
+  await expect(page.getByLabel("IaC content")).toHaveValue('resource "test" {}');
+  await expect(page.getByRole("button", { name: "Start audit", exact: true })).toBeEnabled();
 });
 
 test("schedule creation submits a paired caller revision and observation time", async ({ page }) => {
