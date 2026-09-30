@@ -10,8 +10,10 @@ import { BrandLogo } from "@/components/brand";
 import { AccountMenu } from "@/components/account-menu";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { apiFetch } from "@/lib/api";
-import { dashboardDestination, organizationPath, personalOrganizationId, scopeFromPath } from "@/lib/dashboard-routes";
+import { dashboardDestination, organizationHref, resolveOrganization, personalOrganizationId, scopeFromPath } from "@/lib/dashboard-routes";
 import { OrganizationSwitcher, type OrganizationMembership } from "@/components/organization-switcher";
+
+import { OrganizationScopeContext } from "@/components/organization-scope";
 
 type NavigationItem = { href: string; label: string };
 type NavigationSection = { label: string; items: NavigationItem[] };
@@ -28,15 +30,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (menuOpen) navigation.current?.querySelector<HTMLButtonElement>(".dashboard-nav-label")?.focus();
   }, [menuOpen]);
-  const scope = scopeFromPath(pathname) ?? { kind: "personal" as const };
+  const routeScope = scopeFromPath(pathname) ?? { kind: "personal" as const };
   const memberships = useQuery({
     queryKey: ["workspaces", user.data?.id ?? "guest"],
     enabled: Boolean(user.data?.id),
     queryFn: async ({ signal }) => (await apiFetch<{ data: OrganizationMembership[] }>("/api/workspaces", { signal })).data,
     refetchInterval: 60_000,
   });
+  const routeReference = routeScope.kind === "organization" ? routeScope.id : null;
+  const workspace = routeScope.kind === "organization" ? resolveOrganization(routeScope.id, memberships.data ?? []) : undefined;
+  const scope = workspace ? { kind: "organization" as const, id: workspace.id } : { kind: "personal" as const };
   const access = useQuery({
-    queryKey: ["workspace-access", user.data?.id ?? "guest", scope.kind === "organization" ? scope.id : "legacy"],
+    queryKey: ["workspace-access", user.data?.id ?? "guest", scope.kind === "organization" ? scope.id : "legacy", pathname],
     enabled: Boolean(user.data?.id && scope.kind === "organization"),
     queryFn: async ({ signal }) => (await apiFetch<{ data: OrganizationMembership }>(`/api/workspaces/${scope.kind === "organization" ? scope.id : ""}`, { signal })).data,
     staleTime: 0,
@@ -44,21 +49,27 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   });
   useEffect(() => {
     if (user.isSuccess && !user.data) {
-      router.replace(`/login?next=${encodeURIComponent(pathname + window.location.search)}`);
+      router.replace(`/login?next=${encodeURIComponent(pathname + window.location.search + window.location.hash)}`);
     }
   }, [pathname, router, user.isSuccess, user.data]);
 
   const personalId = personalOrganizationId(memberships.data ?? []);
+  const personalMember = memberships.data?.find(item => item.id === personalId);
+  const personalRoot = personalMember ? organizationHref(personalMember) : "/me";
   const legacy = pathname === "/me" || pathname.startsWith("/me/") || pathname === "/dashboard" || pathname.startsWith("/dashboard/");
   useEffect(() => {
     if (!user.data || !legacy || !memberships.isSuccess || !personalId) return;
     const next = new URLSearchParams(window.location.search).get("next");
-    router.replace(dashboardDestination(next ?? pathname + window.location.search, personalId, memberships.data));
+    router.replace(dashboardDestination(next ?? pathname + window.location.search + window.location.hash, personalId, memberships.data));
   }, [user.data, legacy, memberships.isSuccess, memberships.data, pathname, personalId, router]);
 
-  const workspace = scope.kind === "organization" ? memberships.data?.find(item => item.id === scope.id) : null;
   const isPersonal = workspace?.kind === "personal";
-  const root = scope.kind === "organization" ? organizationPath(scope.id) : personalId ? organizationPath(personalId) : "/dashboard";
+  const root = workspace ? organizationHref(workspace) : personalId ? personalRoot : "/dashboard";
+  useEffect(() => {
+    if (!workspace || access.isPending || access.isFetching || access.isError || access.data?.id !== workspace.id || access.data?.kind !== workspace.kind || !routeReference) return;
+    const oldRoot = `/org/${routeReference}`;
+    if (oldRoot !== root) router.replace(root + pathname.slice(oldRoot.length) + window.location.search + window.location.hash);
+  }, [workspace, access.isPending, access.isFetching, access.isError, access.data, routeReference, root, pathname, router]);
   const sections: NavigationSection[] = !isPersonal ? [
     { label: "Your work", items: [
       { href: root, label: "Dashboard" },
@@ -102,11 +113,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   if (!user.data) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">Checking your session…</main>;
   if (legacy) return <main role="status" className="px-6 py-16">Opening your organization…</main>;
   if (pathname.startsWith("/org/") && !scopeFromPath(pathname)) return <main role="alert" className="px-6 py-16">Organization unavailable.</main>;
-  if (scope.kind === "organization" && memberships.isPending) return <main role="status" className="px-6 py-16">Checking organization access…</main>;
-  if (scope.kind === "organization" && memberships.isError) return <main role="alert" className="px-6 py-16">Could not check organization access. <Button onClick={() => void memberships.refetch()}>Try again</Button></main>;
+  if (routeScope.kind === "organization" && memberships.isPending) return <main role="status" className="px-6 py-16">Checking organization access…</main>;
+  if (routeScope.kind === "organization" && memberships.isError) return <main role="alert" className="px-6 py-16">Could not check organization access. <Button onClick={() => void memberships.refetch()}>Try again</Button></main>;
   if (scope.kind === "organization" && (access.isPending || access.isFetching)) return <main role="status" className="px-6 py-16">Checking organization access…</main>;
-  if (scope.kind === "organization" && (access.isError || access.data?.id !== scope.id || access.data?.kind !== workspace?.kind)) return <main role="alert" className="px-6 py-16">Organization unavailable. {personalId && <Link href={organizationPath(personalId)}>Open Personal</Link>}</main>;
-  if (scope.kind === "organization" && !workspace) return <main role="alert" className="px-6 py-16">Organization unavailable. {personalId && <Link href={organizationPath(personalId)}>Open Personal</Link>}</main>;
+  if (scope.kind === "organization" && (access.isError || access.data?.id !== scope.id || access.data?.kind !== workspace?.kind)) return <main role="alert" className="px-6 py-16">Organization unavailable. {personalId && <Link href={personalRoot}>Open Personal</Link>}</main>;
+  if (routeScope.kind === "organization" && !workspace) return <main role="alert" className="px-6 py-16">Organization unavailable. {personalId && <Link href={personalRoot}>Open Personal</Link>}</main>;
 
   function closeMenu() {
     setMenuOpen(false);
@@ -168,7 +179,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="flex items-center gap-2"><ThemeSwitcher /><AccountMenu key={user.data.id} user={user.data} /></div>
       </header>
-      <div className="dashboard-content" key={`${user.data.id}:${root}`}>{children}</div>
+      <div className="dashboard-content" key={`${user.data.id}:${root}`}>{workspace ? <OrganizationScopeContext.Provider value={{ organization: workspace, root }}>{children}</OrganizationScopeContext.Provider> : children}</div>
     </div>
   </div>;
 }

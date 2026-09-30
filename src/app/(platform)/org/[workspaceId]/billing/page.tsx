@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { OrganizationBillingView } from "@/components/organization-billing-view";
+import { ScopedOrganizationBilling } from "@/components/organization-scope-views";
 import { OrganizationScopeContent } from "@/components/organization-scope-content";
 
 export const metadata: Metadata = {
@@ -7,11 +7,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function OrganizationBillingPage({ params, searchParams }: {
-  params: Promise<{ workspaceId: string }>;
+export default async function OrganizationBillingPage({ searchParams }: {
   searchParams: Promise<{ checkout?: string }>;
 }) {
-  const [{ workspaceId }, query] = await Promise.all([params, searchParams]);
+  const query = await searchParams;
   return <OrganizationScopeContent personal={<main role="alert">Billing is unavailable for Personal.</main>}
-    team={<OrganizationBillingView organizationId={workspaceId} checkoutReturnOrganizationId={query.checkout === "return" ? workspaceId : null} />} />;
+    team={<ScopedOrganizationBilling checkoutReturn={query.checkout === "return"} />} />;
 }

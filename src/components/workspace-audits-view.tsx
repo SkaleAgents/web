@@ -5,7 +5,7 @@ import { AuditCoveragePanel } from "@/components/audit-coverage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useParams } from "next/navigation";
+import { useOrganizationScope, useOrganizationRoot } from "./organization-scope";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Button, TextArea } from "@/components/ui";
 import { apiFetch } from "@/lib/api";
@@ -25,8 +25,8 @@ import {
 import { workspaceSchedulesEnabled } from "@/lib/workspace-schedules";
 
 export function WorkspaceAuditsView() {
-  const params = useParams<{ workspaceId: string }>();
-  return <WorkspaceAuditsPage workspaceId={params.workspaceId} />;
+  const { organization } = useOrganizationScope();
+  return <WorkspaceAuditsPage workspaceId={organization.id} />;
 }
 
 export function WorkspaceAuditsPage({ workspaceId }: { workspaceId: string }) {
@@ -37,11 +37,12 @@ export function WorkspaceAuditsPage({ workspaceId }: { workspaceId: string }) {
 }
 
 export function WorkspaceNewAuditView() {
-  const params = useParams<{ workspaceId: string }>();
-  return <WorkspaceNewAuditPage workspaceId={params.workspaceId} />;
+  const { organization } = useOrganizationScope();
+  return <WorkspaceNewAuditPage workspaceId={organization.id} />;
 }
 
 export function WorkspaceNewAuditPage({ workspaceId }: { workspaceId: string }) {
+  const root = useOrganizationRoot(workspaceId);
   const router = useRouter();
   const client = useQueryClient();
   const user = useQuery(currentUserOptions);
@@ -63,7 +64,7 @@ export function WorkspaceNewAuditPage({ workspaceId }: { workspaceId: string }) 
     onSuccess: (audit) => {
       if (client.getQueryData(currentUserOptions.queryKey)?.id !== accountId || audit.workspaceId !== workspaceId) return;
       void client.invalidateQueries({ queryKey: ["workspace-audits", accountId, workspaceId] });
-      router.push(`/org/${workspaceId}/jobs`);
+      router.push(`${root}/jobs`);
     },
   });
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -75,7 +76,7 @@ export function WorkspaceNewAuditPage({ workspaceId }: { workspaceId: string }) 
   if (user.isError || !accountId || workspaceQuery.isError || !workspace || !canCreate) return <main><h1 className="workspace-heading">Organization unavailable</h1><p role="alert" className="mt-3 text-sm text-ink-muted">You cannot create audits in this organization.</p></main>;
   return <main className="mx-auto max-w-3xl space-y-6">
     <div className="workspace-intro">
-      <Link href={`/org/${workspaceId}/jobs`} className="text-sm font-semibold text-accent hover:underline">Back to shared audits</Link>
+      <Link href={`${root}/jobs`} className="text-sm font-semibold text-accent hover:underline">Back to shared audits</Link>
       <h1 className="workspace-heading mt-3">New shared audit</h1>
       <p className="mt-2 text-sm text-ink-muted">Add configuration for {workspace.name}. Members of this organization can see the result.</p>
     </div>
@@ -90,6 +91,7 @@ export function WorkspaceNewAuditPage({ workspaceId }: { workspaceId: string }) 
 }
 
 function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
+  const root = useOrganizationRoot(workspaceId);
   const client = useQueryClient();
   const user = useQuery(currentUserOptions);
   const accountId = user.data?.id;
@@ -203,9 +205,9 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
         <h1 className="workspace-heading">{workspace.name} audits</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">Shared audit history for current organization members. Watchtower and exports are not available for shared jobs yet.</p>
         <Link className="mt-3 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href="/dashboard/workspaces">All organizations</Link>
-        {workspaceSchedulesEnabled() && <Link className="ml-4 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href={`/org/${workspaceId}/schedules`}>Shared schedules</Link>}
+        {workspaceSchedulesEnabled() && <Link className="ml-4 inline-flex text-sm font-semibold text-accent underline-offset-4 hover:underline" href={`${root}/schedules`}>Shared schedules</Link>}
       </div>
-      {canCreate && !unavailable && <Link href={`/org/${workspaceId}/jobs/new`} className="inline-flex rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-fg hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">New shared audit</Link>}
+      {canCreate && !unavailable && <Link href={`${root}/jobs/new`} className="inline-flex rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-fg hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">New shared audit</Link>}
       {unavailable ? <p role="alert" className="text-sm text-ink-muted">Shared audits are unavailable. Confirm the feature is enabled and that you still belong to this organization.</p> : (
         <section className="space-y-4">
           <h2 className="text-lg font-semibold text-ink">Shared audit history</h2>

@@ -1,8 +1,7 @@
-import { OrganizationSettings } from "@/components/organization-pages";
+import { ScopedOrganizationSettings } from "@/components/organization-scope-views";
 import { OrganizationScopeContent } from "@/components/organization-scope-content";
 import { AccountSettingsRedirect } from "@/components/account-settings-redirect";
 
-export default async function OrganizationSettingsPage({ params }: { params: Promise<{ workspaceId: string }> }) {
-  const { workspaceId } = await params;
-  return <OrganizationScopeContent personal={<AccountSettingsRedirect />} team={<OrganizationSettings workspaceId={workspaceId} />} />;
+export default function OrganizationSettingsPage() {
+  return <OrganizationScopeContent personal={<AccountSettingsRedirect />} team={<ScopedOrganizationSettings />} />;
 }

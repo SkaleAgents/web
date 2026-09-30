@@ -1,5 +1,6 @@
 "use client";
 
+import { useOrganizationRoot } from "./organization-scope";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -55,6 +56,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
   const organizationId = fixedOrganizationId
     ? owned.find((organization) => organization.id === fixedOrganizationId)?.id
     : owned.find((organization) => organization.id === selectedId)?.id ?? owned[0]?.id;
+  const root = useOrganizationRoot(organizationId);
   const billing = useQuery({
     queryKey: ["organization-billing", organizationId],
     enabled: Boolean(organizationId),
@@ -115,7 +117,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
       <h1 className="text-3xl font-semibold tracking-tight text-ink">Organization billing</h1>
       <p className="mt-2 text-sm text-ink-muted">Check your audit allowance and manage the plan for an organization you own.</p>
       {organizationId && owned.find((organization) => organization.id === organizationId)?.cutoverNoticeAvailable ? (
-        <Link className="mt-3 inline-block text-sm font-medium text-accent underline underline-offset-4" href={`/org/${organizationId}/settings/cutover-notice`}>
+        <Link className="mt-3 inline-block text-sm font-medium text-accent underline underline-offset-4" href={`${root}/settings/cutover-notice`}>
           Review Free plan notice
         </Link>
       ) : null}
@@ -163,7 +165,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
         <p className="mt-1 text-ink-muted">Stripe test mode is active. No real payment will be collected.</p>
         {(["grace", "access_paused", "unpaid"] as RenewalStatus[]).includes(billing.data.renewalPayment.status) && billing.data.renewalPayment.paymentUrl && approvedInvoiceUrl(billing.data.renewalPayment.paymentUrl) ? <a className="mt-3 inline-flex rounded-md bg-ink px-4 py-2 font-semibold text-canvas hover:opacity-90" href={billing.data.renewalPayment.paymentUrl}>Pay renewal invoice</a> : null}
         {(["access_paused", "unpaid", "verification_unavailable"] as RenewalStatus[]).includes(billing.data.renewalPayment.status) && !billing.data.renewalPayment.paymentUrl ? <a className="mt-3 inline-block font-medium text-accent underline underline-offset-4" href="mailto:info@skaleagents.com">Contact support</a> : null}
-        {billing.data.renewalPayment.status === "recovered" ? <Link className="mt-3 inline-block font-medium text-accent underline underline-offset-4" href={`/org/${organizationId}/schedules`}>Review paused schedules</Link> : null}
+        {billing.data.renewalPayment.status === "recovered" ? <Link className="mt-3 inline-block font-medium text-accent underline underline-offset-4" href={`${root}/schedules`}>Review paused schedules</Link> : null}
       </section> : null}
       {billing.data.usage ? <section className="border-y border-line py-6" aria-label="Current plan">
         <div className="flex flex-wrap items-end justify-between gap-4">

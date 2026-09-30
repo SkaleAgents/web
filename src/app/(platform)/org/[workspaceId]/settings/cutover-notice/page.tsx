@@ -1,7 +1,6 @@
-import { WorkspaceCutoverNoticeView } from "@/components/workspace-cutover-notice";
+import { ScopedOrganizationCutover } from "@/components/organization-scope-views";
 import { OrganizationScopeContent } from "@/components/organization-scope-content";
 
-export default async function OrganizationCutoverNoticePage({ params }: { params: Promise<{ workspaceId: string }> }) {
-  const { workspaceId } = await params;
-  return <OrganizationScopeContent personal={<main role="alert">This page is unavailable in Personal.</main>} team={<WorkspaceCutoverNoticeView workspaceId={workspaceId} />} />;
+export default function OrganizationCutoverNoticePage() {
+  return <OrganizationScopeContent personal={<main role="alert">This page is unavailable in Personal.</main>} team={<ScopedOrganizationCutover />} />;
 }
