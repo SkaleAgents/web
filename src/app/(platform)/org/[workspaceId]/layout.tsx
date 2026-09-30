@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { DashboardShell } from "@/components/dashboard-shell";
 
 export const metadata: Metadata = {
   title: "Organization | SkaleAgents",
@@ -7,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function OrganizationLayout({ children }: { children: React.ReactNode }) {
-  return <DashboardShell>{children}</DashboardShell>;
+  return children;
 }

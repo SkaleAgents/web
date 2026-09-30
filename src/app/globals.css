@@ -587,3 +587,14 @@ html.dark .finding-severity:is([data-severity="high"], [data-severity="critical"
 .policy-page h2 { margin: 2.25rem 0 0.7rem; font-family: var(--font-syne), sans-serif; font-size: 1.35rem; font-weight: 700; line-height: 1.25; }
 .policy-page p { margin-block: 0.85rem; line-height: 1.7; }
 .policy-page a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Dashboard utilities stay available in both sidebar sizes. */
+.dashboard-main { display: flex; flex-direction: column; min-width: 0; min-height: 100dvh; }
+.dashboard-main > .dashboard-content { flex: 1; }
+.dashboard-sidebar-footer { margin-top: auto; padding: 12px; border-top: 1px solid var(--line); }
+.dashboard-frame.is-collapsed .dashboard-sidebar-footer { padding-inline: 8px; }
+.dashboard-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-inline: 40px; padding-block: 16px; border-top: 1px solid var(--line); color: var(--ink-muted); font-size: 12px; }
+.dashboard-footer nav { display: flex; gap: 20px; }
+.dashboard-footer a:hover { color: var(--ink); text-decoration: underline; }
+@media (max-width: 1023px) { .dashboard-footer { margin-inline: 24px; } }
+@media (max-width: 640px) { .dashboard-footer { margin-inline: 16px; } }
