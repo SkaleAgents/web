@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { organizationPath, type DashboardScope } from "@/lib/dashboard-routes";
+import { organizationHref, type DashboardScope } from "@/lib/dashboard-routes";
 
 export type OrganizationMembership = {
   id: string;
+  slug?: string | null;
   name: string;
   role: "owner" | "member" | "viewer";
   kind: "personal" | "team";
@@ -23,9 +24,9 @@ export function OrganizationSwitcher({ scope, pathname, memberships }: {
   const current = scope.kind === "organization" ? memberships.find(item => item.id === scope.id) : null;
   const section = pathname.match(/^\/org\/[^/]+\/([^/]+)/)?.[1] ?? "";
   const targetPath = (item: OrganizationMembership) => {
-    if (!section || (item.kind === "team" && !["jobs", "schedules", "settings"].includes(section))) return organizationPath(item.id);
+    if (!section || (item.kind === "team" && !["jobs", "schedules", "settings"].includes(section))) return organizationHref(item);
     if (section === "settings" && item.kind === "personal") return "/account/settings";
-    return organizationPath(item.id, section);
+    return organizationHref(item, section);
   };
 
   useEffect(() => {

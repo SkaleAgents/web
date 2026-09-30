@@ -1,9 +1,19 @@
 export type DashboardScope = { kind: "personal" } | { kind: "organization"; id: string };
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const slugPattern = /^(?=.{3,48}$)[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const validReference = (value: string) => uuidPattern.test(value) || slugPattern.test(value);
 const sharedSections = new Set(["jobs", "schedules", "settings"]);
 
-export type OrganizationIdentity = { id: string; kind: "personal" | "team" };
+export type OrganizationIdentity = { id: string; kind: "personal" | "team"; slug?: string | null };
+
+export function resolveOrganization<T extends { id: string; slug?: string | null }>(reference: string, memberships: T[]): T | undefined {
+  return memberships.find(item => item.id === reference || Boolean(item.slug && item.slug === reference));
+}
+
+export function organizationHref(organization: { id: string; slug?: string | null }, section = ""): string {
+  return organizationPath(organization.slug && slugPattern.test(organization.slug) ? organization.slug : organization.id, section);
+}
 
 export function personalOrganizationId(memberships: OrganizationIdentity[]): string | null {
   return memberships.find(item => item.kind === "personal" && uuidPattern.test(item.id))?.id ?? null;
@@ -14,7 +24,7 @@ export function personalPath(section = ""): string {
 }
 
 export function organizationPath(id: string, section = ""): string {
-  if (!uuidPattern.test(id)) throw new Error("Invalid organization ID.");
+  if (!validReference(id)) throw new Error("Invalid organization ID.");
   return section ? `/org/${id}/${section}` : `/org/${id}`;
 }
 
@@ -26,7 +36,7 @@ export function personalDestinationFromPath(pathname: string, section = ""): str
 export function scopeFromPath(pathname: string): DashboardScope | null {
   if (pathname === "/me" || pathname.startsWith("/me/")) return { kind: "personal" };
   const match = pathname.match(/^\/org\/([^/]+)(?:\/|$)/);
-  return match && uuidPattern.test(match[1]) ? { kind: "organization", id: match[1] } : null;
+  return match && validReference(match[1]) ? { kind: "organization", id: match[1] } : null;
 }
 
 export function switchScopePath(pathname: string, target: DashboardScope): string {
@@ -57,7 +67,8 @@ export function legacyDashboardPath(pathname: string): string | null {
 }
 
 export function dashboardDestination(value: string | null, personalId?: string | null, memberships?: OrganizationIdentity[]): string {
-  const fallback = personalId && uuidPattern.test(personalId) ? organizationPath(personalId) : "/me";
+  const personal = memberships?.find(item => item.id === personalId);
+  const fallback = personal ? organizationHref(personal) : personalId && uuidPattern.test(personalId) ? organizationPath(personalId) : "/me";
   if (!value || value.startsWith("//")) return fallback;
   try {
     const base = "https://skaleagents.com";
@@ -72,13 +83,16 @@ export function dashboardDestination(value: string | null, personalId?: string |
       else if (path.startsWith("/me/")) destination = organizationPath(personalId, path.slice(4));
       else if (path.startsWith("/dashboard/workspaces/")) {
         const match = path.match(/^\/dashboard\/workspaces\/([^/]+)(?:\/(.*))?$/);
-        if (match && uuidPattern.test(match[1])) destination = organizationPath(match[1], match[2] === "retention" ? "settings/retention" : match[2] ?? "");
+        if (match && validReference(match[1])) destination = organizationPath(match[1], match[2] === "retention" ? "settings/retention" : match[2] ?? "");
       } else if (path.startsWith("/dashboard/")) destination = organizationPath(personalId, path.slice(11));
       else if (path === "/account/settings" || path === "/staff" || path.startsWith("/staff/")) destination = path;
       else if (scopeFromPath(path)) destination = path;
       if (destination?.startsWith("/org/")) {
         const scope = scopeFromPath(destination);
-        if (!scope || scope.kind !== "organization" || memberships && !memberships.some(item => item.id === scope.id)) return fallback;
+        if (!scope || scope.kind !== "organization") return fallback;
+        const member = memberships && resolveOrganization(scope.id, memberships);
+        if (memberships && !member) return fallback;
+        if (member) destination = organizationHref(member) + destination.slice(`/org/${scope.id}`.length);
       }
       return destination ? `${destination}${url.search}${url.hash}` : fallback;
     }
