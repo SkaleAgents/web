@@ -1,3 +1,4 @@
+import type { AuditCoverage, CheckCoverage } from "./audit-coverage";
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
 
 export class ApiError extends Error {
@@ -183,7 +184,8 @@ export type SwarmJob = {
   createdAt: string;
   updatedAt: string;
   findings?: SwarmFinding[];
-  tasks?: Array<{ specialist: string; status: string; skipReason?: string }>;
+  coverage?: AuditCoverage;
+  tasks?: Array<{ specialist: string; status: string; skipReason?: string; checkCoverage?: CheckCoverage | null }>;
   steps?: SwarmStep[];
 };
 
