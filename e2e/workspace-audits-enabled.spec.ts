@@ -6,7 +6,7 @@ const account = { id: "account-a", displayName: "Account A", email: "a@example.t
 const roles: Record<string, Role> = { "0198f0b0-0000-7000-8000-000000000001": "owner", "0198f0b0-0000-7000-8000-000000000002": "viewer" };
 
 function workspace(id: string, role: Role = roles[id] ?? "member") {
-  return { id, name: `Team ${id}`, createdAt: "2026-09-25T12:00:00Z", role };
+  return { id, name: `Team ${id}`, kind: "team", createdAt: "2026-09-25T12:00:00Z", role };
 }
 
 function auditFor(workspaceId: string, auditId = `audit-${workspaceId}`) {
@@ -46,6 +46,14 @@ async function mockSharedAuditApi(page: Page, options: {
     const method = route.request().method();
     if (path === "/api/workspaces") {
       return route.fulfill({ json: { data: options.memberships?.() ?? [workspace("0198f0b0-0000-7000-8000-000000000001")] } });
+    }
+    const organizationMatch = path.match(/^\/api\/workspaces\/([^/]+)$/);
+    if (organizationMatch && method === "GET") {
+      const memberships = options.memberships?.() ?? [workspace("0198f0b0-0000-7000-8000-000000000001")];
+      const membership = memberships.find(({ id }) => id === organizationMatch[1]);
+      return membership
+        ? route.fulfill({ json: { data: membership } })
+        : route.fulfill({ status: 404, json: { error: "Not found" } });
     }
     auditRequests.push({ path, method });
     const match = path.match(/^\/api\/workspaces\/([^/]+)\/jobs(?:\/([^/]+))?(?:\/(purge-source))?$/);
@@ -162,11 +170,10 @@ test.describe("workspace shared audits with rollout enabled", () => {
 
   test("keeps audit lists separate across workspace route changes", async ({ page }) => {
     const api = await mockSharedAuditApi(page, { memberships: () => [workspace("0198f0b0-0000-7000-8000-000000000001", "member"), workspace("0198f0b0-0000-7000-8000-000000000002", "viewer")] });
-    await page.goto("/me/organizations");
-    await page.getByRole("link", { name: "Shared audits" }).nth(0).click();
+    await openWorkspaceAudits(page);
     await expect(page.getByText("Shared history 0198f0b0-0000-7000-8000-000000000001")).toBeVisible();
-    await page.getByRole("link", { name: "All organizations" }).click();
-    await page.getByRole("link", { name: "Shared audits" }).nth(1).click();
+    await page.getByRole("button", { name: /switch scope/ }).click();
+    await page.getByRole("link", { name: "Team 0198f0b0-0000-7000-8000-000000000002", exact: true }).click();
     await expect(page.getByText("Shared history 0198f0b0-0000-7000-8000-000000000002")).toBeVisible();
     await expect(page.getByText("Shared history 0198f0b0-0000-7000-8000-000000000001")).toHaveCount(0);
     expect(api.auditRequests).toContainEqual({ path: "/api/workspaces/0198f0b0-0000-7000-8000-000000000001/jobs", method: "GET" });
@@ -183,7 +190,7 @@ test.describe("workspace shared audits with rollout enabled", () => {
     active = false;
     await page.clock.fastForward(46_000);
     await page.evaluate(() => window.dispatchEvent(new Event("visibilitychange")));
-    await expect(page.getByRole("heading", { name: "Organization unavailable" })).toBeVisible();
+    await expect(page.getByRole("alert").filter({ hasText: "Organization unavailable" })).toBeVisible();
     await expect(page.getByText(/Review permissions/)).toHaveCount(0);
   });
 

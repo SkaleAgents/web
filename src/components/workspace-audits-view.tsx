@@ -237,6 +237,22 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
   );
 }
 
+function emptyFindingsMessage(audit: WorkspaceAuditDetail): string {
+  switch (audit.status) {
+    case "completed":
+      return audit.partial
+        ? "No findings were reported. Coverage was partial; some checks did not complete."
+        : "No findings were reported.";
+    case "failed":
+      return audit.error === "Cancelled by user"
+        ? "The audit was cancelled without reporting findings."
+        : "The audit failed without reporting findings. Review the error and audit activity.";
+    case "queued":
+    case "running":
+      return "No findings are available yet.";
+  }
+}
+
 function AuditDetail({ detail, canManage, onPurge, purgePending, purgeError, onClose }: {
   detail: { data?: WorkspaceAuditDetail; isPending: boolean; isError: boolean; error: Error | null };
   canManage: boolean;
@@ -253,7 +269,7 @@ function AuditDetail({ detail, canManage, onPurge, purgePending, purgeError, onC
     {audit.summary && <p className="text-sm text-ink">{audit.summary}</p>}{audit.error && <p className="text-sm text-danger">{audit.error}</p>}
     <p className="text-sm text-ink-muted">Source {audit.retention?.inputAvailable ? "is available" : "is unavailable or purged"}. Purge status: {audit.retention?.inputPurgeStatus ?? "unknown"}.</p>
     {canManage && audit.retention?.inputAvailable && <div><Button variant="secondary" disabled={purgePending || audit.status === "queued" || audit.status === "running"} onClick={onPurge}>{purgePending ? "Requesting purge…" : audit.retention.inputPurgeStatus === "pending" || audit.retention.inputPurgeStatus === "failed" ? "Retry source purge" : "Purge source"}</Button>{purgeError && <p role="alert" className="mt-2 text-sm text-danger">{purgeError}</p>}</div>}
-    {audit.findings?.length ? <div className="space-y-3"><h3 className="font-semibold text-ink">Findings</h3><ul className="space-y-3">{audit.findings.map((finding, index) => <li key={finding.id ?? `${finding.title}-${index}`} className="rounded-[10px] border border-line p-3"><p className="text-sm font-semibold text-ink">{finding.severity.toUpperCase()} · {finding.title}</p><p className="mt-1 text-sm text-ink-muted">{finding.detail}</p><p className="mt-2 text-xs text-ink-muted">{finding.resource} · {finding.specialist}</p></li>)}</ul></div> : <p className="text-sm text-ink-muted">No findings are available yet.</p>}
+    {audit.findings?.length ? <div className="space-y-3"><h3 className="font-semibold text-ink">Findings</h3><ul className="space-y-3">{audit.findings.map((finding, index) => <li key={finding.id ?? `${finding.title}-${index}`} className="rounded-[10px] border border-line p-3"><p className="text-sm font-semibold text-ink">{finding.severity.toUpperCase()} · {finding.title}</p><p className="mt-1 text-sm text-ink-muted">{finding.detail}</p><p className="mt-2 text-xs text-ink-muted">{finding.resource} · {finding.specialist}</p></li>)}</ul></div> : <p className="text-sm text-ink-muted">{emptyFindingsMessage(audit)}</p>}
     {audit.steps?.length ? <div><h3 className="font-semibold text-ink">Audit activity</h3><ul className="mt-2 space-y-2">{audit.steps.map((step) => <li key={step.stepId} className="text-sm text-ink-muted">{step.agent}: {step.message}</li>)}</ul></div> : null}
   </section>;
 }
