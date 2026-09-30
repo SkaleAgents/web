@@ -162,6 +162,7 @@ test("mobile dashboard menu closes on Escape and after navigation", async ({ pag
   await page.goto("/me");
   const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
   await page.getByRole("button", { name: "Open menu" }).click();
+  await expect(nav.getByRole("button", { name: "Your work", exact: true })).toBeFocused();
   await nav.getByRole("button", { name: "Build" }).click();
   await nav.getByRole("link", { name: "My bots", exact: true }).focus();
   await page.keyboard.press("Escape");

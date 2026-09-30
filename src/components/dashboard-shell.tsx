@@ -24,6 +24,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const menuToggle = useRef<HTMLButtonElement>(null);
+  const navigation = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (menuOpen) navigation.current?.querySelector<HTMLButtonElement>(".dashboard-nav-label")?.focus();
+  }, [menuOpen]);
   const scope = scopeFromPath(pathname) ?? { kind: "personal" as const };
   const memberships = useQuery({
     queryKey: ["workspaces", user.data?.id ?? "guest"],
@@ -122,7 +126,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     if (event.key === "Escape" && menuOpen) { event.preventDefault(); closeMenu(); }
   }}>
     <aside className="dashboard-sidebar">
-      <nav aria-label="Dashboard navigation" className="dashboard-navigation">
+      <nav ref={navigation} aria-label="Dashboard navigation" className="dashboard-navigation">
         <div className="dashboard-brand">
           <span className="dashboard-brand-logo"><BrandLogo href={root} /></span>
 
