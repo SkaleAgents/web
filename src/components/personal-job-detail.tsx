@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retention-controls";
+import { AuditCoveragePanel } from "@/components/audit-coverage";
 import { SourceMetadata } from "@/components/source-metadata";
 import { Button, LinkButton } from "@/components/ui";
 import { apiFetch, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
@@ -63,6 +64,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
             <SourceMetadata sourceRevision={job.data.sourceRevision} sourceObservedAt={job.data.sourceObservedAt} inputAvailable={job.data.retention?.inputAvailable} verified={job.data.sourceMetadataProvenance === "github_fetched"} />
           </div>
         </section>
+        <AuditCoveragePanel key={job.data.id} coverage={job.data.coverage} tasks={job.data.tasks} status={job.data.status} />
         <section className="rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Audit data and report">
           <h2 className="text-lg font-semibold text-ink">Audit data and report</h2>
           <div className="mt-3"><JobRetentionControls job={job.data} accountId={accountId} onDeletion={(_, state) => setDeletion(state)} /></div>
