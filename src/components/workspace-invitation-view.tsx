@@ -121,7 +121,7 @@ export function WorkspaceInvitationView() {
           <Button type="button" className="mt-4" disabled={submitting} onClick={() => void acceptInvitation()}>
             {submitting ? "Accepting…" : "Accept invitation"}
           </Button>
-          <p className="mt-4 text-xs text-ink-muted">Organization membership does not share your personal audits, schedules, or advisory requests.</p>
+          <p className="mt-4 text-xs text-ink-muted">Organization membership does not share your personal audits or schedules.</p>
         </section>
       )}
       <Link href="/dashboard/workspaces" className="text-sm text-ink-muted underline underline-offset-4">View your organizations</Link>

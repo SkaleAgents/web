@@ -1,21 +1,14 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 
 afterEach(() => { cleanup(); vi.unstubAllEnvs(); });
 
-describe("native consultancy entry", () => {
-  it("keeps booking unavailable while the native rollout flag is off", () => {
-    render(<ConsultancyBookingLink />);
-    expect(screen.getByText("Consultancy booking is not available yet.")).toBeVisible();
-    expect(screen.queryByRole("link", { name: "Book a consultancy session" })).not.toBeInTheDocument();
-  });
-
-  it("opens the dashboard form with only an optional owned source reference", () => {
-    vi.stubEnv("NEXT_PUBLIC_CONSULTANCY_BOOKING_ENABLED", "true");
-    render(<ConsultancyBookingLink source={{ type: "audit_job", id: "private-job-id" }} />);
-    expect(screen.getByRole("link", { name: "Book a consultancy session" }))
-      .toHaveAttribute("href", "/dashboard/consultancy?sourceType=audit_job&sourceId=private-job-id");
-    expect(screen.getByText(/Payment opens only after Harun approves it/)).toBeVisible();
-  });
+it("links directly to the external booking page without native feature flags or referral data", () => {
+  vi.stubEnv("NEXT_PUBLIC_CONSULTANCY_BOOKING_ENABLED", "false");
+  render(<ConsultancyBookingLink />);
+  const link = screen.getByRole("link", { name: "Book consultancy on harun.dev" });
+  expect(link).toHaveAttribute("href", "https://harun.dev/book");
+  expect(link).toHaveAttribute("referrerpolicy", "no-referrer");
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });

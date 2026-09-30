@@ -183,7 +183,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
       <section className="space-y-4" aria-labelledby="billing-change-heading">
         <h2 id="billing-change-heading" className="text-xl font-semibold text-ink">Change plan</h2>
         {!billing.data.testModeEnabled ? <p className="text-sm text-ink-muted">Plan changes are not available yet.</p> : <p className="text-sm text-ink-muted">Stripe test mode is active. No real payment will be collected here.</p>}
-        <p className="text-sm text-ink-muted">Starter, Pro, and Max subscription payments are non-refundable except where required by law. Consultancy bookings have separate cancellation and refund terms. For billing questions, contact <a className="underline underline-offset-4" href="mailto:info@skaleagents.com">info@skaleagents.com</a>.</p>
+        <p className="text-sm text-ink-muted">Starter, Pro, and Max subscription payments are non-refundable except where required by law. For billing questions, contact <a className="underline underline-offset-4" href="mailto:info@skaleagents.com">info@skaleagents.com</a>.</p>
         <div className="divide-y divide-line border-y border-line">
           {paidPlans.map((plan) => {
             const isCurrent = plan.key === billing.data.plan;

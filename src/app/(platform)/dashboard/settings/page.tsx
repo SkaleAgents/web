@@ -10,7 +10,6 @@ import { AccountSecurity } from "@/components/account-security";
 const preferences: Array<{ key: keyof EmailPreferences; label: string; detail: string }> = [
   { key: "auditCompleted", label: "Completed audits", detail: "A link to your results when a manual or scheduled audit finishes, including partial results." },
   { key: "auditFailed", label: "Failed audits", detail: "A notice when a manual or scheduled audit fails." },
-  { key: "reviewUpdates", label: "Review updates", detail: "Status changes to advisory reviews you requested." },
 ];
 
 export default function SettingsPage() {

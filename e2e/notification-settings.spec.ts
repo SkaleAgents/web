@@ -11,7 +11,7 @@ function settings(owner = "alice") {
     email: `${owner}@example.com`,
     emailVerified: true,
     deliveryEnabled: true,
-    preferences: { auditCompleted: true, auditFailed: true, reviewUpdates: true },
+    preferences: { auditCompleted: true, auditFailed: true },
   };
 }
 
@@ -36,7 +36,7 @@ test("email preferences save independently and survive reload", async ({ page })
   await page.reload();
   await expect(page.getByRole("checkbox", { name: /^Completed audits/ })).not.toBeChecked();
   await expect(page.getByRole("checkbox", { name: /^Failed audits/ })).toBeChecked();
-  await expect(page.getByRole("checkbox", { name: /^Review updates/ })).toBeChecked();
+  await expect(page.getByRole("checkbox", { name: /^Review updates/ })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Manage optional schedule webhooks" })).toHaveAttribute("href", "/dashboard/schedules");
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -98,7 +98,7 @@ test("account changes discard the previous email address and preferences", async
   await page.clock.install();
   await page.route("**/api/user", (route) => route.fulfill({ json: { id: owner, displayName: owner } }));
   await page.route("**/api/account/notifications", (route) => route.fulfill({ json: {
-    ...settings(owner), preferences: { auditCompleted: owner === "bob", auditFailed: true, reviewUpdates: true },
+    ...settings(owner), preferences: { auditCompleted: owner === "bob", auditFailed: true },
   } }));
   await page.goto("/settings");
   await expect(page.getByText("alice@example.com", { exact: true })).toBeVisible();

@@ -26,7 +26,7 @@ export function WorkspacesView() {
         <p className="workspace-kicker">Organizations / Memberships</p>
         <h1 className="workspace-heading">Organizations</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-          See the organizations you belong to or create one. Your personal audits, schedules, and advisory requests remain tied to your account.
+          See the organizations you belong to or create one. Your personal audits and schedules remain tied to your account.
         </p>
       </div>
 

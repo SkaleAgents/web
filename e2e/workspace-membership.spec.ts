@@ -12,7 +12,7 @@ async function mockAccount(page: Page, emailVerified = true) {
       email: account.email,
       emailVerified,
       deliveryEnabled: true,
-      preferences: { auditCompleted: true, auditFailed: true, reviewUpdates: true },
+      preferences: { auditCompleted: true, auditFailed: true },
     },
   }));
 }
@@ -65,7 +65,7 @@ test("keeps an invite through sign-in and resumes the exact accept route", async
   let signedIn = false;
   await page.route("**/api/user", (route) => route.fulfill(signedIn ? { json: account } : { status: 401, json: {} }));
   await page.route("**/api/account/notifications", (route) => route.fulfill({
-    json: { accountId: account.id, email: account.email, emailVerified: true, deliveryEnabled: true, preferences: { auditCompleted: true, auditFailed: true, reviewUpdates: true } },
+    json: { accountId: account.id, email: account.email, emailVerified: true, deliveryEnabled: true, preferences: { auditCompleted: true, auditFailed: true } },
   }));
   await page.goto(`/workspace-invitations/accept#token=${invitationToken}`);
   const signInLink = page.getByRole("main").getByRole("link", { name: "Sign in with Google" });
@@ -144,7 +144,7 @@ test("lists and creates only memberships and leaves personal resources unscoped"
   await page.goto("/workspaces");
   await expect(page.getByRole("heading", { name: "Organizations", exact: true })).toBeVisible();
   await expect(page.getByText("Infra", { exact: true })).toBeVisible();
-  await expect(page.getByText(/personal audits, schedules, and advisory requests remain tied to your account/)).toBeVisible();
+  await expect(page.getByText(/personal audits and schedules remain tied to your account/)).toBeVisible();
   await expect(page.getByRole("main").getByRole("combobox")).toHaveCount(0);
   await page.getByLabel("Organization name").fill("Platform Team");
   await page.getByRole("button", { name: "Create organization" }).click();
