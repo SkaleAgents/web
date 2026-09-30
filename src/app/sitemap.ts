@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://skaleagents.com";
-  return ["/", "/bots", "/prompts", "/mcp-config", "/pricing"].map((path) => ({
+  return ["/", "/bots", "/prompts", "/mcp-config", "/pricing", "/products"].map((path) => ({
     url: `${base}${path}`,
     changeFrequency: "weekly" as const,
     priority: path === "/" ? 1 : 0.7,
