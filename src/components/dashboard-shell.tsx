@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { DashboardPageLoader } from "@/components/dashboard-page-loader";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -110,17 +111,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <p className="text-sm text-ink-muted">Try again to open your dashboard.</p>
     <Button onClick={() => void user.refetch()}>Try again</Button>
   </main>;
-  if (!user.data) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">Checking your session…</main>;
-  if (legacy) return <main role="status" className="px-6 py-16">Opening your organization…</main>;
+  if (!user.data) return <DashboardPageLoader />;
+  if (legacy) return <DashboardPageLoader />;
   if (pathname.startsWith("/org/") && !scopeFromPath(pathname)) return <main role="alert" className="px-6 py-16">Organization unavailable.</main>;
-  if (routeScope.kind === "organization" && memberships.isPending) return <main role="status" className="px-6 py-16">Checking organization access…</main>;
+  if (routeScope.kind === "organization" && memberships.isPending) return <DashboardPageLoader />;
   if (routeScope.kind === "organization" && memberships.isError) return <main role="alert" className="px-6 py-16">Could not check organization access. <Button onClick={() => void memberships.refetch()}>Try again</Button></main>;
   if (routeScope.kind === "organization" && !workspace) return <main role="alert" className="px-6 py-16">Organization unavailable. {personalId && <Link href={personalRoot}>Open Personal</Link>}</main>;
 
   let content = children;
   if (scope.kind === "organization") {
     if (access.isPending || access.isFetching) {
-      content = <main role="status" className="py-8 text-sm text-ink-muted">Checking organization access…</main>;
+      content = <DashboardPageLoader title={currentSection} />;
     } else if (access.isError || access.data?.id !== scope.id || access.data?.kind !== workspace?.kind) {
       content = <main role="alert" className="py-8">Organization unavailable. {personalId && <Link href={personalRoot}>Open Personal</Link>}</main>;
     }

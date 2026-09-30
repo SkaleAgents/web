@@ -1,5 +1,7 @@
 "use client";
 
+import { DashboardPageLoader } from "@/components/dashboard-page-loader";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useOrganizationScope, useOrganizationRoot } from "./organization-scope";
@@ -88,7 +90,7 @@ function WorkspaceSchedules({ workspaceId }: { workspaceId: string }) {
     event.preventDefault();
     create.mutate({ name: name.trim(), cronExpression: cron.trim(), timezone: timezone.trim(), scope: { kind: "iac_text", format: "auto", content: content.trim() }, specialists: ["devsecops", "sre"] });
   }
-  if (user.isPending || accountId && workspaceQuery.isPending) return <main><p role="status">Checking organization access…</p></main>;
+  if (user.isPending || accountId && workspaceQuery.isPending) return <DashboardPageLoader title="Scheduled audits" />;
   if (user.isError || !accountId || workspaceQuery.isError || !workspace) return <main><h1 className="workspace-heading">Organization unavailable</h1><p role="alert" className="mt-2 text-sm text-ink-muted">You cannot view schedules in this organization.</p></main>;
   return <main className="space-y-8">
     <div className="workspace-intro">

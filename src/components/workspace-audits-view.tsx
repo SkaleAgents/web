@@ -1,5 +1,7 @@
 "use client";
 
+import { DashboardPageLoader } from "@/components/dashboard-page-loader";
+
 import { AuditCoveragePanel } from "@/components/audit-coverage";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -72,7 +74,7 @@ export function WorkspaceNewAuditPage({ workspaceId }: { workspaceId: string }) 
     create.mutate();
   }
   if (!workspaceAuditsEnabled() || !workspaceAuditCreationEnabled()) return <main className="space-y-4"><h1 className="workspace-heading">New shared audit</h1><p className="text-sm text-ink-muted">Shared audit creation is not enabled for this deployment.</p></main>;
-  if (user.isPending || accountId && workspaceQuery.isPending) return <main><p role="status">Checking organization access…</p></main>;
+  if (user.isPending || accountId && workspaceQuery.isPending) return <DashboardPageLoader title="Audit jobs" />;
   if (user.isError || !accountId || workspaceQuery.isError || !workspace || !canCreate) return <main><h1 className="workspace-heading">Organization unavailable</h1><p role="alert" className="mt-3 text-sm text-ink-muted">You cannot create audits in this organization.</p></main>;
   return <main className="mx-auto max-w-3xl space-y-6">
     <div className="workspace-intro">
@@ -193,7 +195,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
   }, [accountId, auditKey, audits.error, client, detail.error, purge.error, remove.error, unavailableKey, workspaceId]);
 
   if (user.isError) return <main><h1 className="workspace-heading">Shared audits</h1><p role="alert" className="text-sm text-danger">Could not verify your account.</p></main>;
-  if (user.isPending || accountId && workspaceQuery.isPending) return <main><p role="status" className="text-sm text-ink-muted">Checking organization access…</p></main>;
+  if (user.isPending || accountId && workspaceQuery.isPending) return <DashboardPageLoader title="Audit details" />;
   if (!accountId) return <main className="space-y-3"><h1 className="workspace-heading">Shared audits</h1><p className="text-sm text-ink-muted">Sign in to view this organization.</p></main>;
   if (workspaceQuery.isError) return <main><p role="alert" className="text-sm text-danger">Could not verify organization membership. Refresh and try again.</p></main>;
   if (!workspace) return <main className="space-y-3"><h1 className="workspace-heading">Organization unavailable</h1><p role="alert" className="text-sm text-ink-muted">This organization is unavailable or you no longer belong to it.</p></main>;
