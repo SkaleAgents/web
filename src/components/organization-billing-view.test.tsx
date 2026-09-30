@@ -172,11 +172,12 @@ it("requests a paid upgrade from the owner dashboard in staging", async () => {
   expect(ensureCsrfCookie).toHaveBeenCalledOnce();
 });
 
-it("shows a verified Stripe Checkout link only after the server creates a Free upgrade session", async () => {
+it("rejects a hosted response instead of leaving embedded checkout", async () => {
   showBilling("free", true);
   fireEvent.click(await screen.findByRole("button", { name: "Start Starter" }));
-  const link = await screen.findByRole("link", { name: "Continue to secure checkout" });
-  expect(link).toHaveAttribute("href", "https://checkout.stripe.com/c/pay/cs_test_fixture");
+  expect(await screen.findByText("Embedded checkout is unavailable. Please try again or contact support.")).toBeVisible();
+  expect(screen.queryByRole("link", { name: "Continue to secure checkout" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Complete sandbox checkout" })).not.toBeInTheDocument();
   expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1/billing/checkout", expect.objectContaining({ method: "POST" }));
 });
 
@@ -193,20 +194,25 @@ it("hides an open prorated invoice when test billing is closed", async () => {
   expect(screen.queryByRole("link", { name: "Pay prorated invoice" })).not.toBeInTheDocument();
 });
 
-it("hides a previously issued Checkout link when test billing closes", async () => {
+it("hides an embedded checkout when test billing closes", async () => {
   const { client } = showBilling("free", true);
+  const previous = vi.mocked(apiFetch).getMockImplementation()!;
+  vi.mocked(apiFetch).mockImplementation(async (path, init) => path.endsWith("/billing/checkout")
+    ? { uiMode: "embedded_page", clientSecret: "cs_test_fixture_secret_fixture", publishableKey: "pk_test_fixture" } as never
+    : previous(path, init));
   fireEvent.click(await screen.findByRole("button", { name: "Start Starter" }));
-  await screen.findByRole("link", { name: "Continue to secure checkout" });
+  await screen.findByRole("button", { name: "Complete sandbox checkout" });
   client.setQueryData(["organization-billing", "org-1"], {
     plan: "free", usage: { used: 1, limit: 2, remaining: 1, periodEnd: "2026-10-01T00:00:00Z" },
     pendingChange: null, testModeEnabled: false, cancellationEnabled: true,
   });
   await screen.findByText("Plan changes are not available yet.");
   expect(screen.queryByRole("link", { name: "Continue to secure checkout" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Complete sandbox checkout" })).not.toBeInTheDocument();
 });
 
-it("keeps an in-flight Checkout link with the organization that requested it", async () => {
-  let completeCheckout!: (value: { url: string }) => void;
+it("keeps an in-flight embedded session with the organization that requested it", async () => {
+  let completeCheckout!: (value: { uiMode: string; clientSecret: string; publishableKey: string }) => void;
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
   vi.mocked(apiFetch).mockImplementation(async (path, init) => {
@@ -220,8 +226,9 @@ it("keeps an in-flight Checkout link with the organization that requested it", a
   fireEvent.click(await screen.findByRole("button", { name: "Start Starter" }));
   fireEvent.change(screen.getByLabelText("Organization"), { target: { value: "org-2" } });
   await screen.findByText("Second", { selector: "option" });
-  await act(async () => { completeCheckout({ url: "https://checkout.stripe.com/c/pay/cs_test_first" }); });
+  await act(async () => { completeCheckout({ uiMode: "embedded_page", clientSecret: "cs_test_first_secret_fixture", publishableKey: "pk_test_fixture" }); });
   expect(screen.queryByRole("link", { name: "Continue to secure checkout" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Complete sandbox checkout" })).not.toBeInTheDocument();
 });
 
 it("shows UTC renewal dates consistently", async () => {
@@ -240,4 +247,22 @@ it("does not substitute another owner's billing when the URL names an unavailabl
   render(<QueryClientProvider client={client}><OrganizationBillingView organizationId="org-2" /></QueryClientProvider>);
   expect(await screen.findByRole("alert")).toHaveTextContent("Billing unavailable");
   expect(apiFetch).not.toHaveBeenCalledWith("/api/workspaces/org-1/billing", expect.anything());
+});
+
+vi.mock("@/components/embedded-stripe-checkout", () => ({
+  EmbeddedStripeCheckout: ({ onComplete }: { onComplete: () => void }) => <button onClick={onComplete}>Complete sandbox checkout</button>,
+}));
+
+it("requests embedded Checkout and waits for server verification after payment", async () => {
+  showBilling("free", true);
+  const previous = vi.mocked(apiFetch).getMockImplementation()!;
+  vi.mocked(apiFetch).mockImplementation(async (path, init) => path.endsWith("/billing/checkout")
+    ? { uiMode: "embedded_page", clientSecret: "cs_test_fixture_secret_fixture", publishableKey: "pk_test_fixture" } as never
+    : previous(path, init));
+  fireEvent.click(await screen.findByRole("button", { name: "Start Starter" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Complete sandbox checkout" }));
+  expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1/billing/checkout", expect.objectContaining({ body: JSON.stringify({ plan: "starter", uiMode: "embedded_page" }) }));
+  expect(await screen.findByRole("status", { name: "Checkout status" })).not.toHaveTextContent("Starter is active");
+  expect(screen.queryByRole("link", { name: "Continue to secure checkout" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Complete sandbox checkout" })).not.toBeInTheDocument();
 });
