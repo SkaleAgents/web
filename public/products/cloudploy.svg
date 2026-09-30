@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CloudPloy">
+  <rect width="64" height="64" rx="10" fill="#C8F542"/>
+  <path fill="#0B0F14" d="M12 38.6c0-5.2 4-8.8 9.2-8.4 1.2-6 5.6-10.4 10.8-10.4s9.6 4.4 10.8 10.4c5.2-.4 9.2 3.2 9.2 8.4 0 5.3-4.4 9.6-9.8 9.6H21.8C16.4 48.2 12 43.9 12 38.6z"/>
+  <path fill="#C8F542" d="M32 23.8l8.6 9.2h-4.8V44h-7.6V33h-4.8z"/>
+</svg>
