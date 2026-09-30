@@ -562,6 +562,26 @@ html.dark .finding-severity:is([data-severity="high"], [data-severity="critical"
   .dashboard-frame *, .dashboard-frame *::before { transition: none !important; }
 }
 
+/* Header controls remain available when the sidebar is collapsed. */
+.dashboard-toolbar { border-bottom: 1px solid var(--line); }
+.dashboard-toolbar-divider { width: 1px; height: 20px; background: var(--line); margin-inline: 4px; flex-shrink: 0; }
+.dashboard-frame.is-collapsed .dashboard-brand-logo { display: inline-flex; }
+.dashboard-frame.is-collapsed .dashboard-brand-logo .brand-wordmark { display: none; }
+.dashboard-toolbar .dashboard-collapse-toggle { flex-shrink: 0; }
+@media (max-width: 1023px) {
+  .dashboard-sidebar { display: none; position: fixed; top: 56px; bottom: 0; left: 0; width: min(280px, 85vw); border-right: 1px solid var(--line); box-shadow: 12px 0 28px rgb(0 0 0 / 8%); }
+  .dashboard-frame.is-menu-open .dashboard-sidebar { display: block; }
+  .dashboard-navigation { height: 100%; }
+  .dashboard-brand, .dashboard-frame.is-collapsed .dashboard-brand { display: none; }
+  .dashboard-sections { height: 100%; max-height: none; border-top: 0; }
+  .dashboard-section-list { grid-template-columns: 1fr; }
+  .dashboard-toolbar { position: sticky; top: 0; z-index: 60; min-height: 56px; }
+  .dashboard-toolbar .dashboard-menu-toggle { display: grid; place-items: center; width: 32px; min-height: 32px; flex-shrink: 0; border-radius: 6px; }
+  .dashboard-toolbar .dashboard-menu-toggle:hover { background: var(--sidebar-surface); }
+  .dashboard-toolbar-divider { margin-inline: 0; }
+  .scope-switcher-trigger { max-width: min(29vw, 18rem); }
+}
+
 .policy-page { max-width: 76ch; margin-inline: auto; padding-bottom: 4rem; }
 .policy-page h1 { max-width: 18ch; margin: 0.5rem 0 1.5rem; line-height: 1.1; }
 .policy-page h2 { margin: 2.25rem 0 0.7rem; font-family: var(--font-syne), sans-serif; font-size: 1.35rem; font-weight: 700; line-height: 1.25; }

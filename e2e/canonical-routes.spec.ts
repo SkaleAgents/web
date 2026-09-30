@@ -41,8 +41,8 @@ test("switcher names the organization and sidebar groups can collapse", async ({
   await expect(group).toHaveAttribute("aria-expanded", "true");
   await group.click();
   await expect(group).toHaveAttribute("aria-expanded", "false");
-  await navigation.getByRole("button", { name: "Collapse sidebar" }).click();
-  await expect(navigation.getByRole("button", { name: "Expand sidebar" })).toBeVisible();
+  await page.getByRole("banner").getByRole("button", { name: "Collapse sidebar" }).click();
+  await expect(page.getByRole("banner").getByRole("button", { name: "Expand sidebar" })).toBeVisible();
 });
 
 test("legacy dashboard links redirect to the right scope", async ({ request }) => {

@@ -24,6 +24,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const menuToggle = useRef<HTMLButtonElement>(null);
+  const navigation = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (menuOpen) navigation.current?.querySelector<HTMLButtonElement>(".dashboard-nav-label")?.focus();
+  }, [menuOpen]);
   const scope = scopeFromPath(pathname) ?? { kind: "personal" as const };
   const memberships = useQuery({
     queryKey: ["workspaces", user.data?.id ?? "guest"],
@@ -57,7 +61,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const root = scope.kind === "organization" ? organizationPath(scope.id) : personalId ? organizationPath(personalId) : "/dashboard";
   const sections: NavigationSection[] = !isPersonal ? [
     { label: "Your work", items: [
-      { href: root, label: "Overview" },
+      { href: root, label: "Dashboard" },
       { href: `${root}/jobs`, label: "Audit jobs" },
       { href: `${root}/schedules`, label: "Scheduled audits" },
     ] },
@@ -67,7 +71,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     ] },
   ] : [
     { label: "Your work", items: [
-      { href: root, label: "Overview" },
+      { href: root, label: "Dashboard" },
       { href: `${root}/jobs`, label: "Audit jobs" },
       { href: `${root}/schedules`, label: "Scheduled audits" },
       { href: `${root}/organizations`, label: "Organizations" },
@@ -86,7 +90,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const active = (href: string) => pathname === href || (href !== root && pathname.startsWith(`${href}/`)) ||
     (href === `${root}/jobs` && pathname.startsWith(`${root}/watchtower/`));
   const activeGroup = sections.find(section => section.items.some(entry => active(entry.href)))?.label ?? "Your work";
-  const currentSection = sections.flatMap(section => section.items).find(entry => active(entry.href))?.label ?? "Overview";
+  const currentSection = sections.flatMap(section => section.items).find(entry => active(entry.href))?.label ?? "Dashboard";
   const groupKey = (label: string) => `${pathname}:${label}`;
   const groupExpanded = (label: string) => expandedGroups[groupKey(label)] ?? label === activeGroup;
 
@@ -118,23 +122,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     </Link>
   );
 
-  return <div className={`dashboard-frame ${collapsed ? "is-collapsed" : ""}`}>
+  return <div className={`dashboard-frame ${collapsed ? "is-collapsed" : ""} ${menuOpen ? "is-menu-open" : ""}`} onKeyDown={event => {
+    if (event.key === "Escape" && menuOpen) { event.preventDefault(); closeMenu(); }
+  }}>
     <aside className="dashboard-sidebar">
-      <nav aria-label="Dashboard navigation" className="dashboard-navigation" onKeyDown={event => {
-        if (event.key === "Escape" && menuOpen) {
-          event.preventDefault();
-          closeMenu();
-        }
-      }}>
+      <nav ref={navigation} aria-label="Dashboard navigation" className="dashboard-navigation">
         <div className="dashboard-brand">
           <span className="dashboard-brand-logo"><BrandLogo href={root} /></span>
-          <button type="button" className="dashboard-collapse-toggle" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            onClick={() => setCollapsed(value => !value)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M9 4v16" /></svg></button>
-          <button ref={menuToggle} type="button" className="dashboard-menu-toggle"
-            aria-expanded={menuOpen} aria-controls="dashboard-sections"
-            onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? "Close menu" : "Open menu"}
-          </button>
+
         </div>
         <div id="dashboard-sections" className={`dashboard-sections ${menuOpen ? "is-open" : ""}`}>
           <div className="dashboard-section-list">
@@ -159,6 +154,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="min-w-0">
       <header className="dashboard-toolbar">
         <div className="flex min-w-0 items-center gap-2 text-sm">
+          <button type="button" className="dashboard-collapse-toggle" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            onClick={() => setCollapsed(value => !value)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M9 4v16" /></svg></button>
+          <button ref={menuToggle} type="button" className="dashboard-menu-toggle"
+            aria-expanded={menuOpen} aria-controls="dashboard-sections"
+            onClick={() => setMenuOpen(!menuOpen)}>
+            <span className="sr-only">{menuOpen ? "Close menu" : "Open menu"}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d={menuOpen ? "m6 6 12 12M6 18 18 6" : "M4 6h16M4 12h16M4 18h16"} /></svg>
+          </button>
+          <span className="dashboard-toolbar-divider" aria-hidden="true" />
           <OrganizationSwitcher scope={scope} pathname={pathname} memberships={memberships.data ?? []} />
           <span aria-hidden="true" className="text-line">{" / "}</span>
           <span className="truncate font-semibold">{currentSection}</span>

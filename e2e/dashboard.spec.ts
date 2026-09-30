@@ -31,12 +31,12 @@ test("login waits for the session, then opens the dashboard without showing the 
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
-    if (width < 1024) await nav.getByRole("button", { name: "Open menu" }).click();
+    if (width < 1024) await page.getByRole("button", { name: "Open menu" }).click();
     if (await nav.getByRole("button", { name: "Account" }).getAttribute("aria-expanded") === "false") await nav.getByRole("button", { name: "Account" }).click();
     await expect(nav.getByRole("link", { name: "Account settings", exact: true })).toHaveAttribute("href", "/account/settings");
-    await expect(nav.getByRole("link", { name: "Overview", exact: true })).toHaveAttribute("aria-current", "page");
+    await expect(nav.getByRole("link", { name: "Dashboard", exact: true })).toHaveAttribute("aria-current", "page");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    if (width < 1024) await nav.getByRole("button", { name: "Close menu" }).click();
+    if (width < 1024) await page.getByRole("button", { name: "Close menu" }).click();
   }
 });
 
@@ -161,16 +161,17 @@ test("mobile dashboard menu closes on Escape and after navigation", async ({ pag
   await overview(page);
   await page.goto("/me");
   const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
-  await nav.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await expect(nav.getByRole("button", { name: "Your work", exact: true })).toBeFocused();
   await nav.getByRole("button", { name: "Build" }).click();
   await nav.getByRole("link", { name: "My bots", exact: true }).focus();
   await page.keyboard.press("Escape");
-  await expect(nav.getByRole("button", { name: "Open menu" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Open menu" })).toBeFocused();
   await expect(nav.getByRole("link", { name: "My bots", exact: true })).toBeHidden();
-  await nav.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("button", { name: "Open menu" }).click();
   await nav.getByRole("link", { name: "My bots", exact: true }).click();
   await expect(page).toHaveURL(`/org/${personalId}/bots`);
-  await expect(nav.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
-  await nav.getByRole("button", { name: "Open menu" }).click();
+  await expect(page.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
+  await page.getByRole("button", { name: "Open menu" }).click();
   await expect(nav.getByRole("link", { name: "My bots", exact: true })).toHaveAttribute("aria-current", "page");
 });
