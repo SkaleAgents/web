@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { AdvisoryBookingRequest } from "@/components/advisory-booking-request";
+import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retention-controls";
 import { SourceMetadata } from "@/components/source-metadata";
 import { Button, LinkButton } from "@/components/ui";
@@ -69,7 +69,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
         </section>
         {(job.data.status === "completed" || job.data.status === "failed") && <section className="space-y-3 rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Expert help">
           <h2 className="text-lg font-semibold text-ink">Expert help</h2>
-          <AdvisoryBookingRequest source={{ type: "audit_job", id }} />
+          <ConsultancyBookingLink />
         </section>}
       </>}
     </main>

@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
       { source: "/dashboard/staff/:path*", destination: "/staff/:path*", permanent: false },
       { source: "/workspaces", destination: "/dashboard/organizations", permanent: false },
       { source: "/workspaces/:workspaceId/:path*", destination: "/org/:workspaceId/:path*", permanent: false },
-      ...["jobs", "schedules", "settings", "studio", "watchtower", "advisory-bookings"].map(path => ({
+      ...["jobs", "schedules", "settings", "studio", "watchtower"].map(path => ({
         source: `/${path}/:path*`, destination: `/dashboard/${path}/:path*`, permanent: false,
       })),
     ];

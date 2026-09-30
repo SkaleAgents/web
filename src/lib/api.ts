@@ -1,74 +1,5 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
 
-export function advisoryAgreementsEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_ADVISORY_AGREEMENTS_ENABLED === "true";
-}
-
-export function advisoryDeliveryHandoffsEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_ADVISORY_DELIVERY_HANDOFFS_ENABLED === "true";
-}
-
-export function portfolioBookingHandoffEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_PORTFOLIO_BOOKING_HANDOFF_ENABLED === "true";
-}
-
-export function nativeConsultancyEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_CONSULTANCY_BOOKING_ENABLED === "true";
-}
-
-export type ConsultancyPackage = {
-  slug: "light" | "pro" | "max";
-  name: string;
-  durationMinutes: number;
-  priceCents: number;
-  currency: "USD";
-  features: string[];
-};
-
-export type ConsultancyBooking = {
-  id: string;
-  version: number;
-  status: "requested" | "slot_proposed" | "approved_awaiting_payment" | "paid_pending_confirmation" |
-    "payment_review_required" | "cancellation_pending" | "confirmed" | "declined" | "cancelled" | "completed";
-  paymentStatus: "unpaid" | "pending" | "paid" | "refund_review" | "refunded";
-  package: ConsultancyPackage;
-  requestedWindow: { startAt: string; endAt: string };
-  approvedWindow: { startAt: string; endAt: string } | null;
-  proposedWindow: { startAt: string; endAt: string } | null;
-  scope: string;
-  notes: string | null;
-  source: { type: "audit_job" | "advisory_booking"; id: string } | null;
-  termsVersion: string | null;
-  approvedAt: string | null;
-  paidAt: string | null;
-  confirmedAt: string | null;
-  meetingUrl: string | null;
-  cancelledAt: string | null;
-  refundStatus: "creating" | "pending_verification" | "review_required" | "refunded" | null;
-  refundedAt: string | null;
-  deliveredAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type PortfolioBookingReferralSource = { type: "audit_job" | "advisory_booking"; id: string };
-
-export type PortfolioBookingReferral = {
-  id: string;
-  source: PortfolioBookingReferralSource | null;
-  expiresAt: string;
-  bookingPublicId: string | null;
-  bookingStatus: string | null;
-  packageSlug: string | null;
-  amountDueCents: number | null;
-  currency: string | null;
-  startsAt: string | null;
-  endsAt: string | null;
-  paymentStatus: "unpaid" | "paid" | "refunded";
-  lastSyncedAt: string | null;
-  createdAt: string;
-};
-
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
     super(message);
@@ -124,7 +55,6 @@ export type McpConnection = {
 export type EmailPreferences = {
   auditCompleted: boolean;
   auditFailed: boolean;
-  reviewUpdates: boolean;
 };
 
 export type NotificationSettings = {
@@ -351,86 +281,6 @@ export type WatchtowerRedirect = {
   userId: string;
   instruction: string;
   createdAt: string;
-};
-
-export type AdvisoryBookingSourceType = "audit_job" | "watchtower_session";
-
-export type AdvisoryBooking = {
-  id: string;
-  version: number;
-  source: {
-    type: AdvisoryBookingSourceType;
-    id: string;
-  };
-  status: "requested" | "accepted" | "scheduled" | "in_progress" | "completed" | "cancelled";
-  assigneeRef: string | null;
-  scope: string;
-  urgency: "routine" | "soon" | "urgent" | "emergency";
-  preferredWindow: {
-    startAt: string;
-    endAt: string;
-  };
-  notes: string | null;
-  billing: {
-    billableMinutes: number | null;
-    feeCents: number | null;
-    currency: string | null;
-  };
-  agreement: AdvisoryAgreement | null;
-  appointment: AdvisoryAppointment | null;
-  delivery: AdvisoryDelivery | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type AdvisoryAppointment = {
-  confirmedWindow: {
-    startAt: string;
-    endAt: string;
-    timezone: string;
-  };
-  confirmedAt: string;
-};
-
-export type AdvisoryAgreement = {
-  id: string;
-  version: number;
-  scope: string;
-  currency: "USD";
-  quotedFeeCents: number;
-  minimumBillableMinutes: number;
-  incrementMinutes: number;
-  rateCentsPerHour: number;
-  cancellationTermsVersion: string;
-  offeredAt: string;
-  acceptedAt: string | null;
-};
-
-export type AdvisoryDelivery = {
-  ownerRef: string;
-  contact: {
-    name: string;
-    channel: string;
-    value: string;
-  };
-  handoffStatus: "pending" | "ready";
-  handedOffAt: string | null;
-};
-
-export type AdvisoryBookingHistoryEntry = {
-  id: string;
-  type: "assignment" | "status" | "appointment" | "delivery" | "billing";
-  actorRef: string;
-  fromStatus: AdvisoryBooking["status"] | null;
-  toStatus: AdvisoryBooking["status"] | null;
-  assigneeRef: string | null;
-  billing: AdvisoryBooking["billing"];
-  changedFields: string[] | null;
-  createdAt: string;
-};
-
-export type StaffAdvisoryBooking = AdvisoryBooking & {
-  history: AdvisoryBookingHistoryEntry[];
 };
 
 export type PatchProposal = {

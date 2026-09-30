@@ -5,9 +5,9 @@ export const metadata: Metadata = { title: "Terms of Service | SkaleAgents", des
 
 export default function TermsPage() {
   return <main className="policy-page py-4 text-ink">
-    <p className="text-sm font-semibold uppercase tracking-wide text-ink-muted">Effective September 29, 2026 · Version 2026-09-29</p>
+    <p className="text-sm font-semibold uppercase tracking-wide text-ink-muted">Effective September 30, 2026 · Version 2026-09-30</p>
     <h1 className="font-display text-4xl font-bold">SkaleAgents Terms of Service</h1>
-    <p>SkaleAgents is operated by Binary Labs LLC, 1309 Coffeen Avenue, Sheridan, WY 82801, USA. Contact us at <a href="mailto:info@skaleagents.com">info@skaleagents.com</a>. These terms apply to the SkaleAgents website, accounts, dashboards, APIs, and MCP connections. Separate written terms may apply to human advisory engagements.</p>
+    <p>SkaleAgents is operated by Binary Labs LLC, 1309 Coffeen Avenue, Sheridan, WY 82801, USA. Contact us at <a href="mailto:info@skaleagents.com">info@skaleagents.com</a>. These terms apply to the SkaleAgents website, accounts, dashboards, APIs, and MCP connections.</p>
     <h2>Accounts and organizations</h2>
     <p>You must be able to enter a binding agreement and keep your account information accurate. You are responsible for access to your account, tokens, connected tools, and organizations. Organization owners control membership and should invite only people authorized to see that organization&apos;s content.</p>
     <h2>Your content and permitted use</h2>

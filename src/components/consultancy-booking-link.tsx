@@ -1,17 +1,8 @@
-import Link from "next/link";
-import { nativeConsultancyEnabled, type PortfolioBookingReferralSource } from "@/lib/api";
+import { CONSULTANCY_BOOKING_URL } from "@/lib/consultancy-link";
 
-export function ConsultancyBookingLink({ source }: { source?: PortfolioBookingReferralSource }) {
-  if (!nativeConsultancyEnabled()) {
-    return <p className="text-sm text-ink-muted">Consultancy booking is not available yet.</p>;
-  }
-
-  const query = source ? `?sourceType=${encodeURIComponent(source.type)}&sourceId=${encodeURIComponent(source.id)}` : "";
-  return <div className="space-y-2 text-sm">
-    <Link href={`/dashboard/consultancy${query}`}
-      className="inline-flex rounded-[10px] border border-line px-3 py-2 font-semibold text-ink hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent">
-      Book a consultancy session
-    </Link>
-    <p className="text-ink-muted">Choose a package and request a time. Payment opens only after Harun approves it.</p>
-  </div>;
+export function ConsultancyBookingLink() {
+  return <a href={CONSULTANCY_BOOKING_URL} referrerPolicy="no-referrer" rel="noreferrer"
+    className="inline-flex rounded-[10px] border border-line px-3 py-2 text-sm font-semibold text-ink hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent">
+    Book consultancy on harun.dev
+  </a>;
 }
