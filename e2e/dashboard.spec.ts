@@ -126,7 +126,8 @@ test("dashboard has its own navigation and keeps the public shell on public page
   await page.goto("/me");
   await expect(page.getByRole("navigation", { name: "Main navigation" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Dashboard", exact: true })).toBeVisible();
-  await expect(page.getByRole("contentinfo")).toHaveCount(0);
+  await expect(page.getByRole("contentinfo")).toContainText("Binary Labs LLC");
+  await expect(page.getByRole("contentinfo").getByRole("link", { name: "Terms", exact: true })).toHaveAttribute("href", "/terms");
   await expect(page.getByRole("button", { name: "Dashboard Owner, account menu" })).toBeVisible();
   const sidebar = page.getByRole("navigation", { name: "Dashboard navigation" });
   const before = await sidebar.boundingBox();
@@ -139,7 +140,8 @@ test("dashboard has its own navigation and keeps the public shell on public page
   await expect(sidebar).toHaveCount(0);
   await page.getByRole("banner").getByRole("link", { name: "Dashboard", exact: true }).click();
   await expect(sidebar).toBeVisible();
-  await expect(page.getByRole("contentinfo")).toHaveCount(0);
+  await expect(page.getByRole("contentinfo")).toContainText("Binary Labs LLC");
+  await expect(page.getByRole("contentinfo").getByRole("link", { name: "Terms", exact: true })).toHaveAttribute("href", "/terms");
 });
 
 test("sign-in is a focused entry point with a way back to the public site", async ({ page }) => {
