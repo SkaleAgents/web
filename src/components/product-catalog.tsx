@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ProductCover } from "./product-cover";
 import { useState } from "react";
 
 const categories = ["All products", "Cloud & AI", "Developer tools", "Commerce", "More from us"] as const;
@@ -67,12 +68,12 @@ export function ProductCatalog() {
     <div className="grid gap-6 md:grid-cols-2">
       {visible.map((product) => <article key={product.domain} className="overflow-hidden rounded-xl border border-line bg-canvas-elevated">
         <a href={`https://${product.domain}`} target="_blank" rel="noopener noreferrer" aria-label={`Explore ${product.name} (opens in a new tab)`} className="group flex h-full flex-col focus-visible:outline-offset-[-4px]">
-          <div className="flex min-h-60 flex-col justify-between gap-8 p-7 sm:p-8" style={{ backgroundColor: product.color, color: product.ink }}>
-            <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+          <div className="overflow-hidden" style={{ backgroundColor: product.color, color: product.ink }}>
+            <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-6 pt-5 text-sm">
               <span>{product.category}</span>
               {product.status && <span className="rounded-full border border-current/25 px-3 py-1">{product.status}</span>}
             </div>
-            <p className="max-w-sm font-display text-3xl font-semibold leading-tight tracking-tight">{product.headline}</p>
+            <ProductCover id={product.logo.split(".")[0]} logo={product.logo} color={product.ink} />
           </div>
           <div className="flex flex-1 flex-col p-7 sm:p-8">
             <div className="flex items-center gap-3">
@@ -81,7 +82,8 @@ export function ProductCatalog() {
               </span>
               <h2 className="font-display text-2xl font-semibold tracking-tight group-hover:underline underline-offset-4">{product.name}</h2>
             </div>
-            <p className="mt-5 flex-1 leading-relaxed text-ink-muted">{product.description}</p>
+            <p className="mt-5 font-semibold">{product.headline}</p>
+            <p className="mt-2 flex-1 leading-relaxed text-ink-muted">{product.description}</p>
             <div className="mt-7 flex items-center justify-between gap-3 border-t border-line pt-5 text-sm">
               <span className="text-ink-muted">{product.domain}</span>
               <span className="inline-flex items-center gap-2 font-semibold">Explore <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M7 17 17 7M7 7h10v10" /></svg></span>

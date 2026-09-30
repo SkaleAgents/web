@@ -17,7 +17,7 @@ export default function ProductsPage() {
     <div className="max-w-3xl">
       <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] font-semibold leading-tight tracking-tight">Our products</h1>
       <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">More from the team behind SkaleAgents. Tools for your cloud, your everyday work, and your online store.</p>
-      <a href="https://binarylabssoft.com/products" target="_blank" rel="noopener noreferrer" className="mt-5 inline-block text-sm underline decoration-accent underline-offset-4">Made by Binary Labs<span className="sr-only"> (opens in a new tab)</span></a>
+      <a href="https://binarylabssoft.com/products" target="_blank" rel="noopener noreferrer" className="mt-5 inline-block text-sm underline decoration-accent underline-offset-4">Made by Binary Labs LLC<span className="sr-only"> (opens in a new tab)</span></a>
     </div>
     <ProductCatalog />
   </main>;
