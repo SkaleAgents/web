@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { RequiredRetentionNotice } from "@/components/required-retention-notice";
 import { DashboardPageLoader } from "@/components/dashboard-page-loader";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -146,6 +147,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   return <div className={`dashboard-frame ${collapsed ? "is-collapsed" : ""} ${menuOpen ? "is-menu-open" : ""}`} onKeyDown={event => {
     if (event.key === "Escape" && menuOpen) { event.preventDefault(); closeMenu(); }
   }}>
+    <RequiredRetentionNotice accountId={user.data.id} workspaceId={!access.isFetching && access.isSuccess && access.data.id === workspace?.id && access.data.kind === "team" && access.data.role === "owner" ? access.data.id : undefined} />
     <aside className="dashboard-sidebar">
       <nav ref={navigation} aria-label="Dashboard navigation" className="dashboard-navigation">
         <div className="dashboard-brand">

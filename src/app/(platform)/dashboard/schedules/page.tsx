@@ -8,7 +8,6 @@ import { apiFetch, ensureCsrfCookie, type SwarmSchedule } from "@/lib/api";
 import { Button, FieldLabel, LinkButton, Select, TextArea, TextInput } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { ScheduleDeletionStatus, ScheduleRetentionControls } from "@/components/schedule-retention-controls";
-import { RetentionNotice } from "@/components/retention-notice";
 import { SourceMetadata } from "@/components/source-metadata";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
 import { buildSourceMetadata } from "@/lib/source-metadata";
@@ -79,7 +78,6 @@ export default function SchedulesPage() {
 
   return (
     <main className="space-y-8">
-      {user.data && <RetentionNotice key={user.data.id} accountId={user.data.id} />}
       <div className="workspace-intro">
         <p className="workspace-kicker">Review / Make it repeatable</p>
         <h1 className="workspace-heading">Scheduled audits</h1>

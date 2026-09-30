@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { apiFetch, type SwarmJob } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
-import { RetentionNotice } from "@/components/retention-notice";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
 export default function JobsPage() {
@@ -29,7 +28,6 @@ export default function JobsPage() {
   const visibleJobs = filteredJobs.slice((currentPage - 1) * 10, currentPage * 10);
   return (
     <main className="space-y-8">
-      {user.data && <RetentionNotice key={user.data.id} accountId={user.data.id} />}
       <div className="workspace-intro flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="workspace-heading">Audit jobs</h1>

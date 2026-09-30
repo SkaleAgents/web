@@ -20,9 +20,12 @@ test("viewing notice does not acknowledge it; explicit acknowledgement records t
   await page.goto("/jobs");
   await expect(page.getByText(policy.notice[1])).toBeVisible();
   expect(acknowledgements).toBe(0);
-  await page.getByRole("button", { name: "I've read this retention policy" }).click();
-  await expect(page.getByText("Notice recorded", { exact: false })).toBeVisible();
-  await expect(page.getByRole("button", { name: "I've read this retention policy" })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await page.mouse.click(2, 2);
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("button", { name: "I acknowledge" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "I acknowledge" })).toHaveCount(0);
   expect(acknowledgements).toBe(1);
 });
 
@@ -31,8 +34,8 @@ test("changed-account policy responses cannot offer acknowledgement", async ({ p
   await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: [] } }));
   await page.route("**/api/account/retention", route => route.fulfill({ json: { ...policy, accountId: "another-owner" } }));
   await page.goto("/jobs");
-  await expect(page.getByText("Your account changed. Reload the policy notice.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "I've read this retention policy" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Audit jobs", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "I acknowledge" })).toHaveCount(0);
 });
 
 test("reloads a fresh acknowledgement token after a rolling-deploy conflict", async ({ page }) => {
@@ -58,12 +61,12 @@ test("reloads a fresh acknowledgement token after a rolling-deploy conflict", as
 
   await page.goto("/jobs");
   await expect(page.getByText(policy.notice[1])).toBeVisible();
-  await page.getByRole("button", { name: "I've read this retention policy" }).click();
+  await page.getByRole("button", { name: "I acknowledge" }).click();
   await expect(page.getByText("Account or notice changed. Reload the policy notice.")).toBeVisible();
-  await page.getByRole("button", { name: "Reload retention policy" }).click();
+  await page.getByRole("button", { name: "Reload notice" }).click();
   await expect.poll(() => noticeFetches).toBe(2);
-  await page.getByRole("button", { name: "I've read this retention policy" }).click();
-  await expect(page.getByText("Notice recorded", { exact: false })).toBeVisible();
+  await page.getByRole("button", { name: "I acknowledge" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   expect(acknowledgements).toBe(2);
 });
 
@@ -81,13 +84,14 @@ test("advance notice can be recorded before automatic cleanup and survives reloa
     return route.fulfill({ json: state });
   });
   await page.goto("/jobs");
-  await expect(page.getByText("Automatic retention is not active. Recording this notice starts your 30-day legacy grace period but does not activate cleanup.")).toBeVisible();
+  await expect(page.getByText("Automatic retention is not active. Acknowledging this notice starts your 30-day legacy grace period but does not activate cleanup.")).toBeVisible();
   expect(acknowledgements).toBe(0);
-  await page.getByRole("button", { name: "I've read this retention policy" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Notice recorded" })).toContainText("Deadlines will appear after activation.");
+  await page.getByRole("button", { name: "I acknowledge" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.reload();
-  await expect(page.getByRole("status").filter({ hasText: "Notice recorded" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "I've read this retention policy" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Audit jobs", exact: true })).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "I acknowledge" })).toHaveCount(0);
   expect(acknowledgements).toBe(1);
 });
 
