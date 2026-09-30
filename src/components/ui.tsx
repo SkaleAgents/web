@@ -22,6 +22,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
+      data-ui="button" data-variant={variant}
       className={`inline-flex items-center justify-center rounded-[10px] border px-3 py-2 text-sm font-semibold disabled:opacity-60 ${variants[variant]} ${className}`}
       {...props}
     />
@@ -39,6 +40,7 @@ export function LinkButton({
 }: LinkButtonProps) {
   return (
     <Link
+      data-ui="button" data-variant={variant}
       className={`inline-flex items-center justify-center rounded-[10px] border px-3 py-2 text-sm font-semibold ${variants[variant]} ${className}`}
       {...props}
     />

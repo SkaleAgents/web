@@ -77,11 +77,15 @@ export function JobRetentionControls({ job, accountId, onDeletion }: {
             {retention?.historyExpiresAt && `History deadline: ${new Date(retention.historyExpiresAt).toLocaleString()}.`}
           </p>
           {job.scheduleId && <p className="text-xs text-ink-muted">The recurring schedule keeps a separate input copy. Cleaning this job does not clean its schedule or other runs.</p>}
-          <div className="flex flex-wrap gap-2">
+          <div className="audit-report-actions flex flex-wrap gap-2">
+            <Button type="button" disabled={report.isPending} onClick={() => report.mutate()}>{report.isPending ? "Preparing report…" : "Export report"}</Button>
+          </div>
+          <details className="audit-data-actions"><summary>Manage retained data</summary>
+          <div className="mt-3 flex flex-wrap gap-2">
             {retention?.inputPurgeStatus !== "purged" && <Button type="button" variant="secondary" disabled={cleanup.isPending} onClick={() => setConfirm("input")}>Purge audit input</Button>}
             <Button type="button" variant="secondary" disabled={cleanup.isPending} onClick={() => setConfirm("history")}>Delete audit</Button>
-            <Button type="button" variant="secondary" disabled={report.isPending} onClick={() => report.mutate()}>Export report</Button>
           </div>
+          </details>
           <p className="text-xs text-ink-muted">Downloaded reports and copies already delivered to webhook recipients are outside server-side cleanup. Live-store completion does not confirm backup deletion.</p>
         </>
       )}

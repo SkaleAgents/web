@@ -77,3 +77,24 @@ test("coverage disclosure stays expanded when a pending audit finishes", async (
   complete = true;
   await expect(panel.getByText("Evaluated, no findings")).toBeVisible({ timeout: 8000 });
 });
+
+
+test("audit findings and report action stay clear across dashboard layouts", async ({ page }, testInfo) => {
+  await page.route("**/api/user", route => route.fulfill({ json: account }));
+  await page.route("**/api/jobs/design-review", route => route.fulfill({ json: { ...audit("design-review"), findings: [{ severity: "high", title: "Public network access detected", detail: "The security group permits public ingress on port 22.", resource: "aws_security_group.review_fixture", remediation: "Restrict ingress to the approved network.", specialist: "devsecops" }] } }));
+  await page.goto(`/org/${personalOrganizationId}/jobs/design-review`);
+  await expect(page.getByRole("heading", { name: "Public network access detected" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Export report", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Delete audit", exact: true })).not.toBeVisible();
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 1100 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath(`dashboard-${width}.png`), fullPage: true });
+  }
+  await page.getByRole("button", { name: "Color theme" }).click();
+  await page.getByRole("menuitemradio", { name: "Dark", exact: true }).click();
+  await expect(page.locator("html")).toHaveClass(/dark/);
+  await expect(page.getByRole("button", { name: "Export report", exact: true })).toHaveCSS("background-color", "rgb(237, 237, 237)");
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await page.screenshot({ path: testInfo.outputPath("dashboard-dark.png"), fullPage: true });
+});
