@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { apiFetch, type SwarmJob } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
+import { AuditHistoryResult } from "@/components/audit-history-result";
 import { RetentionNotice } from "@/components/retention-notice";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
@@ -33,7 +34,7 @@ export default function JobsPage() {
       <div className="workspace-intro flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="workspace-heading">Audit jobs</h1>
-          <p className="mt-2 text-sm text-ink-muted">Track your reviews and open findings in Watchtower.</p>
+          <p className="mt-2 text-sm text-ink-muted">See which audits need attention, then open a report for findings and coverage.</p>
         </div>
         <LinkButton href={href("jobs/new")}>New audit</LinkButton>
       </div>
@@ -56,7 +57,9 @@ export default function JobsPage() {
             <li key={job.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold capitalize text-ink-muted">{job.status}{job.partial ? " · Partial results" : ""}</p>
-                <p className="mt-1 line-clamp-2 text-sm font-medium text-ink">{job.summary ?? "Waiting for specialist results"}</p>
+                <AuditHistoryResult job={job} />
+                {job.summary && <p className="mt-1 line-clamp-2 text-xs text-ink-muted">{job.summary}</p>}
+                {job.sourceRevision && <p className="mt-1 break-all text-xs text-ink-muted">Source revision: {job.sourceRevision}</p>}
                 <p className="mt-1 text-xs text-ink-muted">{job.specialists.join(" · ")} · {new Date(job.createdAt).toLocaleString()}</p>
               </div>
               <LinkButton href={href(`jobs/${job.id}`)} variant="secondary">View audit</LinkButton>

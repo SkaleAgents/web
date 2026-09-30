@@ -108,3 +108,27 @@ test("a guessed audit detail ID stays unavailable without exposing source data",
   await expect(page.getByText("private-revision")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Download JSON (technical)" })).toHaveCount(0);
 });
+
+test("history summarizes results and revisions without loading individual reports", async ({ page }) => {
+  const base = { status: "completed", partial: false, specialists: ["devsecops"], createdAt: "2026-09-30T13:00:00Z" };
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "owner", enabled: false } }));
+  await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: [
+    { ...base, id: "public", sourceRevision: "sample-before", findingSummary: { total: 1, highestSeverity: "high" } },
+    { ...base, id: "fixed", sourceRevision: "sample-after", findingSummary: { total: 0, highestSeverity: null } },
+    { ...base, id: "partial", partial: true, findingSummary: { total: 0, highestSeverity: null } },
+    { ...base, id: "unknown" },
+  ] } }));
+  const detailRequests: string[] = [];
+  page.on("request", request => { if (/\/api\/jobs\//.test(request.url())) detailRequests.push(request.url()); });
+  await page.goto(`/org/${personalOrganizationId}/jobs`);
+  await expect(page.getByText("1 finding", { exact: true })).toBeVisible();
+  await expect(page.getByText("High severity", { exact: true })).toBeVisible();
+  await expect(page.getByText("No findings", { exact: true })).toBeVisible();
+  await expect(page.getByText("Incomplete results", { exact: true })).toBeVisible();
+  await expect(page.getByText("Findings unavailable", { exact: true })).toBeVisible();
+  await expect(page.getByText("Source revision: sample-before", { exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(detailRequests).toEqual([]);
+});

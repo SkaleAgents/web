@@ -183,6 +183,7 @@ export type SwarmJob = {
   error?: string;
   createdAt: string;
   updatedAt: string;
+  findingSummary?: { total: number; highestSeverity: SwarmFinding["severity"] | null };
   findings?: SwarmFinding[];
   coverage?: AuditCoverage;
   tasks?: Array<{ specialist: string; status: string; skipReason?: string; checkCoverage?: CheckCoverage | null }>;
