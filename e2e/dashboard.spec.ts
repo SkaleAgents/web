@@ -133,15 +133,18 @@ test("dashboard has its own navigation and keeps the public shell on public page
   const before = await sidebar.boundingBox();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   expect((await sidebar.boundingBox())!.y).toBe(before!.y);
-  await sidebar.getByRole("link", { name: "Visit public site" }).click();
-  await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
-  await expect(page.getByRole("contentinfo")).toBeVisible();
-  await expect(sidebar).toHaveCount(0);
-  await page.getByRole("banner").getByRole("link", { name: "Dashboard", exact: true }).click();
+  const publicLink = sidebar.getByRole("link", { name: "Visit public site (opens in a new tab)", exact: true });
+  await expect(publicLink).toHaveAttribute("target", "_blank");
+  await expect(publicLink).toContainText("↗");
+  const popupPromise = page.waitForEvent("popup");
+  await publicLink.click();
+  const publicPage = await popupPromise;
+  await expect(publicPage).toHaveURL(/\/$/);
+  await expect(publicPage.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
+  await expect(publicPage.getByRole("contentinfo")).toBeVisible();
+  await expect(page).toHaveURL(/\/org\/[^/]+$/);
   await expect(sidebar).toBeVisible();
-  await expect(page.getByRole("contentinfo")).toContainText("Binary Labs LLC");
-  await expect(page.getByRole("contentinfo").getByRole("link", { name: "Terms", exact: true })).toHaveAttribute("href", "/terms");
+  await publicPage.close();
 });
 
 test("sign-in is a focused entry point with a way back to the public site", async ({ page }) => {
