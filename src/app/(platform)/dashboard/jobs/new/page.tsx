@@ -45,20 +45,21 @@ export default function NewJobPage() {
         }
         parsedTelemetry = parsed as Record<string, unknown>;
       }
+      const sourceMetadata = buildSourceMetadata(sourceRevision, sourceObservedAt);
       await ensureCsrfCookie();
       return apiFetch<SwarmJob>("/api/jobs", {
         method: "POST",
         body: JSON.stringify({
           scope: { kind: "iac_text", format: "auto", content },
           specialists,
-          ...buildSourceMetadata(sourceRevision, sourceObservedAt),
+          ...sourceMetadata,
           ...(parsedTelemetry ? { telemetry: parsedTelemetry } : {}),
         }),
       });
     },
-    onSuccess: () => {
+    onSuccess: (job) => {
       void queryClient.invalidateQueries({ queryKey: ["swarm-jobs", user.data?.id ?? "guest"] });
-      router.push(jobsPath);
+      router.push(`${jobsPath}/${job.id}`);
     },
   });
 
@@ -66,18 +67,47 @@ export default function NewJobPage() {
     <div className="workspace-intro">
       <LinkButton href={jobsPath} variant="ghost">Back to audit jobs</LinkButton>
       <h1 className="workspace-heading mt-3">New audit</h1>
-      <p className="mt-2 text-sm text-ink-muted">Add configuration, choose what to review, then queue the audit.</p>
+      <p className="mt-2 text-sm text-ink-muted">Review your configuration for issues and get recommended next steps.</p>
     </div>
-      <section className="rounded-[10px] border border-line bg-canvas-elevated p-5">
-        <h2 className="text-lg font-semibold text-ink">Start an IaC audit</h2>
+      <form className="overflow-hidden rounded-xl border border-line bg-canvas-elevated" onSubmit={(event) => { event.preventDefault(); if (user.data && content.trim() && specialists.length && !create.isPending) create.mutate(); }}>
+      <fieldset disabled={create.isPending} className="min-w-0">
+      <section className="p-5 sm:p-6" aria-labelledby="configuration-heading">
+        <h2 id="configuration-heading" className="text-base font-semibold text-ink">1. Configuration</h2>
         <p className="mt-2 text-sm text-ink-muted">Bring Terraform, CloudFormation, or Kubernetes configuration. Include the resources a reviewer needs to understand the scope.</p>
         <textarea
           value={content}
           onChange={(event) => setContent(event.target.value)}
-          className="mt-4 min-h-32 w-full rounded-[10px] border border-line bg-canvas px-3 py-2 font-mono text-sm text-ink outline-none focus:border-accent"
+          className="mt-4 min-h-56 w-full rounded-[10px] border border-line bg-canvas px-3 py-2 font-mono text-sm text-ink outline-none focus:border-accent"
           placeholder={'resource "aws_security_group" "web" {}'}
           aria-label="IaC content"
+          spellCheck={false}
         />
+        <p className="mt-2 text-xs text-ink-muted">Checks review only the input you provide. A result with no findings does not confirm your infrastructure is secure.</p>
+      </section>
+      <section className="border-t border-line p-5 sm:p-6" aria-labelledby="checks-heading">
+        <h2 id="checks-heading" className="text-base font-semibold text-ink">2. Review checks</h2>
+        <p className="mt-2 text-sm text-ink-muted">Choose at least one area to review.</p>
+        <fieldset className="mt-4">
+          <legend className="sr-only">Review areas</legend>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {AUDIT_SPECIALISTS.map((specialist) => (
+              <label key={specialist} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 text-sm ${specialists.includes(specialist) ? "border-accent bg-accent-soft" : "border-line"}`}>
+                <input
+                  type="checkbox"
+                  checked={specialists.includes(specialist)}
+                  onChange={(event) => setSpecialists((current) => event.target.checked
+                    ? [...current, specialist]
+                    : current.filter((item) => item !== specialist))}
+                />
+                <span><strong className="block text-ink">{specialistDetails[specialist].title}</strong><span className="mt-1 block text-ink-muted">{specialistDetails[specialist].detail}</span></span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </section>
+      <details className="group border-t border-line px-5 py-4 sm:px-6">
+        <summary className="cursor-pointer text-sm font-medium text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">Advanced options</summary>
+        <p className="mt-2 text-sm text-ink-muted">Optionally add telemetry or identify the source revision for this audit.</p>
         <label className="mt-4 block text-sm font-medium text-ink" htmlFor="audit-telemetry">Telemetry JSON (optional)</label>
         <textarea
           id="audit-telemetry"
@@ -94,30 +124,19 @@ export default function NewJobPage() {
           onRevisionChange={setSourceRevision}
           onObservedAtChange={setSourceObservedAt}
         />
-        <fieldset className="mt-4">
-          <legend className="text-sm font-medium text-ink">Specialists</legend>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            {AUDIT_SPECIALISTS.map((specialist) => (
-              <label key={specialist} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 text-sm ${specialists.includes(specialist) ? "border-accent bg-accent-soft" : "border-line"}`}>
-                <input
-                  type="checkbox"
-                  checked={specialists.includes(specialist)}
-                  onChange={(event) => setSpecialists((current) => event.target.checked
-                    ? [...current, specialist]
-                    : current.filter((item) => item !== specialist))}
-                />
-                <span><strong className="block text-ink">{specialistDetails[specialist].title}</strong><span className="mt-1 block text-ink-muted">{specialistDetails[specialist].detail}</span></span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <div className="mt-3 flex items-center gap-3">
-          <Button type="button" disabled={!user.data || !content.trim() || specialists.length === 0 || create.isPending} onClick={() => create.mutate()}>
-            {create.isPending ? "Queueing…" : "Queue audit"}
+      </details>
+      <section className="border-t border-line bg-canvas p-5 sm:p-6" aria-labelledby="start-heading">
+        <h2 id="start-heading" className="text-base font-semibold text-ink">3. Start audit</h2>
+        <p className="mt-2 text-sm text-ink-muted">{specialists.length === 0 ? "Select at least one review area to continue." : `${specialists.length} review ${specialists.length === 1 ? "area" : "areas"} selected. Your audit will open with its status and results.`}</p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button type="submit" disabled={!user.data || !content.trim() || specialists.length === 0 || create.isPending}>
+            {create.isPending ? "Starting audit…" : "Start audit"}
           </Button>
-          {create.isError && <p className="text-sm text-danger">{create.error.message}</p>}
+          {!content.trim() && <span className="text-sm text-ink-muted">Add configuration to start.</span>}
         </div>
+        {create.isError && <p role="alert" className="mt-3 text-sm text-danger">{create.error.message}</p>}
       </section>
-
+      </fieldset>
+      </form>
   </main>;
 }

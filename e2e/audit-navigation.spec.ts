@@ -14,15 +14,18 @@ test("audit creation and job management use separate pages", async ({ page }) =>
     return route.fulfill({ json: { jobs: created ? [{ id: "new-job", status: "queued", summary: "Review queued", specialists: ["devsecops"], createdAt: new Date().toISOString() }] : [] } });
   });
 
+  await page.route("**/api/jobs/new-job", route => route.fulfill({ json: { id: "new-job", status: "queued", specialists: ["devsecops", "sre"], partial: false, scope: {}, createdAt: new Date().toISOString() } }));
   await page.goto("/me/jobs");
   await expect(page.getByRole("heading", { name: "Audit jobs", exact: true })).toBeVisible();
   await expect(page.getByRole("textbox", { name: "IaC content" })).toHaveCount(0);
   await page.getByRole("link", { name: "New audit" }).first().click();
   await expect(page).toHaveURL(`/org/${personalOrganizationId}/jobs/new`);
+  await expect(page.getByLabel("Telemetry JSON", { exact: true })).not.toBeVisible();
+  await expect(page.getByRole("button", { name: "Start audit", exact: true })).toBeDisabled();
   await page.getByRole("textbox", { name: "IaC content" }).fill('resource "aws_security_group" "ssh" {}');
-  await page.getByRole("button", { name: "Queue audit" }).click();
-  await expect(page).toHaveURL(`/org/${personalOrganizationId}/jobs`);
-  await expect(page.getByText("Review queued")).toBeVisible();
+  await page.getByRole("button", { name: "Start audit" }).click();
+  await expect(page).toHaveURL(`/org/${personalOrganizationId}/jobs/new-job`);
+  await expect(page.getByText("Audit in progress", { exact: true })).toBeVisible();
 });
 
 test("signed-in navigation shows the theme control beside an avatar-only account menu", async ({ page }) => {
@@ -116,7 +119,7 @@ test("history summarizes results and revisions without loading individual report
   await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: [
     { ...base, id: "public", sourceRevision: "sample-before", findingSummary: { total: 1, highestSeverity: "high" } },
     { ...base, id: "fixed", sourceRevision: "sample-after", findingSummary: { total: 0, highestSeverity: null } },
-    { ...base, id: "partial", partial: true, findingSummary: { total: 0, highestSeverity: null } },
+    { ...base, id: "partial", partial: true, findingSummary: { total: 2, highestSeverity: "medium" } },
     { ...base, id: "unknown" },
   ] } }));
   const detailRequests: string[] = [];
@@ -131,4 +134,38 @@ test("history summarizes results and revisions without loading individual report
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(detailRequests).toEqual([]);
+  await page.getByRole("button", { name: "Issues found (2)", exact: true }).click();
+  await expect(page.getByRole("link", { name: "View audit", exact: true })).toHaveCount(2);
+  await expect(page.getByText("High severity", { exact: true })).toBeVisible();
+  await expect(page.getByText("Incomplete results", { exact: true })).toBeVisible();
+  await expect(page.getByText("No findings", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Findings unavailable", { exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "All jobs (4)", exact: true }).click();
+  await expect(page.getByRole("link", { name: "View audit", exact: true })).toHaveCount(4);
+});
+
+test("audit submission preserves configuration after a failure and prevents duplicate starts", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/sanctum/csrf-cookie", route => route.fulfill({ status: 204 }));
+  let release: () => void = () => {};
+  const pending = new Promise<void>(resolve => { release = resolve; });
+  let calls = 0;
+  await page.route("**/api/jobs", async route => {
+    if (route.request().method() !== "POST") return route.fulfill({ json: { jobs: [] } });
+    calls++;
+    await pending;
+    return route.fulfill({ status: 503, json: { message: "Audit service unavailable. Try again shortly." } });
+  });
+  await page.goto("/me/jobs/new");
+  await page.getByLabel("IaC content").fill("kind: Deployment");
+  await page.getByRole("button", { name: "Start audit", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Starting audit…" })).toBeDisabled();
+  await expect(page.getByLabel("IaC content")).toBeDisabled();
+  await expect.poll(() => calls).toBe(1);
+  release();
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("Audit service unavailable");
+  await expect(page.getByLabel("IaC content")).toHaveValue("kind: Deployment");
+  await expect(page.getByRole("button", { name: "Start audit", exact: true })).toBeEnabled();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
