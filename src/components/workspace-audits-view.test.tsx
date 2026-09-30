@@ -179,7 +179,7 @@ it.each([
   ["completed", true, "No findings were reported. Coverage was partial; some checks did not complete."],
   ["failed", false, "The audit failed without reporting findings. Review the error and audit activity."],
   ["failed", false, "The audit was cancelled without reporting findings.", "Cancelled by user"],
-])("explains an empty %s audit result (partial: %s)", async (status, partial, message, error) => {
+])("explains an empty %s audit result (partial: %s)", async (status, partial, message, error?: string) => {
   setup(routeFetch({ emptyResult: { status, partial, error } })).renderPage();
   await userEvent.click(await screen.findByRole("button", { name: "Details" }));
   expect(await screen.findByText(message, { exact: true })).toBeInTheDocument();
