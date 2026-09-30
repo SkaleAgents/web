@@ -33,6 +33,7 @@ function setup(fetcher: typeof fetch) {
 
 function routeFetch(options: {
   role?: "owner" | "member" | "viewer";
+  emptyResult?: { status: string; partial?: boolean; error?: string };
   onCreate?: (body: Record<string, unknown>) => Response;
   onDelete?: () => Response;
   onPurge?: () => Response;
@@ -50,7 +51,7 @@ function routeFetch(options: {
     if (/^\/api\/workspaces\/workspace-a\/jobs\/[^/]+\/purge-source$/.test(url.pathname)) return options.onPurge?.() ?? Response.json({ ok: true, sourcePurged: false, inputPurgeStatus: "pending", cleanupReceiptId: "receipt-a", retention: { ...audit.retention, inputPurgeStatus: "pending" } }, { status: 202 });
     if (url.pathname === "/api/workspaces/workspace-a/jobs/audit-a" && init?.method === "DELETE") return options.onDelete?.() ?? Response.json({ cleanupReceiptId: "receipt-delete-a", status: "pending" }, { status: 202 });
     if (/^\/api\/workspaces\/workspace-a\/jobs\/[^/]+$/.test(url.pathname) && init?.method === "DELETE") return options.onDelete?.() ?? Response.json({ cleanupReceiptId: "receipt-delete-a", status: "pending" }, { status: 202 });
-    if (/^\/api\/workspaces\/workspace-a\/jobs\/[^/]+$/.test(url.pathname)) return Response.json({ ...audit, id: url.pathname.split("/").at(-1), findings: [{ id: "finding-a", severity: "high", title: "Review permissions", detail: "A broad role is attached.", resource: "module.web", remediation: "Narrow the role.", specialist: "devsecops" }], tasks: [], steps: [{ jobId: "audit-a", stepId: "step-a", agent: "sre", message: "Checked resilience.", ts: "2026-09-25T12:01:00Z" }] });
+    if (/^\/api\/workspaces\/workspace-a\/jobs\/[^/]+$/.test(url.pathname)) return Response.json({ ...audit, id: url.pathname.split("/").at(-1), ...(options.emptyResult ?? {}), findings: options.emptyResult ? [] : [{ id: "finding-a", severity: "high", title: "Review permissions", detail: "A broad role is attached.", resource: "module.web", remediation: "Narrow the role.", specialist: "devsecops" }], tasks: [], steps: [{ jobId: "audit-a", stepId: "step-a", agent: "sre", message: "Checked resilience.", ts: "2026-09-25T12:01:00Z" }] });
     if (url.pathname === "/api/workspaces/workspace-a/jobs") return options.workspaceAuditsUnavailable ? Response.json({ error: "Not found" }, { status: 404 }) : Response.json({ jobs: options.workspaceAuditsWrongTenant ? [audit, { ...audit, id: "audit-b", workspaceId: "workspace-b" }] : [audit] });
     if (url.pathname === "/sanctum/csrf-cookie") return new Response(null, { status: 204 });
     throw new Error(`Unexpected request: ${url.pathname} ${init?.method ?? "GET"}`);
@@ -168,4 +169,21 @@ it("makes no workspace-audit request when the rollout flag is off", async () => 
 
   expect(screen.getByText("Shared audits are not enabled for this deployment.")).toBeInTheDocument();
   expect(fetcher).not.toHaveBeenCalled();
+});
+
+
+it.each([
+  ["queued", false, "No findings are available yet."],
+  ["running", false, "No findings are available yet."],
+  ["completed", false, "No findings were reported."],
+  ["completed", true, "No findings were reported. Coverage was partial; some checks did not complete."],
+  ["failed", false, "The audit failed without reporting findings. Review the error and audit activity."],
+  ["failed", false, "The audit was cancelled without reporting findings.", "Cancelled by user"],
+])("explains an empty %s audit result (partial: %s)", async (status, partial, message, error) => {
+  setup(routeFetch({ emptyResult: { status, partial, error } })).renderPage();
+  await userEvent.click(await screen.findByRole("button", { name: "Details" }));
+  expect(await screen.findByText(message, { exact: true })).toBeInTheDocument();
+  if (status !== "queued" && status !== "running") {
+    expect(screen.queryByText("No findings are available yet.")).not.toBeInTheDocument();
+  }
 });
