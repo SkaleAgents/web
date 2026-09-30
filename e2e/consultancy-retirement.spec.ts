@@ -14,7 +14,7 @@ for (const path of retiredCustomerPaths) {
   test(`retired ${path} redirects without private information`, async ({ request }) => {
     const response = await request.get(`${path}?sourceId=private-audit&token=private-token&next=https://untrusted.example`, { maxRedirects: 0 });
     expect(response.status()).toBe(303);
-    expect(response.headers().location).toBe(bookingUrl);
+    expect(response.headers().location).toBe(`${bookingUrl}#booking`);
     expect(response.headers()["referrer-policy"]).toBe("no-referrer");
     expect(response.headers()["cache-control"]).toBe("no-store");
   });
@@ -25,7 +25,7 @@ test("obsolete form submissions switch to GET before leaving SkaleAgents", async
     data: { notes: "private notes", sourceId: "private-audit" }, maxRedirects: 0,
   });
   expect(response.status()).toBe(303);
-  expect(response.headers().location).toBe(bookingUrl);
+  expect(response.headers().location).toBe(`${bookingUrl}#booking`);
 });
 
 test("public booking link works signed out without contacting a booking API", async ({ page }) => {
@@ -67,7 +67,7 @@ for (const prefix of ["/workspaces/private-organization", "/dashboard/workspaces
       expect(target.origin).toBe(new URL(first.url()).origin);
       const final = await request.post(target.toString(), { data: { notes: "private" }, maxRedirects: 0 });
       expect(final.status()).toBe(303);
-      expect(final.headers().location).toBe(bookingUrl);
+      expect(final.headers().location).toBe(`${bookingUrl}#booking`);
       expect(final.headers()["referrer-policy"]).toBe("no-referrer");
     });
   }
@@ -108,3 +108,10 @@ async function captureRedirectedBooking(page: Page) {
   });
   return requests;
 }
+
+test("redirects clear private URL fragments before the external page can read them", async ({ page }) => {
+  await captureRedirectedBooking(page);
+  await page.goto("/dashboard/consultancy?sourceId=private-audit#token=private-fragment");
+  await expect(page.getByRole("heading", { name: "External booking" })).toBeVisible();
+  expect(new URL(page.url()).hash).toBe("#booking");
+});
