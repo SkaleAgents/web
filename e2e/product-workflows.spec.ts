@@ -63,9 +63,10 @@ test("grouped navigation supports keyboard dismissal, active routes, and mobile"
   await expect(build).toBeFocused();
   await expect(build).toHaveAttribute("aria-expanded", "false");
   await page.setViewportSize({ width: 320, height: 740 });
-  for (const label of ["Explore", "Connect"]) {
+  for (const [label, count] of [["Explore", 3], ["Connect", 2]] as const) {
     await nav.getByRole("button", { name: label, exact: true }).click();
-    await expect(nav.getByRole("link")).toHaveCount(2);
+    await expect(nav.getByRole("link")).toHaveCount(count);
+    if (label === "Explore") await expect(nav.getByRole("link", { name: /Review checks/ })).toHaveAttribute("href", "/checks");
     if (label === "Connect") await expect(nav.getByRole("link", { name: /Pricing/ })).toHaveAttribute("href", "/pricing");
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   }
