@@ -14,6 +14,15 @@ test("public pages ask for cookie consent until the visitor chooses", async ({ p
   await expect(page.getByRole("region", { name: "Cookie consent" })).toHaveCount(0);
 });
 
+test("deny removes a stored reminder cookie", async ({ page, context, baseURL }) => {
+  await context.addCookies([{ name: "skale_retention_later", value: "saved", url: baseURL }]);
+  await page.goto("/");
+  await page.getByRole("region", { name: "Cookie consent" }).getByRole("button", { name: "Deny" }).click();
+  const cookies = await context.cookies();
+  expect(cookies.some(cookie => cookie.name === "skale_retention_later")).toBe(false);
+  expect(cookies.some(cookie => cookie.name === "skale_cookie_consent" && cookie.value === "declined")).toBe(true);
+});
+
 test("the dashboard uses the same cookie consent notice", async ({ page }) => {
   await page.goto("/login");
   await expect(page.getByRole("region", { name: "Cookie consent" })).toBeVisible();
