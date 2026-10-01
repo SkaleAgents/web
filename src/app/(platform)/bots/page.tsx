@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { BotDirectory } from "@/components/bot-directory";
 import { loadPublicBots } from "@/lib/public-catalog";
 
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Bot directory | SkaleAgents",
   description: "Read public specialist instructions for infrastructure review. No account required.",

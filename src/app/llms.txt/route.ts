@@ -1,7 +1,7 @@
 import { loadCommunityPrompts, loadPublicBots } from "@/lib/public-catalog";
 import { publicCheckPath, publicChecks } from "@/lib/public-checks";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 export async function GET() {
   const [bots, prompts] = await Promise.all([loadPublicBots(), loadCommunityPrompts()]);
@@ -49,6 +49,6 @@ export async function GET() {
     "",
   ];
   return new Response(lines.join("\n"), {
-    headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=3600" },
+    headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=300" },
   });
 }
