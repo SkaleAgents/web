@@ -14,7 +14,7 @@ const plans = { data: [
   { key: "max", name: "Max", monthlyUsd: 499, auditLimit: 2000, checkoutMode: "self_service" },
 ] };
 
-function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean, paymentUrl: string | null = null, checkoutReturnOrganizationId: string | null = null, pendingCyclePlan: string | null = null, renewalPayment: { status: "grace" | "access_paused"; graceEndsAt: string; paymentUrl: string | null } | null = null, cutoverNoticeAvailable = false) {
+function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean, paymentUrl: string | null = null, checkoutReturnOrganizationId: string | null = null, pendingCyclePlan: string | null = null, renewalPayment: { status: "grace" | "access_paused"; graceEndsAt: string; paymentUrl: string | null } | null = null, cutoverNoticeAvailable = false, checkoutEnvironment?: "test" | "live" | "closed") {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
   vi.mocked(apiFetch).mockImplementation(async (path, init) => {
@@ -24,6 +24,7 @@ function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean,
       plan, usage: { used: plan === "free" ? 1 : 7, limit: plan === "free" ? 2 : plan === "starter" ? 25 : 200, remaining: plan === "free" ? 1 : plan === "starter" ? 18 : 193, periodEnd: "2026-10-01T00:00:00Z" },
       pendingChange: paymentUrl ? { id: "change-1", toPlan: "pro", status: "pending_payment", effectiveAt: null, paymentUrl }
         : pendingCyclePlan ? { id: "change-2", kind: pendingCyclePlan === "free" ? "cancellation" : "downgrade", toPlan: pendingCyclePlan, status: "pending_cycle", effectiveAt: "2026-10-01T00:00:00Z", paymentUrl: null } : null, testModeEnabled, cancellationEnabled: true,
+      ...(checkoutEnvironment ? { checkoutEnvironment } : {}),
       renewalPayment,
     } as never;
     if (path === "/api/workspaces/org-1/billing/change-plan" && init?.method === "POST") return { id: "change-1", status: "effective" } as never;
@@ -155,6 +156,20 @@ it("shows scheduled cancellation without offering another cancellation request",
   showBilling("pro", true, null, null, "free");
   expect(await screen.findByText(/Free starts at your next renewal/)).toBeVisible();
   expect(screen.queryByRole("button", { name: "Cancel at renewal" })).not.toBeInTheDocument();
+});
+
+it("does not call live checkout a test payment", async () => {
+  const { client } = showBilling("starter", true, null, null, null, null, false, "live");
+  expect(await screen.findByRole("button", { name: "Upgrade to Pro" })).toBeEnabled();
+  expect(screen.queryByText(/No real payment will be collected/)).not.toBeInTheDocument();
+  expect(screen.queryByText("Plan changes are not available yet.")).not.toBeInTheDocument();
+  client.setQueryData(["organization-billing", "org-1"], {
+    plan: "starter", usage: { used: 7, limit: 25, remaining: 18, periodEnd: "2026-10-01T00:00:00Z" },
+    pendingChange: null, testModeEnabled: true, cancellationEnabled: true, checkoutEnvironment: "live",
+    renewalPayment: { status: "grace", graceEndsAt: "2026-10-08T00:00:00Z", paymentUrl: "https://invoice.stripe.com/i/renewal_fixture" },
+  });
+  expect(await screen.findByRole("link", { name: "Pay renewal invoice" })).toBeVisible();
+  expect(screen.queryByText(/No real payment will be collected/)).not.toBeInTheDocument();
 });
 
 it("shows the current allowance but keeps checkout closed when the API gate is off", async () => {
