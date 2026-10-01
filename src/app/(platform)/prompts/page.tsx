@@ -11,6 +11,6 @@ export const metadata: Metadata = {
 };
 
 export default async function PromptsPage() {
-  const initialPrompts = await loadCommunityPrompts();
+  const initialPrompts = (await loadCommunityPrompts())?.map((prompt) => ({ ...prompt, body: "" }));
   return <PromptLibrary initialPrompts={initialPrompts} />;
 }

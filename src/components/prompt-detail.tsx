@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiFetch, type Prompt } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
+import { promptCategoryLabel, promptType } from "@/lib/prompt-labels";
 
 export function PromptDetail({ initialPrompt }: { initialPrompt?: Prompt }) {
   const params = useParams<{ id: string }>();
@@ -53,7 +54,8 @@ export function PromptDetail({ initialPrompt }: { initialPrompt?: Prompt }) {
             Prompt
           </p>
           <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink">{prompt.title}</h1>
-          {prompt.tags.length > 0 && <p className="mt-2 text-xs text-ink-muted">{prompt.tags.join(" · ")}</p>}
+          <p className="mt-3 text-sm text-ink-muted">Type <span className="text-ink">{promptType(prompt.ownerUserId)}</span></p>
+          <p className="text-sm text-ink-muted">Category <span className="text-ink">{promptCategoryLabel(prompt.tags)}</span></p>
         </div>
         <div className="flex flex-wrap gap-2">
           <LinkButton href="/prompts" variant="secondary">Back to library</LinkButton>
