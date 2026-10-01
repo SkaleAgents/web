@@ -102,7 +102,7 @@ function RetentionBody({ titleId, policy, acknowledge, onReload, onLater }: {
           <Button disabled={acknowledge.isPending} onClick={() => acknowledge.mutate()}>{acknowledge.isPending ? "Recording notice…" : "I've read this retention policy"}</Button>
           {onLater ? <Button type="button" variant="secondary" onClick={onLater}>Do it later</Button> : null}
         </div>}
-      {onLater ? <p className="text-sm text-ink-muted">Do it later hides this reminder. It lasts 24 hours if you accept cookies, and until you close this browser if you deny them. It does not record that you read the policy.</p> : null}
+      {onLater ? <p className="text-sm text-ink-muted">Do it later hides this reminder. It lasts 24 hours after you accept cookies, and until you close this browser before that. It does not record that you read the policy.</p> : null}
       {acknowledge.isError && <RetentionError message={acknowledge.error?.message ?? "Could not record the notice."} onReload={onReload} />}
     </div>
   );
