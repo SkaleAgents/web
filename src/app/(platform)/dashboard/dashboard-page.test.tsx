@@ -24,6 +24,7 @@ const pendingPolicy: RetentionPolicy = {
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  document.cookie = "skale_retention_later=; Max-Age=0; Path=/";
 });
 
 function installDialog() {
@@ -88,6 +89,28 @@ it("leaves the dashboard clear after the notice is already recorded", async () =
 
   expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+
+it("hides the popup for 24 hours when the account chooses to do it later", async () => {
+  const fetcher = await renderDashboard();
+
+  fireEvent.click(await screen.findByRole("button", { name: "Do it later" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  expect(fetcher).not.toHaveBeenCalledWith(
+    expect.stringContaining("/api/account/retention/acknowledge"),
+    expect.anything(),
+  );
+
+  cleanup();
+  await renderDashboard();
+  expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+
+it("shows the popup again after the 24 hour reminder expires", async () => {
+  document.cookie = `skale_retention_later=${encodeURIComponent(JSON.stringify({ owner: Date.now() - 1000 }))}; Path=/`;
+  await renderDashboard();
+  expect(await screen.findByRole("dialog", { name: "Audit retention policy" })).toBeInTheDocument();
 });
 
 it("records acceptance from the dashboard dialog", async () => {

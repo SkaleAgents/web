@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie, type RetentionPolicy } from "@/lib/api";
+import { retentionLaterActive, snoozeRetentionNotice, subscribeRetentionLater } from "@/lib/retention-notice-later";
 import { currentUserOptions } from "@/lib/session";
 import { Button } from "@/components/ui";
 
@@ -33,10 +34,13 @@ export function RetentionNotice({ accountId, presentation = "page" }: { accountI
     },
   });
   const titleId = useId();
+  const onClient = useSyncExternalStore(subscribeRetentionLater, () => true, () => false);
+  const laterActive = useSyncExternalStore(subscribeRetentionLater, () => retentionLaterActive(accountId), () => false);
   const acknowledgementOpen = Boolean(policy.data && (policy.data.acknowledgementEnabled ?? policy.data.enabled));
   const awaitingAcceptance = acknowledgementOpen && !policy.data?.noticeArchived;
 
   if (presentation === "dialog") {
+    if (!onClient || laterActive) return null;
     if (!policy.isError && !awaitingAcceptance) return null;
     return (
       <RetentionDialog titleId={titleId}>
@@ -46,7 +50,7 @@ export function RetentionNotice({ accountId, presentation = "page" }: { accountI
             <RetentionError message={policy.error.message} onReload={() => void policy.refetch()} />
           </>
         ) : policy.data ? (
-          <RetentionBody titleId={titleId} policy={policy.data} acknowledge={acknowledge} onReload={() => void policy.refetch()} />
+          <RetentionBody titleId={titleId} policy={policy.data} acknowledge={acknowledge} onReload={() => void policy.refetch()} onLater={() => snoozeRetentionNotice(accountId)} />
         ) : null}
       </RetentionDialog>
     );
@@ -81,11 +85,12 @@ function RetentionDialog({ titleId, children }: { titleId: string; children: Rea
   );
 }
 
-function RetentionBody({ titleId, policy, acknowledge, onReload }: {
+function RetentionBody({ titleId, policy, acknowledge, onReload, onLater }: {
   titleId: string;
   policy: RetentionPolicy;
   acknowledge: { isPending: boolean; isError: boolean; error: Error | null; mutate: () => void };
   onReload: () => void;
+  onLater?: () => void;
 }) {
   return (
     <div className="space-y-3">
@@ -93,7 +98,11 @@ function RetentionBody({ titleId, policy, acknowledge, onReload }: {
       {!policy.enabled && <p className="text-sm text-ink-muted">Automatic retention is not active. Recording this notice starts your 30-day legacy grace period but does not activate cleanup.</p>}
       <ul className="list-disc space-y-1 pl-5 text-sm text-ink-muted">{policy.notice.map(line => <li key={line}>{line}</li>)}</ul>
       {policy.noticeArchived ? <p role="status" className="text-sm">Notice recorded {new Date(policy.noticeDeliveredAt!).toLocaleString()}. Existing records cannot be automatically removed before {new Date(policy.legacyNotBefore!).toLocaleString()}. {policy.enabled ? "Each record shows its effective deadline." : "Deadlines will appear after activation."}</p>
-        : <Button disabled={acknowledge.isPending} onClick={() => acknowledge.mutate()}>{acknowledge.isPending ? "Recording notice…" : "I've read this retention policy"}</Button>}
+        : <div className="flex flex-wrap gap-2">
+          <Button disabled={acknowledge.isPending} onClick={() => acknowledge.mutate()}>{acknowledge.isPending ? "Recording notice…" : "I've read this retention policy"}</Button>
+          {onLater ? <Button type="button" variant="secondary" onClick={onLater}>Do it later</Button> : null}
+        </div>}
+      {onLater ? <p className="text-sm text-ink-muted">Do it later hides this for 24 hours in this browser. It does not record that you read the policy.</p> : null}
       {acknowledge.isError && <RetentionError message={acknowledge.error?.message ?? "Could not record the notice."} onReload={onReload} />}
     </div>
   );
