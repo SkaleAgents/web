@@ -6,7 +6,7 @@ test("public pages ask for cookie consent until the visitor chooses", async ({ p
   await expect(notice).toBeVisible();
   await expect(notice.getByRole("link", { name: "Privacy Policy" })).toHaveAttribute("href", "/privacy#cookies");
 
-  await notice.getByRole("button", { name: "Necessary only" }).click();
+  await notice.getByRole("button", { name: "Deny" }).click();
   await expect(notice).toHaveCount(0);
 
   await page.goto("/privacy#cookies");

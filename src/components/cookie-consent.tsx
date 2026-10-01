@@ -16,7 +16,7 @@ export function CookieConsent() {
           SkaleAgents uses necessary cookies to keep you signed in and protect forms. Optional cookies remember choices in this browser, such as postponing a notice for 24 hours. Read the <Link href="/privacy#cookies" className="font-semibold text-ink underline">Privacy Policy</Link>.
         </p>
         <div className="flex shrink-0 flex-wrap gap-2">
-          <Button type="button" variant="secondary" onClick={() => saveCookieChoice("declined")}>Necessary only</Button>
+          <Button type="button" variant="secondary" onClick={() => saveCookieChoice("declined")}>Deny</Button>
           <Button type="button" onClick={() => saveCookieChoice("accepted")}>Accept</Button>
         </div>
       </div>
