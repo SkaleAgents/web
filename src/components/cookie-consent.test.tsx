@@ -25,9 +25,9 @@ it("remembers an acceptance in this browser", () => {
   expect(screen.queryByRole("region", { name: "Cookie consent" })).not.toBeInTheDocument();
 });
 
-it("lets a visitor keep only necessary cookies", () => {
+it("lets a visitor deny optional cookies", () => {
   render(<CookieConsent />);
-  fireEvent.click(screen.getByRole("button", { name: "Necessary only" }));
+  fireEvent.click(screen.getByRole("button", { name: "Deny" }));
   expect(screen.queryByRole("region", { name: "Cookie consent" })).not.toBeInTheDocument();
   expect(document.cookie).toContain("skale_cookie_consent=declined");
 });
