@@ -91,8 +91,9 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
         <p className="workspace-kicker">Explore / Your next starting point</p>
         <h1 className="workspace-heading">{manage ? "My prompts" : "Prompt library"}</h1>
         <p className="mt-3 max-w-2xl text-sm text-ink-muted">
-          Pick a task, copy the instructions, and add your project context in your assistant.
-          Save the prompts you write here so the next review starts with less setup.
+          {manage
+            ? "Pick a task, copy the instructions, and add your project context in your assistant. Save the prompts you write here so the next review starts with less setup."
+            : "These are full instructions. Copy one into your assistant, then paste your own infrastructure, telemetry, or incident notes under Input. Reading them does not need an account."}
         </p>
       </div>
 
@@ -168,7 +169,7 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
       )}
 
       {filteredPrompts?.length === 0 && <div className="rounded-xl border border-line p-6"><h2 className="font-semibold">No prompts found</h2><p className="my-2 text-sm text-ink-muted">Try another search or save a prompt of your own.</p>{(search || tag !== null) && <Button variant="secondary" onClick={() => { setSearch(""); setTag(null); }}>Clear filters</Button>}</div>}
-      <ul className="grid gap-4 sm:grid-cols-2">
+      <ul className={manage ? "grid gap-4 sm:grid-cols-2" : "space-y-6"}>
         {filteredPrompts?.map((prompt) => (
           <li key={prompt.id} className="space-y-4 rounded-xl border border-line bg-canvas-elevated p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -177,12 +178,16 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
                 {prompt.ownerUserId ? "yours" : "community"}
               </span>
             </div>
-            <p className="line-clamp-3 text-sm leading-relaxed text-ink-muted">{prompt.body}</p>
-            <details><summary className="cursor-pointer text-sm font-semibold">Read full prompt</summary>
-            <pre className="mt-3 whitespace-pre-wrap break-words font-mono text-sm text-ink">
-              {prompt.body}
-            </pre>
-            </details>
+            {manage ? (
+              <>
+                <p className="line-clamp-3 text-sm leading-relaxed text-ink-muted">{prompt.body}</p>
+                <details><summary className="cursor-pointer text-sm font-semibold">Read full prompt</summary>
+                <pre className="mt-3 whitespace-pre-wrap break-words font-mono text-sm text-ink">{prompt.body}</pre>
+                </details>
+              </>
+            ) : (
+              <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-6 text-ink">{prompt.body}</pre>
+            )}
             {prompt.tags.length > 0 && (
               <p className="text-xs text-ink-muted">{prompt.tags.join(" · ")}</p>
             )}
