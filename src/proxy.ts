@@ -1,7 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { markdownInternalPath } from "@/lib/markdown-path";
 import { CONSULTANCY_BOOKING_URL } from "@/lib/consultancy-link";
 
-export function proxy() {
+export function proxy(request: NextRequest) {
+  const internal = markdownInternalPath(request.nextUrl.pathname);
+  if (internal) {
+    return NextResponse.rewrite(new URL(internal, request.url));
+  }
   // A new fixed URL deliberately drops all private path and query data.
   // Use 303 so obsolete form submissions cannot forward their body externally.
   // A fixed fragment prevents inheritance; Next.js normalizes away an empty one.
@@ -13,6 +18,8 @@ export function proxy() {
 
 export const config = {
   matcher: [
+    "/:path*.md",
+    "/index.md",
     "/consultancy/:path*",
     "/advisory-bookings/:path*",
     "/dashboard/consultancy/:path*",

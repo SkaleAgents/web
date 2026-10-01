@@ -1,13 +1,14 @@
-import type { Metadata } from "next";
+import { markdownPath } from "@/lib/ai-corpus";
 import { BotDirectory } from "@/components/bot-directory";
 import { loadPublicBots } from "@/lib/public-catalog";
+import type { Metadata } from "next";
 
 export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Bot directory | SkaleAgents",
   description: "Read public specialist instructions for infrastructure review. No account required.",
-  alternates: { canonical: "/bots" },
+  alternates: { canonical: "/bots", types: { "text/markdown": markdownPath("/bots") } },
 };
 
 export default async function BotsPage() {

@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
+import { planBlurbs } from "@/lib/plan-blurbs";
 
 type Plan = {
   key: string;
@@ -13,14 +14,6 @@ type Plan = {
   minimumIntervalHours: number | null;
   recommended: boolean;
   checkoutMode: "included" | "self_service" | "contact";
-};
-
-const descriptions: Record<string, string> = {
-  free: "Start reviewing infrastructure on your own schedule.",
-  starter: "A steady review rhythm for smaller projects.",
-  pro: "Room for regular audits across an active organization.",
-  max: "High-volume review and frequent monitoring.",
-  enterprise: "A plan built around your security and delivery needs.",
 };
 
 type PlanCatalog = { data: Plan[]; enrollmentOpen?: boolean };
@@ -78,7 +71,7 @@ export function PricingPlans() {
           {plan.recommended && <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-fg">Recommended</span>}
         </div>
         <h2 className="mt-5 font-display text-2xl font-semibold">{plan.name}</h2>
-        <p className="mt-2 min-h-12 text-sm leading-relaxed text-ink-muted">{descriptions[plan.key] ?? "Organization plan"}</p>
+        <p className="mt-2 min-h-12 text-sm leading-relaxed text-ink-muted">{planBlurbs[plan.key] ?? "Organization plan"}</p>
         <div className="mt-6 border-b border-line pb-6">
           {plan.monthlyUsd === null ? <p className="font-display text-3xl font-semibold">Custom quote</p> : <p><strong className="font-display text-4xl font-semibold">${plan.monthlyUsd}</strong><span className="ml-2 text-sm text-ink-muted">/ month</span></p>}
         </div>
