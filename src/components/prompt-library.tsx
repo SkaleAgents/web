@@ -17,6 +17,7 @@ import { parsePromptTags } from "@/lib/tags";
 import { Button, LinkButton, TextInput } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
+import { promptCategories, promptCategoryLabel, promptType } from "@/lib/prompt-labels";
 
 const schema = z.object({
   title: z.string().min(1, "Title required"),
@@ -71,11 +72,15 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
   });
 
   const prompts = promptsQuery.data?.filter(prompt => manage ? prompt.ownerUserId === userQuery.data?.id : !prompt.ownerUserId);
-  const tags = [...new Set(prompts?.flatMap((prompt) => prompt.tags) ?? [])].sort();
-  const filteredPrompts = prompts?.filter((prompt) =>
-    (tag === null || prompt.tags.includes(tag)) &&
-    `${prompt.title} ${prompt.body} ${prompt.tags.join(" ")}`.toLowerCase().includes(search.trim().toLowerCase()),
-  );
+  const tags = [...new Set(prompts?.flatMap((prompt) => manage ? prompt.tags : promptCategories(prompt.tags)) ?? [])].sort();
+  const filteredPrompts = prompts?.filter((prompt) => {
+    const categories = promptCategories(prompt.tags);
+    const haystack = manage
+      ? `${prompt.title} ${prompt.body} ${prompt.tags.join(" ")}`
+      : `${prompt.title} ${prompt.body} ${promptType(prompt.ownerUserId)} ${categories.join(" ")}`;
+    return (tag === null || (manage ? prompt.tags.includes(tag) : categories.includes(tag)))
+      && haystack.toLowerCase().includes(search.trim().toLowerCase());
+  });
 
   async function copyPrompt(body: string) {
     try {
@@ -94,13 +99,13 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
         <p className="mt-3 max-w-2xl text-sm text-ink-muted">
           {manage
             ? "Pick a task, copy the instructions, and add your project context in your assistant. Save the prompts you write here so the next review starts with less setup."
-            : "Choose a title to read the full prompt and copy it. No account required."}
+            : "The list shows the title, type, and category. Open a prompt to read it and copy it. No account required."}
         </p>
       </div>
 
       <section aria-label="Find a prompt" className="space-y-4">
-        <label className="block max-w-xl space-y-2 text-sm font-semibold"><span>Find instructions for your task</span><TextInput type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search titles, prompt text, or tags" /></label>
-        <div className="flex flex-wrap gap-2"><button type="button" className="filter-chip" aria-pressed={tag === null} onClick={() => setTag(null)}>All topics</button>{tags.map((item) => <button key={item} type="button" className="filter-chip" aria-pressed={tag === item} onClick={() => setTag(item)}>{item}</button>)}</div>
+        <label className="block max-w-xl space-y-2 text-sm font-semibold"><span>Find instructions for your task</span><TextInput type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={manage ? "Search titles, prompt text, or tags" : "Search titles, types, or categories"} /></label>
+        <div className="flex flex-wrap gap-2"><button type="button" className="filter-chip" aria-pressed={tag === null} onClick={() => setTag(null)}>{manage ? "All topics" : "All categories"}</button>{tags.map((item) => <button key={item} type="button" className="filter-chip" aria-pressed={tag === item} onClick={() => setTag(item)}>{item}</button>)}</div>
         {prompts && <p role="status" className="text-sm text-ink-muted">{filteredPrompts?.length} of {prompts.length} prompts</p>}
       </section>
 
@@ -170,40 +175,49 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
       )}
 
       {filteredPrompts?.length === 0 && <div className="rounded-xl border border-line p-6"><h2 className="font-semibold">No prompts found</h2><p className="my-2 text-sm text-ink-muted">Try another search or save a prompt of your own.</p>{(search || tag !== null) && <Button variant="secondary" onClick={() => { setSearch(""); setTag(null); }}>Clear filters</Button>}</div>}
+      {manage ? (
       <ul className="grid gap-4 sm:grid-cols-2">
         {filteredPrompts?.map((prompt) => (
           <li key={prompt.id} className="flex flex-col rounded-xl border border-line bg-canvas-elevated p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              {manage ? (
-                <h2 className="text-lg font-medium">{prompt.title}</h2>
-              ) : (
-                <h2 className="text-lg font-medium">
-                  <Link href={`/prompts/${prompt.id}`} className="hover:underline">{prompt.title}</Link>
-                </h2>
-              )}
-              <span className="text-xs uppercase tracking-wide text-ink-muted">
-                {prompt.ownerUserId ? "yours" : "community"}
-              </span>
+              <h2 className="text-lg font-medium">{prompt.title}</h2>
+              <span className="text-xs uppercase tracking-wide text-ink-muted">{promptType(prompt.ownerUserId)}</span>
             </div>
-            {prompt.tags.length > 0 && (
-              <p className="mt-2 text-xs text-ink-muted">{prompt.tags.join(" · ")}</p>
-            )}
-            {manage ? (
-              <>
-                <p className="line-clamp-3 text-sm leading-relaxed text-ink-muted">{prompt.body}</p>
-                <details><summary className="cursor-pointer text-sm font-semibold">Read full prompt</summary>
-                <pre className="mt-3 whitespace-pre-wrap break-words font-mono text-sm text-ink">{prompt.body}</pre>
-                </details>
-                <Button type="button" variant="secondary" onClick={() => void copyPrompt(prompt.body)}>Copy prompt</Button>
-              </>
-            ) : (
-              <div className="mt-auto pt-5">
-                <LinkButton href={`/prompts/${prompt.id}`} variant="secondary">Open prompt</LinkButton>
-              </div>
-            )}
+            <p className="mt-2 text-xs text-ink-muted">{promptCategoryLabel(prompt.tags)}</p>
+            <p className="line-clamp-3 text-sm leading-relaxed text-ink-muted">{prompt.body}</p>
+            <details><summary className="cursor-pointer text-sm font-semibold">Read full prompt</summary>
+            <pre className="mt-3 whitespace-pre-wrap break-words font-mono text-sm text-ink">{prompt.body}</pre>
+            </details>
+            <Button type="button" variant="secondary" onClick={() => void copyPrompt(prompt.body)}>Copy prompt</Button>
           </li>
         ))}
       </ul>
+      ) : (
+      <div className="overflow-x-auto rounded-xl border border-line">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-line text-xs uppercase tracking-wide text-ink-muted">
+            <tr>
+              <th className="px-4 py-3 font-semibold" scope="col">Title</th>
+              <th className="px-4 py-3 font-semibold" scope="col">Type</th>
+              <th className="px-4 py-3 font-semibold" scope="col">Category</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredPrompts?.map((prompt) => (
+              <tr key={prompt.id} className="border-t border-line">
+                <td className="px-4 py-4">
+                  <h2 className="text-base font-medium">
+                    <Link href={`/prompts/${prompt.id}`} className="hover:underline">{prompt.title}</Link>
+                  </h2>
+                </td>
+                <td className="px-4 py-4 text-ink-muted">{promptType(prompt.ownerUserId)}</td>
+                <td className="px-4 py-4 text-ink-muted">{promptCategoryLabel(prompt.tags)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      )}
     </main>
   );
 }

@@ -101,7 +101,7 @@ test("prompt topics and search select the full text to copy", async ({ page, con
     { id: "2", title: "Access check", body: "Review permissions", tags: ["security"], ownerUserId: null },
   ] } }));
   await page.goto("/prompts");
-  await page.getByRole("button", { name: "sre", exact: true }).click();
+  await page.getByRole("button", { name: "Reliability", exact: true }).click();
   await page.getByRole("searchbox").fill("readiness");
   await expect(page.getByRole("heading", { name: "Access check" })).toHaveCount(0);
   await expect(page.getByText(body)).toHaveCount(0);
