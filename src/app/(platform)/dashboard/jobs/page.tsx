@@ -32,7 +32,7 @@ export default function JobsPage() {
   const visibleJobs = filteredJobs.slice((currentPage - 1) * 10, currentPage * 10);
   return (
     <main className="space-y-8">
-      {user.data && <RetentionNotice key={user.data.id} accountId={user.data.id} />}
+      {user.data && <RetentionNotice key={user.data.id} accountId={user.data.id} showRecorded={false} />}
       <div className="workspace-intro flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="workspace-heading">Audit jobs</h1>

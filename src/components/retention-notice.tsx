@@ -7,7 +7,7 @@ import { retentionLaterActive, snoozeRetentionNotice, subscribeRetentionLater } 
 import { currentUserOptions } from "@/lib/session";
 import { Button } from "@/components/ui";
 
-export function RetentionNotice({ accountId, presentation = "page" }: { accountId: string; presentation?: "page" | "dialog" }) {
+export function RetentionNotice({ accountId, presentation = "page", showRecorded = true }: { accountId: string; presentation?: "page" | "dialog"; showRecorded?: boolean }) {
   const client = useQueryClient();
   const queryKey = ["retention-policy", accountId];
   const policy = useQuery({
@@ -56,8 +56,9 @@ export function RetentionNotice({ accountId, presentation = "page" }: { accountI
     );
   }
 
-  if (policy.isPending) return <p className="text-sm text-ink-muted">Loading retention policy…</p>;
+  if (policy.isPending) return showRecorded ? <p className="text-sm text-ink-muted">Loading retention policy…</p> : null;
   if (policy.isError) return <RetentionError message={policy.error.message} onReload={() => void policy.refetch()} />;
+  if (policy.data.noticeArchived && !showRecorded) return null;
   if (!acknowledgementOpen && !policy.data.noticeArchived) return <p className="text-sm text-ink-muted">Automatic retention is not active. You can explicitly purge input or delete completed audits and saved schedules.</p>;
   return (
     <section className="space-y-3 rounded-[10px] border border-line p-4" aria-label="Retention policy">

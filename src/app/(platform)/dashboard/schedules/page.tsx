@@ -79,7 +79,7 @@ export default function SchedulesPage() {
 
   return (
     <main className="space-y-8">
-      {user.data && <RetentionNotice key={user.data.id} accountId={user.data.id} />}
+      {user.data && <RetentionNotice key={user.data.id} accountId={user.data.id} showRecorded={false} />}
       <div className="workspace-intro">
         <p className="workspace-kicker">Review / Make it repeatable</p>
         <h1 className="workspace-heading">Scheduled audits</h1>
