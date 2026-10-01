@@ -6,6 +6,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 import { AppShell } from "@/components/app-shell";
+import { CookieConsent } from "@/components/cookie-consent";
 import { DeferredFooterBadges } from "@/components/deferred-footer-badges";
 import { FooterBadgesFallback } from "@/components/footer-badges-fallback";
 import { InvitationPublisherScript, PreferredSourceControl } from "@/components/preferred-source-control";
@@ -104,6 +105,7 @@ export default function RootLayout({
             }>
               {children}
             </AppShell>
+            <CookieConsent />
           </Providers>
         </div>
       </body>
