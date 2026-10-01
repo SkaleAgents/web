@@ -14,6 +14,7 @@ test("shows five plans and records an Enterprise inquiry", async ({ page }) => {
   await expect(page.getByRole("note")).toContainText("planned organization lineup");
   await expect(page.getByText("Recommended")).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(5);
+  await expect(page.getByText("/ 05")).toHaveCount(0);
   await expect(page.getByText("Enrollment coming soon")).toHaveCount(3);
   await page.getByRole("button", { name: "Contact us" }).click();
   await page.getByLabel("Organization name").fill("Example Org");

@@ -20,6 +20,7 @@ describe("organization pricing", () => {
     render(<PricingPlans />);
     await screen.findByRole("heading", { name: "Enterprise" });
     expect(screen.getAllByRole("article").map((item) => item.querySelector("h2")?.textContent)).toEqual(["Free", "Starter", "Pro", "Max", "Enterprise"]);
+    expect(screen.queryByText(/\/ 05/)).not.toBeInTheDocument();
     expect(screen.getByText("Recommended")).toBeVisible();
     expect(screen.getAllByRole("article")[0]).toHaveTextContent("2 audits / month");
     expect(screen.getAllByText("Enrollment coming soon")).toHaveLength(3);
