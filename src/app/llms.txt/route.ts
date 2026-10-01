@@ -35,6 +35,7 @@ export async function GET() {
     ...(prompts ?? []).flatMap((prompt) => [
       "",
       `### ${prompt.title}`,
+      `https://skaleagents.com/prompts/${prompt.id}`,
       prompt.tags.length ? `Tags: ${prompt.tags.join(", ")}` : "",
       prompt.body,
     ].filter(Boolean)),

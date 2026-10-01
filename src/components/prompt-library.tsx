@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -93,7 +94,7 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
         <p className="mt-3 max-w-2xl text-sm text-ink-muted">
           {manage
             ? "Pick a task, copy the instructions, and add your project context in your assistant. Save the prompts you write here so the next review starts with less setup."
-            : "These are full instructions. Copy one into your assistant, then paste your own infrastructure, telemetry, or incident notes under Input. Reading them does not need an account."}
+            : "Choose a title to read the full prompt and copy it. No account required."}
         </p>
       </div>
 
@@ -169,29 +170,37 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
       )}
 
       {filteredPrompts?.length === 0 && <div className="rounded-xl border border-line p-6"><h2 className="font-semibold">No prompts found</h2><p className="my-2 text-sm text-ink-muted">Try another search or save a prompt of your own.</p>{(search || tag !== null) && <Button variant="secondary" onClick={() => { setSearch(""); setTag(null); }}>Clear filters</Button>}</div>}
-      <ul className={manage ? "grid gap-4 sm:grid-cols-2" : "space-y-6"}>
+      <ul className="grid gap-4 sm:grid-cols-2">
         {filteredPrompts?.map((prompt) => (
-          <li key={prompt.id} className="space-y-4 rounded-xl border border-line bg-canvas-elevated p-5">
+          <li key={prompt.id} className="flex flex-col rounded-xl border border-line bg-canvas-elevated p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="text-lg font-medium">{prompt.title}</h2>
+              {manage ? (
+                <h2 className="text-lg font-medium">{prompt.title}</h2>
+              ) : (
+                <h2 className="text-lg font-medium">
+                  <Link href={`/prompts/${prompt.id}`} className="hover:underline">{prompt.title}</Link>
+                </h2>
+              )}
               <span className="text-xs uppercase tracking-wide text-ink-muted">
                 {prompt.ownerUserId ? "yours" : "community"}
               </span>
             </div>
+            {prompt.tags.length > 0 && (
+              <p className="mt-2 text-xs text-ink-muted">{prompt.tags.join(" · ")}</p>
+            )}
             {manage ? (
               <>
                 <p className="line-clamp-3 text-sm leading-relaxed text-ink-muted">{prompt.body}</p>
                 <details><summary className="cursor-pointer text-sm font-semibold">Read full prompt</summary>
                 <pre className="mt-3 whitespace-pre-wrap break-words font-mono text-sm text-ink">{prompt.body}</pre>
                 </details>
+                <Button type="button" variant="secondary" onClick={() => void copyPrompt(prompt.body)}>Copy prompt</Button>
               </>
             ) : (
-              <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-6 text-ink">{prompt.body}</pre>
+              <div className="mt-auto pt-5">
+                <LinkButton href={`/prompts/${prompt.id}`} variant="secondary">Open prompt</LinkButton>
+              </div>
             )}
-            {prompt.tags.length > 0 && (
-              <p className="text-xs text-ink-muted">{prompt.tags.join(" · ")}</p>
-            )}
-            <Button type="button" variant="secondary" onClick={() => void copyPrompt(prompt.body)}>Copy prompt</Button>
           </li>
         ))}
       </ul>

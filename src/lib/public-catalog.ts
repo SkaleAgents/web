@@ -30,6 +30,11 @@ export async function loadPublicBot(id: string): Promise<Bot | undefined> {
 }
 
 export async function loadCommunityPrompts(): Promise<Prompt[] | undefined> {
-  const data = await readJson<{ prompts: Prompt[] }>("/api/prompts");
-  return data ? communityPrompts(data.prompts) : undefined;
+  const data = await readJson<{ prompts?: Prompt[] }>("/api/prompts");
+  return data?.prompts ? communityPrompts(data.prompts) : undefined;
+}
+
+export async function loadCommunityPrompt(id: string): Promise<Prompt | undefined> {
+  const prompts = await loadCommunityPrompts();
+  return prompts?.find((prompt) => prompt.id === id);
 }
