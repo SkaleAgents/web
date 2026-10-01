@@ -8,6 +8,7 @@ const groups = [
   { label: "Explore", items: [
     { href: "/bots", label: "Bot directory", detail: "Find a specialist for your next review.", icon: "bot" },
     { href: "/prompts", label: "Prompt library", detail: "Copy focused instructions into your assistant.", icon: "library" },
+    { href: "/checks", label: "Review checks", detail: "Read what each check looks for. No account required.", icon: "audit" },
   ] },
   { label: "Connect", items: [
     { href: "/mcp-config", label: "MCP config", detail: "Set up SkaleAgents in your editor or AI client.", icon: "plug" },
