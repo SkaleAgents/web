@@ -25,7 +25,7 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export function PromptLibrary({ manage = false }: { manage?: boolean }) {
+export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boolean; initialPrompts?: Prompt[] }) {
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
@@ -36,6 +36,7 @@ export function PromptLibrary({ manage = false }: { manage?: boolean }) {
   const promptsQuery = useQuery({
     queryKey: ["prompts", manage ? userQuery.data?.id ?? "guest" : "public"],
     enabled: !manage || Boolean(userQuery.data),
+    initialData: manage ? undefined : initialPrompts,
     queryFn: async ({ signal }) => {
       const data = await apiFetch<{ prompts: Prompt[] }>("/api/prompts", { signal, credentials: manage ? "include" : "omit" });
       return data.prompts;
