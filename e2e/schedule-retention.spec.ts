@@ -130,6 +130,8 @@ test("purged schedules require fresh input and deletion remains incomplete until
     return deleted ? route.fulfill({ status: 204 }) : route.fulfill({ status: 202, json: { status: "pending", cleanupReceiptId: id } });
   });
   await page.goto("/schedules");
+  await page.getByRole("link", { name: "Saved review" }).click();
+  await expect(page).toHaveURL(new RegExp(`/schedules/${id}$`));
   await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeDisabled();
   await expect(page.getByText("Input unavailable. Source metadata is hidden.")).toBeVisible();
   await expect(page.getByText(/private-old-revision/)).toHaveCount(0);
