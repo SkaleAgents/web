@@ -17,7 +17,7 @@ export function AuditCoveragePanel({ coverage, tasks = [], status }: {
       {coverage.tasksWithoutCoverage > 0 && <p className="mt-1 text-ink-muted">Check details are missing for {coverage.tasksWithoutCoverage} {coverage.tasksWithoutCoverage === 1 ? "specialist" : "specialists"}.</p>}
     </div>}
     {rows.length === 0 && <p className="text-sm text-ink-muted">{pending(status) ? "Awaiting results" : "Check details unavailable"}</p>}
-    {rows.map(task => <details key={task.specialist} className="border-t border-line pt-3">
+    {rows.map(task => <details key={task.specialist} className="border-t border-line pt-3" open={task.checkCoverage?.checks.some((check) => check.status === "skipped") || undefined}>
       <summary className="cursor-pointer text-sm font-medium text-ink focus-visible:outline-2 focus-visible:outline-offset-4">{specialistLabels[task.specialist] ?? "Specialist"}</summary>
       {task.checkCoverage?.version === "builtin-coverage-v1" ? <ul className="mt-3 space-y-3">
         {task.checkCoverage.checks.map(check => <li key={check.ruleId} className="text-sm">

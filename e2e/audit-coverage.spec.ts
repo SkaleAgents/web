@@ -20,12 +20,13 @@ function audit(id = "coverage-job") {
 async function keyboardDisclosure(page: Page) {
   const panel = page.getByRole("region", { name: "Check coverage" });
   await expect(panel.getByText("1 evaluated · 2 skipped · 0 failed")).toBeVisible();
+  await expect(panel.getByText("Failed scheduled jobs")).toBeVisible();
   const summary = panel.locator("summary");
   await summary.focus();
   await page.keyboard.press("Enter");
-  await expect(panel.getByText("Evaluated, no findings")).toBeVisible();
+  await expect(panel.getByText("Failed scheduled jobs")).not.toBeVisible();
   await page.keyboard.press("Space");
-  await expect(panel.getByText("Evaluated, no findings")).not.toBeVisible();
+  await expect(panel.getByText("Failed scheduled jobs")).toBeVisible();
 }
 
 test("personal audit shows recorded coverage with keyboard disclosure", async ({ page }) => {

@@ -8,6 +8,7 @@ import { Button, LinkButton } from "@/components/ui";
 import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 import { currentUserOptions } from "@/lib/session";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
+import { watchtowerSessionTitle } from "@/lib/watchtower-session";
 
 export default function WatchtowerPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -110,7 +111,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-xs uppercase tracking-wide text-accent">Watchtower review</p>
-          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink">Live audit session</h1>
+          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink">{watchtowerSessionTitle(session.data.status)}</h1>
           <p className="mt-1 text-sm text-ink-muted">{job.data?.summary ?? "Specialists are working"}</p>
           <p className="mt-2 text-xs text-ink-muted">Participants: {session.data?.participants.length ?? 0}</p>
           {session.data?.status === "open" && (

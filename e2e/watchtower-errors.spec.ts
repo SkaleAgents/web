@@ -34,7 +34,7 @@ test("retrying a failed session loads its dependent job", async ({ page }) => {
   await expect(page.getByRole("main").getByRole("alert")).toHaveText("Session unavailable");
   available = true;
   await page.getByRole("button", { name: "Try again" }).click();
-  await expect(page.getByRole("heading", { name: "Live audit session" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Closed audit session" })).toBeVisible();
   await expect(page.getByText("Recovered audit", { exact: true })).toBeVisible();
   await expect(page.getByRole("main").getByRole("alert")).toHaveCount(0);
 });
@@ -52,6 +52,6 @@ test("retrying a failed job preserves the successful session", async ({ page }) 
   const requestsBeforeRetry = sessionRequests;
   available = true;
   await page.getByRole("button", { name: "Try again" }).click();
-  await expect(page.getByRole("heading", { name: "Live audit session" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Closed audit session" })).toBeVisible();
   expect(sessionRequests).toBe(requestsBeforeRetry);
 });

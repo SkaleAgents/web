@@ -32,4 +32,6 @@ it("shows partial evaluated checks, skips, failures and missing tasks separately
   expect(screen.getByText("1 finding")).toBeInTheDocument();
   expect(screen.getByText("Check details unavailable")).toBeInTheDocument();
   expect(screen.getByText("Required input was not supplied.")).toBeInTheDocument();
+  expect(screen.getByText("Reliability").closest("details")).toHaveAttribute("open");
+  expect(screen.getByText("Security").closest("details")).not.toHaveAttribute("open");
 });
