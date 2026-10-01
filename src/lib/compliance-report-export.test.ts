@@ -3,7 +3,7 @@ import { reportToCsv, reportToJson, reportToPdf, type ComplianceReport } from ".
 
 const report: ComplianceReport = {
   generatedAt: "2026-09-26T11:09:53+00:00",
-  job: { id: "audit-1", status: "completed", summary: "1 specialist task completed.", partial: false },
+  job: { id: "audit-1", status: "completed", summary: "1 specialist task completed.", partial: false, dispatchActor: "scheduler" },
   controls: [
     {
       theme: "access",
@@ -47,5 +47,6 @@ it("writes a PDF that names the recorded finding and the empty-theme limit", () 
   expect(pdf.startsWith("%PDF-1.4")).toBe(true);
   expect(pdf).toContain("Public network access detected");
   expect(pdf).toContain("Empty themes are not a pass");
+  expect(pdf).toContain("Queued by: scheduled run");
   expect(pdf).toContain("logging: 0 recorded");
 });

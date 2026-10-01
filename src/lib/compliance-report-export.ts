@@ -15,7 +15,14 @@ export type ComplianceControl = {
 
 export type ComplianceReport = {
   generatedAt?: string;
-  job?: { id?: string; status?: string; summary?: string | null; error?: string | null; partial?: boolean };
+  job?: {
+    id?: string;
+    status?: string;
+    summary?: string | null;
+    error?: string | null;
+    partial?: boolean;
+    dispatchActor?: "user" | "scheduler";
+  };
   controls?: ComplianceControl[];
   unmappedFindings?: ComplianceFinding[];
 };
@@ -99,6 +106,7 @@ function reportLines(report: ComplianceReport): string[] {
     `Generated: ${report.generatedAt ?? "unknown"}`,
     `Audit: ${report.job?.id ?? "unknown"}`,
     `Status: ${report.job?.status ?? "unknown"}`,
+    ...(report.job?.dispatchActor === "scheduler" ? ["Queued by: scheduled run"] : report.job?.dispatchActor === "user" ? ["Queued by: direct request"] : []),
     "",
     "Empty themes are not a pass. Only recorded findings are listed.",
     "This file is not a certification.",
