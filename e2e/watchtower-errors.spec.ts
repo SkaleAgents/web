@@ -36,6 +36,9 @@ test("retrying a failed session loads its dependent job", async ({ page }) => {
   await page.getByRole("button", { name: "Try again" }).click();
   await expect(page.getByRole("heading", { name: "Closed audit session" })).toBeVisible();
   await expect(page.getByText("Recovered audit", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Redirect the swarm" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Generate safe proposals" })).toHaveCount(0);
+  await expect(page.getByText("No patch proposals have been generated for this audit.")).toBeVisible();
   await expect(page.getByRole("main").getByRole("alert")).toHaveCount(0);
 });
 
