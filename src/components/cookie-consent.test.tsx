@@ -5,6 +5,7 @@ import { CookieConsent } from "./cookie-consent";
 afterEach(() => {
   cleanup();
   document.cookie = "skale_cookie_consent=; Max-Age=0; Path=/";
+  document.cookie = "skale_retention_later=; Max-Age=0; Path=/";
   vi.unstubAllGlobals();
 });
 
@@ -29,5 +30,13 @@ it("lets a visitor deny optional cookies", () => {
   render(<CookieConsent />);
   fireEvent.click(screen.getByRole("button", { name: "Deny" }));
   expect(screen.queryByRole("region", { name: "Cookie consent" })).not.toBeInTheDocument();
+  expect(document.cookie).toContain("skale_cookie_consent=declined");
+});
+
+it("removes a stored reminder when the visitor denies", () => {
+  document.cookie = `skale_retention_later=${encodeURIComponent(JSON.stringify({ owner: Date.now() + 60_000 }))}; Path=/`;
+  render(<CookieConsent />);
+  fireEvent.click(screen.getByRole("button", { name: "Deny" }));
+  expect(document.cookie).not.toContain("skale_retention_later=");
   expect(document.cookie).toContain("skale_cookie_consent=declined");
 });

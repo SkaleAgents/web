@@ -65,6 +65,13 @@ function writeMap(map: LaterMap, now: number) {
   emit();
 }
 
+export function clearRetentionReminder() {
+  const secure = typeof location !== "undefined" && location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${COOKIE}=; Max-Age=0; Path=/; SameSite=Lax${secure}`;
+  snapshots.clear();
+  emit();
+}
+
 export function retentionLaterUntil(accountId: string, now = Date.now()): number | null {
   const until = readMap()[accountId];
   if (typeof until === "number" && until > now) return until;
