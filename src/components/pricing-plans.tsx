@@ -23,8 +23,11 @@ const descriptions: Record<string, string> = {
   enterprise: "A plan built around your security and delivery needs.",
 };
 
+type PlanCatalog = { data: Plan[]; enrollmentOpen?: boolean };
+
 export function PricingPlans() {
   const [plans, setPlans] = useState<Plan[] | null>(null);
+  const [enrollmentOpen, setEnrollmentOpen] = useState(false);
   const [catalogError, setCatalogError] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -33,8 +36,8 @@ export function PricingPlans() {
 
   useEffect(() => {
     let active = true;
-    apiFetch<{ data: Plan[] }>("/api/organization-plans", { credentials: "omit" })
-      .then((result) => { if (active) setPlans(result.data); })
+    apiFetch<PlanCatalog>("/api/organization-plans", { credentials: "omit" })
+      .then((result) => { if (active) { setPlans(result.data); setEnrollmentOpen(result.enrollmentOpen === true); } })
       .catch(() => { if (active) setCatalogError(true); });
     return () => { active = false; };
   }, []);
@@ -88,7 +91,9 @@ export function PricingPlans() {
           </>}
         </div>
         {plan.checkoutMode === "contact" ? <button type="button" onClick={() => { setFormOpen(true); setSubmitted(false); }} className="w-full bg-accent px-4 py-3 text-sm font-semibold text-accent-fg hover:opacity-90">Contact us</button>
-          : plan.checkoutMode === "self_service" ? <p className="border border-line bg-canvas px-4 py-3 text-center text-sm font-semibold text-ink-muted">Enrollment coming soon</p>
+          : plan.checkoutMode === "self_service" ? (enrollmentOpen
+            ? <Link href="/dashboard/billing" className="border border-line px-4 py-3 text-center text-sm font-semibold hover:bg-accent-soft">Choose {plan.name}</Link>
+            : <p className="border border-line bg-canvas px-4 py-3 text-center text-sm font-semibold text-ink-muted">Enrollment coming soon</p>)
           : <Link href="/login" className="border border-line px-4 py-3 text-center text-sm font-semibold hover:bg-accent-soft">Get started free</Link>}
       </article>)}
     </div>}

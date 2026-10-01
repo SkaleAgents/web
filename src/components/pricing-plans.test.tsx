@@ -26,6 +26,15 @@ describe("organization pricing", () => {
     expect(screen.queryByText(/free trial/i)).not.toBeInTheDocument();
   });
 
+  it("links paid plans to organization billing when enrollment is open", async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce({ ...catalog, enrollmentOpen: true });
+    render(<PricingPlans />);
+    expect(await screen.findByRole("link", { name: "Choose Starter" })).toHaveAttribute("href", "/dashboard/billing");
+    expect(screen.getByRole("link", { name: "Choose Pro" })).toHaveAttribute("href", "/dashboard/billing");
+    expect(screen.getByRole("link", { name: "Choose Max" })).toHaveAttribute("href", "/dashboard/billing");
+    expect(screen.queryByText("Enrollment coming soon")).not.toBeInTheDocument();
+  });
+
   it("submits an Enterprise inquiry and waits for the server response", async () => {
     vi.mocked(apiFetch).mockResolvedValueOnce(catalog).mockResolvedValueOnce({ id: "inquiry-1", status: "received" });
     render(<PricingPlans />);
