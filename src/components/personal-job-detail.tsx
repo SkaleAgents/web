@@ -9,6 +9,7 @@ import { AuditResultSummary } from "@/components/audit-result-summary";
 import { AuditCoveragePanel } from "@/components/audit-coverage";
 import { SourceMetadata } from "@/components/source-metadata";
 import { Button, LinkButton } from "@/components/ui";
+import { scheduledRunLabel } from "@/lib/audit-dispatch";
 import { apiFetch, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { organizationPath, scopeFromPath } from "@/lib/dashboard-routes";
@@ -51,7 +52,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
         <section className="audit-overview space-y-4 rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Audit overview">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <p className="audit-status text-xs font-semibold capitalize text-ink-muted">{job.data.status}{job.data.partial ? " · Partial results" : ""}</p>
+              <p className="audit-status text-xs font-semibold capitalize text-ink-muted">{job.data.status}{job.data.partial ? " · Partial results" : ""}{scheduledRunLabel(job.data) ? ` · ${scheduledRunLabel(job.data)}` : ""}</p>
               <AuditResultSummary job={job.data} />
               {job.data.summary && <p className="mt-2 text-sm text-ink-muted">{job.data.summary}</p>}
               <p className="mt-2 text-sm text-ink-muted">Started {new Date(job.data.createdAt).toLocaleString()}</p>

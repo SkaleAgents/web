@@ -16,7 +16,7 @@ it("keeps the audit history scannable and opens full controls on a detail page",
   const fetcher = vi.fn(async (input: RequestInfo | URL) => {
     const url = String(input);
     if (url.endsWith("/api/jobs")) return Response.json({ jobs: [{
-      id: jobId, status: "completed", summary: "Ingress review", requestedBy: "owner",
+      id: jobId, status: "completed", summary: "Ingress review", requestedBy: "owner", dispatchActor: "scheduler",
       sourcePurged: false, specialists: ["devsecops"], partial: false, scope: {},
       createdAt: "2026-09-28T12:00:00Z", updatedAt: "2026-09-28T12:00:00Z",
     }] });
@@ -30,6 +30,7 @@ it("keeps the audit history scannable and opens full controls on a detail page",
   render(<QueryClientProvider client={client}><JobsPage /></QueryClientProvider>);
 
   expect(await screen.findByText("Ingress review")).toBeInTheDocument();
+  expect(screen.getByText(/Scheduled run/)).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "View audit" })).toHaveAttribute("href", `/org/00000000-0000-4000-8000-000000000002/jobs/${jobId}`);
   expect(screen.queryByRole("button", { name: "Export report" })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Delete audit" })).not.toBeInTheDocument();

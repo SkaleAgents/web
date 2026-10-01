@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { scheduledRunLabel } from "@/lib/audit-dispatch";
 import { apiFetch, type SwarmJob } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
@@ -57,7 +58,7 @@ export default function JobsPage() {
           {visibleJobs.map((job) => (
             <li key={job.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold capitalize text-ink-muted">{job.status}{job.partial ? " · Partial results" : ""}</p>
+                <p className="text-xs font-semibold capitalize text-ink-muted">{job.status}{job.partial ? " · Partial results" : ""}{scheduledRunLabel(job) ? ` · ${scheduledRunLabel(job)}` : ""}</p>
                 <AuditHistoryResult job={job} />
                 {job.summary && <p className="mt-1 line-clamp-2 text-xs text-ink-muted">{job.summary}</p>}
                 {job.sourceRevision && <p className="mt-1 break-all text-xs text-ink-muted">Source revision: {job.sourceRevision}</p>}

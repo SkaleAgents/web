@@ -164,7 +164,9 @@ export type SwarmJob = {
   id: string;
   status: "queued" | "running" | "completed" | "failed";
   requestedBy: string;
+  workspaceId?: string | null;
   scheduleId?: string | null;
+  dispatchActor?: "user" | "scheduler";
   scope: Record<string, unknown>;
   sourcePurged: boolean;
   sourceRevision?: string | null;

@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useOrganizationScope, useOrganizationRoot } from "./organization-scope";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Button, TextArea } from "@/components/ui";
+import { scheduledRunLabel } from "@/lib/audit-dispatch";
 import { apiFetch } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import {
@@ -218,7 +219,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
           {audits.data?.length === 0 && <p className="text-sm text-ink-muted">No shared audits are available yet.</p>}
           <ul className="divide-y divide-line">
             {visibleAudits?.map((audit) => <li key={audit.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
-              <div><p className="font-mono text-xs uppercase tracking-wide text-ink-muted">{audit.status}</p><p className="mt-1 text-sm text-ink">{audit.summary ?? "Waiting for specialist results"}</p><p className="mt-1 text-xs text-ink-muted">{audit.specialists.join(" · ")}{audit.partial ? " · Partial results" : ""} · {new Date(audit.createdAt).toLocaleString()}</p></div>
+              <div><p className="font-mono text-xs uppercase tracking-wide text-ink-muted">{audit.status}</p><p className="mt-1 text-sm text-ink">{audit.summary ?? "Waiting for specialist results"}</p><p className="mt-1 text-xs text-ink-muted">{audit.specialists.join(" · ")}{audit.partial ? " · Partial results" : ""}{scheduledRunLabel(audit) ? ` · ${scheduledRunLabel(audit)}` : ""} · {new Date(audit.createdAt).toLocaleString()}</p></div>
               <div className="flex gap-2"><Button variant="secondary" onClick={() => setSelectedAuditId(audit.id)}>Details</Button>{canManage && <Button variant="secondary" disabled={remove.isPending || audit.status === "queued" || audit.status === "running"} onClick={() => setConfirmation({ kind: "delete", auditId: audit.id })}>Delete</Button>}</div>
             </li>)}
           </ul>
