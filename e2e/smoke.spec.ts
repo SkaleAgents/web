@@ -69,7 +69,8 @@ test.describe("Phase 1 page smokes", () => {
     await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
     await page.goto("/schedules");
     await expect(page.getByRole("heading", { name: /Scheduled audits/i })).toBeVisible();
-    await expect(page.getByRole("heading", { name: /Create a schedule/i })).toBeVisible();
+    await page.getByRole("link", { name: "Add schedule" }).click();
+    await expect(page.getByRole("heading", { name: "Add a schedule" })).toBeVisible();
   });
 
   test("every public route shows a direct sign-in action", async ({ page }) => {
