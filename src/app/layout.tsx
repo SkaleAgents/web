@@ -1,7 +1,9 @@
 import { siteJsonLd } from "@/lib/ai-corpus";
 import { CONSULTANCY_BOOKING_URL } from "@/lib/consultancy-link";
+import { cookieConsentRequired } from "@/lib/cookie-consent-region";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { IBM_Plex_Mono, Source_Sans_3 } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -60,11 +62,12 @@ export const metadata: Metadata = {
 const showDevelopmentWarning =
   process.env.NEXT_PUBLIC_SHOW_DEV_WARNING === "true";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const country = (await headers()).get("cf-ipcountry");
   return (
     <html
       lang="en"
@@ -109,7 +112,7 @@ export default function RootLayout({
             }>
               {children}
             </AppShell>
-            <CookieConsent />
+            <CookieConsent required={cookieConsentRequired(country)} />
           </Providers>
         </div>
       </body>

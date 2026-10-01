@@ -7,7 +7,7 @@ import { retentionLaterActive, snoozeRetentionNotice, subscribeRetentionLater } 
 import { currentUserOptions } from "@/lib/session";
 import { Button } from "@/components/ui";
 
-export function RetentionNotice({ accountId, presentation = "page" }: { accountId: string; presentation?: "page" | "dialog" }) {
+export function RetentionNotice({ accountId, presentation = "page", showRecorded = true }: { accountId: string; presentation?: "page" | "dialog"; showRecorded?: boolean }) {
   const client = useQueryClient();
   const queryKey = ["retention-policy", accountId];
   const policy = useQuery({
@@ -56,8 +56,9 @@ export function RetentionNotice({ accountId, presentation = "page" }: { accountI
     );
   }
 
-  if (policy.isPending) return <p className="text-sm text-ink-muted">Loading retention policy…</p>;
+  if (policy.isPending) return showRecorded ? <p className="text-sm text-ink-muted">Loading retention policy…</p> : null;
   if (policy.isError) return <RetentionError message={policy.error.message} onReload={() => void policy.refetch()} />;
+  if (policy.data.noticeArchived && !showRecorded) return null;
   if (!acknowledgementOpen && !policy.data.noticeArchived) return <p className="text-sm text-ink-muted">Automatic retention is not active. You can explicitly purge input or delete completed audits and saved schedules.</p>;
   return (
     <section className="space-y-3 rounded-[10px] border border-line p-4" aria-label="Retention policy">
@@ -102,7 +103,7 @@ function RetentionBody({ titleId, policy, acknowledge, onReload, onLater }: {
           <Button disabled={acknowledge.isPending} onClick={() => acknowledge.mutate()}>{acknowledge.isPending ? "Recording notice…" : "I've read this retention policy"}</Button>
           {onLater ? <Button type="button" variant="secondary" onClick={onLater}>Do it later</Button> : null}
         </div>}
-      {onLater ? <p className="text-sm text-ink-muted">Do it later hides this reminder. It lasts 24 hours if you accept cookies, and until you close this browser if you deny them. It does not record that you read the policy.</p> : null}
+      {onLater ? <p className="text-sm text-ink-muted">Do it later hides this reminder. It lasts 24 hours after you accept cookies, and until you close this browser before that. It does not record that you read the policy.</p> : null}
       {acknowledge.isError && <RetentionError message={acknowledge.error?.message ?? "Could not record the notice."} onReload={onReload} />}
     </div>
   );

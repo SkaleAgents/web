@@ -1,5 +1,5 @@
 import { markdownDocument, type DirectoryEntry, type PublicPlan } from "@/lib/ai-corpus";
-import type { Bot, Prompt } from "@/lib/api";
+import { loadCommunityPrompts, loadPublicBots } from "@/lib/public-catalog";
 
 export const revalidate = 3600;
 
@@ -24,19 +24,17 @@ async function extrasFor(path: string): Promise<{ plans?: PublicPlan[] | null; d
     return { plans: catalog?.data ?? null };
   }
   if (path === "/bots") {
-    const catalog = await loadJson<{ bots: Bot[] }>("/api/bots");
+    const bots = await loadPublicBots();
     return {
-      directory: catalog?.bots
-        .filter((bot) => bot.visibility === "public" && bot.status === "published")
-        .map((bot) => ({ name: bot.name, href: `/bots/${bot.id}`, detail: `${bot.specialty}. ${bot.description}` })) ?? null,
+      directory: bots?.map((bot) => ({ name: bot.name, href: `/bots/${bot.id}`, detail: `${bot.specialty}. ${bot.description}` })) ?? null,
     };
   }
   if (path === "/prompts") {
-    const catalog = await loadJson<{ prompts: Prompt[] }>("/api/prompts");
+    const prompts = await loadCommunityPrompts();
     return {
-      directory: catalog?.prompts.map((prompt) => ({
+      directory: prompts?.map((prompt) => ({
         name: prompt.title,
-        href: "/prompts",
+        href: `/prompts/${prompt.id}`,
         detail: prompt.tags.length > 0 ? prompt.tags.join(", ") : "Community prompt",
       })) ?? null,
     };

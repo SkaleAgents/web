@@ -1,13 +1,17 @@
 import { markdownPath } from "@/lib/ai-corpus";
 import { BotDirectory } from "@/components/bot-directory";
+import { loadPublicBots } from "@/lib/public-catalog";
 import type { Metadata } from "next";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Bot directory | SkaleAgents",
-  description: "Search specialist DevOps bots and open their instructions in your own assistant.",
+  description: "Read public specialist instructions for infrastructure review. No account required.",
   alternates: { canonical: "/bots", types: { "text/markdown": markdownPath("/bots") } },
 };
 
-export default function BotsPage() {
-  return <BotDirectory />;
+export default async function BotsPage() {
+  const initialBots = await loadPublicBots();
+  return <BotDirectory initialBots={initialBots} />;
 }

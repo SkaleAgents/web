@@ -21,7 +21,7 @@ test("viewing notice does not acknowledge it; explicit acknowledgement records t
   await expect(page.getByText(policy.notice[1])).toBeVisible();
   expect(acknowledgements).toBe(0);
   await page.getByRole("button", { name: "I've read this retention policy" }).click();
-  await expect(page.getByText("Notice recorded", { exact: false })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Retention policy" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "I've read this retention policy" })).toHaveCount(0);
   expect(acknowledgements).toBe(1);
 });
@@ -63,7 +63,7 @@ test("reloads a fresh acknowledgement token after a rolling-deploy conflict", as
   await page.getByRole("button", { name: "Reload retention policy" }).click();
   await expect.poll(() => noticeFetches).toBe(2);
   await page.getByRole("button", { name: "I've read this retention policy" }).click();
-  await expect(page.getByText("Notice recorded", { exact: false })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Retention policy" })).toHaveCount(0);
   expect(acknowledgements).toBe(2);
 });
 
@@ -84,9 +84,9 @@ test("advance notice can be recorded before automatic cleanup and survives reloa
   await expect(page.getByText("Automatic retention is not active. Recording this notice starts your 30-day legacy grace period but does not activate cleanup.")).toBeVisible();
   expect(acknowledgements).toBe(0);
   await page.getByRole("button", { name: "I've read this retention policy" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Notice recorded" })).toContainText("Deadlines will appear after activation.");
+  await expect(page.getByRole("region", { name: "Retention policy" })).toHaveCount(0);
   await page.reload();
-  await expect(page.getByRole("status").filter({ hasText: "Notice recorded" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Retention policy" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "I've read this retention policy" })).toHaveCount(0);
   expect(acknowledgements).toBe(1);
 });

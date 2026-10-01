@@ -1,9 +1,9 @@
 const COOKIE = "skale_cookie_consent";
 const MAX_AGE = 60 * 60 * 24 * 180;
 const listeners = new Set<() => void>();
-let cached: { cookie: string; choice: "accepted" | "declined" | null } | null = null;
+let cached: { cookie: string; choice: "accepted" | null } | null = null;
 
-export type CookieChoice = "accepted" | "declined";
+export type CookieChoice = "accepted";
 
 function emit() {
   cached = null;
@@ -22,7 +22,7 @@ function readChoice(): CookieChoice | null {
     const eq = part.indexOf("=");
     if (eq === -1 || part.slice(0, eq) !== COOKIE) continue;
     const value = decodeURIComponent(part.slice(eq + 1));
-    return value === "accepted" || value === "declined" ? value : null;
+    return value === "accepted" ? value : null;
   }
   return null;
 }

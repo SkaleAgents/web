@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { loadCommunityPrompts, loadPublicBots } from "@/lib/public-catalog";
 import { publicCheckPath, publicChecks } from "@/lib/public-checks";
 
 const publicPaths = [
@@ -15,9 +16,15 @@ const publicPaths = [
   "/terms",
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://skaleagents.com";
-  return publicPaths.map((path) => ({
+  const [bots, prompts] = await Promise.all([loadPublicBots(), loadCommunityPrompts()]);
+  const paths = [
+    ...publicPaths,
+    ...(bots ?? []).map((bot) => `/bots/${bot.id}`),
+    ...(prompts ?? []).map((prompt) => `/prompts/${prompt.id}`),
+  ];
+  return paths.map((path) => ({
     url: `${base}${path}`,
     changeFrequency: "weekly" as const,
     priority: path === "/" ? 1 : path.startsWith("/checks") ? 0.8 : 0.7,

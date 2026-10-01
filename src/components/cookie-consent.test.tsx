@@ -9,34 +9,45 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-it("asks for cookie consent until the visitor chooses", () => {
-  render(<CookieConsent />);
-  expect(screen.getByRole("region", { name: "Cookie consent" })).toHaveTextContent("necessary cookies");
+it("asks visitors in Europe to accept or leave", () => {
+  render(<CookieConsent required />);
+  expect(screen.getByRole("region", { name: "Cookie consent" })).toHaveTextContent("Google");
   expect(screen.getByRole("link", { name: "Privacy Policy" })).toHaveAttribute("href", "/privacy#cookies");
+  expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Deny" })).toBeInTheDocument();
+});
+
+it("stays hidden outside Europe", () => {
+  render(<CookieConsent required={false} />);
+  expect(screen.queryByRole("region", { name: "Cookie consent" })).not.toBeInTheDocument();
 });
 
 it("remembers an acceptance in this browser", () => {
-  render(<CookieConsent />);
+  render(<CookieConsent required />);
   fireEvent.click(screen.getByRole("button", { name: "Accept" }));
   expect(screen.queryByRole("region", { name: "Cookie consent" })).not.toBeInTheDocument();
   expect(document.cookie).toContain("skale_cookie_consent=accepted");
 
   cleanup();
-  render(<CookieConsent />);
+  render(<CookieConsent required />);
   expect(screen.queryByRole("region", { name: "Cookie consent" })).not.toBeInTheDocument();
 });
 
-it("lets a visitor deny optional cookies", () => {
-  render(<CookieConsent />);
+it("sends a denial to Google without storing acceptance", () => {
+  const assign = vi.fn();
+  vi.stubGlobal("location", { assign, protocol: "http:" });
+  render(<CookieConsent required />);
   fireEvent.click(screen.getByRole("button", { name: "Deny" }));
-  expect(screen.queryByRole("region", { name: "Cookie consent" })).not.toBeInTheDocument();
-  expect(document.cookie).toContain("skale_cookie_consent=declined");
+  expect(assign).toHaveBeenCalledWith("https://www.google.com");
+  expect(document.cookie).not.toContain("skale_cookie_consent=accepted");
+  expect(screen.getByRole("region", { name: "Cookie consent" })).toBeInTheDocument();
 });
 
-it("removes a stored reminder when the visitor denies", () => {
-  document.cookie = `skale_retention_later=${encodeURIComponent(JSON.stringify({ owner: Date.now() + 60_000 }))}; Path=/`;
-  render(<CookieConsent />);
-  fireEvent.click(screen.getByRole("button", { name: "Deny" }));
-  expect(document.cookie).not.toContain("skale_retention_later=");
-  expect(document.cookie).toContain("skale_cookie_consent=declined");
+it("asks again when an older denial is stored", () => {
+  document.cookie = "skale_cookie_consent=declined; Path=/";
+  render(<CookieConsent required />);
+  expect(screen.getByRole("region", { name: "Cookie consent" })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Accept" }));
+  expect(document.cookie).toContain("skale_cookie_consent=accepted");
+  expect(document.cookie).not.toContain("skale_cookie_consent=declined");
 });
