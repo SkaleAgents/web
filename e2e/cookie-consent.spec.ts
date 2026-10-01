@@ -6,7 +6,8 @@ test("public pages ask for cookie consent until the visitor chooses", async ({ p
   await expect(notice).toBeVisible();
   await expect(notice.getByRole("link", { name: "Privacy Policy" })).toHaveAttribute("href", "/privacy#cookies");
 
-  await notice.getByRole("button", { name: "Deny" }).click();
+  await expect(notice.getByRole("button", { name: "Deny" })).toHaveCount(0);
+  await notice.getByRole("button", { name: "Accept" }).click();
   await expect(notice).toHaveCount(0);
 
   await page.goto("/privacy#cookies");
@@ -14,13 +15,16 @@ test("public pages ask for cookie consent until the visitor chooses", async ({ p
   await expect(page.getByRole("region", { name: "Cookie consent" })).toHaveCount(0);
 });
 
-test("deny removes a stored reminder cookie", async ({ page, context, baseURL }) => {
-  await context.addCookies([{ name: "skale_retention_later", value: "saved", url: baseURL }]);
+test("an older denial still asks for acceptance", async ({ page, context, baseURL }) => {
+  await context.addCookies([{ name: "skale_cookie_consent", value: "declined", url: baseURL }]);
   await page.goto("/");
-  await page.getByRole("region", { name: "Cookie consent" }).getByRole("button", { name: "Deny" }).click();
+  const notice = page.getByRole("region", { name: "Cookie consent" });
+  await expect(notice).toBeVisible();
+  await notice.getByRole("button", { name: "Accept" }).click();
+  await expect(notice).toHaveCount(0);
   const cookies = await context.cookies();
-  expect(cookies.some(cookie => cookie.name === "skale_retention_later")).toBe(false);
-  expect(cookies.some(cookie => cookie.name === "skale_cookie_consent" && cookie.value === "declined")).toBe(true);
+  expect(cookies.some(cookie => cookie.name === "skale_cookie_consent" && cookie.value === "accepted")).toBe(true);
+  expect(cookies.some(cookie => cookie.name === "skale_cookie_consent" && cookie.value === "declined")).toBe(false);
 });
 
 test("the dashboard uses the same cookie consent notice", async ({ page }) => {
