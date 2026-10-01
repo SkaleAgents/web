@@ -43,6 +43,7 @@ test("personal dashboard asks for retention acceptance until the account records
 });
 
 test("do it later hides the retention popup for 24 hours in this browser", async ({ page }) => {
+  await page.context().addCookies([{ name: "skale_cookie_consent", value: "accepted", domain: "127.0.0.1", path: "/" }]);
   let acknowledgements = 0;
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Harun R Rayhan", email: "owner@example.com" } }));
   await page.route("**/api/jobs", route => route.fulfill({ json: { jobs: [] } }));
@@ -59,6 +60,8 @@ test("do it later hides the retention popup for 24 hours in this browser", async
   await dialog.getByRole("button", { name: "Do it later" }).click();
   await expect(dialog).toHaveCount(0);
   expect(acknowledgements).toBe(0);
+  const cookies = await page.context().cookies();
+  expect(cookies.some(cookie => cookie.name === "skale_retention_later")).toBe(true);
 
   await page.reload();
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();

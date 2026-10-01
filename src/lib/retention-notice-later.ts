@@ -1,7 +1,10 @@
+import { optionalCookiesAllowed } from "@/lib/cookie-consent";
+
 const COOKIE = "skale_retention_later";
+const SESSION = "skale_retention_later_session";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const listeners = new Set<() => void>();
-const snapshots = new Map<string, { cookie: string; active: boolean }>();
+const snapshots = new Map<string, { source: string; active: boolean }>();
 
 function emit() {
   listeners.forEach(listener => listener());
@@ -31,6 +34,23 @@ function readMap(): LaterMap {
   return {};
 }
 
+function readSession(): LaterMap {
+  if (typeof sessionStorage === "undefined") return {};
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(SESSION) ?? "") as LaterMap;
+    if (!parsed || typeof parsed !== "object") return {};
+    return parsed;
+  } catch {
+    return {};
+  }
+}
+
+function snapshotSource() {
+  const cookie = typeof document === "undefined" ? "" : document.cookie;
+  const session = typeof sessionStorage === "undefined" ? "" : sessionStorage.getItem(SESSION) ?? "";
+  return `${cookie}\n${session}`;
+}
+
 function writeMap(map: LaterMap, now: number) {
   const active = Object.fromEntries(Object.entries(map).filter(([, until]) => typeof until === "number" && until > now));
   const secure = typeof location !== "undefined" && location.protocol === "https:" ? "; Secure" : "";
@@ -47,20 +67,29 @@ function writeMap(map: LaterMap, now: number) {
 
 export function retentionLaterUntil(accountId: string, now = Date.now()): number | null {
   const until = readMap()[accountId];
-  return typeof until === "number" && until > now ? until : null;
+  if (typeof until === "number" && until > now) return until;
+  const sessionUntil = readSession()[accountId];
+  return typeof sessionUntil === "number" && sessionUntil > now ? sessionUntil : null;
 }
 
 export function retentionLaterActive(accountId: string): boolean {
-  const cookie = typeof document === "undefined" ? "" : document.cookie;
+  const source = snapshotSource();
   const previous = snapshots.get(accountId);
-  if (previous && previous.cookie === cookie) return previous.active;
+  if (previous && previous.source === source) return previous.active;
   const active = retentionLaterUntil(accountId) !== null;
-  snapshots.set(accountId, { cookie, active });
+  snapshots.set(accountId, { source, active });
   return active;
 }
 
 export function snoozeRetentionNotice(accountId: string, now = Date.now()): number {
   const until = now + DAY_MS;
-  writeMap({ ...readMap(), [accountId]: until }, now);
+  if (optionalCookiesAllowed()) {
+    writeMap({ ...readMap(), [accountId]: until }, now);
+    return until;
+  }
+  const session = { ...readSession(), [accountId]: until };
+  sessionStorage.setItem(SESSION, JSON.stringify(session));
+  snapshots.clear();
+  emit();
   return until;
 }

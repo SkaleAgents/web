@@ -24,7 +24,9 @@ const pendingPolicy: RetentionPolicy = {
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  sessionStorage.clear();
   document.cookie = "skale_retention_later=; Max-Age=0; Path=/";
+  document.cookie = "skale_cookie_consent=; Max-Age=0; Path=/";
 });
 
 function installDialog() {
@@ -91,17 +93,28 @@ it("leaves the dashboard clear after the notice is already recorded", async () =
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 });
 
-it("hides the popup for 24 hours when the account chooses to do it later", async () => {
+it("hides the popup without a reminder cookie until optional cookies are allowed", async () => {
   const fetcher = await renderDashboard();
 
   fireEvent.click(await screen.findByRole("button", { name: "Do it later" }));
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  expect(document.cookie).not.toContain("skale_retention_later=");
   expect(fetcher).not.toHaveBeenCalledWith(
     expect.stringContaining("/api/account/retention/acknowledge"),
     expect.anything(),
   );
+});
+
+it("stores the 24 hour reminder after optional cookies are allowed", async () => {
+  document.cookie = "skale_cookie_consent=accepted; Path=/";
+  await renderDashboard();
+
+  fireEvent.click(await screen.findByRole("button", { name: "Do it later" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  expect(document.cookie).toContain("skale_retention_later=");
 
   cleanup();
+  sessionStorage.clear();
   await renderDashboard();
   expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
