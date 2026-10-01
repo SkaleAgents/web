@@ -17,6 +17,7 @@ type Billing = {
   pendingChange: { id: string; kind: string; toPlan: string; status: string; effectiveAt: string | null; paymentUrl: string | null } | null;
   renewalPayment: { status: RenewalStatus; graceEndsAt: string | null; finalizationEndsAt: string | null; paymentUrl: string | null } | null;
   testModeEnabled: boolean;
+  checkoutEnvironment?: "test" | "live" | "closed";
   cancellationEnabled: boolean;
 };
 
@@ -43,6 +44,13 @@ function approvedInvoiceUrl(value: string): boolean {
 
 function utcDate(value: string): string {
   return `${new Date(value).toLocaleDateString("en-US", { timeZone: "UTC" })} UTC`;
+}
+
+function checkoutEnvironmentOf(billing: Billing): "test" | "live" | "closed" {
+  if (billing.checkoutEnvironment === "live" || billing.checkoutEnvironment === "test" || billing.checkoutEnvironment === "closed") {
+    return billing.checkoutEnvironment;
+  }
+  return billing.testModeEnabled ? "test" : "closed";
 }
 
 export function OrganizationBillingView({ checkoutReturnOrganizationId = null, organizationId: fixedOrganizationId }: { checkoutReturnOrganizationId?: string | null; organizationId?: string }) {
@@ -97,13 +105,15 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
       await client.invalidateQueries({ queryKey: ["organization-billing", variables.organizationId] });
     },
   });
+  const environment = billing.data ? checkoutEnvironmentOf(billing.data) : "closed";
+  const checkoutOpen = environment !== "closed";
   useEffect(() => {
-    if (checkoutLink && checkoutLink.organizationId === organizationId && billing.data?.testModeEnabled
-      && billing.data.plan === "free" && redirectedCheckout.current !== checkoutLink.url) {
+    if (checkoutLink && checkoutLink.organizationId === organizationId && checkoutOpen
+      && billing.data?.plan === "free" && redirectedCheckout.current !== checkoutLink.url) {
       redirectedCheckout.current = checkoutLink.url;
       window.location.assign(checkoutLink.url);
     }
-  }, [checkoutLink, organizationId, billing.data?.testModeEnabled, billing.data?.plan]);
+  }, [checkoutLink, organizationId, checkoutOpen, billing.data?.plan]);
   const cancel = useMutation({
     mutationFn: async (requestedId: string) => {
       await ensureCsrfCookie();
@@ -169,7 +179,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
                     : billing.data.renewalPayment.status === "recovered"
                       ? "Paid audits are available again. Schedules paused during nonpayment are still off until you review and re-enable them."
                       : "This organization is now on Free."}</p>
-        <p className="mt-1 text-ink-muted">Stripe test mode is active. No real payment will be collected.</p>
+        {environment === "test" ? <p className="mt-1 text-ink-muted">Stripe test mode is active. No real payment will be collected.</p> : null}
         {(["grace", "access_paused", "unpaid"] as RenewalStatus[]).includes(billing.data.renewalPayment.status) && billing.data.renewalPayment.paymentUrl && approvedInvoiceUrl(billing.data.renewalPayment.paymentUrl) ? <a className="mt-3 inline-flex rounded-md bg-ink px-4 py-2 font-semibold text-canvas hover:opacity-90" href={billing.data.renewalPayment.paymentUrl}>Pay renewal invoice</a> : null}
         {(["access_paused", "unpaid", "verification_unavailable"] as RenewalStatus[]).includes(billing.data.renewalPayment.status) && !billing.data.renewalPayment.paymentUrl ? <a className="mt-3 inline-block font-medium text-accent underline underline-offset-4" href="mailto:info@skaleagents.com">Contact support</a> : null}
         {billing.data.renewalPayment.status === "recovered" ? <Link className="mt-3 inline-block font-medium text-accent underline underline-offset-4" href={`${root}/schedules`}>Review paused schedules</Link> : null}
@@ -189,7 +199,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
             : `${pendingPlanName} starts at your next renewal.`
           : `Your ${pendingPlanName} change is waiting for payment confirmation. Your current plan remains active.`}
       </p> : null}
-      {billing.data.testModeEnabled && billing.data.pendingChange?.paymentUrl && approvedInvoiceUrl(billing.data.pendingChange.paymentUrl) ? <a className="inline-flex rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:opacity-90" href={billing.data.pendingChange.paymentUrl}>Pay prorated invoice</a> : null}
+      {checkoutOpen && billing.data.pendingChange?.paymentUrl && approvedInvoiceUrl(billing.data.pendingChange.paymentUrl) ? <a className="inline-flex rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:opacity-90" href={billing.data.pendingChange.paymentUrl}>Pay prorated invoice</a> : null}
       {billing.data.plan !== "free" && billing.data.pendingChange?.kind !== "cancellation" ? <div className="space-y-2">
         <Button type="button" variant="secondary" disabled={!billing.data.cancellationEnabled || cancel.isPending || billing.data.pendingChange?.status === "pending_payment" || billing.data.pendingChange?.status === "creating"} onClick={() => cancel.mutate(organizationId)}>Cancel at renewal</Button>
         <p className="text-sm text-ink-muted">Your paid plan stays active through the current billing cycle. A scheduled downgrade will be replaced.</p>
@@ -197,7 +207,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
       </div> : null}
       <section className="space-y-4" aria-labelledby="billing-change-heading">
         <h2 id="billing-change-heading" className="text-xl font-semibold text-ink">Change plan</h2>
-        {!billing.data.testModeEnabled ? <p className="text-sm text-ink-muted">Plan changes are not available yet.</p> : <p className="text-sm text-ink-muted">Stripe test mode is active. No real payment will be collected here.</p>}
+        {environment === "closed" ? <p className="text-sm text-ink-muted">Plan changes are not available yet.</p> : environment === "test" ? <p className="text-sm text-ink-muted">Stripe test mode is active. No real payment will be collected here.</p> : null}
         <p className="text-sm text-ink-muted">Starter, Pro, and Max subscription payments are non-refundable except where required by law. For billing questions, contact <a className="underline underline-offset-4" href="mailto:info@skaleagents.com">info@skaleagents.com</a>.</p>
         <div className="divide-y divide-line border-y border-line">
           {paidPlans.map((plan) => {
@@ -206,12 +216,12 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
             const label = billing.data.plan === "free" ? `Start ${plan.name}` : isUpgrade ? `Upgrade to ${plan.name}` : `Schedule ${plan.name} at renewal`;
             return <div key={plan.key} className="flex flex-wrap items-center justify-between gap-4 py-4">
               <div><h3 className="font-semibold text-ink">{plan.name}</h3><p className="text-sm text-ink-muted">${plan.monthlyUsd} per month · {plan.auditLimit?.toLocaleString()} audits</p></div>
-              {isCurrent ? <span className="text-sm text-ink-muted">Current plan</span> : <Button type="button" variant="secondary" disabled={!billing.data.testModeEnabled || change.isPending || Boolean(billing.data.pendingChange) || Boolean(billing.data.renewalPayment)} onClick={() => change.mutate({ plan: plan.key, organizationId, fromPlan: billing.data.plan })}>{label}</Button>}
+              {isCurrent ? <span className="text-sm text-ink-muted">Current plan</span> : <Button type="button" variant="secondary" disabled={!checkoutOpen || change.isPending || Boolean(billing.data.pendingChange) || Boolean(billing.data.renewalPayment)} onClick={() => change.mutate({ plan: plan.key, organizationId, fromPlan: billing.data.plan })}>{label}</Button>}
             </div>;
           })}
         </div>
         {change.isError ? <p role="alert" className="text-sm text-danger">{change.error.message}</p> : null}
-        {billing.data.testModeEnabled && billing.data.plan === "free" && checkoutLink?.organizationId === organizationId ? <p role="status" className="text-sm text-ink-muted">Opening the secure Stripe payment page. <a className="underline" href={checkoutLink.url}>Continue to Stripe</a></p> : null}
+        {checkoutOpen && billing.data.plan === "free" && checkoutLink?.organizationId === organizationId ? <p role="status" className="text-sm text-ink-muted">Opening the secure Stripe payment page. <a className="underline" href={checkoutLink.url}>Continue to Stripe</a></p> : null}
       </section>
     </> : null}
   </main>;
