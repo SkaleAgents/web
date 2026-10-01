@@ -1,3 +1,4 @@
+import { siteJsonLd } from "@/lib/ai-corpus";
 import { CONSULTANCY_BOOKING_URL } from "@/lib/consultancy-link";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -72,7 +73,9 @@ export default function RootLayout({
     >
       <head>
         {apiOrigin ? <link rel="preconnect" href={apiOrigin} crossOrigin="use-credentials" /> : null}
+        <link rel="describedby" href="/llms.txt" />
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM reference" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: siteJsonLd() }} />
         <script id="capture-email-link" dangerouslySetInnerHTML={{ __html: captureEmailLinkScript }} />
         <script
           id="capture-workspace-invitation"

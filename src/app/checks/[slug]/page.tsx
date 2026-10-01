@@ -1,3 +1,4 @@
+import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -14,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${check.title} | SkaleAgents review check`,
     description: check.looksFor,
-    alternates: { canonical: path },
+    alternates: { canonical: path, types: { "text/markdown": markdownPath(path) } },
     openGraph: { title: check.title, description: check.looksFor, url: path },
   };
 }

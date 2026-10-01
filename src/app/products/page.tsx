@@ -1,3 +1,4 @@
+import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
 import { ProductCatalog } from "@/components/product-catalog";
 
@@ -7,7 +8,7 @@ const description = "Explore more from the team behind SkaleAgents: CloudPloy, C
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: "/products" },
+  alternates: { canonical: "/products", types: { "text/markdown": markdownPath("/products") } },
   openGraph: { title, description, url: "/products", type: "website", siteName: "SkaleAgents" },
   twitter: { card: "summary", title, description },
 };

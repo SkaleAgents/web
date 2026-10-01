@@ -1,9 +1,10 @@
+import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contact SkaleAgents",
   description: "Get in touch about your SkaleAgents account, audits, billing, or organization plan.",
-  alternates: { canonical: "/contact" },
+  alternates: { canonical: "/contact", types: { "text/markdown": markdownPath("/contact") } },
 };
 
 export default function ContactPage() {

@@ -1,7 +1,12 @@
+import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Privacy Policy | SkaleAgents", description: "How SkaleAgents handles account and product data." };
+export const metadata: Metadata = {
+  title: "Privacy Policy | SkaleAgents",
+  description: "How SkaleAgents handles account and product data.",
+  alternates: { canonical: "/privacy", types: { "text/markdown": markdownPath("/privacy") } },
+};
 
 export default function PrivacyPage() {
   return <main className="policy-page py-4 text-ink">

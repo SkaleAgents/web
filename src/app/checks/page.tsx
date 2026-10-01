@@ -1,3 +1,4 @@
+import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { publicCheckAreas, publicCheckPath, publicChecks } from "@/lib/public-checks";
@@ -5,7 +6,7 @@ import { publicCheckAreas, publicCheckPath, publicChecks } from "@/lib/public-ch
 export const metadata: Metadata = {
   title: "Infrastructure review checks | SkaleAgents",
   description: "Read the built-in SkaleAgents review checks, the input each one needs, and what a result does not prove. No account required.",
-  alternates: { canonical: "/checks" },
+  alternates: { canonical: "/checks", types: { "text/markdown": markdownPath("/checks") } },
 };
 
 export default function PublicChecksPage() {

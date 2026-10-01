@@ -10,5 +10,7 @@ export function GET() {
       ...check,
       url: `https://skaleagents.com${publicCheckPath(check)}`,
     })),
+  }, {
+    headers: { "cache-control": "public, max-age=3600, s-maxage=86400" },
   });
 }
