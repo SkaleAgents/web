@@ -56,9 +56,11 @@ async function expectRecordedNoticeHidden(heading: string, fetcher: typeof fetch
   expect(screen.queryByRole("region", { name: "Retention policy" })).not.toBeInTheDocument();
 }
 
-it("hides the recorded retention notice on organization schedules", async () => {
-  const fetcher = await renderPage("schedules");
-  await expectRecordedNoticeHidden("Scheduled audits", fetcher);
+it("does not show the retention policy on schedules", async () => {
+  await renderPage("schedules");
+  expect(await screen.findByRole("heading", { name: "Scheduled audits" })).toBeInTheDocument();
+  expect(screen.queryByRole("region", { name: "Retention policy" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "I've read this retention policy" })).not.toBeInTheDocument();
 });
 
 it("hides the recorded retention notice on audit jobs", async () => {
@@ -73,15 +75,3 @@ it("keeps the recorded retention notice on the account record", async () => {
   expect(await screen.findByText(/Notice recorded/)).toBeInTheDocument();
 });
 
-it("still asks for acceptance on schedules when the notice is not recorded", async () => {
-  vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
-    const url = String(input);
-    if (url.endsWith("/api/schedules")) return Response.json({ schedules: [] });
-    if (url.endsWith("/api/account/retention")) return Response.json({ ...recordedPolicy, noticeArchived: false, noticeDeliveredAt: null, legacyNotBefore: null });
-    throw new Error(`Unexpected request: ${url}`);
-  }) as typeof fetch);
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  await setSessionUser(client, { id: "owner", displayName: "Owner", email: null, grokSubject: null });
-  render(<QueryClientProvider client={client}><SchedulesPage /></QueryClientProvider>);
-  expect(await screen.findByRole("button", { name: "I've read this retention policy" })).toBeInTheDocument();
-});

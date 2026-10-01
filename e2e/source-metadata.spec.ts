@@ -84,7 +84,7 @@ test("schedule creation submits a paired caller revision and observation time", 
     return route.fulfill({ json: { schedules: [] } });
   });
 
-  await page.goto("/schedules");
+  await page.goto("/schedules/new");
   await page.getByLabel("Scheduled IaC content").fill('resource "test" {}');
   await page.getByLabel("Source revision").fill("commit-schedule");
   await page.getByLabel("Source observed at").fill("2026-09-25T10:30");

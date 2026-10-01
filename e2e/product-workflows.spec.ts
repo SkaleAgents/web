@@ -140,7 +140,7 @@ test("schedule preset and timezone reach the API without altering the scope", as
       await route.fulfill({ status: 201, json: { ...saved, id: "schedule-1" } });
     } else await route.fulfill({ json: { schedules: [] } });
   });
-  await page.goto("/schedules");
+  await page.goto("/schedules/new");
   await page.getByRole("button", { name: "Weekdays", exact: true }).click();
   await page.getByRole("combobox", { name: "Timezone" }).selectOption("Asia/Dhaka");
   await expect(page.getByRole("textbox", { name: "Cron expression" })).toHaveValue("0 9 * * 1-5");
