@@ -63,22 +63,26 @@ body {
   outline-offset: 2px;
 }
 
-body:has(.get-started-dialog[open]) {
+body:has(.get-started-dialog[open]),
+body:has(.retention-notice-dialog[open]) {
   overflow: hidden;
 }
 
-.get-started-dialog::backdrop {
+.get-started-dialog::backdrop,
+.retention-notice-dialog::backdrop {
   background: rgb(3 12 16 / 55%);
   backdrop-filter: blur(4px);
 }
 
-.get-started-dialog[open] {
+.get-started-dialog[open],
+.retention-notice-dialog[open] {
   animation: signal-enter 180ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .motion-enter,
-  .get-started-dialog[open] {
+  .get-started-dialog[open],
+  .retention-notice-dialog[open] {
     animation: none !important;
   }
 }

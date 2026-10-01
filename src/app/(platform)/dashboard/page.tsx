@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch, type Bot, type SwarmJob } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
+import { RetentionNotice } from "@/components/retention-notice";
 import { LinkButton } from "@/components/ui";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
@@ -35,6 +36,7 @@ export default function DashboardPage() {
   const recent = [...(jobs.data ?? [])].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)).slice(0, 5);
 
   return <main className="space-y-8">
+    {accountId ? <RetentionNotice key={accountId} accountId={accountId} presentation="dialog" /> : null}
     <div className="workspace-intro flex flex-wrap items-end justify-between gap-4">
       <div><p className="workspace-kicker">Your account</p><h1 className="workspace-heading">Dashboard</h1>
         <p className="mt-3 text-sm text-ink-muted">Welcome back{user.data?.displayName ? `, ${user.data.displayName.split(" ")[0]}` : ""}. What are you working on today?</p></div>
