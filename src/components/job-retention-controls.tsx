@@ -1,9 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie, type DeletionPendingResponse, type InputCleanupResponse, type SwarmJob } from "@/lib/api";
+import { reportToCsv, reportToJson, reportToPdf, type ComplianceReport } from "@/lib/compliance-report-export";
 import { Button } from "@/components/ui";
+
+const reportFormats = [
+  { id: "json", label: "JSON", filename: (jobId: string) => `audit-${jobId}.json`, type: "application/json" },
+  { id: "pdf", label: "PDF", filename: (jobId: string) => `audit-${jobId}.pdf`, type: "application/pdf" },
+  { id: "csv", label: "CSV", filename: (jobId: string) => `audit-${jobId}.csv`, type: "text/csv" },
+] as const;
+
+type ReportFormat = (typeof reportFormats)[number]["id"];
+
+function downloadReport(name: string, blob: Blob) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function reportFile(format: ReportFormat, jobId: string, data: ComplianceReport): { name: string; blob: Blob } {
+  const choice = reportFormats.find((item) => item.id === format) ?? reportFormats[0];
+  if (format === "pdf") {
+    const pdf = reportToPdf(data);
+    const body = new ArrayBuffer(pdf.byteLength);
+    new Uint8Array(body).set(pdf);
+    return { name: choice.filename(jobId), blob: new Blob([body], { type: choice.type }) };
+  }
+  const text = format === "csv" ? reportToCsv(data) : reportToJson(data);
+  return { name: choice.filename(jobId), blob: new Blob([text], { type: choice.type }) };
+}
 
 export function JobRetentionControls({ job, accountId, onDeletion }: {
   job: SwarmJob;
@@ -12,6 +42,10 @@ export function JobRetentionControls({ job, accountId, onDeletion }: {
 }) {
   const client = useQueryClient();
   const [confirm, setConfirm] = useState<"input" | "history" | "cancel" | null>(null);
+  const [formatsOpen, setFormatsOpen] = useState(false);
+  const formatMenu = useRef<HTMLDivElement>(null);
+  const formatTrigger = useRef<HTMLButtonElement>(null);
+  const formatMenuId = useId();
   const terminal = job.status === "completed" || job.status === "failed";
   const retention = job.retention;
   const ownsView = () => client.getQueryData<{ id: string } | null>(["user"])?.id === accountId;
@@ -45,17 +79,25 @@ export function JobRetentionControls({ job, accountId, onDeletion }: {
     },
   });
   const report = useMutation({
-    mutationFn: () => apiFetch<unknown>(`/api/jobs/${job.id}/compliance-report`),
-    onSuccess: (data) => {
+    mutationFn: async (format: ReportFormat) => {
+      const data = await apiFetch<ComplianceReport>(`/api/jobs/${job.id}/compliance-report`);
+      return { format, data };
+    },
+    onSuccess: ({ format, data }) => {
       if (!ownsView()) return;
-      const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `audit-${job.id}.json`;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      const file = reportFile(format, job.id, data);
+      downloadReport(file.name, file.blob);
     },
   });
+  useEffect(() => {
+    if (!formatsOpen) return;
+    formatMenu.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus();
+    function dismiss(event: PointerEvent) {
+      if (!formatMenu.current?.parentElement?.contains(event.target as Node)) setFormatsOpen(false);
+    }
+    document.addEventListener("pointerdown", dismiss);
+    return () => document.removeEventListener("pointerdown", dismiss);
+  }, [formatsOpen]);
 
   return (
     <div className="w-full space-y-2 text-sm" aria-label={`Retention for audit ${job.id}`}>
@@ -77,9 +119,25 @@ export function JobRetentionControls({ job, accountId, onDeletion }: {
             {retention?.historyExpiresAt && `History deadline: ${new Date(retention.historyExpiresAt).toLocaleString()}.`}
           </p>
           {job.scheduleId && <p className="text-xs text-ink-muted">The recurring schedule keeps a separate input copy. Cleaning this job does not clean its schedule or other runs.</p>}
-          <p className="text-sm text-ink-muted">Optional: download structured data for a developer or another tool. The findings and recommended actions are readable on this page.</p>
-          <div className="audit-report-actions flex flex-wrap gap-2">
-            <Button type="button" disabled={report.isPending} onClick={() => report.mutate()}>{report.isPending ? "Preparing JSON…" : "Download JSON (technical)"}</Button>
+          <p className="text-sm text-ink-muted">Download a copy as JSON, PDF, or CSV. Findings stay readable on this page. A spreadsheet row with no finding is not a pass.</p>
+          <div className="audit-report-actions relative inline-flex" onKeyDown={(event) => {
+            if (event.key === "Escape" && formatsOpen) {
+              event.preventDefault();
+              setFormatsOpen(false);
+              formatTrigger.current?.focus();
+            }
+          }}>
+            <Button ref={formatTrigger} type="button" aria-haspopup="menu" aria-expanded={formatsOpen} aria-controls={formatMenuId} disabled={report.isPending} onClick={() => setFormatsOpen((open) => !open)}>
+              {report.isPending ? "Preparing report…" : "Download report"}
+            </Button>
+            {formatsOpen && <div ref={formatMenu} id={formatMenuId} role="menu" aria-label="Report file type" className="absolute left-0 top-full z-20 mt-2 w-36 rounded-[10px] border border-line bg-canvas-elevated p-1 shadow-lg">
+              {reportFormats.map((format) => (
+                <button key={format.id} type="button" role="menuitem" className="block w-full rounded-md px-3 py-2 text-left text-ink hover:bg-canvas focus:bg-canvas focus:outline-none" onClick={() => {
+                  setFormatsOpen(false);
+                  report.mutate(format.id);
+                }}>{format.label}</button>
+              ))}
+            </div>}
           </div>
           <details className="audit-data-actions"><summary>Manage retained data</summary>
           <div className="mt-3 flex flex-wrap gap-2">
