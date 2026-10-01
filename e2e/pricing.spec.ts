@@ -11,7 +11,7 @@ test("shows five plans and records an Enterprise inquiry", async ({ page }) => {
   await page.route("**/sanctum/csrf-cookie", async (route) => route.fulfill({ status: 204 }));
   await page.route("**/api/enterprise-inquiries", async (route) => route.fulfill({ status: 201, json: { id: "inquiry-1", status: "received" } }));
   await page.goto("/pricing");
-  await expect(page.getByRole("note")).toContainText("planned organization lineup");
+  await expect(page.getByRole("note")).toContainText("organization plans");
   await expect(page.getByText("Recommended")).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(5);
   await expect(page.getByText("/ 05")).toHaveCount(0);
