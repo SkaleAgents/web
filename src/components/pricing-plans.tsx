@@ -73,9 +73,8 @@ export function PricingPlans() {
     {catalogError && <p role="alert" className="rounded-lg border border-line bg-canvas-elevated p-5">Plans could not be loaded. Please try again later.</p>}
     {!plans && !catalogError && <p role="status" className="py-12 text-ink-muted">Loading plans…</p>}
     {plans && <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {plans.map((plan, index) => <article key={plan.key} className={`relative flex min-h-[23rem] flex-col border p-6 sm:p-7 ${plan.recommended ? "border-accent bg-accent-soft/30" : "border-line bg-canvas-elevated"}`}>
-        <div className="flex min-h-7 items-start justify-between gap-3">
-          <span className="font-mono text-xs text-ink-muted">{String(index + 1).padStart(2, "0")} / 05</span>
+      {plans.map((plan) => <article key={plan.key} className={`relative flex min-h-[23rem] flex-col border p-6 sm:p-7 ${plan.recommended ? "border-accent bg-accent-soft/30" : "border-line bg-canvas-elevated"}`}>
+        <div className="flex min-h-7 items-start justify-end gap-3">
           {plan.recommended && <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-fg">Recommended</span>}
         </div>
         <h2 className="mt-5 font-display text-2xl font-semibold">{plan.name}</h2>
