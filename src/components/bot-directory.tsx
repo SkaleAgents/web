@@ -9,7 +9,7 @@ import { currentUserOptions } from "@/lib/session";
 import { Button, LinkButton, TextInput } from "@/components/ui";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
-export function BotDirectory({ manage = false }: { manage?: boolean }) {
+export function BotDirectory({ manage = false, initialBots }: { manage?: boolean; initialBots?: Bot[] }) {
   const pathname = usePathname();
   const personalHref = (section: string) => personalDestinationFromPath(pathname, section);
   const [search, setSearch] = useState("");
@@ -19,6 +19,7 @@ export function BotDirectory({ manage = false }: { manage?: boolean }) {
   const botsQuery = useQuery({
     queryKey: ["bots", manage ? userQuery.data?.id ?? "guest" : "public"],
     enabled: !manage || Boolean(userQuery.data),
+    initialData: manage ? undefined : initialBots,
     queryFn: async ({ signal }) => {
       const data = await apiFetch<{ bots: Bot[] }>("/api/bots", { signal, credentials: manage ? "include" : "omit" });
       return data.bots;

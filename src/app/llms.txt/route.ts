@@ -1,8 +1,10 @@
+import { loadCommunityPrompts, loadPublicBots } from "@/lib/public-catalog";
 import { publicCheckPath, publicChecks } from "@/lib/public-checks";
 
-export const dynamic = "force-static";
+export const revalidate = 3600;
 
-export function GET() {
+export async function GET() {
+  const [bots, prompts] = await Promise.all([loadPublicBots(), loadCommunityPrompts()]);
   const lines = [
     "# SkaleAgents",
     "",
@@ -16,6 +18,26 @@ export function GET() {
     "",
     "## Machine-readable catalog",
     "- [JSON catalog](https://skaleagents.com/checks.json)",
+    "",
+    "## Bot directory",
+    "Each page includes the specialist instructions. No account is required.",
+    ...(bots ?? []).flatMap((bot) => [
+      "",
+      `### ${bot.name}`,
+      bot.description,
+      `https://skaleagents.com/bots/${bot.id}`,
+      "",
+      bot.promptBody,
+    ]),
+    "",
+    "## Prompt library",
+    "Community prompts are free to read and copy.",
+    ...(prompts ?? []).flatMap((prompt) => [
+      "",
+      `### ${prompt.title}`,
+      prompt.tags.length ? `Tags: ${prompt.tags.join(", ")}` : "",
+      prompt.body,
+    ].filter(Boolean)),
     "",
     "## Also public",
     "- [Bot directory](https://skaleagents.com/bots)",

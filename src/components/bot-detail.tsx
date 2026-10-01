@@ -9,7 +9,7 @@ import { LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
-export function BotDetail({ manage = false }: { manage?: boolean }) {
+export function BotDetail({ manage = false, initialBot }: { manage?: boolean; initialBot?: Bot }) {
   const pathname = usePathname();
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -18,6 +18,7 @@ export function BotDetail({ manage = false }: { manage?: boolean }) {
     queryKey: ["bot", id, manage ? user.data?.id ?? "guest" : "public"],
     queryFn: ({ signal }) => apiFetch<Bot>(`/api/bots/${id}`, { signal, credentials: manage ? "include" : "omit" }),
     enabled: Boolean(id) && (!manage || Boolean(user.data)),
+    initialData: !manage && initialBot?.id === id ? initialBot : undefined,
   });
   const directory = manage ? personalDestinationFromPath(pathname, "bots") : "/bots";
 
