@@ -23,6 +23,6 @@ test("Watchtower distinguishes retained findings from removed proposal copies", 
   await expect(page.getByText("Public network access detected", { exact: true })).toBeVisible();
   await expect(page.getByText("Finding retained without source. Original resource locator removed.")).toBeVisible();
   await expect(page.getByText("Unclassified finding text removed with input.")).toHaveCount(2);
-  await expect(page.getByRole("button", { name: "Generate safe proposals" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Generate safe proposals" })).toHaveCount(0);
   expect(errors.filter(message => message.includes("same key"))).toEqual([]);
 });

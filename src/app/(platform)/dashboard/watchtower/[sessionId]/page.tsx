@@ -103,6 +103,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
   if (session.isPending || job.isPending) return <p role="status" className="text-sm text-ink-muted">Loading Watchtower…</p>;
   const proposals = session.data?.proposals ?? [];
   const redirects = session.data?.redirects ?? [];
+  const sessionOpen = session.data?.status === "open";
   const content = typeof job.data?.scope.content === "string" ? job.data.scope.content : "";
   const allSteps = [...(job.data?.steps ?? []), ...steps].filter((step, index, all) => all.findIndex((item) => item.stepId === step.stepId) === index);
 
@@ -139,10 +140,10 @@ function SessionReview({ sessionId }: { sessionId: string }) {
         </div>
       </div>
 
-      <section className="rounded-[10px] border border-line bg-canvas-elevated p-5">
-        <h2 className="text-lg font-semibold text-ink">Redirect the swarm</h2>
-        <p className="mt-1 text-sm text-ink-muted">Send a review instruction to the next queued swarm task. It never auto-approves a patch.</p>
-        {session.data?.status === "open" && (
+      {(sessionOpen || redirects.length > 0) && <section className="rounded-[10px] border border-line bg-canvas-elevated p-5">
+        <h2 className="text-lg font-semibold text-ink">{sessionOpen ? "Redirect the swarm" : "Review instructions"}</h2>
+        {sessionOpen && <p className="mt-1 text-sm text-ink-muted">Send a review instruction to the next queued swarm task. It never auto-approves a patch.</p>}
+        {sessionOpen && (
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start">
             <textarea
               value={instruction}
@@ -162,7 +163,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
             {redirects.map((item) => <li key={item.id}>{item.instruction}</li>)}
           </ul>
         )}
-      </section>
+      </section>}
 
       <section className="grid gap-5 md:grid-cols-2">
         <div className="rounded-[10px] border border-line bg-canvas-elevated p-5">
@@ -198,6 +199,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
         sessionId={sessionId}
         findings={job.data?.findings ?? []}
         content={content}
+        canPropose={sessionOpen}
         onUpdated={() => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId, userId] })}
       />
       {close.isError && <p className="text-sm text-danger">{close.error.message}</p>}
@@ -205,7 +207,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
   );
 }
 
-function ProposalList({ proposals, sessionId, findings, content, onUpdated }: { proposals: PatchProposal[]; sessionId: string; findings: SwarmFinding[]; content: string; onUpdated: () => void }) {
+function ProposalList({ proposals, sessionId, findings, content, canPropose, onUpdated }: { proposals: PatchProposal[]; sessionId: string; findings: SwarmFinding[]; content: string; canPropose: boolean; onUpdated: () => void }) {
   const [diffs, setDiffs] = useState<Record<string, string>>({});
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [skipped, setSkipped] = useState<ProposalGenerationResult["skipped"]>([]);
@@ -227,12 +229,12 @@ function ProposalList({ proposals, sessionId, findings, content, onUpdated }: { 
     <section className="rounded-[10px] border border-line bg-canvas-elevated p-5">
       <h2 className="text-lg font-semibold text-ink">Patch proposals</h2>
       {proposals.length === 0 && <p className="mt-3 text-sm text-ink-muted">No patch proposals have been generated for this audit.</p>}
-      <div className="mt-4 flex flex-wrap items-center gap-3">
+      {canPropose && <div className="mt-4 flex flex-wrap items-center gap-3">
         <Button type="button" disabled={generate.isPending || !content || findings.length === 0} onClick={() => generate.mutate()}>
           {generate.isPending ? "Analyzing findings…" : "Generate safe proposals"}
         </Button>
         {generate.isError && <p className="text-sm text-danger">{generate.error.message}</p>}
-      </div>
+      </div>}
       {skipped.length > 0 && (
         <ul className="mt-4 space-y-2 text-sm text-ink-muted">
           {skipped.map((item) => <li key={`${item.title}-${item.resource}`}>Skipped {item.title}: {item.reason}</li>)}
@@ -244,7 +246,7 @@ function ProposalList({ proposals, sessionId, findings, content, onUpdated }: { 
             <p className="font-medium text-ink">{proposal.finding.title}</p>
             <pre className="mt-2 overflow-auto rounded bg-canvas p-3 text-xs text-ink-muted">{proposal.diff}</pre>
             <p className="mt-2 font-mono text-xs uppercase tracking-wide text-ink-muted">{proposal.status}</p>
-            {proposal.status === "pending" && (
+            {canPropose && proposal.status === "pending" && (
               <div className="mt-3 space-y-2">
                 <textarea aria-label={`Replacement diff for ${proposal.finding.title}`} value={diffs[proposal.id] ?? proposal.diff} onChange={(event) => setDiffs({ ...diffs, [proposal.id]: event.target.value })} className="min-h-20 w-full rounded border border-line bg-canvas p-2 font-mono text-xs text-ink" />
                 <input aria-label={`Rejection reason for ${proposal.finding.title}`} value={reasons[proposal.id] ?? ""} onChange={(event) => setReasons({ ...reasons, [proposal.id]: event.target.value })} className="w-full rounded border border-line bg-canvas p-2 text-sm text-ink" placeholder="Reason if rejecting" />
