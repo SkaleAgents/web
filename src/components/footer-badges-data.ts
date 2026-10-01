@@ -18,7 +18,7 @@ export const directoryBadges = [
   ["SaaSGrow", "https://saasgrow.app?ref=skaleagents.com", "https://saasgrow.app/api/badge?type=featured&style=light", 240, 54],
   ["DailyPings", "https://dailypings.com/p/skaleagents", "https://dailypings.com/badge.svg", 179, 32],
   ["Smol Launch", "https://smollaunch.com", "https://smollaunch.com/badges/featured.svg", 250, 60],
-  ["Fazier", "https://fazier.com/launches/skaleagents.com", "https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=launched&theme=light", 103, 44],
+  ["Fazier", "https://fazier.com/launches/skaleagents", "https://fazier.com/api/v1/public/badges/embed_image.svg?launch_id=14064&badge_type=daily&theme=neutral", 255, 54],
   ["AI Agents Directory", "https://aiagentsdirectory.com/agent/skaleagents", "https://aiagentsdirectory.com/featured-badge.svg?v=2024", 200, 50],
   ["ShowMeBestAI", "https://showmebest.ai", "https://showmebest.ai/badge/feature-badge-white.webp", 2400, 600],
   ["LaunchPact", "https://www.launchpact.io/startups?utm_source=badge&utm_medium=embed&utm_campaign=directory-badge", "https://www.launchpact.io/badge-listed.png", 540, 180],
