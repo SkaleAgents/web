@@ -267,7 +267,7 @@ function staticPage(path: string): string | null {
 
 function privacyMarkdown(): string {
   return document("SkaleAgents Privacy Policy", [
-    "Effective October 1, 2026. Version 2026-10-01. The HTML page is the binding copy.",
+    "Effective October 2, 2026. Version 2026-10-02. The HTML page is the binding copy.",
     "",
     "Binary Labs LLC, 1309 Coffeen Avenue, Sheridan, WY 82801, USA, operates SkaleAgents. For privacy requests, email info@skaleagents.com. This policy covers the SkaleAgents website, account, dashboards, APIs, and MCP connections.",
     "",
@@ -281,7 +281,7 @@ function privacyMarkdown(): string {
     "",
     "## Service providers and transfers",
     "",
-    "Our hosting and database services run on Railway. Resend delivers account and invitation email. Google supplies sign-in identity when you choose Google. A payment provider may process checkout when paid plans are available. Connected AI and MCP services may receive the inputs needed for the features you activate. Information may be processed in the United States or other countries where these providers operate.",
+    "Our hosting and database services run on Railway. Resend delivers account and invitation email. Google supplies sign-in identity when you choose Google. Google Analytics 4 counts page visits when the cookie rules below allow it. A payment provider may process checkout when paid plans are available. Connected AI and MCP services may receive the inputs needed for the features you activate. Information may be processed in the United States or other countries where these providers operate.",
     "",
     "## Retention and deletion",
     "",
@@ -289,7 +289,7 @@ function privacyMarkdown(): string {
     "",
     "## Cookies",
     "",
-    "Necessary cookies keep you signed in and protect form submissions. The cookie that remembers your consent choice is also necessary. If you accept optional cookies, this browser can remember a choice such as postponing the audit retention notice for 24 hours. We do not use advertising cookies.",
+    "Visitors in the European Economic Area, the United Kingdom, and Switzerland see a cookie notice. Accept stays on this site. Deny sends you to Google. If you accept, this browser can remember a choice such as postponing the audit retention notice for 24 hours, and Google Analytics 4 counts page visits. We do not use advertising cookies. Visitors outside those countries do not see the notice, and Google Analytics 4 counts their page visits.",
     "",
     "## Your choices and rights",
     "",

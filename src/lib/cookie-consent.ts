@@ -1,4 +1,4 @@
-const COOKIE = "skale_cookie_consent";
+const COOKIE = "skale_site_consent";
 const MAX_AGE = 60 * 60 * 24 * 180;
 const listeners = new Set<() => void>();
 let cached: { cookie: string; choice: "accepted" | null } | null = null;

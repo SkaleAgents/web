@@ -27,6 +27,7 @@ afterEach(() => {
   sessionStorage.clear();
   document.cookie = "skale_retention_later=; Max-Age=0; Path=/";
   document.cookie = "skale_cookie_consent=; Max-Age=0; Path=/";
+  document.cookie = "skale_site_consent=; Max-Age=0; Path=/";
 });
 
 function installDialog() {
@@ -106,7 +107,7 @@ it("hides the popup without a reminder cookie until optional cookies are allowed
 });
 
 it("stores the 24 hour reminder after optional cookies are allowed", async () => {
-  document.cookie = "skale_cookie_consent=accepted; Path=/";
+  document.cookie = "skale_site_consent=accepted; Path=/";
   await renderDashboard();
 
   fireEvent.click(await screen.findByRole("button", { name: "Do it later" }));

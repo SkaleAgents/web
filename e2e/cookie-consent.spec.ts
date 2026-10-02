@@ -35,20 +35,20 @@ test("deny leaves for Google and does not store acceptance", async ({ page, cont
   await page.getByRole("button", { name: "Deny" }).click();
   await expect(page).toHaveURL(/https:\/\/www\.google\.com\/?/);
   const cookies = await context.cookies();
-  expect(cookies.some(cookie => cookie.name === "skale_cookie_consent" && cookie.value === "accepted")).toBe(false);
+  expect(cookies.some(cookie => cookie.name === "skale_site_consent" && cookie.value === "accepted")).toBe(false);
 });
 
-test("an older denial still asks for acceptance in Europe", async ({ page, context, baseURL }) => {
+test("a previous acceptance cookie still asks in Europe", async ({ page, context, baseURL }) => {
   await page.setExtraHTTPHeaders({ "cf-ipcountry": "FR" });
-  await context.addCookies([{ name: "skale_cookie_consent", value: "declined", url: baseURL }]);
+  await context.addCookies([{ name: "skale_cookie_consent", value: "accepted", url: baseURL }]);
   await page.goto("/");
   const notice = page.getByRole("region", { name: "Cookie consent" });
   await expect(notice).toBeVisible();
+  await expect(notice).toContainText("Google Analytics");
   await notice.getByRole("button", { name: "Accept" }).click();
   await expect(notice).toHaveCount(0);
   const cookies = await context.cookies();
-  expect(cookies.some(cookie => cookie.name === "skale_cookie_consent" && cookie.value === "accepted")).toBe(true);
-  expect(cookies.some(cookie => cookie.name === "skale_cookie_consent" && cookie.value === "declined")).toBe(false);
+  expect(cookies.some(cookie => cookie.name === "skale_site_consent" && cookie.value === "accepted")).toBe(true);
 });
 
 test("the dashboard uses the same cookie consent notice in Europe", async ({ page }) => {
@@ -58,5 +58,5 @@ test("the dashboard uses the same cookie consent notice in Europe", async ({ pag
   await page.getByRole("button", { name: "Accept" }).click();
   await expect(page.getByRole("region", { name: "Cookie consent" })).toHaveCount(0);
   const cookies = await page.context().cookies();
-  expect(cookies.some(cookie => cookie.name === "skale_cookie_consent" && cookie.value === "accepted")).toBe(true);
+  expect(cookies.some(cookie => cookie.name === "skale_site_consent" && cookie.value === "accepted")).toBe(true);
 });
