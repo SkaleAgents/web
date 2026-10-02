@@ -18,6 +18,7 @@ it("asks for a codebase review before a pasted infrastructure file", async () =>
   expect(screen.getByRole("heading", { name: "Review the codebase" })).toBeInTheDocument();
   expect(screen.getByText(/Pulumi program, or Docker Compose/)).toBeInTheDocument();
   expect(screen.getByText(/unlimited database pool, or a root container user/)).toBeInTheDocument();
+  expect(screen.getByText(/public database, wildcard permissions, the Docker socket/)).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Set up MCP" })).toHaveAttribute("href", "/org/personal-cfgnns/mcp-config");
   expect(screen.getByRole("textbox", { name: "IaC content" })).toBeInTheDocument();
   expect(screen.getByText(/Paste your Terraform, CloudFormation, Kubernetes, or Pulumi YAML file/)).toBeInTheDocument();
