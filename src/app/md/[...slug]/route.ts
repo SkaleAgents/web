@@ -1,5 +1,5 @@
-import { markdownDocument, type DirectoryEntry, type PublicPlan } from "@/lib/ai-corpus";
-import { loadCommunityPrompts, loadPublicBots } from "@/lib/public-catalog";
+import { markdownDocument, type DirectoryEntry, type PublicPageDetail, type PublicPlan } from "@/lib/ai-corpus";
+import { loadCommunityPrompt, loadCommunityPrompts, loadPublicBot, loadPublicBots } from "@/lib/public-catalog";
 
 export const revalidate = 3600;
 
@@ -18,7 +18,7 @@ async function loadJson<T>(path: string): Promise<T | null> {
   }
 }
 
-async function extrasFor(path: string): Promise<{ plans?: PublicPlan[] | null; directory?: DirectoryEntry[] | null }> {
+async function extrasFor(path: string): Promise<{ plans?: PublicPlan[] | null; directory?: DirectoryEntry[] | null; detail?: PublicPageDetail | null }> {
   if (path === "/pricing") {
     const catalog = await loadJson<{ data: PublicPlan[] }>("/api/organization-plans");
     return { plans: catalog?.data ?? null };
@@ -26,7 +26,7 @@ async function extrasFor(path: string): Promise<{ plans?: PublicPlan[] | null; d
   if (path === "/bots") {
     const bots = await loadPublicBots();
     return {
-      directory: bots?.map((bot) => ({ name: bot.name, href: `/bots/${bot.id}`, detail: `${bot.specialty}. ${bot.description}` })) ?? null,
+      directory: bots?.map((bot) => ({ name: bot.name, href: `/bots/${bot.id}.md`, detail: `${bot.specialty}. ${bot.description}` })) ?? null,
     };
   }
   if (path === "/prompts") {
@@ -34,12 +34,37 @@ async function extrasFor(path: string): Promise<{ plans?: PublicPlan[] | null; d
     return {
       directory: prompts?.map((prompt) => ({
         name: prompt.title,
-        href: `/prompts/${prompt.id}`,
+        href: `/prompts/${prompt.id}.md`,
         detail: prompt.tags.length > 0 ? prompt.tags.join(", ") : "Community prompt",
       })) ?? null,
     };
   }
+  const botId = singlePublicId(path, "/bots/");
+  if (botId) {
+    const bot = await loadPublicBot(botId);
+    return {
+      detail: bot
+        ? { kind: "bot", name: bot.name, specialty: bot.specialty, description: bot.description, instructions: bot.promptBody }
+        : { kind: "missing" },
+    };
+  }
+  const promptId = singlePublicId(path, "/prompts/");
+  if (promptId) {
+    const prompt = await loadCommunityPrompt(promptId);
+    return {
+      detail: prompt
+        ? { kind: "prompt", title: prompt.title, tags: prompt.tags, body: prompt.body }
+        : { kind: "missing" },
+    };
+  }
   return {};
+}
+
+function singlePublicId(path: string, prefix: string): string | null {
+  if (!path.startsWith(prefix)) return null;
+  const id = path.slice(prefix.length);
+  if (!/^[a-z0-9-]+$/.test(id)) return null;
+  return id;
 }
 
 export async function GET(_request: Request, context: { params: Promise<{ slug: string[] }> }) {

@@ -40,6 +40,11 @@ export type DirectoryEntry = {
   detail: string;
 };
 
+export type PublicPageDetail =
+  | { kind: "bot"; name: string; specialty: string; description: string; instructions: string }
+  | { kind: "prompt"; title: string; tags: string[]; body: string }
+  | { kind: "missing" };
+
 export type PublicPlan = {
   key: string;
   name: string;
@@ -100,7 +105,7 @@ export function llmsTxt(): string {
     "",
     "## Directories",
     link("Bot directory", "/bots", "Public bot names and descriptions. Instruction text stays on each bot page."),
-    link("Prompt library", "/prompts", "Public prompt titles and tags. Prompt text stays on the library page."),
+    link("Prompt library", "/prompts", "Public prompt titles and tags. Prompt text stays on each prompt page."),
     link("MCP config", "/mcp-config", "How to add SkaleAgents to an AI editor. Credentials are handled by the client."),
     "",
     "## Policies",
@@ -339,11 +344,42 @@ function termsMarkdown(): string {
   ]);
 }
 
+export function botPageMarkdown(bot: Extract<PublicPageDetail, { kind: "bot" }>): string {
+  const description = bot.description.trim() || "No description is published.";
+  const instructions = bot.instructions.trim() || "No instruction text is published on this page.";
+  return document(bot.name, [
+    `${bot.specialty}. ${description}`,
+    "",
+    "This is one public bot page. The directory file lists names only.",
+    "",
+    "## Instructions",
+    "",
+    instructions,
+  ]);
+}
+
+export function promptPageMarkdown(prompt: Extract<PublicPageDetail, { kind: "prompt" }>): string {
+  const tags = prompt.tags.length > 0 ? prompt.tags.join(", ") : "No tags";
+  const body = prompt.body.trim() || "No prompt text is published on this page.";
+  return document(prompt.title, [
+    `Tags: ${tags}.`,
+    "",
+    "This is one community prompt page. The library file lists titles and tags only.",
+    "",
+    "## Prompt",
+    "",
+    body,
+  ]);
+}
+
 export function markdownDocument(
   path: string,
-  extras?: { plans?: PublicPlan[] | null; directory?: DirectoryEntry[] | null },
+  extras?: { plans?: PublicPlan[] | null; directory?: DirectoryEntry[] | null; detail?: PublicPageDetail | null },
 ): string | null {
   if (PRIVATE_PATHS.some((prefix) => path === prefix || path.startsWith(prefix))) return null;
+  if (extras?.detail?.kind === "missing") return null;
+  if (extras?.detail?.kind === "bot") return botPageMarkdown(extras.detail);
+  if (extras?.detail?.kind === "prompt") return promptPageMarkdown(extras.detail);
   if (path === "/pricing") return pricingMarkdown(extras?.plans ?? null);
   if (path === "/bots") {
     return directoryMarkdown(

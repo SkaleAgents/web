@@ -67,6 +67,31 @@ it("renders public markdown and refuses account paths and prompt bodies", () => 
   expect(bots).toContain("Queue watcher");
   expect(bots).not.toContain("promptBody");
   expect(bots).toContain("does not include instruction text");
+  expect(bots).not.toContain("Restart the worker");
+
+  const botPage = markdownDocument("/bots/queue-watcher", {
+    detail: {
+      kind: "bot",
+      name: "Queue watcher",
+      specialty: "sre",
+      description: "Looks at failed jobs.",
+      instructions: "Restart the worker after you read the log.",
+    },
+  });
+  expect(botPage).toContain("# Queue watcher");
+  expect(botPage).toContain("Restart the worker after you read the log.");
+  expect(markdownDocument("/bots/missing", { detail: { kind: "missing" } })).toBeNull();
+
+  const prompts = markdownDocument("/prompts", {
+    directory: [{ name: "Deploy note", href: "/prompts/deploy-note.md", detail: "deploy" }],
+  });
+  expect(prompts).toContain("does not include prompt text");
+  expect(prompts).not.toContain("Paste the service name");
+  const promptPage = markdownDocument("/prompts/deploy-note", {
+    detail: { kind: "prompt", title: "Deploy note", tags: ["deploy"], body: "Paste the service name." },
+  });
+  expect(promptPage).toContain("Paste the service name.");
+  expect(markdownInternalPath("/bots/01a05d3a-1d0e-705d-a273-058a913feb38.md")).toBe("/md/public/bots/01a05d3a-1d0e-705d-a273-058a913feb38");
 });
 
 it("does not invent a price when the plan catalog is missing", () => {
