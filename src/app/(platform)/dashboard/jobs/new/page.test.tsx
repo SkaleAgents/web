@@ -16,9 +16,9 @@ it("asks for a codebase review before a pasted infrastructure file", async () =>
   render(<QueryClientProvider client={client}><NewJobPage /></QueryClientProvider>);
 
   expect(screen.getByRole("heading", { name: "Review the codebase" })).toBeInTheDocument();
-  expect(screen.getByText(/scan the Terraform, CloudFormation, or Kubernetes files/)).toBeInTheDocument();
-  expect(screen.getByText(/Pulumi is not scanned yet/)).toBeInTheDocument();
+  expect(screen.getByText(/scan the Terraform, CloudFormation, Kubernetes, or Pulumi YAML files/)).toBeInTheDocument();
+  expect(screen.getByText(/Pulumi TypeScript, Python, and Go programs are not parsed yet/)).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Set up MCP" })).toHaveAttribute("href", "/org/personal-cfgnns/mcp-config");
   expect(screen.getByRole("textbox", { name: "IaC content" })).toBeInTheDocument();
-  expect(screen.getByText(/Paste your Terraform, CloudFormation, or Kubernetes file/)).toBeInTheDocument();
+  expect(screen.getByText(/Paste your Terraform, CloudFormation, Kubernetes, or Pulumi YAML file/)).toBeInTheDocument();
 });

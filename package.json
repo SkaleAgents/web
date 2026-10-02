@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
-    "@skaleagents/swarm": "0.6.1",
+    "@skaleagents/swarm": "0.6.3",
     "@tanstack/react-query": "^5.102.8",
     "next": "16.3.3",
     "next-themes": "^0.4.6",
