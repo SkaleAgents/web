@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BotDetail } from "@/components/bot-detail";
+import { markdownPath } from "@/lib/ai-corpus";
 import { loadPublicBot } from "@/lib/public-catalog";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -8,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title: `${bot.name} | SkaleAgents bot`,
     description: bot.description || "Specialist instructions you can read without an account.",
-    alternates: { canonical: `/bots/${bot.id}` },
+    alternates: { canonical: `/bots/${bot.id}`, types: { "text/markdown": markdownPath(`/bots/${bot.id}`) } },
   };
 }
 
