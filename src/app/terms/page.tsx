@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return <main className="policy-page py-4 text-ink">
-    <p className="text-sm font-semibold uppercase tracking-wide text-ink-muted">Effective September 30, 2026 · Version 2026-09-30</p>
+    <p className="text-sm font-semibold uppercase tracking-wide text-ink-muted">Effective October 2, 2026 · Version 2026-10-02</p>
     <h1 className="font-display text-4xl font-bold">SkaleAgents Terms of Service</h1>
     <p>SkaleAgents is operated by Binary Labs LLC, 1309 Coffeen Avenue, Sheridan, WY 82801, USA. Contact us at <a href="mailto:info@skaleagents.com">info@skaleagents.com</a>. These terms apply to the SkaleAgents website, accounts, dashboards, APIs, and MCP connections.</p>
     <h2>Accounts and organizations</h2>
@@ -20,7 +20,8 @@ export default function TermsPage() {
     <h2>Audits, agents, and connected tools</h2>
     <p>Audit findings, agent output, and suggested changes can be incomplete or wrong. Review them before relying on them or changing a live system. Connecting an external tool authorizes that tool to act within the access you grant. You can revoke tokens and connections in account settings. We do not promise that automated output will detect every issue or safely make changes on your behalf.</p>
     <h2>Plans and payment</h2>
-    <p>Available features and limits depend on the plan shown when you subscribe. If a paid plan is offered, its checkout will show the price and billing interval before you confirm payment. Plan changes, cancellation, and refunds follow the terms shown at checkout and any applicable law. We may change future plan prices or features with notice; a change does not rewrite an already paid period.</p>
+    <p>Available features and limits depend on the plan shown when you subscribe. Checkout shows the price and billing interval before you confirm payment. Starter, Pro, and Max subscription payments are non-refundable except where required by law. For billing questions, contact <a href="mailto:info@skaleagents.com">info@skaleagents.com</a>.</p>
+    <p>A new paid subscription starts a full monthly billing cycle after payment is verified. Upgrading during a paid cycle keeps that cycle; we collect the prorated price difference before the higher plan takes effect. A downgrade or cancellation takes effect at the end of the current paid cycle. Cancellation does not itself create a refund. We may change future plan prices or features with notice; a change does not rewrite an already paid period.</p>
     <h2>Availability and suspension</h2>
     <p>We may update or pause the service for maintenance, security, or legal reasons. We may restrict access if we reasonably believe an account violates these terms or creates a security risk. Contact us if you believe a restriction was a mistake.</p>
     <h2>Ending use and disputes</h2>
