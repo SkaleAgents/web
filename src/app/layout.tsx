@@ -10,6 +10,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { AppShell } from "@/components/app-shell";
 import { CookieConsent } from "@/components/cookie-consent";
+import { SiteAnalytics } from "@/components/site-analytics";
 import { DeferredFooterBadges } from "@/components/deferred-footer-badges";
 import { FooterBadgesFallback } from "@/components/footer-badges-fallback";
 import { InvitationPublisherScript, PreferredSourceControl } from "@/components/preferred-source-control";
@@ -68,6 +69,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const country = (await headers()).get("cf-ipcountry");
+  const consentRequired = cookieConsentRequired(country);
   return (
     <html
       lang="en"
@@ -112,7 +114,8 @@ export default async function RootLayout({
             }>
               {children}
             </AppShell>
-            <CookieConsent required={cookieConsentRequired(country)} />
+            <CookieConsent required={consentRequired} />
+            <SiteAnalytics consentRequired={consentRequired} />
           </Providers>
         </div>
       </body>

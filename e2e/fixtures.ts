@@ -3,7 +3,7 @@ import { installPersonalOrganizationRoutes } from "./personal-organization-fixtu
 
 export const test = base.extend<{ personalOrganizationRoutes: void; cookieConsent: void }>({
   cookieConsent: [async ({ context, baseURL }, use) => {
-    await context.addCookies([{ name: "skale_cookie_consent", value: "accepted", url: baseURL }]);
+    await context.addCookies([{ name: "skale_site_consent", value: "accepted", url: baseURL }]);
     await use();
   }, { auto: true }],
   personalOrganizationRoutes: [async ({ page }, use) => {

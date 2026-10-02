@@ -53,7 +53,8 @@ it("renders public markdown and refuses account paths and prompt bodies", () => 
   const check = markdownDocument("/checks/container-image-scan");
   expect(check).toMatch(/does not scan/i);
   expect(markdownDocument("/products")).toContain("CloudPloy");
-  expect(markdownDocument("/privacy")).toContain("Effective October 1, 2026");
+  expect(markdownDocument("/privacy")).toContain("Effective October 2, 2026");
+  expect(markdownDocument("/privacy")).toContain("Google Analytics 4");
   expect(markdownDocument("/terms")).toContain("Wyoming");
   expect(markdownDocument("/dashboard")).toBeNull();
   expect(markdownDocument("/dashboard/jobs")).toBeNull();
