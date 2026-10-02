@@ -22,6 +22,7 @@ type AuditSpecialist = (typeof AUDIT_SPECIALISTS)[number];
 export default function NewJobPage() {
   const pathname = usePathname();
   const jobsPath = personalDestinationFromPath(pathname, "jobs");
+  const mcpPath = personalDestinationFromPath(pathname, "mcp-config");
   const router = useRouter();
   const queryClient = useQueryClient();
   const user = useQuery(currentUserOptions);
@@ -67,13 +68,18 @@ export default function NewJobPage() {
     <div className="workspace-intro">
       <LinkButton href={jobsPath} variant="ghost">Back to audit jobs</LinkButton>
       <h1 className="workspace-heading mt-3">New audit</h1>
-      <p className="mt-2 text-sm text-ink-muted">Review your configuration for issues and get recommended next steps.</p>
+      <p className="mt-2 text-sm text-ink-muted">Review the infrastructure files in your codebase, or paste one definition file here.</p>
     </div>
+    <section className="rounded-xl border border-line bg-canvas-elevated p-5" aria-labelledby="codebase-heading">
+      <h2 id="codebase-heading" className="text-base font-semibold text-ink">Review the codebase</h2>
+      <p className="mt-2 text-sm text-ink-muted">Add SkaleAgents in your editor, then ask it to scan the Terraform, CloudFormation, or Kubernetes files in the open project. That review uses your files. Pulumi is not scanned yet. This does not connect to a live cloud account.</p>
+      <LinkButton href={mcpPath} className="mt-4">Set up MCP</LinkButton>
+    </section>
       <form className="overflow-hidden rounded-xl border border-line bg-canvas-elevated" onSubmit={(event) => { event.preventDefault(); if (user.data && content.trim() && specialists.length && !create.isPending) create.mutate(); }}>
       <fieldset disabled={create.isPending} className="min-w-0">
       <section className="p-5 sm:p-6" aria-labelledby="configuration-heading">
         <h2 id="configuration-heading" className="text-base font-semibold text-ink">1. Configuration</h2>
-        <p className="mt-2 text-sm text-ink-muted">Bring Terraform, CloudFormation, or Kubernetes configuration. Include the resources a reviewer needs to understand the scope.</p>
+        <p className="mt-2 text-sm text-ink-muted">Paste your Terraform, CloudFormation, or Kubernetes file. Include the resources a reviewer needs to understand the scope.</p>
         <textarea
           value={content}
           onChange={(event) => setContent(event.target.value)}
