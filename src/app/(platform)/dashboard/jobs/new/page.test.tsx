@@ -17,6 +17,7 @@ it("asks for a codebase review before a pasted infrastructure file", async () =>
 
   expect(screen.getByRole("heading", { name: "Review the codebase" })).toBeInTheDocument();
   expect(screen.getByText(/scan the Terraform, CloudFormation, Kubernetes, or Pulumi YAML files/)).toBeInTheDocument();
+  expect(screen.getByText(/disabled timeout, a one-connection pool, or an unbounded retry limit/)).toBeInTheDocument();
   expect(screen.getByText(/Pulumi TypeScript, Python, and Go programs are not parsed yet/)).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Set up MCP" })).toHaveAttribute("href", "/org/personal-cfgnns/mcp-config");
   expect(screen.getByRole("textbox", { name: "IaC content" })).toBeInTheDocument();

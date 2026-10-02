@@ -72,7 +72,7 @@ export default function NewJobPage() {
     </div>
     <section className="rounded-xl border border-line bg-canvas-elevated p-5" aria-labelledby="codebase-heading">
       <h2 id="codebase-heading" className="text-base font-semibold text-ink">Review the codebase</h2>
-      <p className="mt-2 text-sm text-ink-muted">Add SkaleAgents in your editor, then ask it to scan the Terraform, CloudFormation, Kubernetes, or Pulumi YAML files in the open project. That review uses your files. Pulumi TypeScript, Python, and Go programs are not parsed yet. This does not connect to a live cloud account.</p>
+      <p className="mt-2 text-sm text-ink-muted">Add SkaleAgents in your editor, then ask it to scan the Terraform, CloudFormation, Kubernetes, or Pulumi YAML files in the open project. For the rest of the codebase, ask it to review application source for a disabled timeout, a one-connection pool, or an unbounded retry limit. Pulumi TypeScript, Python, and Go programs are not parsed yet. This does not connect to a live cloud account.</p>
       <LinkButton href={mcpPath} className="mt-4">Set up MCP</LinkButton>
     </section>
       <form className="overflow-hidden rounded-xl border border-line bg-canvas-elevated" onSubmit={(event) => { event.preventDefault(); if (user.data && content.trim() && specialists.length && !create.isPending) create.mutate(); }}>

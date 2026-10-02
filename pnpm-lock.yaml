@@ -15,8 +15,8 @@ importers:
         specifier: 16.3.3
         version: 16.3.3(next@16.3.3(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       '@skaleagents/swarm':
-        specifier: 0.6.3
-        version: 0.6.3
+        specifier: 0.6.4
+        version: 0.6.4
       '@tanstack/react-query':
         specifier: ^5.102.8
         version: 5.102.8(react@19.2.8)
@@ -770,8 +770,8 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
-  '@skaleagents/swarm@0.6.3':
-    resolution: {integrity: sha512-dK9QiRcYgLtOgJWNn9YLQT7/yZQLGt2IBchViQITRTUQJ/87tSdW7jLG0GYElBg8lxiMVI2DCkAI84e+dHGDWQ==}
+  '@skaleagents/swarm@0.6.4':
+    resolution: {integrity: sha512-JaF3B03nGSIhuh8m2Y1DxdUv+xfrAiB4DCjdWi1TJMzERgMLzQJR2V34pwCgzEO957XBH5/0gkHs6xURJ/YI9A==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -3600,7 +3600,7 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@skaleagents/swarm@0.6.3':
+  '@skaleagents/swarm@0.6.4':
     dependencies:
       '@modelcontextprotocol/sdk': 1.30.0(zod@4.5.2)
       hcl2-parser: 1.0.3
