@@ -30,7 +30,44 @@ export const checkLabels: Record<string, string> = {
   "mlops.high-compute-utilization": "AI compute utilization",
   "scaling.autoscaling-ceiling": "Autoscaling capacity",
   "scaling.database-bottleneck": "Database bottlenecks",
+  SEC001: "Hardcoded credential-like value",
+  SEC002: "Possible AWS access key",
+  SEC003: "Private key material in source",
+  NET002: "Unencrypted HTTP endpoint",
+  DATA001: "Public data access",
+  DATA002: "Storage encryption disabled",
+  DB001: "Public database",
+  DB002: "Database backups disabled",
+  VM001: "Instance metadata tokens not required",
+  K8S002: "Host namespace access",
+  K8S003: "Host filesystem mounted",
+  K8S004: "Non-root execution not enforced",
+  K8S005: "Writable container root filesystem",
+  K8S006: "Dangerous Linux capabilities",
+  K8S007: "Unpinned container image",
+  K8S008: "Missing memory limit",
+  K8S012: "Secret stored in manifest",
+  K8S013: "Wildcard Kubernetes RBAC",
 };
+
+export function findingPlace(finding: { resource?: string | null; location?: { path?: string; line?: number } | null }): string | null {
+  const path = finding.location?.path;
+  const line = finding.location?.line;
+  if (path && Number.isInteger(line)) {
+    const place = `${path} line ${line}`;
+    return finding.resource && finding.resource !== path ? `${finding.resource} · ${place}` : place;
+  }
+  return finding.resource || null;
+}
+
+export function skippedChecks(coverage?: AuditCoverage, tasks: CoverageTask[] = []): Array<{ id: string; label: string; reason: string }> {
+  const rows = coverage?.tasks?.length ? coverage.tasks : tasks;
+  return rows.flatMap((task) => (task.checkCoverage?.checks ?? []).filter((check) => check.status === "skipped").map((check) => ({
+    id: `${task.specialist}:${check.ruleId}`,
+    label: checkLabels[check.ruleId] ?? "Skipped check",
+    reason: check.reasonCodes.map((code) => reasonLabels[code] ?? "Check details unavailable").join(" "),
+  })));
+}
 export const reasonLabels: Record<string, string> = {
   missing_input: "Required input was not supplied.", invalid_input: "Some supplied input could not be evaluated.",
   not_applicable: "This check does not apply to the supplied input.", unsupported_structure: "The input structure is not supported.",

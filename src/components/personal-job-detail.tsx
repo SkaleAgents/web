@@ -6,7 +6,8 @@ import { useState } from "react";
 import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retention-controls";
 import { AuditResultSummary } from "@/components/audit-result-summary";
-import { AuditCoveragePanel } from "@/components/audit-coverage";
+import { AuditCoveragePanel, SkippedCheckList } from "@/components/audit-coverage";
+import { findingPlace } from "@/lib/audit-coverage";
 import { SourceMetadata } from "@/components/source-metadata";
 import { Button, LinkButton } from "@/components/ui";
 import { scheduledRunLabel } from "@/lib/audit-dispatch";
@@ -53,9 +54,11 @@ export function PersonalJobDetail({ id }: { id: string }) {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               <p className="audit-status text-xs font-semibold capitalize text-ink-muted">{job.data.status}{job.data.partial ? " · Partial results" : ""}{scheduledRunLabel(job.data) ? ` · ${scheduledRunLabel(job.data)}` : ""}</p>
+              <p className="mt-2 break-all font-mono text-xs text-ink-muted">Job {job.data.id}</p>
               <AuditResultSummary job={job.data} />
               {job.data.summary && <p className="mt-2 text-sm text-ink-muted">{job.data.summary}</p>}
-              <p className="mt-2 text-sm text-ink-muted">Started {new Date(job.data.createdAt).toLocaleString()}</p>
+              <p className="mt-2 text-sm text-ink-muted">Created {new Date(job.data.createdAt).toLocaleString()}</p>
+              <p className="text-sm text-ink-muted">Updated {new Date(job.data.updatedAt).toLocaleString()}</p>
             </div>
             <Button type="button" variant="secondary" disabled={openReview.isPending} onClick={() => openReview.mutate()}>Open Watchtower</Button>
           </div>
@@ -72,10 +75,11 @@ export function PersonalJobDetail({ id }: { id: string }) {
           {job.data.findings.length === 0 ? <p className="text-sm text-ink-muted">No findings were recorded. Review check coverage below to understand the limits.</p> : job.data.findings.map((finding, index) => <article key={index} className="audit-finding">
             <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
             <div><h3 className="font-semibold">{finding.title}</h3><p className="mt-1 text-sm text-ink-muted">{finding.detail}</p>
-              {finding.resource && <p className="mt-2 break-all font-mono text-xs text-ink-muted">{finding.resource}</p>}
+              {findingPlace(finding) && <p className="mt-2 break-all font-mono text-xs text-ink-muted">{findingPlace(finding)}</p>}
               <p className="mt-3 text-sm"><strong>Recommended action: </strong>{finding.remediation || "No specific fix was recorded. Ask the person responsible for this resource to review the issue before changing it."}</p>
             </div>
           </article>)}
+          <SkippedCheckList coverage={job.data.coverage} tasks={job.data.tasks} />
         </section>}
         <AuditCoveragePanel key={job.data.id} coverage={job.data.coverage} tasks={job.data.tasks} status={job.data.status} />
         <section className="rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Audit data and report">

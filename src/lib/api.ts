@@ -158,6 +158,7 @@ export type SwarmFinding = {
   resource: string;
   remediation: string;
   specialist: "devsecops" | "sre" | "mlops" | "scaling";
+  location?: { path: string; line: number; column: number } | null;
 };
 
 export type SwarmJob = {

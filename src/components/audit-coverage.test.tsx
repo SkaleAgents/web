@@ -1,7 +1,7 @@
 import { afterEach, expect, it } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
-import { AuditCoveragePanel } from "./audit-coverage";
-import type { AuditCoverage } from "@/lib/audit-coverage";
+import { AuditCoveragePanel, SkippedCheckList } from "./audit-coverage";
+import { findingPlace, type AuditCoverage } from "@/lib/audit-coverage";
 afterEach(cleanup);
 
 it("does not infer a clean audit from unavailable historical coverage", () => {
@@ -34,4 +34,19 @@ it("shows partial evaluated checks, skips, failures and missing tasks separately
   expect(screen.getByText("Required input was not supplied.")).toBeInTheDocument();
   expect(screen.getByText("Reliability").closest("details")).toHaveAttribute("open");
   expect(screen.getByText("Security").closest("details")).not.toHaveAttribute("open");
+});
+
+it("lists skipped checks and a finding path with its line", () => {
+  const coverage: AuditCoverage = {
+    basis: "rule_execution", recordingStatus: "available", ruleLevelChecksAvailable: true,
+    limitation: "These checks review supplied input.", counts: { evaluated: 0, partial: 0, skipped: 1, failed: 0 }, tasksWithoutCoverage: 0,
+    tasks: [{ specialist: "devsecops", status: "completed", checkCoverage: { version: "builtin-coverage-v1", checks: [
+      { ruleId: "iac.container-image-scan", status: "skipped", completeness: "none", findingCount: 0, reasonCodes: ["scanner_unavailable"] },
+    ] } }],
+  };
+  render(<SkippedCheckList coverage={coverage} />);
+  expect(screen.getByText(/Container image scan/)).toBeInTheDocument();
+  expect(screen.getByText(/Container image scanning is not configured/)).toBeInTheDocument();
+  expect(findingPlace({ resource: "source", location: { path: "source", line: 4 } })).toBe("source line 4");
+  expect(findingPlace({ resource: "aws_db_instance.app", location: { path: "resource.aws_db_instance.app", line: 2 } })).toBe("aws_db_instance.app · resource.aws_db_instance.app line 2");
 });
