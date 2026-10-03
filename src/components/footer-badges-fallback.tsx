@@ -12,8 +12,8 @@ export function FooterBadgesFallback() {
             {badge.name}
           </a>
         ))}
-        {directoryLinks.map(([name, href, rel = "noopener noreferrer"]) => (
-          <a key={href} href={href} target="_blank" rel={rel}>
+        {directoryLinks.map(([name, href, rel = "noopener noreferrer", title]) => (
+          <a key={href} href={href} target="_blank" rel={rel} title={title}>
             {name}
           </a>
         ))}

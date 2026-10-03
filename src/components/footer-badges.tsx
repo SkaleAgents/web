@@ -113,7 +113,7 @@ export function FooterBadges() {
         </div>
       </div>
       <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-ink-muted">
-        {directoryLinks.map(([name, href, rel = "noopener noreferrer"]) => <a key={href} href={href} target="_blank" rel={rel} className="hover:text-ink hover:underline">{name}</a>)}
+        {directoryLinks.map(([name, href, rel = "noopener noreferrer", title]) => <a key={href} href={href} target="_blank" rel={rel} title={title} className="hover:text-ink hover:underline">{name}</a>)}
       </div>
     </div>
   );
