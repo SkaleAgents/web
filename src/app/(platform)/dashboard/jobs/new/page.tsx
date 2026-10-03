@@ -79,7 +79,7 @@ export default function NewJobPage() {
       <fieldset disabled={create.isPending} className="min-w-0">
       <section className="p-5 sm:p-6" aria-labelledby="configuration-heading">
         <h2 id="configuration-heading" className="text-base font-semibold text-ink">1. Configuration</h2>
-        <p className="mt-2 text-sm text-ink-muted">Paste your Terraform, CloudFormation, Kubernetes, or Pulumi YAML file. Include the resources a reviewer needs to understand the scope.</p>
+        <p className="mt-2 text-sm text-ink-muted">Paste your Terraform, CloudFormation, Kubernetes, or Pulumi YAML file, or a Dockerfile or GitHub Actions workflow. A review can notice a container that runs as root, a workflow that checks out pull request code from pull_request_target, and an action pinned to @main. Include the resources a reviewer needs to understand the scope.</p>
         <textarea
           value={content}
           onChange={(event) => setContent(event.target.value)}
