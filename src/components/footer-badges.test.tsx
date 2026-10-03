@@ -24,13 +24,30 @@ const requestedBadges = [
   ["https://nicklaunches.com/products/skaleagents/?utm_source=skaleagents.com&utm_medium=badge&utm_campaign=featured", "Featured on Nick Launches"],
   ["https://bowora.com/", null],
   ["https://navfolders.com/", "Featured on NavFolders"],
+  ["https://www.aitoolfinder.com/", "#1 Product on www.aitoolfinder.com"],
+  ["https://www.direct2app.com", "Featured On Direct2App"],
+  ["https://firstlook.tools", "Featured on First Look"],
+  ["https://indieshowcase.io", "Featured"],
+  ["https://submito.net", "Listed on Submito"],
+  ["https://toolfame.com/item/skaleagents", "Featured on toolfame.com"],
+] as const;
+
+const addedBadgeImages = [
+  ["https://www.aitoolfinder.com/", "https://www.aitoolfinder.com//function/badge-generator.php?type=0&theme=light&domain=www.aitoolfinder.com", "84", null],
+  ["https://www.direct2app.com", "https://www.direct2app.com/featured-light.svg", null, "noopener"],
+  ["https://firstlook.tools", "https://firstlook.tools/badge/badge_dark.svg", "54", "noopener noreferrer"],
+  ["https://indieshowcase.io", "https://indieshowcase.io/badge/featured-light.svg", null, null],
+  ["https://submito.net", "https://submito.net/badge/listed-light.svg", null, null],
+  ["https://toolfame.com/item/skaleagents", "https://toolfame.com/badge-light.svg", null, "noopener noreferrer"],
 ] as const;
 
 const requestedLinks = [
-  ["https://newaiforyou.com", "NewAIForYou"],
-  ["https://www.launch-list.org", "Launch List"],
-  ["https://www.launchboard.dev/", "LaunchBoard"],
-  ["https://startupproject.org/", "Startup Project"],
+  ["https://newaiforyou.com", "NewAIForYou", "noopener noreferrer"],
+  ["https://www.launch-list.org", "Launch List", "noopener noreferrer"],
+  ["https://www.launchboard.dev/", "LaunchBoard", "noopener noreferrer"],
+  ["https://startupproject.org/", "Startup Project", "noopener noreferrer"],
+  ["https://directoryhunt.org", "Directory Hunt", "noopener"],
+  ["https://newtools.site", "NewTools", "noopener"],
 ] as const;
 
 describe("FooterBadges", () => {
@@ -44,6 +61,8 @@ describe("FooterBadges", () => {
     }
 
     expect(markup).not.toContain("hJHZDJxqO5");
+    expect(markup).not.toContain("ainewtool.site");
+    expect(links.filter((link) => link.getAttribute("href") === "https://saascity.io")).toHaveLength(1);
   });
 
   it("renders each missing directory once in the primary slider group", () => {
@@ -86,17 +105,34 @@ describe("FooterBadges", () => {
     expect(codeHypeImage).toHaveAttribute("loading", "lazy");
     expect(codeHypeImage).toHaveAttribute("decoding", "async");
     expect(codeHypeImage).toHaveAttribute("style", "display: inline-block; border: 0px; width: 100%; max-width: 180px; height: auto; max-height: 65px;");
+
+    for (const [href, src, height, rel] of addedBadgeImages) {
+      const badge = links.find((link) => link.getAttribute("href") === href);
+      const image = badge?.querySelector("img");
+      expect(image, href).toHaveAttribute("src", src);
+      if (height) expect(image, href).toHaveAttribute("height", height);
+      if (rel) expect(badge, href).toHaveAttribute("rel", rel);
+      else expect(badge, href).not.toHaveAttribute("rel");
+    }
+
+    const firstLook = links.find((link) => link.getAttribute("href") === "https://firstlook.tools")?.querySelector("img");
+    expect(firstLook).toHaveAttribute("width", "200");
+    expect(links.find((link) => link.getAttribute("href") === "https://submito.net")).toHaveAttribute("title", "Listed on Submito");
+    expect(links.find((link) => link.getAttribute("href") === "https://www.direct2app.com")?.querySelector("img")).toHaveAttribute("style", "height: 54px; width: auto;");
+    expect(links.find((link) => link.getAttribute("href") === "https://toolfame.com/item/skaleagents")?.querySelector("img")).toHaveAttribute("style", "height: 54px; width: auto;");
   });
 
   it("renders the remaining submissions as plain links outside the badge slider", () => {
     const { container } = render(<FooterBadges />);
     const allLinks = Array.from(container.querySelectorAll("a[href]"));
 
-    for (const [href, label] of requestedLinks) {
+    for (const [href, label, rel] of requestedLinks) {
       const matchingLinks = allLinks.filter((link) => link.getAttribute("href") === href);
       expect(matchingLinks, href).toHaveLength(1);
       expect(matchingLinks[0]).toHaveTextContent(label);
+      expect(matchingLinks[0]).toHaveAttribute("rel", rel);
       expect(matchingLinks[0].closest(".footer-badge-group")).toBeNull();
+      expect(matchingLinks[0].querySelector("img")).toBeNull();
     }
   });
 });

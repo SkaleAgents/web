@@ -53,6 +53,8 @@ export const directoryLinks = [
   ["Launch List", "https://www.launch-list.org"],
   ["LaunchBoard", "https://www.launchboard.dev/"],
   ["Startup Project", "https://startupproject.org/"],
+  ["Directory Hunt", "https://directoryhunt.org", "noopener"],
+  ["NewTools", "https://newtools.site", "noopener"],
 ] as const;
 
 export type DirectoryBadgeEntry = {
@@ -93,6 +95,12 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "Nick Launches", href: "https://nicklaunches.com/products/skaleagents/?utm_source=skaleagents.com&utm_medium=badge&utm_campaign=featured", src: "https://nicklaunches.com/badges/featured.svg", width: 200, height: 54, alt: "Featured on Nick Launches", rel: "noopener noreferrer", ariaLabel: "SkaleAgents on Nick Launches", displayWidth: 142.2 },
   { name: "Bowora", href: "https://bowora.com/", src: null, displayWidth: 170, variant: "bowora" },
   { name: "NavFolders", href: "https://navfolders.com/", src: "https://navfolders.com/badge.png", width: 200, height: 54, alt: "Featured on NavFolders", rel: "noopener noreferrer", displayWidth: 142.2 },
+  { name: "AI Tool Finder", href: "https://www.aitoolfinder.com/", src: "https://www.aitoolfinder.com//function/badge-generator.php?type=0&theme=light&domain=www.aitoolfinder.com", height: 84, alt: "#1 Product on www.aitoolfinder.com", displayWidth: 153.6 },
+  { name: "Direct2App", href: "https://www.direct2app.com", src: "https://www.direct2app.com/featured-light.svg", alt: "Featured On Direct2App", rel: "noopener", displayWidth: 153.6, imageStyle: { height: "54px", width: "auto" } },
+  { name: "First Look", href: "https://firstlook.tools", src: "https://firstlook.tools/badge/badge_dark.svg", width: 200, height: 54, alt: "Featured on First Look", rel: "noopener noreferrer", displayWidth: 142.2 },
+  { name: "IndieShowcase", href: "https://indieshowcase.io", src: "https://indieshowcase.io/badge/featured-light.svg", alt: "Featured", displayWidth: 153.6 },
+  { name: "Submito", href: "https://submito.net", src: "https://submito.net/badge/listed-light.svg", alt: "Listed on Submito", title: "Listed on Submito", displayWidth: 153.6 },
+  { name: "ToolFame", href: "https://toolfame.com/item/skaleagents", src: "https://toolfame.com/badge-light.svg", alt: "Featured on toolfame.com", rel: "noopener noreferrer", displayWidth: 153.6, imageStyle: { height: "54px", width: "auto" } },
 ];
 
 export const directoryBadgeEntries: DirectoryBadgeEntry[] = [
