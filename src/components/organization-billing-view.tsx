@@ -131,7 +131,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
 
   return <main className="mx-auto max-w-4xl space-y-8">
     <div>
-      <h1 className="text-3xl font-semibold tracking-tight text-ink">Organization billing</h1>
+      <h1 className="font-display text-3xl font-bold tracking-tight text-ink">Organization billing</h1>
       <p className="mt-2 text-sm text-ink-muted">Check your audit allowance and manage the plan for an organization you own.</p>
       {organizationId && owned.find((organization) => organization.id === organizationId)?.cutoverNoticeAvailable ? (
         <Link className="mt-3 inline-block text-sm font-medium text-accent underline underline-offset-4" href={`${root}/settings/cutover-notice`}>
