@@ -35,6 +35,7 @@ export function AccountMenu({ user }: { user: ApiUser }) {
     key={`${user.id}:${pathname}`}
     user={user}
     settingsActive={pathname === "/account/settings"}
+    inquiriesActive={pathname === "/staff/enterprise-inquiries"}
     signingOut={signingOut}
     onSignOut={() => void logout()}
   />;
