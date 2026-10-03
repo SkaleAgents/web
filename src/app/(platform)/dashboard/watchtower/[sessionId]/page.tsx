@@ -4,6 +4,8 @@ import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, API_URL, type PatchProposal, type ProposalGenerationResult, type SwarmFinding, type SwarmJob, type SwarmStep, type WatchtowerRedirect, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
+import { SkippedCheckList } from "@/components/audit-coverage";
+import { findingPlace } from "@/lib/audit-coverage";
 import { Button, LinkButton } from "@/components/ui";
 import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 import { currentUserOptions } from "@/lib/session";
@@ -114,6 +116,9 @@ function SessionReview({ sessionId }: { sessionId: string }) {
           <p className="font-mono text-xs uppercase tracking-wide text-accent">Watchtower review</p>
           <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink">{watchtowerSessionTitle(session.data.status)}</h1>
           <p className="mt-1 text-sm text-ink-muted">{job.data?.summary ?? "Specialists are working"}</p>
+          <p className="mt-2 break-all font-mono text-xs text-ink-muted">Job {job.data?.id}</p>
+          {job.data?.createdAt && <p className="mt-1 text-xs text-ink-muted">Created {new Date(job.data.createdAt).toLocaleString()}</p>}
+          {job.data?.updatedAt && <p className="text-xs text-ink-muted">Updated {new Date(job.data.updatedAt).toLocaleString()}</p>}
           <p className="mt-2 text-xs text-ink-muted">Participants: {session.data?.participants.length ?? 0}</p>
           {session.data?.status === "open" && (
             <div className="mt-2 flex items-center gap-3 text-sm">
@@ -173,6 +178,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
               <li key={finding.id ?? `${finding.specialist}-${finding.resource}-${finding.title}`} className="border-l-2 border-danger pl-3">
                 <p className="font-mono text-xs uppercase tracking-wide text-danger">{finding.severity} · {finding.specialist}</p>
                 <p className="mt-1 font-medium text-ink">{finding.title}</p>
+                {findingPlace(finding) && <p className="mt-1 break-all font-mono text-xs text-ink-muted">{findingPlace(finding)}</p>}
                 <p className="mt-1 text-sm text-ink-muted">{finding.detail}</p>
                 <p className="mt-2 text-xs text-ink-muted">Remediation: {finding.remediation}</p>
                 {finding.inputLocatorAvailable === false && <p className="mt-2 text-xs text-ink-muted">{finding.classification === "builtin-v1" ? "Finding retained without source. Original resource locator removed." : "Unclassified finding text removed with input."}</p>}
@@ -180,6 +186,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
             ))}
             {job.data?.findings?.length === 0 && <li className="text-sm text-ink-muted">No findings.</li>}
           </ul>
+          <div className="mt-4"><SkippedCheckList coverage={job.data?.coverage} tasks={job.data?.tasks} /></div>
         </div>
         <div className="rounded-[10px] border border-line bg-canvas-elevated p-5">
           <h2 className="text-lg font-semibold text-ink">Live steps</h2>

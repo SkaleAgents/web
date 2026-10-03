@@ -4,7 +4,10 @@ import { publicCheckBySlug, publicChecks } from "./public-checks";
 
 it("publishes each built-in check once, with the image scan kept honest", async () => {
   expect(new Set(publicChecks.map((check) => check.slug)).size).toBe(publicChecks.length);
-  expect(new Set(publicChecks.map((check) => check.ruleId)).size).toBe(12);
+  expect(new Set(publicChecks.map((check) => check.ruleId)).size).toBe(17);
+  expect(publicChecks.map((check) => check.title)).toEqual(expect.arrayContaining([
+    "Public database", "Wildcard IAM permissions", "Docker socket", "Missing memory limit", "Disabled timeout", "One-connection pool",
+  ]));
   const image = publicCheckBySlug("container-image-scan");
   expect(image?.limit).toMatch(/not a clean image report/);
   expect(image?.looksFor).toMatch(/does not scan/i);

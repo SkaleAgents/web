@@ -27,7 +27,7 @@ export default function PublicChecksPage() {
     <div className="mb-11 border-b border-line pb-10">
       <p className="marketing-eyebrow">Public reference / No account required</p>
       <h1 className="mt-4 max-w-3xl font-display text-[clamp(2.5rem,6vw,4.5rem)] font-semibold leading-tight tracking-tight">What a review actually checks.</h1>
-      <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">These pages describe the built-in checks in plain language. You can read them without signing in or paying. They do not run a review, connect to a cloud account, or prove that infrastructure is secure.</p>
+      <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">These pages describe the built-in checks in plain language. You can read them without signing in or paying. They do not run a review, connect to a cloud account, or prove that infrastructure is secure. Infrastructure text can be Terraform, CloudFormation, Kubernetes, Pulumi YAML, Pulumi programs, or Docker Compose. The list includes a public database, wildcard permissions, a Docker socket, a missing memory limit, a disabled timeout, and a one-connection pool.</p>
     </div>
     <div className="space-y-12">
       {publicCheckAreas.map((area) => (

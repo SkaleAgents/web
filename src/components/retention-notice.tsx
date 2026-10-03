@@ -39,6 +39,8 @@ export function RetentionNotice({ accountId, presentation = "page", showRecorded
   const acknowledgementOpen = Boolean(policy.data && (policy.data.acknowledgementEnabled ?? policy.data.enabled));
   const awaitingAcceptance = acknowledgementOpen && !policy.data?.noticeArchived;
 
+  if (!showRecorded && presentation !== "dialog") return null;
+
   if (presentation === "dialog") {
     if (!onClient || laterActive) return null;
     if (!policy.isError && !awaitingAcceptance) return null;

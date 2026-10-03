@@ -35,4 +35,6 @@ it("keeps the audit history scannable and opens full controls on a detail page",
   expect(screen.queryByRole("button", { name: "Export report" })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Delete audit" })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Open Watchtower" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("region", { name: "Retention policy" })).not.toBeInTheDocument();
+  expect(screen.queryByText(/Audit retention policy/)).not.toBeInTheDocument();
 });

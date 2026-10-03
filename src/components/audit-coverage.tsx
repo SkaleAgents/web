@@ -1,4 +1,17 @@
-import { checkLabel, checkLabels, reasonLabels, specialistLabels, type AuditCoverage, type CoverageTask } from "@/lib/audit-coverage";
+import { checkLabel, checkLabels, reasonLabels, skippedChecks, specialistLabels, type AuditCoverage, type CoverageTask } from "@/lib/audit-coverage";
+
+export function SkippedCheckList({ coverage, tasks = [] }: { coverage?: AuditCoverage; tasks?: CoverageTask[] }) {
+  const skipped = skippedChecks(coverage, tasks);
+  if (skipped.length === 0) return null;
+  const shown = skipped.slice(0, 8);
+  return <div className="space-y-2">
+    <h3 className="text-sm font-semibold text-ink">Skipped checks</h3>
+    <ul className="list-disc space-y-1 pl-5 text-sm text-ink-muted">
+      {shown.map((check) => <li key={check.id}>{check.label}. {check.reason}</li>)}
+    </ul>
+    {skipped.length > shown.length && <p className="text-xs text-ink-muted">{skipped.length - shown.length} more skipped checks are listed in check coverage.</p>}
+  </div>;
+}
 
 export function AuditCoveragePanel({ coverage, tasks = [], status }: {
   coverage?: AuditCoverage;
