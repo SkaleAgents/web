@@ -135,6 +135,9 @@ test("purged schedules require fresh input and deletion remains incomplete until
   await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeDisabled();
   await expect(page.getByText("Input unavailable. Source metadata is hidden.")).toBeVisible();
   await expect(page.getByText(/private-old-revision/)).toHaveCount(0);
+  await expect(page.getByText("Scanned revision: No revision has been recorded")).toBeVisible();
+  await expect(page.getByText("Webhook result: None")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Retention policy" })).toHaveCount(0);
   await page.getByRole("button", { name: "Supply fresh input" }).click();
   await expect(page.getByRole("button", { name: "Replace input and keep paused" })).toBeDisabled();
   await page.getByLabel("Fresh IaC input").fill("fresh input");
@@ -143,10 +146,12 @@ test("purged schedules require fresh input and deletion remains incomplete until
   await page.getByRole("button", { name: "Replace input and keep paused" }).click();
   await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeEnabled();
   await expect(page.getByText("Caller-reported source revision: new-revision")).toBeVisible();
+  await expect(page.getByText("Scanned revision: new-revision")).toBeVisible();
   await page.getByRole("button", { name: "Supply fresh input" }).click();
   await page.getByLabel("Fresh IaC input").fill("replacement without metadata");
   await page.getByRole("button", { name: "Replace input and keep paused" }).click();
   await expect(page.getByText("Caller-reported source revision: unknown")).toBeVisible();
+  await expect(page.getByText("Scanned revision: No revision has been recorded")).toBeVisible();
   await page.getByRole("button", { name: "Delete schedule", exact: true }).click();
   await page.getByRole("button", { name: "Confirm schedule deletion" }).click();
   await expect(page.getByText("Schedule deletion incomplete.", { exact: false })).toBeVisible();
@@ -154,4 +159,31 @@ test("purged schedules require fresh input and deletion remains incomplete until
   deleted = true;
   await page.getByRole("button", { name: "Check schedule deletion" }).click();
   await expect(page.getByText("Schedule deletion completed. Dispatched audits remain separate.")).toBeVisible();
+});
+
+test("schedule detail shows a recorded revision and each webhook result", async ({ page }) => {
+  const base = {
+    id, name: "Saved review", cronExpression: "0 * * * *", timezone: "UTC", enabled: true,
+    scope: { kind: "repo_ref", ref: "owner/repo" }, specialists: ["sre"], nextRunAt: null, sourceObservedAt: null,
+    retention: { inputAvailable: true, inputPurgeStatus: "retained", inputExpiresAt: null }, webhookConfigured: true,
+  };
+  let result: "delivered" | "failed" | "none" = "none";
+  let revision: string | null = null;
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Owner" } }));
+  await page.route("**/api/account/retention", route => route.fulfill({ json: { ...policy, enabled: false } }));
+  await page.route("**/sanctum/csrf-cookie", route => route.fulfill({ status: 204 }));
+  await page.route("**/api/schedules", route => route.fulfill({ json: { schedules: [{ ...base, sourceRevision: revision, webhookResult: result }] } }));
+  await page.goto(`/schedules/${id}`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByText("Scanned revision: No revision has been recorded")).toBeVisible();
+  await expect(page.getByText("Webhook result: None")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Retention policy" })).toHaveCount(0);
+  result = "delivered";
+  revision = "abc123";
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.getByText("Scanned revision: abc123")).toBeVisible();
+  await expect(page.getByText("Webhook result: Delivered")).toBeVisible();
+  result = "failed";
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.getByText("Webhook result: Failed")).toBeVisible();
+  await expect(page.getByText("Scanned revision: abc123")).toBeVisible();
 });

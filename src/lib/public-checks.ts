@@ -224,6 +224,113 @@ export const publicChecks: PublicCheck[] = [
     exampleLabel: "Assignment that this check is written to notice",
     example: "pool_size = 1",
   },
+  {
+    slug: "container-runs-as-root",
+    ruleId: "DF001",
+    area: "Security",
+    title: "Container runs as root",
+    looksFor: "A Dockerfile whose last USER is root or 0, or a Dockerfile with no USER instruction.",
+    needs: "The Dockerfile text. The check does not build or run the image.",
+    finding: "High severity. The suggested next step is to end the image with a non-root USER the image already supports.",
+    limit: "A root user that exists only in a comment is not a USER instruction. No finding does not prove the running container is unprivileged.",
+    exampleLabel: "Instruction that this check is written to notice",
+    example: "USER root",
+  },
+  {
+    slug: "remote-script-piped-to-a-shell",
+    ruleId: "DF003",
+    area: "Security",
+    title: "Remote script piped to a shell",
+    looksFor: "A Dockerfile RUN instruction that downloads a script with curl or wget and pipes it to sh or bash.",
+    needs: "The Dockerfile text. The check does not fetch the remote script.",
+    finding: "High severity. The suggested next step is to download the script, review it, and pin a checksum before running it.",
+    limit: "A download that is saved to a file and not piped to a shell is not this finding.",
+    exampleLabel: "Instruction that this check is written to notice",
+    example: "RUN curl -fsSL https://example.com/install.sh | bash",
+  },
+  {
+    slug: "pull-request-target-checkout",
+    ruleId: "GH001",
+    area: "Security",
+    title: "Pull request target checkout of PR code",
+    looksFor: "A GitHub Actions workflow that triggers on pull_request_target and checks out the pull request head ref or head sha.",
+    needs: "The workflow YAML. The check does not open the pull request.",
+    finding: "Critical severity. The suggested next step is to avoid checking out pull request head code from pull_request_target.",
+    limit: "A pull_request workflow, or a pull_request_target workflow that checks out only the base repository, is not this finding.",
+    exampleLabel: "Checkout that this check is written to notice",
+    example: `on:
+  pull_request_target:
+jobs:
+  build:
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: \${{ github.event.pull_request.head.sha }}`,
+  },
+  {
+    slug: "action-pinned-to-main",
+    ruleId: "GH003",
+    area: "Security",
+    title: "Action pinned to @main",
+    looksFor: "A GitHub Actions uses value pinned to @main or @master.",
+    needs: "The workflow YAML. The check does not look up the action repository.",
+    finding: "Medium severity. The suggested next step is to pin the action to a release tag or a full commit SHA.",
+    limit: "The check does not invent a commit SHA when the workflow only names a branch.",
+    exampleLabel: "Uses line that this check is written to notice",
+    example: "- uses: actions/checkout@main",
+  },
+  {
+    slug: "secret-file-copied-into-an-image",
+    ruleId: "DF004",
+    area: "Security",
+    title: "Secret file copied into an image",
+    looksFor: "A Dockerfile COPY or ADD whose source is .env, id_rsa, id_ed25519, a .pem file, or a path ending in credentials.",
+    needs: "The Dockerfile text. The check does not read the copied file.",
+    finding: "High severity. The suggested next step is to keep the secret file out of the image and mount it at runtime.",
+    limit: "COPY package.json is not this finding. A copy instruction that appears only in a comment is not a finding.",
+    exampleLabel: "Instruction that this check is written to notice",
+    example: "COPY .env /app/.env",
+  },
+  {
+    slug: "workflow-prints-a-secret",
+    ruleId: "GH004",
+    area: "Security",
+    title: "Workflow prints a secret",
+    looksFor: "A GitHub Actions run script that echoes or prints a \${{ secrets. }} expression.",
+    needs: "The workflow YAML. The check does not run the workflow.",
+    finding: "High severity. The suggested next step is to remove the secret from the script output.",
+    limit: "A normal run: echo \"hello\" is not this finding. Mentioning secrets.GITHUB_TOKEN in an env mapping, without printing it, is not this finding.",
+    exampleLabel: "Run script that this check is written to notice",
+    example: "run: echo ${{ secrets.API_KEY }}",
+  },
+  {
+    slug: "helm-privileged-container",
+    ruleId: "HELM001",
+    area: "Security",
+    title: "Helm privileged container",
+    looksFor: "A Helm template that sets privileged: true outside a comment.",
+    needs: "The chart template text. Helm templates are not executed.",
+    finding: "Critical severity. The suggested next step is to set privileged to false unless the workload is isolated on purpose.",
+    limit: "A rendered Kubernetes manifest with no template markers is reviewed as Kubernetes, not Helm. A template that only sets replicas: 1 is not this finding. privileged: true in a comment is not a finding.",
+    exampleLabel: "Setting that this check is written to notice",
+    example: `securityContext:
+  privileged: true`,
+  },
+  {
+    slug: "ansible-task-runs-as-root",
+    ruleId: "ANS001",
+    area: "Security",
+    title: "Ansible task runs as root",
+    looksFor: "An Ansible play or task that sets become: true or become: yes outside a comment.",
+    needs: "The playbook text. Ansible facts are not executed.",
+    finding: "High severity. The suggested next step is to set become to false unless the task has a reviewed need to run as root.",
+    limit: "A play with become: false and no public CIDR is not this finding. become: true in a comment is not a finding.",
+    exampleLabel: "Task that this check is written to notice",
+    example: `- hosts: all
+  tasks:
+    - name: install
+      become: true`,
+  },
 ];
 
 export const publicCheckAreas = ["Security", "Reliability", "AI workloads", "Scaling and cost"] as const;
