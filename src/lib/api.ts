@@ -212,6 +212,7 @@ export type SwarmSchedule = {
   specialists: string[];
   telemetry?: Record<string, unknown> | null;
   webhookConfigured: boolean;
+  webhookResult?: "none" | "delivered" | "failed";
   enabled: boolean;
   nextRunAt: string | null;
   lastRunAt: string | null;

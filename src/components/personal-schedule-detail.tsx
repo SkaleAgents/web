@@ -46,6 +46,8 @@ export function PersonalScheduleDetail({ id }: { id: string }) {
             <p className="text-sm text-ink-muted">Next run: {schedule.enabled && schedule.nextRunAt ? new Date(schedule.nextRunAt).toLocaleString() : "Not scheduled"}</p>
             <p className="text-sm text-ink-muted">Last run: {schedule.lastRunAt ? new Date(schedule.lastRunAt).toLocaleString() : "None yet"}</p>
             <p className="text-sm text-ink-muted">Webhook: {schedule.webhookConfigured ? "Configured" : "Not configured"}</p>
+            <p className="text-sm text-ink-muted">Scanned revision: {schedule.sourceRevision?.trim() ? schedule.sourceRevision : "No revision has been recorded"}</p>
+            <p className="text-sm text-ink-muted">Webhook result: {schedule.webhookResult === "delivered" ? "Delivered" : schedule.webhookResult === "failed" ? "Failed" : "None"}</p>
             <p className="break-all font-mono text-xs text-ink-muted">{schedule.cronExpression}</p>
             <p className="break-all text-sm text-ink-muted">Source: {source}</p>
             <SourceMetadata sourceRevision={schedule.sourceRevision} sourceObservedAt={schedule.sourceObservedAt} inputAvailable={schedule.retention?.inputAvailable} verified={schedule.scope?.kind === "repo_ref"} />
