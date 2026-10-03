@@ -8,7 +8,8 @@ test("public checks name infrastructure formats and bottleneck checks", async ({
   const deny = page.getByRole("button", { name: "Deny" });
   if (await deny.isVisible()) await deny.click();
   await expect(page.getByRole("heading", { name: "What a review actually checks." })).toBeVisible();
-  await expect(page.getByText("Terraform, CloudFormation, Kubernetes, Pulumi YAML, Pulumi programs, or Docker Compose")).toBeVisible();
+  await expect(page.getByText("a Dockerfile, or a GitHub Actions workflow")).toBeVisible();
+  await expect(page.getByText("a container that runs as root")).toBeVisible();
   for (const title of ["Public database", "Wildcard IAM permissions", "Docker socket", "Missing memory limit", "Disabled timeout", "One-connection pool"]) {
     await expect(page.getByRole("link", { name: title })).toBeVisible();
   }

@@ -241,7 +241,7 @@ function staticPage(path: string): string | null {
   }
   if (path === "/checks") {
     return document("Infrastructure review checks", [
-      "These checks describe what a review looks for. They do not run a review, connect to a cloud account, or prove that infrastructure is secure. Infrastructure text can be Terraform, CloudFormation, Kubernetes, Pulumi YAML, Pulumi programs, or Docker Compose. The list includes a public database, wildcard permissions, a Docker socket, a missing memory limit, a disabled timeout, and a one-connection pool.",
+      "These checks describe what a review looks for. They do not run a review, connect to a cloud account, or prove that infrastructure is secure. Infrastructure text can be Terraform, CloudFormation, Kubernetes, Pulumi YAML, Pulumi programs, Docker Compose, a Dockerfile, or a GitHub Actions workflow. The list includes a public database, wildcard permissions, a Docker socket, a missing memory limit, a disabled timeout, a one-connection pool, a container that runs as root, a workflow that checks out pull request code from pull_request_target, and an action pinned to @main.",
       "",
       ...publicChecks.map((check) => `- [${check.title}](${absoluteMarkdown(publicCheckPath(check))}): ${check.looksFor}`),
     ]);
