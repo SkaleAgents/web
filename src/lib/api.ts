@@ -304,6 +304,16 @@ export type ProposalGenerationResult = {
   skipped: Array<{ title: string; resource: string; reason: string }>;
 };
 
+export type EnterpriseInquiry = {
+  id: string;
+  organizationName: string;
+  contactName: string;
+  email: string;
+  requirements: string | null;
+  status: "received";
+  receivedAt: string;
+};
+
 export type ApiUser = {
   id: string;
   agreementRequired?: boolean;

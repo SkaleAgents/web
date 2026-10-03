@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import type { ApiUser } from "@/lib/api";
 
-export function AccountNavigation({ user, settingsActive, signingOut, onSignOut }: {
+export function AccountNavigation({ user, settingsActive, inquiriesActive = false, signingOut, onSignOut }: {
   user: ApiUser;
   settingsActive: boolean;
+  inquiriesActive?: boolean;
   signingOut: boolean;
   onSignOut: () => void;
 }) {
@@ -53,6 +54,10 @@ export function AccountNavigation({ user, settingsActive, signingOut, onSignOut 
           <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2" fill="var(--canvas-elevated)" /><circle cx="15" cy="17" r="2" fill="var(--canvas-elevated)" /></svg>
           Settings
         </Link>
+        {user.staffRole === "staff" || user.staffRole === "operator" ? <Link href="/staff/enterprise-inquiries" aria-current={inquiriesActive ? "page" : undefined}
+          className="account-nav-item" onClick={() => setOpen(false)}>
+          Enterprise inquiries
+        </Link> : null}
         <button type="button" className="account-nav-item" disabled={signingOut} onClick={onSignOut}>
           <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M9 4H4v16h5m6-12 4 4-4 4M9 12h10" /></svg>
           {signingOut ? "Signing out…" : "Sign out"}
