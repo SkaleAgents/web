@@ -207,6 +207,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
         findings={job.data?.findings ?? []}
         content={content}
         canPropose={sessionOpen}
+        apiSkipped={session.data?.skipped ?? []}
         onUpdated={() => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId, userId] })}
       />
       {close.isError && <p className="text-sm text-danger">{close.error.message}</p>}
@@ -214,17 +215,18 @@ function SessionReview({ sessionId }: { sessionId: string }) {
   );
 }
 
-function ProposalList({ proposals, sessionId, findings, content, canPropose, onUpdated }: { proposals: PatchProposal[]; sessionId: string; findings: SwarmFinding[]; content: string; canPropose: boolean; onUpdated: () => void }) {
+function ProposalList({ proposals, sessionId, findings, content, canPropose, apiSkipped, onUpdated }: { proposals: PatchProposal[]; sessionId: string; findings: SwarmFinding[]; content: string; canPropose: boolean; apiSkipped: ProposalGenerationResult["skipped"]; onUpdated: () => void }) {
   const [diffs, setDiffs] = useState<Record<string, string>>({});
   const [reasons, setReasons] = useState<Record<string, string>>({});
-  const [skipped, setSkipped] = useState<ProposalGenerationResult["skipped"]>([]);
+  const [generatedSkipped, setGeneratedSkipped] = useState<ProposalGenerationResult["skipped"] | null>(null);
+  const skipped = generatedSkipped ?? apiSkipped;
   const generate = useMutation({
     mutationFn: () => watchtowerFetch<ProposalGenerationResult>(`/sessions/${sessionId}/proposals/generate`, {
       method: "POST",
       body: JSON.stringify({ findings, content, file: "audit-input.tf" }),
     }),
     onSuccess: (result) => {
-      setSkipped(result.skipped);
+      setGeneratedSkipped(result.skipped);
       onUpdated();
     },
   });

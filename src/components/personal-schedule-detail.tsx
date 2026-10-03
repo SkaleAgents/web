@@ -11,6 +11,12 @@ import { SourceMetadata } from "@/components/source-metadata";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 import { scheduleCadenceLabel } from "@/lib/schedule-cadence";
 
+export function findingsChangeLabel(value: boolean | null | undefined): string {
+  if (value === true) return "Findings changed";
+  if (value === false) return "Findings unchanged";
+  return "No previous run";
+}
+
 export function PersonalScheduleDetail({ id }: { id: string }) {
   const pathname = usePathname();
   const href = (section: string) => personalDestinationFromPath(pathname, section);
@@ -48,6 +54,7 @@ export function PersonalScheduleDetail({ id }: { id: string }) {
             <p className="text-sm text-ink-muted">Webhook: {schedule.webhookConfigured ? "Configured" : "Not configured"}</p>
             <p className="text-sm text-ink-muted">Scanned revision: {schedule.retention?.inputAvailable === false || !schedule.sourceRevision?.trim() ? "No revision has been recorded" : schedule.sourceRevision}</p>
             <p className="text-sm text-ink-muted">Webhook result: {schedule.webhookResult === "delivered" ? "Delivered" : schedule.webhookResult === "failed" ? "Failed" : "None"}</p>
+            <p className="text-sm text-ink-muted">{findingsChangeLabel(schedule.findingsChanged)}</p>
             <p className="break-all font-mono text-xs text-ink-muted">{schedule.cronExpression}</p>
             <p className="break-all text-sm text-ink-muted">Source: {source}</p>
             <SourceMetadata sourceRevision={schedule.sourceRevision} sourceObservedAt={schedule.sourceObservedAt} inputAvailable={schedule.retention?.inputAvailable} verified={schedule.scope?.kind === "repo_ref"} />

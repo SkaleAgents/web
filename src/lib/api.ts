@@ -213,6 +213,7 @@ export type SwarmSchedule = {
   telemetry?: Record<string, unknown> | null;
   webhookConfigured: boolean;
   webhookResult?: "none" | "delivered" | "failed";
+  findingsChanged?: boolean | null;
   enabled: boolean;
   nextRunAt: string | null;
   lastRunAt: string | null;
@@ -279,6 +280,7 @@ export type WatchtowerSession = {
   createdAt: string;
   closedAt?: string;
   redirects?: WatchtowerRedirect[];
+  skipped?: ProposalGenerationResult["skipped"];
 };
 
 export type WatchtowerRedirect = {
