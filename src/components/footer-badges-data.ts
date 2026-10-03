@@ -55,6 +55,7 @@ export const directoryLinks = [
   ["Startup Project", "https://startupproject.org/"],
   ["Directory Hunt", "https://directoryhunt.org", "noopener"],
   ["NewTools", "https://newtools.site", "noopener"],
+  ["AiToolGo", "https://www.aitoolgo.com", "noopener noreferrer", "AiToolGo"],
 ] as const;
 
 export type DirectoryBadgeEntry = {
@@ -101,6 +102,9 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "IndieShowcase", href: "https://indieshowcase.io", src: "https://indieshowcase.io/badge/featured-light.svg", alt: "Featured", displayWidth: 153.6 },
   { name: "Submito", href: "https://submito.net", src: "https://submito.net/badge/listed-light.svg", alt: "Listed on Submito", title: "Listed on Submito", displayWidth: 153.6 },
   { name: "ToolFame", href: "https://toolfame.com/item/skaleagents", src: "https://toolfame.com/badge-light.svg", alt: "Featured on toolfame.com", rel: "noopener noreferrer", displayWidth: 153.6, imageStyle: { height: "54px", width: "auto" } },
+  { name: "Toolhunter", href: "https://toolhunter.ai/ai-tool/skaleagents?ref=badge", src: "https://toolhunter.ai/badge/skaleagents.svg?theme=light", width: 200, height: 50, alt: "Featured on Toolhunter", rel: "noopener", displayWidth: 153.6 },
+  { name: "AI Finder", href: "https://aifinder.site", src: "https://aifinder.site/light-badge.png", alt: "Discover more AI tools at aifinder.site", rel: "noopener noreferrer", displayWidth: 153.6, imageStyle: { width: "200px", height: "auto" } },
+  { name: "Product Launchify", href: "https://www.productlaunchify.com/projects/skaleagents", src: "https://www.productlaunchify.com/images/badges/powered-by-light.svg", width: 231, height: 55, alt: "Featured on Product Launchify", title: "Featured on Product Launchify", rel: "noopener noreferrer", ariaLabel: "Featured on Product Launchify", displayWidth: 153.6 },
 ];
 
 export const directoryBadgeEntries: DirectoryBadgeEntry[] = [

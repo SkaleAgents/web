@@ -30,6 +30,9 @@ const requestedBadges = [
   ["https://indieshowcase.io", "Featured"],
   ["https://submito.net", "Listed on Submito"],
   ["https://toolfame.com/item/skaleagents", "Featured on toolfame.com"],
+  ["https://toolhunter.ai/ai-tool/skaleagents?ref=badge", "Featured on Toolhunter"],
+  ["https://aifinder.site", "Discover more AI tools at aifinder.site"],
+  ["https://www.productlaunchify.com/projects/skaleagents", "Featured on Product Launchify"],
 ] as const;
 
 const addedBadgeImages = [
@@ -39,6 +42,9 @@ const addedBadgeImages = [
   ["https://indieshowcase.io", "https://indieshowcase.io/badge/featured-light.svg", null, null],
   ["https://submito.net", "https://submito.net/badge/listed-light.svg", null, null],
   ["https://toolfame.com/item/skaleagents", "https://toolfame.com/badge-light.svg", null, "noopener noreferrer"],
+  ["https://toolhunter.ai/ai-tool/skaleagents?ref=badge", "https://toolhunter.ai/badge/skaleagents.svg?theme=light", "50", "noopener"],
+  ["https://aifinder.site", "https://aifinder.site/light-badge.png", null, "noopener noreferrer"],
+  ["https://www.productlaunchify.com/projects/skaleagents", "https://www.productlaunchify.com/images/badges/powered-by-light.svg", "55", "noopener noreferrer"],
 ] as const;
 
 const requestedLinks = [
@@ -48,6 +54,7 @@ const requestedLinks = [
   ["https://startupproject.org/", "Startup Project", "noopener noreferrer"],
   ["https://directoryhunt.org", "Directory Hunt", "noopener"],
   ["https://newtools.site", "NewTools", "noopener"],
+  ["https://www.aitoolgo.com", "AiToolGo", "noopener noreferrer"],
 ] as const;
 
 describe("FooterBadges", () => {
@@ -120,6 +127,14 @@ describe("FooterBadges", () => {
     expect(links.find((link) => link.getAttribute("href") === "https://submito.net")).toHaveAttribute("title", "Listed on Submito");
     expect(links.find((link) => link.getAttribute("href") === "https://www.direct2app.com")?.querySelector("img")).toHaveAttribute("style", "height: 54px; width: auto;");
     expect(links.find((link) => link.getAttribute("href") === "https://toolfame.com/item/skaleagents")?.querySelector("img")).toHaveAttribute("style", "height: 54px; width: auto;");
+
+    const toolhunter = links.find((link) => link.getAttribute("href") === "https://toolhunter.ai/ai-tool/skaleagents?ref=badge")?.querySelector("img");
+    expect(toolhunter).toHaveAttribute("width", "200");
+    const launchify = links.find((link) => link.getAttribute("href") === "https://www.productlaunchify.com/projects/skaleagents");
+    expect(launchify).toHaveAttribute("title", "Featured on Product Launchify");
+    expect(launchify).toHaveAttribute("aria-label", "Featured on Product Launchify");
+    expect(launchify?.querySelector("img")).toHaveAttribute("width", "231");
+    expect(links.find((link) => link.getAttribute("href") === "https://aifinder.site")?.querySelector("img")).toHaveAttribute("style", "width: 200px; height: auto;");
   });
 
   it("renders the remaining submissions as plain links outside the badge slider", () => {
@@ -134,5 +149,7 @@ describe("FooterBadges", () => {
       expect(matchingLinks[0].closest(".footer-badge-group")).toBeNull();
       expect(matchingLinks[0].querySelector("img")).toBeNull();
     }
+
+    expect(allLinks.find((link) => link.getAttribute("href") === "https://www.aitoolgo.com")).toHaveAttribute("title", "AiToolGo");
   });
 });
