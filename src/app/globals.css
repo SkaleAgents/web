@@ -437,7 +437,7 @@ body:has(.retention-notice-dialog[open]) {
 .scope-switcher-options a { overflow: hidden; border-radius: 5px; padding: 0.6rem 0.7rem; color: var(--ink); text-overflow: ellipsis; white-space: nowrap; }
 .scope-switcher-options a:hover, .scope-switcher-options a[aria-current="page"] { background: var(--accent-soft); }
 .dashboard-content { width: 100%; max-width: 1440px; margin-inline: auto; padding: 2rem; }
-.dashboard-content .workspace-heading { font-family: var(--font-syne), sans-serif; font-size: clamp(1.75rem, 3vw, 2rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; }
+.dashboard-content .workspace-heading { font-family: var(--font-syne), sans-serif; font-size: clamp(1.75rem, 3vw, 2rem); font-weight: 700; letter-spacing: -0.03em; line-height: 36px; }
 .dashboard-content .workspace-intro { padding-bottom: 1.25rem; }
 .dashboard-content .workspace-kicker { margin-bottom: 0.4rem; font-family: inherit; font-size: 0.8rem; text-transform: none; letter-spacing: normal; }
 @media (max-width: 1023px) {
@@ -505,7 +505,7 @@ html.dark .dashboard-frame {
 .dashboard-toolbar .account-nav-trigger { border: 0; }
 .dashboard-toolbar .account-nav-avatar { background: var(--accent-soft); color: var(--ink); }
 .dashboard-content { max-width: 1200px; padding: 30px 40px 72px; }
-.dashboard-content .workspace-heading { font-family: var(--font-syne), sans-serif; font-size: clamp(24px, 2.5vw, 30px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; }
+.dashboard-content .workspace-heading { font-family: var(--font-syne), sans-serif; font-size: clamp(24px, 2.5vw, 30px); font-weight: 700; letter-spacing: -0.03em; line-height: 36px; }
 .dashboard-content .workspace-intro { border: 0; padding-bottom: 12px; }
 .dashboard-content :is(input, textarea, select) { border-radius: 8px; }
 .dashboard-frame [data-ui="button"] { min-height: 36px; border-radius: 8px; font-weight: 500; transition: background 140ms ease, box-shadow 140ms ease; }
