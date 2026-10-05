@@ -8,12 +8,24 @@ import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retent
 import { AuditResultSummary } from "@/components/audit-result-summary";
 import { AuditCoveragePanel, PlainCheckList } from "@/components/audit-coverage";
 import { findingPlace } from "@/lib/audit-coverage";
+import { leadFinding, plainRisk } from "@/lib/audit-risk";
 import { SourceMetadata } from "@/components/source-metadata";
 import { Button, LinkButton } from "@/components/ui";
 import { scheduledRunLabel } from "@/lib/audit-dispatch";
 import { apiFetch, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { organizationPath, scopeFromPath } from "@/lib/dashboard-routes";
+
+function RiskLead({ findings, partial }: { findings: Array<{ title: string; severity: string }>; partial?: boolean }) {
+  const lead = leadFinding(findings);
+  const more = findings.length - 1;
+  return <section className="audit-risk" aria-label="Risk">
+    <span className="finding-severity" data-severity={lead.severity}>{lead.severity}</span>
+    <h2>{plainRisk(lead.title, lead.severity)}</h2>
+    {more > 0 && <p>{more} more {more === 1 ? "finding is" : "findings are"} listed below.</p>}
+    {partial && <p>Some checks may be missing. This is not the full picture.</p>}
+  </section>;
+}
 
 function FindingResource({ value }: { value: string }) {
   const tokens = value.split(/(\.|\[|\])/);
@@ -68,12 +80,13 @@ export function PersonalJobDetail({ id }: { id: string }) {
           <button type="button" role="tab" id="audit-advanced-tab" aria-controls="audit-advanced-panel" aria-selected={view === "advanced"} tabIndex={view === "advanced" ? 0 : -1} onClick={() => setView("advanced")}>Advanced</button>
         </div>
         <div role="tabpanel" id="audit-general-panel" aria-labelledby="audit-general-tab" hidden={view !== "general"} className="space-y-6">
-          <section className="audit-overview" aria-label="Audit overview">
+          {job.data.findings && job.data.findings.length > 0 ? <RiskLead findings={job.data.findings} partial={job.data.partial} /> : <section className="audit-overview" aria-label="Audit overview">
             <p className="audit-status text-xs font-semibold capitalize text-ink-muted">{job.data.status}{job.data.partial ? " · Partial results" : ""}{scheduledRunLabel(job.data) ? ` · ${scheduledRunLabel(job.data)}` : ""}</p>
             <AuditResultSummary job={job.data} />
             {job.data.summary && <p className="mt-2 text-sm text-ink-muted">{job.data.summary}</p>}
             {job.data.error && <p role="alert" className="mt-3 text-sm text-danger">{job.data.error}</p>}
-          </section>
+          </section>}
+          {job.data.findings && job.data.findings.length > 0 && job.data.error && <p role="alert" className="text-sm text-danger">{job.data.error}</p>}
           {job.data.findings && <section className="audit-findings" aria-label="Findings">
             <div className="audit-section-heading"><h2>Findings</h2><span>{job.data.findings.length} {job.data.findings.length === 1 ? "finding" : "findings"}</span></div>
             {job.data.findings.length === 0 ? <p className="text-sm text-ink-muted">No findings were recorded.</p> : job.data.findings.map((finding, index) => <article key={index} className="audit-finding">
