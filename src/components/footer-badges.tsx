@@ -80,6 +80,18 @@ function BoworaBadge() {
   );
 }
 
+function AgentWiseBadge() {
+  return (
+    <svg width="200" height="48" viewBox="0 0 200 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="48" rx="6" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="1" />
+      <circle cx="28" cy="24" r="14" fill="#2563eb" />
+      <text x="28" y="29" fontFamily="Arial, sans-serif" fontSize="14" fontWeight="700" textAnchor="middle" fill="white">A</text>
+      <text x="54" y="22" fontFamily="system-ui, sans-serif" fontSize="11" fontWeight="500" fill="#6B7280">Featured on</text>
+      <text x="54" y="37" fontFamily="system-ui, sans-serif" fontSize="14" fontWeight="700" fill="#2563eb">AgentWise</text>
+    </svg>
+  );
+}
+
 export function FooterBadges() {
   const slider = useRef<HTMLDivElement>(null);
   const [manual, setManual] = useState(false);
@@ -104,8 +116,8 @@ export function FooterBadges() {
           {(clientReady ? [false, true] : [false]).map((duplicate) => (
             <div key={String(duplicate)} className="footer-badge-group" aria-hidden={duplicate ? true : undefined}>
               {directoryBadgeEntries.map((badge) => (
-                <a key={badge.href} href={badge.href} target="_blank" rel={badge.rel} title={badge.title} aria-label={badge.ariaLabel} tabIndex={duplicate ? -1 : undefined} style={badge.variant === "bowora" ? { display: "inline-flex", alignItems: "center", gap: 10, width: 170, height: 50, backgroundColor: "#fff", color: "#000", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", padding: "8px 14px", borderRadius: 8, textDecoration: "none", border: "1px solid #E8E8E8" } : badge.variant === "ainexfinder" ? { display: "inline-flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "#7150E6", border: "1px solid #6347D1", borderRadius: 10, textDecoration: "none", fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif", lineHeight: 1 } : { width: badge.displayWidth }} data-topaitools4u-badge={badge.name === "TopAITools4U" ? "verified-listing" : undefined}>
-                  {badge.variant === "agenthunter" ? <AgentHunterBadge /> : badge.variant === "ainexfinder" ? <AInexfinderBadge /> : badge.variant === "bowora" ? <BoworaBadge /> : <BadgeImage name={badge.name} src={badge.src} width={badge.width} height={badge.height} alt={badge.alt} loading={badge.loading} decoding={badge.decoding} imageStyle={badge.imageStyle} />}
+                <a key={badge.href} href={badge.href} target="_blank" rel={badge.rel} title={badge.title} aria-label={badge.ariaLabel} tabIndex={duplicate ? -1 : undefined} style={badge.variant === "bowora" ? { display: "inline-flex", alignItems: "center", gap: 10, width: 170, height: 50, backgroundColor: "#fff", color: "#000", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", padding: "8px 14px", borderRadius: 8, textDecoration: "none", border: "1px solid #E8E8E8" } : badge.variant === "ainexfinder" ? { display: "inline-flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "#7150E6", border: "1px solid #6347D1", borderRadius: 10, textDecoration: "none", fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif", lineHeight: 1 } : badge.variant === "agentwise" ? { display: "inline-flex", width: 200, height: 48 } : { width: badge.displayWidth }} data-topaitools4u-badge={badge.name === "TopAITools4U" ? "verified-listing" : undefined}>
+                  {badge.variant === "agenthunter" ? <AgentHunterBadge /> : badge.variant === "ainexfinder" ? <AInexfinderBadge /> : badge.variant === "bowora" ? <BoworaBadge /> : badge.variant === "agentwise" ? <AgentWiseBadge /> : <BadgeImage name={badge.name} src={badge.src} width={badge.width} height={badge.height} alt={badge.alt} loading={badge.loading} decoding={badge.decoding} imageStyle={badge.imageStyle} />}
                 </a>
               ))}
             </div>

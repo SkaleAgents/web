@@ -59,6 +59,8 @@ export const directoryLinks = [
   ["Listed on Tool Index", "https://toolindex.net/?ref=listed", "nofollow noopener"],
   ["RightAI Tools Diresctory", "https://right-ai.com/", "", "RightAI Tools Directory"],
   ["AiHeron", "https://www.aiheron.com/", "", "AiHeron AI nav"],
+  ["Okei AI Tools", "https://okeiai.com/", "", "Okei AI Tools Directory"],
+  ["T0 AI Tools Directory", "https://t0ai.com", "", "T0 AI Tools Directory"],
 ] as const;
 
 export type DirectoryBadgeEntry = {
@@ -72,7 +74,7 @@ export type DirectoryBadgeEntry = {
   rel?: string;
   displayWidth: number;
   ariaLabel?: string;
-  variant?: "agenthunter" | "ainexfinder" | "bowora";
+  variant?: "agenthunter" | "ainexfinder" | "bowora" | "agentwise";
   loading?: "eager" | "lazy" | null;
   decoding?: "async" | "auto" | "sync" | null;
   imageStyle?: CSSProperties;
@@ -114,6 +116,13 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "EasyLaunch", href: "https://easylaunch.dev/dev-tools/skaleagents", src: "https://easylaunch.dev/badge/easylaunch-badge-light.svg", width: 188, height: 56, alt: "Featured on EasyLaunch", rel: "noopener", displayWidth: 128.9 },
   { name: "ShipGrowth", href: "https://shipgrowth.dev", src: "https://storage.shipgrowth.dev/badge-light.png", alt: "Featured on ShipGrowth", rel: "noopener noreferrer", displayWidth: 153.6, imageStyle: { height: "64px", width: "auto" } },
   { name: "AI Tool Discovery", href: "https://aitooldiscovery.com", src: "https://aitooldiscovery.com/badges/featured-1.svg", width: 200, height: 54, alt: "Featured on AI Tool Discovery", displayWidth: 142.2 },
+  { name: "LaunchKiwi", href: "https://launchkiwi.com/p/skaleagents", src: "https://launchkiwi.com/badge-light.svg", width: 198, height: 62, alt: "Featured on LaunchKiwi", rel: "noopener", displayWidth: 122.6 },
+  { name: "ToolVerified", href: "https://www.toolverified.com/tool/skaleagents?ref=badge", src: "https://www.toolverified.com/badge/35703d0a1bdf0158f31b3af7-light.svg", width: 220, height: 54, alt: "SkaleAgents on ToolVerified", rel: "noopener", displayWidth: 153.6, imageStyle: { width: "220px", height: "54px" } },
+  { name: "PromptFrenzy", href: "https://www.promptfrenzy.com/directory", src: "https://www.promptfrenzy.com/badges/directory.svg", width: 220, height: 44, alt: "Featured on PromptFrenzy AI Directory", title: "Featured on PromptFrenzy AI Directory", rel: "noopener", displayWidth: 153.6, loading: "lazy" },
+  { name: "MediaProNet", href: "https://mediapronet.com/?utm_source=partner-site&utm_medium=badge", src: "https://mediapronet.com/api/badge?style=classic", height: 54, alt: "Listed on MEDIAPRONET", rel: "nofollow noopener noreferrer", displayWidth: 153.6 },
+  { name: "ToolNav", href: "https://toolnav.ai/", src: "https://toolnav.ai/badges/toolnav-dark.svg", width: 220, height: 60, alt: "ToolNav AI", rel: "noopener noreferrer", displayWidth: 140.8 },
+  { name: "AgentWise", href: "https://agentwise.org/agent/skaleagents", src: null, rel: "noopener", displayWidth: 200, variant: "agentwise" },
+  { name: "AIGCList", href: "https://aigclist.com", src: "https://aigclist.com/imgs/badge.svg", width: 240, height: 56, alt: "Featured on AIGCLIST", rel: "noopener", displayWidth: 153.6 },
 ];
 
 export const directoryBadgeEntries: DirectoryBadgeEntry[] = [

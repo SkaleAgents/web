@@ -39,6 +39,13 @@ const requestedBadges = [
   ["https://easylaunch.dev/dev-tools/skaleagents", "Featured on EasyLaunch"],
   ["https://shipgrowth.dev", "Featured on ShipGrowth"],
   ["https://aitooldiscovery.com", "Featured on AI Tool Discovery"],
+  ["https://launchkiwi.com/p/skaleagents", "Featured on LaunchKiwi"],
+  ["https://www.toolverified.com/tool/skaleagents?ref=badge", "SkaleAgents on ToolVerified"],
+  ["https://www.promptfrenzy.com/directory", "Featured on PromptFrenzy AI Directory"],
+  ["https://mediapronet.com/?utm_source=partner-site&utm_medium=badge", "Listed on MEDIAPRONET"],
+  ["https://toolnav.ai/", "ToolNav AI"],
+  ["https://agentwise.org/agent/skaleagents", null],
+  ["https://aigclist.com", "Featured on AIGCLIST"],
 ] as const;
 
 const addedBadgeImages = [
@@ -57,6 +64,12 @@ const addedBadgeImages = [
   ["https://easylaunch.dev/dev-tools/skaleagents", "https://easylaunch.dev/badge/easylaunch-badge-light.svg", "56", "noopener"],
   ["https://shipgrowth.dev", "https://storage.shipgrowth.dev/badge-light.png", null, "noopener noreferrer"],
   ["https://aitooldiscovery.com", "https://aitooldiscovery.com/badges/featured-1.svg", "54", null],
+  ["https://launchkiwi.com/p/skaleagents", "https://launchkiwi.com/badge-light.svg", "62", "noopener"],
+  ["https://www.toolverified.com/tool/skaleagents?ref=badge", "https://www.toolverified.com/badge/35703d0a1bdf0158f31b3af7-light.svg", "54", "noopener"],
+  ["https://www.promptfrenzy.com/directory", "https://www.promptfrenzy.com/badges/directory.svg", "44", "noopener"],
+  ["https://mediapronet.com/?utm_source=partner-site&utm_medium=badge", "https://mediapronet.com/api/badge?style=classic", "54", "nofollow noopener noreferrer"],
+  ["https://toolnav.ai/", "https://toolnav.ai/badges/toolnav-dark.svg", "60", "noopener noreferrer"],
+  ["https://aigclist.com", "https://aigclist.com/imgs/badge.svg", "56", "noopener"],
 ] as const;
 
 const requestedLinks = [
@@ -70,6 +83,8 @@ const requestedLinks = [
   ["https://toolindex.net/?ref=listed", "Listed on Tool Index", "nofollow noopener"],
   ["https://right-ai.com/", "RightAI Tools Diresctory", null],
   ["https://www.aiheron.com/", "AiHeron", null],
+  ["https://okeiai.com/", "Okei AI Tools", null],
+  ["https://t0ai.com", "T0 AI Tools Directory", null],
 ] as const;
 
 describe("FooterBadges", () => {
@@ -84,6 +99,8 @@ describe("FooterBadges", () => {
 
     expect(markup).not.toContain("hJHZDJxqO5");
     expect(markup).not.toContain("ainewtool.site");
+    expect(markup).not.toContain("launchnest.io");
+    expect(markup).not.toContain("launchpadly.co");
     expect(links.filter((link) => link.getAttribute("href") === "https://saascity.io")).toHaveLength(1);
   });
 
@@ -107,6 +124,11 @@ describe("FooterBadges", () => {
       } else if (href === "https://bowora.com/") {
         expect(matchingLinks[0]).toHaveTextContent(/Featured on\s*Bowora/);
         expect(matchingLinks[0].querySelector("svg")).not.toBeNull();
+      } else if (href === "https://agentwise.org/agent/skaleagents") {
+        expect(matchingLinks[0]).toHaveTextContent(/Featured on\s*AgentWise/);
+        expect(matchingLinks[0].querySelector("svg")).toHaveAttribute("width", "200");
+        expect(matchingLinks[0].querySelector("svg")).toHaveAttribute("height", "48");
+        expect(matchingLinks[0]).toHaveAttribute("rel", "noopener");
       } else {
         expect(matchingLinks[0], href).toHaveTextContent("AI旋风");
       }
@@ -168,6 +190,19 @@ describe("FooterBadges", () => {
     expect(links.find((link) => link.getAttribute("href") === "https://shipgrowth.dev")?.querySelector("img")).toHaveAttribute("style", "height: 64px; width: auto;");
     expect(links.find((link) => link.getAttribute("href") === "https://aitooldiscovery.com")?.querySelector("img")).toHaveAttribute("width", "200");
     expect(container.innerHTML).not.toContain("https://tools.cafe/b/light.svg");
+    expect(links.find((link) => link.getAttribute("href") === "https://launchkiwi.com/p/skaleagents")?.querySelector("img")).toHaveAttribute("width", "198");
+    const toolVerified = links.find((link) => link.getAttribute("href") === "https://www.toolverified.com/tool/skaleagents?ref=badge")?.querySelector("img");
+    expect(toolVerified).toHaveAttribute("width", "220");
+    expect(toolVerified?.getAttribute("style")).toContain("width: 220px");
+    expect(toolVerified?.getAttribute("style")).toContain("height: 54px");
+    const promptFrenzy = links.find((link) => link.getAttribute("href") === "https://www.promptfrenzy.com/directory");
+    expect(promptFrenzy).toHaveAttribute("title", "Featured on PromptFrenzy AI Directory");
+    expect(promptFrenzy?.querySelector("img")).toHaveAttribute("loading", "lazy");
+    expect(promptFrenzy?.querySelector("img")).toHaveAttribute("width", "220");
+    expect(links.find((link) => link.getAttribute("href") === "https://mediapronet.com/?utm_source=partner-site&utm_medium=badge")?.querySelector("img")).not.toHaveAttribute("width");
+    expect(links.find((link) => link.getAttribute("href") === "https://toolnav.ai/")?.querySelector("img")).toHaveAttribute("width", "220");
+    expect(links.find((link) => link.getAttribute("href") === "https://aigclist.com")?.querySelector("img")).toHaveAttribute("width", "240");
+    expect(container.innerHTML).not.toContain("toolnav-light");
   });
 
   it("renders the remaining submissions as plain links outside the badge slider", () => {
@@ -187,5 +222,7 @@ describe("FooterBadges", () => {
     expect(allLinks.find((link) => link.getAttribute("href") === "https://www.aitoolgo.com")).toHaveAttribute("title", "AiToolGo");
     expect(allLinks.find((link) => link.getAttribute("href") === "https://right-ai.com/")).toHaveAttribute("title", "RightAI Tools Directory");
     expect(allLinks.find((link) => link.getAttribute("href") === "https://www.aiheron.com/")).toHaveAttribute("title", "AiHeron AI nav");
+    expect(allLinks.find((link) => link.getAttribute("href") === "https://okeiai.com/")).toHaveAttribute("title", "Okei AI Tools Directory");
+    expect(allLinks.find((link) => link.getAttribute("href") === "https://t0ai.com")).toHaveAttribute("title", "T0 AI Tools Directory");
   });
 });
