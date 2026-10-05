@@ -510,6 +510,56 @@ jobs:
   "Statement": [{ "Effect": "Allow", "Action": "*", "Resource": "*" }]
 }`,
   },
+  {
+    slug: "referenced-value-is-public",
+    ruleId: "iac.referenced-public-value",
+    area: "Security",
+    title: "Referenced value is public",
+    looksFor: "A same-file var, local, or CloudFormation parameter Default of 0.0.0.0/0 or ::/0 used through a reference.",
+    needs: "The variable, local, or parameter Default and the resource or module argument that references it, in the same file.",
+    finding: "High severity. The suggested next step is to replace the referenced public range with an approved range.",
+    limit: "A private default such as 10.0.0.0/24 or 10.0.0.0/16 is not this finding. Functions, Fn::Sub, and a parameter with no Default stay unresolved. A value that appears only in a comment is not this finding.",
+    exampleLabel: "Reference that this check is written to notice",
+    example: `variable "cidr" {
+  default = "0.0.0.0/0"
+}
+resource "aws_security_group" "web" {
+  ingress {
+    cidr_blocks = [var.cidr]
+  }
+}`,
+  },
+  {
+    slug: "referenced-secret",
+    ruleId: "iac.referenced-secret",
+    area: "Security",
+    title: "Referenced secret",
+    looksFor: "A same-file secret-like variable or parameter default used through a reference.",
+    needs: "The variable or parameter Default and the resource, module argument, or property that references it, in the same file.",
+    finding: "High severity. The suggested next step is to pass the value from a secret store and leave the default empty.",
+    limit: "An unknown name stays quiet. The same secret value is reported once. A secret that appears only in a comment is not this finding.",
+    exampleLabel: "Reference that this check is written to notice",
+    example: `variable "password" {
+  default = "hunter2"
+}
+resource "aws_db_instance" "db" {
+  password = var.password
+}`,
+  },
+  {
+    slug: "iam-condition-allows-every-address",
+    ruleId: "iac.iam-open-source-address",
+    area: "Security",
+    title: "IAM condition allows every address",
+    looksFor: "An IpAddress or aws:SourceIp value of 0.0.0.0/0, ::/0, or * on a standalone IAM policy or a Serverless iamRoleStatements entry.",
+    needs: "The policy JSON or the Serverless iamRoleStatements entry. Other condition operators are not evaluated.",
+    finding: "High severity. The suggested next step is to restrict the source address to an approved range.",
+    limit: "A condition of 10.0.0.0/8 or a specific address is not this finding. An Effect of Deny is not this finding.",
+    exampleLabel: "Condition that this check is written to notice",
+    example: `Condition:
+  IpAddress:
+    aws:SourceIp: 0.0.0.0/0`,
+  },
 ];
 
 export const publicCheckAreas = ["Security", "Reliability", "AI workloads", "Scaling and cost"] as const;
