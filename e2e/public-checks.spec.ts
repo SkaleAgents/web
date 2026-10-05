@@ -21,10 +21,9 @@ test("public checks index lists titles and detail pages still explain the check"
   await expect(page.getByRole("heading", { name: "What a check cannot do" })).toBeVisible();
   await expect(page.getByText("No findings does not prove the system is secure.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Wildcard IAM permissions" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Public database" })).toHaveCount(0);
-  await expect(page.getByText("A database that enables public network access")).toHaveCount(0);
-  await page.getByRole("link", { name: "Security 37" }).click();
   await expect(page.getByRole("link", { name: "Public database" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Error rate" })).toHaveCount(0);
+  await expect(page.getByText("A database that enables public network access")).toHaveCount(0);
   await page.getByRole("link", { name: "Public database" }).click();
   await page.waitForURL("**/checks/public-database");
   await expect(page.getByText("A database that enables public network access")).toBeVisible();
