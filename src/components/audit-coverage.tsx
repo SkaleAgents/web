@@ -1,4 +1,18 @@
-import { checkLabel, checkLabels, reasonLabels, skippedChecks, specialistLabels, type AuditCoverage, type CoverageTask } from "@/lib/audit-coverage";
+import { checkLabel, checkTitle, evaluatedClearChecks, reasonLabels, skippedChecks, specialistLabels, type AuditCoverage, type CoverageTask } from "@/lib/audit-coverage";
+
+export function ClearCheckSummary({ coverage, tasks = [] }: { coverage?: AuditCoverage; tasks?: CoverageTask[] }) {
+  const checks = evaluatedClearChecks(coverage, tasks);
+  if (checks.length === 0) return null;
+  const shown = checks.slice(0, 12);
+  const more = checks.length - shown.length;
+  return <div className="space-y-2">
+    <p className="text-sm text-ink">These checks ran and found nothing.</p>
+    <ul className="list-disc space-y-1 pl-5 text-sm text-ink-muted">
+      {shown.map((check) => <li key={check.id}>{check.title}</li>)}
+    </ul>
+    {more > 0 && <p className="text-xs text-ink-muted">{more} more ran.</p>}
+  </div>;
+}
 
 export function SkippedCheckList({ coverage, tasks = [] }: { coverage?: AuditCoverage; tasks?: CoverageTask[] }) {
   const skipped = skippedChecks(coverage, tasks);
@@ -34,7 +48,7 @@ export function AuditCoveragePanel({ coverage, tasks = [], status }: {
       <summary className="cursor-pointer text-sm font-medium text-ink focus-visible:outline-2 focus-visible:outline-offset-4">{specialistLabels[task.specialist] ?? "Specialist"}</summary>
       {task.checkCoverage?.version === "builtin-coverage-v1" ? <ul className="mt-3 space-y-3">
         {task.checkCoverage.checks.map(check => <li key={check.ruleId} className="text-sm">
-          <p className="font-medium text-ink">{checkLabels[check.ruleId] ?? "Unrecognized check"}</p>
+          <p className="font-medium text-ink">{checkTitle(check) || "Unrecognized check"}</p>
           <p className="text-ink-muted">{checkLabel(check)}</p>
           {check.findingCount > 0 && <p className="text-ink-muted">{check.findingCount} {check.findingCount === 1 ? "finding" : "findings"}</p>}
           {check.reasonCodes.map(reason => <p key={reason} className="text-xs text-ink-muted">{reasonLabels[reason] ?? "Check details unavailable"}</p>)}

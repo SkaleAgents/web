@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retention-controls";
 import { AuditResultSummary } from "@/components/audit-result-summary";
-import { AuditCoveragePanel, SkippedCheckList } from "@/components/audit-coverage";
+import { AuditCoveragePanel, ClearCheckSummary, SkippedCheckList } from "@/components/audit-coverage";
 import { findingPlace } from "@/lib/audit-coverage";
 import { SourceMetadata } from "@/components/source-metadata";
 import { Button, LinkButton } from "@/components/ui";
@@ -72,7 +72,10 @@ export function PersonalJobDetail({ id }: { id: string }) {
         </section>
         {job.data.findings && <section className="audit-findings" aria-label="Findings">
           <div className="audit-section-heading"><h2>Findings</h2><span>{job.data.findings.length} recorded</span></div>
-          {job.data.findings.length === 0 ? <p className="text-sm text-ink-muted">No findings were recorded. Review check coverage below to understand the limits.</p> : job.data.findings.map((finding, index) => <article key={index} className="audit-finding">
+          {job.data.findings.length === 0 ? <div className="space-y-3">
+            <p className="text-sm text-ink-muted">No findings were recorded.</p>
+            <ClearCheckSummary coverage={job.data.coverage} tasks={job.data.tasks} />
+          </div> : job.data.findings.map((finding, index) => <article key={index} className="audit-finding">
             <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
             <div><h3 className="font-semibold">{finding.title}</h3><p className="mt-1 text-sm text-ink-muted">{finding.detail}</p>
               {findingPlace(finding) && <p className="mt-2 break-all font-mono text-xs text-ink-muted">{findingPlace(finding)}</p>}
