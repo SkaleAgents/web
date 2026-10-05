@@ -94,6 +94,14 @@ export function findingPlace(finding: { resource?: string | null; location?: { p
   return finding.resource || null;
 }
 
+export function checksWithStatus(coverage: AuditCoverage | undefined, tasks: CoverageTask[], status: CheckResult["status"]): Array<{ id: string; title: string }> {
+  const rows = coverage?.tasks?.length ? coverage.tasks : tasks;
+  return rows.flatMap((task) => (task.checkCoverage?.checks ?? []).filter((check) => check.status === status).map((check) => ({
+    id: `${task.specialist}:${check.ruleId}`,
+    title: checkTitle(check) || "Unnamed check",
+  })));
+}
+
 export function skippedChecks(coverage?: AuditCoverage, tasks: CoverageTask[] = []): Array<{ id: string; label: string; reason: string }> {
   const rows = coverage?.tasks?.length ? coverage.tasks : tasks;
   return rows.flatMap((task) => (task.checkCoverage?.checks ?? []).filter((check) => check.status === "skipped").map((check) => ({

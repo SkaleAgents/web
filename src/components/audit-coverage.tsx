@@ -1,4 +1,4 @@
-import { checkLabel, checkTitle, evaluatedClearChecks, reasonLabels, skippedChecks, specialistLabels, type AuditCoverage, type CoverageTask } from "@/lib/audit-coverage";
+import { checkLabel, checksWithStatus, checkTitle, evaluatedClearChecks, reasonLabels, skippedChecks, specialistLabels, type AuditCoverage, type CoverageTask } from "@/lib/audit-coverage";
 
 export function ClearCheckSummary({ coverage, tasks = [] }: { coverage?: AuditCoverage; tasks?: CoverageTask[] }) {
   const checks = evaluatedClearChecks(coverage, tasks);
@@ -25,6 +25,30 @@ export function SkippedCheckList({ coverage, tasks = [] }: { coverage?: AuditCov
     </ul>
     {skipped.length > shown.length && <p className="text-xs text-ink-muted">{skipped.length - shown.length} more skipped checks are listed in check coverage.</p>}
   </div>;
+}
+
+export function PlainCheckList({ coverage, tasks = [], status }: { coverage?: AuditCoverage; tasks?: CoverageTask[]; status: string }) {
+  const pending = status === "queued" || status === "running";
+  const checked = checksWithStatus(coverage, tasks, "evaluated");
+  const skipped = skippedChecks(coverage, tasks);
+  const failed = checksWithStatus(coverage, tasks, "failed");
+  const recorded = Boolean(coverage?.ruleLevelChecksAvailable) || checked.length + skipped.length + failed.length > 0;
+  const shown = <T,>(items: T[]) => items.slice(0, 8);
+  return <section className="audit-check-list" aria-label="What was checked">
+    <h2>What was checked</h2>
+    {pending ? <p>Checks are still running.</p> : !recorded ? <p>This audit did not record which checks ran or which were skipped.</p> : <>
+      <h3>Checked</h3>
+      {checked.length === 0 ? <p>No completed checks were recorded.</p> : <ul>{shown(checked).map((check) => <li key={check.id}>{check.title}</li>)}</ul>}
+      {checked.length > 8 && <p>{checked.length - 8} more completed checks are in Advanced.</p>}
+      <h3>Not checked</h3>
+      {skipped.length === 0 ? <p>No skipped checks were recorded.</p> : <ul>{shown(skipped).map((check) => <li key={check.id}>{check.label}. {check.reason}</li>)}</ul>}
+      {skipped.length > 8 && <p>{skipped.length - 8} more skipped checks are in Advanced.</p>}
+      {failed.length > 0 && <>
+        <h3>Could not finish</h3>
+        <ul>{shown(failed).map((check) => <li key={check.id}>{check.title}</li>)}</ul>
+      </>}
+    </>}
+  </section>;
 }
 
 export function AuditCoveragePanel({ coverage, tasks = [], status }: {
