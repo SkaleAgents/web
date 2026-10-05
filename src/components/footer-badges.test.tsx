@@ -33,6 +33,12 @@ const requestedBadges = [
   ["https://toolhunter.ai/ai-tool/skaleagents?ref=badge", "Featured on Toolhunter"],
   ["https://aifinder.site", "Discover more AI tools at aifinder.site"],
   ["https://www.productlaunchify.com/projects/skaleagents", "Featured on Product Launchify"],
+  ["https://artificin.com?utm_source=badge&utm_medium=referral&utm_campaign=featured_badge", "Featured on Artificin"],
+  ["https://tools.cafe", "Listed on tools.cafe"],
+  ["https://xinquji.com", "Featured on Xinquji"],
+  ["https://easylaunch.dev/dev-tools/skaleagents", "Featured on EasyLaunch"],
+  ["https://shipgrowth.dev", "Featured on ShipGrowth"],
+  ["https://aitooldiscovery.com", "Featured on AI Tool Discovery"],
 ] as const;
 
 const addedBadgeImages = [
@@ -45,6 +51,12 @@ const addedBadgeImages = [
   ["https://toolhunter.ai/ai-tool/skaleagents?ref=badge", "https://toolhunter.ai/badge/skaleagents.svg?theme=light", "50", "noopener"],
   ["https://aifinder.site", "https://aifinder.site/light-badge.png", null, "noopener noreferrer"],
   ["https://www.productlaunchify.com/projects/skaleagents", "https://www.productlaunchify.com/images/badges/powered-by-light.svg", "55", "noopener noreferrer"],
+  ["https://artificin.com?utm_source=badge&utm_medium=referral&utm_campaign=featured_badge", "https://artificin.com/badges/Artificin-badge.png", "50", "noopener"],
+  ["https://tools.cafe", "https://tools.cafe/b/dark.svg", "54", "noopener noreferrer"],
+  ["https://xinquji.com", "https://xinquji.com/badge", "54", "noopener noreferrer"],
+  ["https://easylaunch.dev/dev-tools/skaleagents", "https://easylaunch.dev/badge/easylaunch-badge-light.svg", "56", "noopener"],
+  ["https://shipgrowth.dev", "https://storage.shipgrowth.dev/badge-light.png", null, "noopener noreferrer"],
+  ["https://aitooldiscovery.com", "https://aitooldiscovery.com/badges/featured-1.svg", "54", null],
 ] as const;
 
 const requestedLinks = [
@@ -55,6 +67,9 @@ const requestedLinks = [
   ["https://directoryhunt.org", "Directory Hunt", "noopener"],
   ["https://newtools.site", "NewTools", "noopener"],
   ["https://www.aitoolgo.com", "AiToolGo", "noopener noreferrer"],
+  ["https://toolindex.net/?ref=listed", "Listed on Tool Index", "nofollow noopener"],
+  ["https://right-ai.com/", "RightAI Tools Diresctory", null],
+  ["https://www.aiheron.com/", "AiHeron", null],
 ] as const;
 
 describe("FooterBadges", () => {
@@ -135,6 +150,24 @@ describe("FooterBadges", () => {
     expect(launchify).toHaveAttribute("aria-label", "Featured on Product Launchify");
     expect(launchify?.querySelector("img")).toHaveAttribute("width", "231");
     expect(links.find((link) => link.getAttribute("href") === "https://aifinder.site")?.querySelector("img")).toHaveAttribute("style", "width: 200px; height: auto;");
+
+    const artificin = links.find((link) => link.getAttribute("href") === "https://artificin.com?utm_source=badge&utm_medium=referral&utm_campaign=featured_badge")?.querySelector("img");
+    expect(artificin).toHaveAttribute("width", "175");
+    expect(artificin).toHaveAttribute("height", "50");
+    expect(artificin?.getAttribute("style")).toContain("width: 175px");
+    expect(artificin?.getAttribute("style")).toContain("height: 50px");
+    const toolsCafe = links.find((link) => link.getAttribute("href") === "https://tools.cafe")?.querySelector("img");
+    expect(toolsCafe).toHaveAttribute("src", "https://tools.cafe/b/dark.svg");
+    expect(toolsCafe).toHaveAttribute("width", "220");
+    const xinquji = links.find((link) => link.getAttribute("href") === "https://xinquji.com");
+    expect(xinquji).toHaveAttribute("title", "SkaleAgents：AI DevOps 智能体控制平面");
+    expect(xinquji?.querySelector("img")).toHaveAttribute("style", "width: 200px; height: 54px;");
+    expect(xinquji?.querySelector("img")).toHaveAttribute("width", "200");
+    const easyLaunch = links.find((link) => link.getAttribute("href") === "https://easylaunch.dev/dev-tools/skaleagents")?.querySelector("img");
+    expect(easyLaunch).toHaveAttribute("width", "188");
+    expect(links.find((link) => link.getAttribute("href") === "https://shipgrowth.dev")?.querySelector("img")).toHaveAttribute("style", "height: 64px; width: auto;");
+    expect(links.find((link) => link.getAttribute("href") === "https://aitooldiscovery.com")?.querySelector("img")).toHaveAttribute("width", "200");
+    expect(container.innerHTML).not.toContain("https://tools.cafe/b/light.svg");
   });
 
   it("renders the remaining submissions as plain links outside the badge slider", () => {
@@ -145,11 +178,14 @@ describe("FooterBadges", () => {
       const matchingLinks = allLinks.filter((link) => link.getAttribute("href") === href);
       expect(matchingLinks, href).toHaveLength(1);
       expect(matchingLinks[0]).toHaveTextContent(label);
-      expect(matchingLinks[0]).toHaveAttribute("rel", rel);
+      if (rel) expect(matchingLinks[0]).toHaveAttribute("rel", rel);
+      else expect(matchingLinks[0]).not.toHaveAttribute("rel");
       expect(matchingLinks[0].closest(".footer-badge-group")).toBeNull();
       expect(matchingLinks[0].querySelector("img")).toBeNull();
     }
 
     expect(allLinks.find((link) => link.getAttribute("href") === "https://www.aitoolgo.com")).toHaveAttribute("title", "AiToolGo");
+    expect(allLinks.find((link) => link.getAttribute("href") === "https://right-ai.com/")).toHaveAttribute("title", "RightAI Tools Directory");
+    expect(allLinks.find((link) => link.getAttribute("href") === "https://www.aiheron.com/")).toHaveAttribute("title", "AiHeron AI nav");
   });
 });

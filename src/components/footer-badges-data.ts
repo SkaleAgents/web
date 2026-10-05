@@ -56,6 +56,9 @@ export const directoryLinks = [
   ["Directory Hunt", "https://directoryhunt.org", "noopener"],
   ["NewTools", "https://newtools.site", "noopener"],
   ["AiToolGo", "https://www.aitoolgo.com", "noopener noreferrer", "AiToolGo"],
+  ["Listed on Tool Index", "https://toolindex.net/?ref=listed", "nofollow noopener"],
+  ["RightAI Tools Diresctory", "https://right-ai.com/", "", "RightAI Tools Directory"],
+  ["AiHeron", "https://www.aiheron.com/", "", "AiHeron AI nav"],
 ] as const;
 
 export type DirectoryBadgeEntry = {
@@ -105,6 +108,12 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "Toolhunter", href: "https://toolhunter.ai/ai-tool/skaleagents?ref=badge", src: "https://toolhunter.ai/badge/skaleagents.svg?theme=light", width: 200, height: 50, alt: "Featured on Toolhunter", rel: "noopener", displayWidth: 153.6 },
   { name: "AI Finder", href: "https://aifinder.site", src: "https://aifinder.site/light-badge.png", alt: "Discover more AI tools at aifinder.site", rel: "noopener noreferrer", displayWidth: 153.6, imageStyle: { width: "200px", height: "auto" } },
   { name: "Product Launchify", href: "https://www.productlaunchify.com/projects/skaleagents", src: "https://www.productlaunchify.com/images/badges/powered-by-light.svg", width: 231, height: 55, alt: "Featured on Product Launchify", title: "Featured on Product Launchify", rel: "noopener noreferrer", ariaLabel: "Featured on Product Launchify", displayWidth: 153.6 },
+  { name: "Artificin", href: "https://artificin.com?utm_source=badge&utm_medium=referral&utm_campaign=featured_badge", src: "https://artificin.com/badges/Artificin-badge.png", width: 175, height: 50, alt: "Featured on Artificin", rel: "noopener", displayWidth: 134.4, imageStyle: { border: "none", width: "175px", height: "50px" } },
+  { name: "tools.cafe", href: "https://tools.cafe", src: "https://tools.cafe/b/dark.svg", width: 220, height: 54, alt: "Listed on tools.cafe", rel: "noopener noreferrer", displayWidth: 153.6 },
+  { name: "Xinquji", href: "https://xinquji.com", src: "https://xinquji.com/badge", width: 200, height: 54, alt: "Featured on Xinquji", title: "SkaleAgents：AI DevOps 智能体控制平面", rel: "noopener noreferrer", displayWidth: 142.2, imageStyle: { width: "200px", height: "54px" } },
+  { name: "EasyLaunch", href: "https://easylaunch.dev/dev-tools/skaleagents", src: "https://easylaunch.dev/badge/easylaunch-badge-light.svg", width: 188, height: 56, alt: "Featured on EasyLaunch", rel: "noopener", displayWidth: 128.9 },
+  { name: "ShipGrowth", href: "https://shipgrowth.dev", src: "https://storage.shipgrowth.dev/badge-light.png", alt: "Featured on ShipGrowth", rel: "noopener noreferrer", displayWidth: 153.6, imageStyle: { height: "64px", width: "auto" } },
+  { name: "AI Tool Discovery", href: "https://aitooldiscovery.com", src: "https://aitooldiscovery.com/badges/featured-1.svg", width: 200, height: 54, alt: "Featured on AI Tool Discovery", displayWidth: 142.2 },
 ];
 
 export const directoryBadgeEntries: DirectoryBadgeEntry[] = [
