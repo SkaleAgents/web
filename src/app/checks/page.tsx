@@ -27,22 +27,37 @@ export default function PublicChecksPage() {
     <div className="mb-11 border-b border-line pb-10">
       <p className="marketing-eyebrow">Public reference / No account required</p>
       <h1 className="mt-4 max-w-3xl font-display text-[clamp(2.5rem,6vw,4.5rem)] font-semibold leading-tight tracking-tight">What a review actually checks.</h1>
-      <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">These pages describe the built-in checks in plain language. You can read them without signing in or paying. They do not run a review, connect to a cloud account, or prove that infrastructure is secure. Infrastructure text can be Terraform, CloudFormation, Kubernetes, Pulumi YAML, Pulumi programs, Docker Compose, a Dockerfile, or a GitHub Actions workflow. It can also be a Helm template, an Ansible playbook, a Bicep file, or an ARM template. GitLab CI, Azure Pipelines, Cloud Build, Terraform module arguments, and tfvars are included too. Serverless Framework config, a standalone IAM policy, and package.json are included too. Helm templates, Ansible facts, Bicep modules, ARM expressions, and pipelines are not executed. The framework config and the policy are not executed. An IpAddress of 0.0.0.0/0 is checked, and other condition operators are not. Files in one audit share variable defaults, locals, and parameter defaults. A reference, a simple Fn::Sub of known parameters, and format of known literals are resolved. join, Fn::Join, and Fn::FindInMap resolve when every piece is a known literal. Other functions and module sources do not. A finding names var, local, or parameter when the value came from one. The list includes a public database, wildcard permissions, a Docker socket, a missing memory limit, a disabled timeout, a one-connection pool, a container that runs as root, a remote script piped to a shell, a pull_request_target checkout of pull request code, an action pinned to @main, a secret file copied into an image, a workflow that prints a secret, broad workflow permissions, a secret assigned in an image variable, a secret assigned in workflow env, a Helm privileged container, an Ansible task that runs as root, storage encryption set to false, database backups set to zero, a possible AWS access key, and private key material.</p>
+      <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">This page lists the checks a review can run. It does not run a review, connect to a cloud account, or prove that a system is secure.</p>
+      <p className="mt-3 text-sm text-ink-muted">{publicChecks.length} checks. Open a check to read what it looks for.</p>
+      <p className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
+        <Link href="/dashboard/jobs" className="underline decoration-line underline-offset-4">Start a review</Link>
+        <Link href="/mcp-config" className="underline decoration-line underline-offset-4">Set up MCP</Link>
+      </p>
     </div>
     <div className="space-y-12">
-      {publicCheckAreas.map((area) => (
-        <section key={area} aria-labelledby={`checks-${area}`}>
-          <h2 id={`checks-${area}`} className="text-lg font-semibold">{area}</h2>
-          <ul className="mt-4 divide-y divide-line border-y border-line">
-            {publicChecks.filter((check) => check.area === area).map((check) => (
-              <li key={check.slug} className="py-5">
-                <h3 className="font-semibold"><Link href={publicCheckPath(check)} className="hover:underline">{check.title}</Link></h3>
-                <p className="mt-2 max-w-3xl text-sm leading-relaxed text-ink-muted">{check.looksFor}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+      {publicCheckAreas.map((area) => {
+        const checks = publicChecks.filter((check) => check.area === area);
+        return (
+          <section key={area} aria-labelledby={`checks-${area}`}>
+            <h2 id={`checks-${area}`} className="text-lg font-semibold">{area} <span className="font-normal text-ink-muted">{checks.length}</span></h2>
+            <ul className="mt-4 divide-y divide-line border-y border-line">
+              {checks.map((check) => (
+                <li key={check.slug} className="py-3">
+                  <h3 className="font-semibold"><Link href={publicCheckPath(check)} className="hover:underline">{check.title}</Link></h3>
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      })}
     </div>
+    <section aria-labelledby="check-limits" className="mt-12 border-t border-line pt-10">
+      <h2 id="check-limits" className="text-lg font-semibold">What a check cannot do</h2>
+      <div className="mt-4 max-w-2xl space-y-2 text-sm leading-relaxed text-ink-muted">
+        <p>It reads the text you submit. It does not call a cloud account.</p>
+        <p>A value is resolved only when the literal is in the files you submit.</p>
+        <p>No findings does not prove the system is secure.</p>
+      </div>
+    </section>
   </main>;
 }
