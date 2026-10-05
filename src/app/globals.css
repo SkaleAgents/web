@@ -517,6 +517,10 @@ html.dark .dashboard-frame {
 .dashboard-content th { font-weight: 500; color: var(--ink-muted); }
 .dashboard-content td, .dashboard-content th { padding-block: 14px; }
 .audit-detail { max-width: 980px; margin-inline: auto; }
+.audit-view-tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 10px; background: var(--sidebar-surface); }
+.audit-view-tabs button { border: 0; border-radius: 8px; padding: 8px 14px; background: transparent; color: var(--ink-muted); font-size: 14px; font-weight: 600; cursor: pointer; }
+.audit-view-tabs button[aria-selected="true"] { background: var(--canvas); color: var(--ink); }
+.audit-view-tabs button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .audit-detail > a:first-child { padding-left: 0; font-size: 12px; min-height: 24px; }
 .audit-detail .workspace-intro { margin-top: 16px; }
 .audit-overview { border: 0; padding: 20px 24px; background: var(--sidebar-surface); border-radius: 12px; }

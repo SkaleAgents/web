@@ -39,12 +39,15 @@ test("audit creation submits paired source metadata and job reads distinguish un
   await expect(page).toHaveURL(/\/jobs\/created$/);
   await page.getByRole("link", { name: "Back to audit jobs" }).click();
   await page.getByRole("link", { name: "View audit" }).nth(0).click();
+  await page.getByRole("tab", { name: "Advanced" }).click();
   await expect(page.getByText("Caller-reported source revision: unknown")).toBeVisible();
   await page.getByRole("link", { name: "Back to audit jobs" }).click();
   await page.getByRole("link", { name: "View audit" }).nth(1).click();
+  await page.getByRole("tab", { name: "Advanced" }).click();
   await expect(page.getByText("Caller-reported source revision: recorded-revision")).toBeVisible();
   await page.getByRole("link", { name: "Back to audit jobs" }).click();
   await page.getByRole("link", { name: "View audit" }).nth(2).click();
+  await page.getByRole("tab", { name: "Advanced" }).click();
   await expect(page.getByText("Input unavailable. Source metadata is hidden.")).toBeVisible();
   await expect(page.getByText(/private-revision/)).toHaveCount(0);
 });
