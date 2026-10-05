@@ -88,7 +88,7 @@ test("audit findings and report action stay clear across dashboard layouts", asy
   await page.route("**/api/jobs/design-review", route => route.fulfill({ json: { ...audit("design-review"), findings: [{ severity: "high", title: "Public network access detected", detail: "The security group permits public ingress on port 22.", resource: "aws_security_group.review_fixture", remediation: "Restrict ingress to the approved network.", specialist: "devsecops" }] } }));
   await page.goto(`/org/${personalOrganizationId}/jobs/design-review`);
   await expect(page.getByRole("heading", { name: "Public network access detected" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "1 finding to review" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Anyone on the internet can reach this." })).toBeVisible();
   await expect(page.getByText("Restrict ingress to the approved network.", { exact: false })).toBeVisible();
   await expect(page.getByText(/You do not need to download a file/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Download report", exact: true })).toHaveCount(0);
