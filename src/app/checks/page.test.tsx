@@ -18,6 +18,7 @@ it("lists the first page of checks and every category filter", async () => {
   expect(screen.getByRole("heading", { name: "What a review actually checks." })).toBeInTheDocument();
   expect(screen.getByText("This page lists the checks a review can run. It does not run a review, connect to a cloud account, or prove that a system is secure.")).toBeInTheDocument();
   expect(screen.getByText("Showing 1\u201310 of 48")).toBeInTheDocument();
+  expect(container.innerHTML).toContain("Showing 1\u201310 of 48");
   expect(text).not.toContain("The list includes a public database, wildcard permissions");
   expect(screen.getByRole("link", { name: "Start a review" })).toHaveAttribute("href", "/dashboard/jobs");
   expect(screen.getByRole("link", { name: "Set up MCP" })).toHaveAttribute("href", "/mcp-config");
@@ -73,6 +74,7 @@ it("shows the second page of security checks", async () => {
   const security = publicChecks.filter((check) => check.area === "Security");
 
   expect(screen.getByText("Showing 11\u201320 of 37")).toBeInTheDocument();
+  expect(container.innerHTML).toContain("Showing 11\u201320 of 37");
   expect(listLinks(container)).toEqual(security.slice(10, 20).map((check) => check.title));
   expect(listLinks(container)).not.toContain(security[0]?.title);
   expect(screen.getByRole("link", { name: "Security 37" })).toHaveAttribute("href", "/checks?category=security");
