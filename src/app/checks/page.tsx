@@ -92,7 +92,7 @@ export default async function PublicChecksPage({ searchParams }: { searchParams:
         );
       })}
     </nav>
-    <p className="mt-6 text-sm text-ink-muted">Showing {rangeStart}{"\u2013"}{rangeEnd} of {filtered.length}</p>
+    <p className="mt-6 text-sm text-ink-muted">{`Showing ${rangeStart}\u2013${rangeEnd} of ${filtered.length}`}</p>
     <ul className="mt-4 divide-y divide-line border-y border-line">
       {visible.map((check) => (
         <li key={check.slug} className="py-3">
