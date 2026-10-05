@@ -1,6 +1,6 @@
 import { afterEach, expect, it } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
-import { AuditCoveragePanel, ClearCheckSummary, SkippedCheckList } from "./audit-coverage";
+import { AuditCoveragePanel, ClearCheckSummary, PlainCheckList, SkippedCheckList } from "./audit-coverage";
 import { findingPlace, type AuditCoverage, type CheckResult } from "@/lib/audit-coverage";
 afterEach(cleanup);
 
@@ -87,4 +87,23 @@ it("names the checks that ran when an audit has no findings", () => {
   rerender(<h3>Wildcard permission detected</h3>);
   expect(screen.queryByText("These checks ran and found nothing.")).not.toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "Wildcard permission detected" })).toBeInTheDocument();
+});
+
+it("lists completed and skipped checks in plain language", () => {
+  render(<PlainCheckList status="completed" />);
+  expect(screen.getByText("This audit did not record which checks ran or which were skipped.")).toBeInTheDocument();
+  const coverage: AuditCoverage = {
+    basis: "rule_execution", recordingStatus: "available", ruleLevelChecksAvailable: true,
+    limitation: "These checks review supplied input.", counts: { evaluated: 1, partial: 0, skipped: 1, failed: 0 }, tasksWithoutCoverage: 0,
+    tasks: [{ specialist: "sre", status: "completed", checkCoverage: { version: "builtin-coverage-v1", checks: [
+      { ruleId: "sre.elevated-error-rate", status: "evaluated", completeness: "complete", findingCount: 0, reasonCodes: [] },
+      { ruleId: "sre.failed-crons", status: "skipped", completeness: "none", findingCount: 0, reasonCodes: ["missing_input"] },
+    ] } }],
+  };
+  cleanup();
+  render(<PlainCheckList status="completed" coverage={coverage} />);
+  expect(screen.getByRole("heading", { name: "Checked" })).toBeInTheDocument();
+  expect(screen.getByText("Error rate")).toBeInTheDocument();
+  expect(screen.getByText(/Failed scheduled jobs/)).toBeInTheDocument();
+  expect(screen.queryByText("sre.failed-crons")).not.toBeInTheDocument();
 });

@@ -6,7 +6,7 @@ import { useState, type KeyboardEvent } from "react";
 import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retention-controls";
 import { AuditResultSummary } from "@/components/audit-result-summary";
-import { AuditCoveragePanel, ClearCheckSummary, SkippedCheckList } from "@/components/audit-coverage";
+import { AuditCoveragePanel, ClearCheckSummary, PlainCheckList, SkippedCheckList } from "@/components/audit-coverage";
 import { findingPlace } from "@/lib/audit-coverage";
 import { SourceMetadata } from "@/components/source-metadata";
 import { Button, LinkButton } from "@/components/ui";
@@ -85,6 +85,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
               </div>
             </article>)}
           </section>}
+          <PlainCheckList coverage={job.data.coverage} tasks={job.data.tasks} status={job.data.status} />
         </div>
         <div role="tabpanel" id="audit-advanced-panel" aria-labelledby="audit-advanced-tab" hidden={view !== "advanced"} className="space-y-6">
           <section className="audit-overview" aria-label="Audit record">

@@ -521,6 +521,11 @@ html.dark .dashboard-frame {
 .audit-view-tabs button { border: 0; border-radius: 8px; padding: 8px 14px; background: transparent; color: var(--ink-muted); font-size: 14px; font-weight: 600; cursor: pointer; }
 .audit-view-tabs button[aria-selected="true"] { background: var(--canvas); color: var(--ink); }
 .audit-view-tabs button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.audit-check-list h2 { font-family: var(--font-syne), sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
+.audit-check-list h3 { margin-top: 16px; font-size: 14px; font-weight: 600; }
+.audit-check-list p, .audit-check-list li { max-width: 65ch; font-size: 15px; line-height: 1.55; }
+.audit-check-list ul { margin-top: 8px; padding-left: 1.1rem; }
+.audit-check-list li + li { margin-top: 6px; }
 .audit-detail > a:first-child { padding-left: 0; font-size: 12px; min-height: 24px; }
 .audit-detail .workspace-intro { margin-top: 16px; }
 .audit-overview { border: 0; padding: 20px 24px; background: var(--sidebar-surface); border-radius: 12px; }
