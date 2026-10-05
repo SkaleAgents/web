@@ -2,8 +2,9 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { apiFetch, ensureCsrfCookie, type SwarmJob } from "@/lib/api";
+import { auditFileBasename, auditFileError, joinAuditFiles, type AuditFilePart } from "@/lib/audit-files";
 import { Button, LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
@@ -27,6 +28,10 @@ export default function NewJobPage() {
   const queryClient = useQueryClient();
   const user = useQuery(currentUserOptions);
   const [content, setContent] = useState("");
+  const [files, setFiles] = useState<AuditFilePart[]>([]);
+  const [fileError, setFileError] = useState("");
+  const fileInput = useRef<HTMLInputElement>(null);
+  const submission = files.length > 0 ? joinAuditFiles(files) : content;
   const [telemetry, setTelemetry] = useState("");
   const [sourceRevision, setSourceRevision] = useState("");
   const [sourceObservedAt, setSourceObservedAt] = useState("");
@@ -51,7 +56,7 @@ export default function NewJobPage() {
       return apiFetch<SwarmJob>("/api/jobs", {
         method: "POST",
         body: JSON.stringify({
-          scope: { kind: "iac_text", format: "auto", content },
+          scope: { kind: "iac_text", format: "auto", content: submission },
           specialists,
           ...sourceMetadata,
           ...(parsedTelemetry ? { telemetry: parsedTelemetry } : {}),
@@ -75,11 +80,38 @@ export default function NewJobPage() {
       <p className="mt-2 text-sm text-ink-muted">Add SkaleAgents in your editor, then ask it to scan Terraform, CloudFormation, Kubernetes, Pulumi YAML, a Pulumi program, or Docker Compose in the open project. For the rest of the codebase, ask it to review application source for a disabled timeout, a one-connection pool, an unbounded retry limit, an unlimited database pool, or a root container user. The same scan reports a public database, wildcard permissions, the Docker socket, and a missing memory limit. This does not connect to a live cloud account.</p>
       <LinkButton href={mcpPath} className="mt-4">Set up MCP</LinkButton>
     </section>
-      <form className="overflow-hidden rounded-xl border border-line bg-canvas-elevated" onSubmit={(event) => { event.preventDefault(); if (user.data && content.trim() && specialists.length && !create.isPending) create.mutate(); }}>
+      <form className="overflow-hidden rounded-xl border border-line bg-canvas-elevated" onSubmit={(event) => { event.preventDefault(); if (user.data && submission.trim() && !fileError && specialists.length && !create.isPending) create.mutate(); }}>
       <fieldset disabled={create.isPending} className="min-w-0">
       <section className="p-5 sm:p-6" aria-labelledby="configuration-heading">
         <h2 id="configuration-heading" className="text-base font-semibold text-ink">1. Configuration</h2>
         <p className="mt-2 text-sm text-ink-muted">Paste your Terraform, CloudFormation, Kubernetes, or Pulumi YAML file, or a Dockerfile or GitHub Actions workflow. A review can notice a container that runs as root, a workflow that checks out pull request code from pull_request_target, and an action pinned to @main. Include the resources a reviewer needs to understand the scope.</p>
+        <p className="mt-2 text-sm text-ink-muted">Several text files can be added and each file is scanned on its own, while the paste box remains for a single snippet.</p>
+        <input
+          ref={fileInput}
+          type="file"
+          multiple
+          className="mt-3 block w-full text-sm text-ink file:mr-3 file:rounded-[10px] file:border file:border-line file:bg-canvas file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink"
+          aria-label="Audit text files"
+          onChange={(event) => {
+            const selected = [...(event.target.files ?? [])];
+            void Promise.all(selected.map(async (file) => ({ name: file.name, text: await file.text() }))).then((loaded) => {
+              const error = auditFileError(loaded);
+              setFileError(error ?? "");
+              setFiles(error || loaded.length === 0 ? [] : loaded);
+            });
+          }}
+        />
+        {files.length > 0 && <p className="mt-2 text-xs text-ink-muted">{files.map((file) => auditFileBasename(file.name)).join(", ")}</p>}
+        {files.length > 0 && <Button type="button" variant="ghost" className="mt-2" onClick={() => { setFiles([]); setFileError(""); if (fileInput.current) fileInput.current.value = ""; }}>Remove selected files</Button>}
+        {fileError && <p role="alert" className="mt-2 text-sm text-danger">{fileError}</p>}
+        <textarea
+          aria-hidden="true"
+          readOnly
+          tabIndex={-1}
+          className="sr-only"
+          aria-label="Audit submission content"
+          value={submission}
+        />
         <textarea
           value={content}
           onChange={(event) => setContent(event.target.value)}
@@ -135,10 +167,10 @@ export default function NewJobPage() {
         <h2 id="start-heading" className="text-base font-semibold text-ink">3. Start audit</h2>
         <p className="mt-2 text-sm text-ink-muted">{specialists.length === 0 ? "Select at least one review area to continue." : `${specialists.length} review ${specialists.length === 1 ? "area" : "areas"} selected. Your audit will open with its status and results.`}</p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Button type="submit" disabled={!user.data || !content.trim() || specialists.length === 0 || create.isPending}>
+          <Button type="submit" disabled={!user.data || !submission.trim() || Boolean(fileError) || specialists.length === 0 || create.isPending}>
             {create.isPending ? "Starting audit…" : "Start audit"}
           </Button>
-          {!content.trim() && <span className="text-sm text-ink-muted">Add configuration to start.</span>}
+          {!submission.trim() && <span className="text-sm text-ink-muted">Add configuration to start.</span>}
         </div>
         {create.isError && <p role="alert" className="mt-3 text-sm text-danger">{create.error.message}</p>}
       </section>
