@@ -30,10 +30,12 @@ it("lists the first page of checks and every category filter", async () => {
   expect(screen.getByRole("link", { name: "Security 37" })).toHaveAttribute("href", "/checks?category=security");
   expect(screen.getByRole("link", { name: "Reliability 6" })).toHaveAttribute("href", "/checks?category=reliability");
 
-  const visible = publicChecks.slice(0, 10);
+  const security = publicChecks.filter((check) => check.area === "Security");
+  const visible = security.slice(0, 10);
   expect(listLinks(container)).toEqual(visible.map((check) => check.title));
+  expect(listLinks(container)[4]).toBe("Public database");
   expect(container.querySelectorAll("ul li a")).toHaveLength(10);
-  expect(listLinks(container)).not.toContain(publicChecks[10]?.title);
+  expect(listLinks(container)).not.toContain(security[10]?.title);
   for (const check of publicChecks) expect(text).not.toContain(check.looksFor);
 
   expect(screen.getByText("Previous")).toHaveAttribute("aria-disabled", "true");
@@ -54,6 +56,15 @@ it("lists the first page of checks and every category filter", async () => {
   expect(data.itemListElement.map((item) => item.name)).toEqual(publicChecks.map((check) => check.title));
   expect(data.itemListElement).toHaveLength(publicChecks.length);
   expect(data.itemListElement[0]?.url).toBe(`https://skaleagents.com${publicCheckPath(publicChecks[0])}`);
+});
+
+it("puts the fifth security check fifth on the default page", async () => {
+  const { container } = render(await PublicChecksPage({ searchParams: Promise.resolve({}) }));
+  const security = publicChecks.filter((check) => check.area === "Security");
+  const titles = listLinks(container);
+  expect(titles).toEqual(security.slice(0, 10).map((check) => check.title));
+  expect(titles[4]).toBe(security[4]?.title);
+  expect(titles[4]).toBe("Public database");
 });
 
 it("shows reliability checks on one page", async () => {
@@ -87,7 +98,10 @@ it("shows the second page of security checks", async () => {
 it("treats a missing or unknown category as all and clamps the page", async () => {
   const { container } = render(await PublicChecksPage({ searchParams: Promise.resolve({ category: "unknown", page: "0" }) }));
   expect(screen.getByRole("link", { name: "All 48" })).toHaveAttribute("aria-current", "page");
-  expect(listLinks(container)).toEqual(publicChecks.slice(0, 10).map((check) => check.title));
+  const security = publicChecks.filter((check) => check.area === "Security");
+  expect(listLinks(container)).toEqual(security.slice(0, 10).map((check) => check.title));
+  expect(listLinks(container)[4]).toBe(security[4]?.title);
+  expect(listLinks(container)[4]).toBe("Public database");
 
   cleanup();
   render(await PublicChecksPage({ searchParams: Promise.resolve({ page: "nope" }) }));

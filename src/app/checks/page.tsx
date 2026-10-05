@@ -1,7 +1,7 @@
 import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { publicCheckPath, publicChecks, type PublicCheck } from "@/lib/public-checks";
+import { publicCheckAreas, publicCheckPath, publicChecks, type PublicCheck } from "@/lib/public-checks";
 
 export const metadata: Metadata = {
   title: "Infrastructure review checks | SkaleAgents",
@@ -41,7 +41,9 @@ function checksPageHref(category: CheckCategory, page: number): string {
 }
 
 function checksInFilter(filter: CheckFilter): PublicCheck[] {
-  if (filter.area === null) return publicChecks;
+  if (filter.area === null) {
+    return publicCheckAreas.flatMap((area) => publicChecks.filter((check) => check.area === area));
+  }
   return publicChecks.filter((check) => check.area === filter.area);
 }
 
