@@ -157,10 +157,12 @@ test.describe("Phase 1 page smokes", () => {
       await installPersonalOrganizationRoutes(pageTwo);
       await pageOne.goto("/jobs");
       await pageOne.getByRole("link", { name: "View audit" }).click();
+      await pageOne.getByRole("tab", { name: "Advanced" }).click();
       await pageOne.getByRole("button", { name: "Open Watchtower" }).click();
       await expect(pageOne).toHaveURL(new RegExp(`/watchtower/${sessionId}$`));
       await pageTwo.goto("/jobs");
       await pageTwo.getByRole("link", { name: "View audit" }).click();
+      await pageTwo.getByRole("tab", { name: "Advanced" }).click();
       await pageTwo.getByRole("button", { name: "Open Watchtower" }).click();
       await expect(pageTwo).toHaveURL(new RegExp(`/watchtower/${sessionId}$`));
       await expect(pageTwo.getByText("Participants: 2")).toBeVisible();

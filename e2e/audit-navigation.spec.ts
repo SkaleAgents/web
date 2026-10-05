@@ -97,6 +97,7 @@ test("audit history opens one job at a time for review and management", async ({
   await page.getByRole("link", { name: "View audit" }).click();
   await expect(page).toHaveURL(new RegExp(`/org/[^/]+/jobs/${id}$`));
   await expect(page.getByRole("heading", { name: "Audit details" })).toBeVisible();
+  await page.getByRole("tab", { name: "Advanced" }).click();
   await expect(page.getByRole("button", { name: "Open Watchtower" })).toBeVisible();
   await page.route(`**/api/jobs/${id}/compliance-report`, route => route.fulfill({ json: {
     generatedAt: "2026-09-28T12:00:00Z",

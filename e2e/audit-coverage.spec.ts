@@ -33,6 +33,7 @@ test("personal audit shows recorded coverage with keyboard disclosure", async ({
   await page.route("**/api/user", route => route.fulfill({ json: account }));
   await page.route("**/api/jobs/coverage-job", route => route.fulfill({ json: audit() }));
   await page.goto(`/org/${personalOrganizationId}/jobs/coverage-job`);
+  await page.getByRole("tab", { name: "Advanced" }).click();
   await keyboardDisclosure(page);
 });
 
@@ -40,6 +41,7 @@ test("personal historical audit never implies checks passed", async ({ page }) =
   await page.route("**/api/user", route => route.fulfill({ json: account }));
   await page.route("**/api/jobs/coverage-old", route => route.fulfill({ json: { ...audit("coverage-old"), coverage: undefined, tasks: [] } }));
   await page.goto(`/org/${personalOrganizationId}/jobs/coverage-old`);
+  await page.getByRole("tab", { name: "Advanced" }).click();
   await expect(page.getByText("Check details unavailable")).toBeVisible();
 });
 
@@ -72,6 +74,7 @@ test("coverage disclosure stays expanded when a pending audit finishes", async (
     ...audit(), status: "running", coverage: undefined, tasks: [{ specialist: "sre", status: "running" }],
   } }));
   await page.goto(`/org/${personalOrganizationId}/jobs/coverage-job`);
+  await page.getByRole("tab", { name: "Advanced" }).click();
   const panel = page.getByRole("region", { name: "Check coverage" });
   await panel.locator("summary").click();
   await expect(panel.getByText("Awaiting results")).toBeVisible();
@@ -88,6 +91,8 @@ test("audit findings and report action stay clear across dashboard layouts", asy
   await expect(page.getByRole("heading", { name: "1 finding to review" })).toBeVisible();
   await expect(page.getByText("Restrict ingress to the approved network.", { exact: false })).toBeVisible();
   await expect(page.getByText(/You do not need to download a file/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Download report", exact: true })).toHaveCount(0);
+  await page.getByRole("tab", { name: "Advanced" }).click();
   await expect(page.getByRole("button", { name: "Download report", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Delete audit", exact: true })).not.toBeVisible();
   for (const width of [1440, 390]) {
