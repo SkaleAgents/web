@@ -6,7 +6,7 @@ import { useState, type KeyboardEvent } from "react";
 import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retention-controls";
 import { AuditResultSummary } from "@/components/audit-result-summary";
-import { AuditCoveragePanel, ClearCheckSummary, PlainCheckList, SkippedCheckList } from "@/components/audit-coverage";
+import { AuditCoveragePanel, PlainCheckList } from "@/components/audit-coverage";
 import { findingPlace } from "@/lib/audit-coverage";
 import { SourceMetadata } from "@/components/source-metadata";
 import { Button, LinkButton } from "@/components/ui";
@@ -27,7 +27,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
   const user = useQuery(currentUserOptions);
   const accountId = user.data?.id;
   const [deletion, setDeletion] = useState<"pending" | "processing" | "failed" | "completed" | null>(null);
-  const [view, setView] = useState<"simple" | "advanced">("simple");
+  const [view, setView] = useState<"general" | "advanced">("general");
   const job = useQuery({
     queryKey: ["swarm-job", id, accountId ?? "guest"],
     enabled: Boolean(accountId) && !deletion,
@@ -44,9 +44,9 @@ export function PersonalJobDetail({ id }: { id: string }) {
   function onTabsKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
     event.preventDefault();
-    const next = view === "simple" ? "advanced" : "simple";
+    const next = view === "general" ? "advanced" : "general";
     setView(next);
-    document.getElementById(next === "simple" ? "audit-simple-tab" : "audit-advanced-tab")?.focus();
+    document.getElementById(next === "general" ? "audit-general-tab" : "audit-advanced-tab")?.focus();
   }
 
   return (
@@ -64,10 +64,10 @@ export function PersonalJobDetail({ id }: { id: string }) {
       {!deletion && accountId && job.isError && <p role="alert" className="text-sm text-danger">This audit is unavailable or has been removed.</p>}
       {!deletion && accountId && job.data && <>
         <div className="audit-view-tabs" role="tablist" aria-label="Audit detail" onKeyDown={onTabsKeyDown}>
-          <button type="button" role="tab" id="audit-simple-tab" aria-controls="audit-simple-panel" aria-selected={view === "simple"} tabIndex={view === "simple" ? 0 : -1} onClick={() => setView("simple")}>Simple</button>
+          <button type="button" role="tab" id="audit-general-tab" aria-controls="audit-general-panel" aria-selected={view === "general"} tabIndex={view === "general" ? 0 : -1} onClick={() => setView("general")}>General</button>
           <button type="button" role="tab" id="audit-advanced-tab" aria-controls="audit-advanced-panel" aria-selected={view === "advanced"} tabIndex={view === "advanced" ? 0 : -1} onClick={() => setView("advanced")}>Advanced</button>
         </div>
-        <div role="tabpanel" id="audit-simple-panel" aria-labelledby="audit-simple-tab" hidden={view !== "simple"} className="space-y-6">
+        <div role="tabpanel" id="audit-general-panel" aria-labelledby="audit-general-tab" hidden={view !== "general"} className="space-y-6">
           <section className="audit-overview" aria-label="Audit overview">
             <p className="audit-status text-xs font-semibold capitalize text-ink-muted">{job.data.status}{job.data.partial ? " · Partial results" : ""}{scheduledRunLabel(job.data) ? ` · ${scheduledRunLabel(job.data)}` : ""}</p>
             <AuditResultSummary job={job.data} />
@@ -99,20 +99,19 @@ export function PersonalJobDetail({ id }: { id: string }) {
             </div>
             {openReview.isError && <p role="alert" className="text-sm text-danger">{openReview.error.message}</p>}
           </section>
-          <section className="audit-source" aria-label="Source and coverage">
-            <h2>Source and coverage</h2>
+          <section className="audit-source" aria-label="Source">
+            <h2>Source</h2>
             <p>Specialists: {job.data.specialists.join(", ") || "none"}</p>
             <SourceMetadata sourceRevision={job.data.sourceRevision} sourceObservedAt={job.data.sourceObservedAt} inputAvailable={job.data.retention?.inputAvailable} verified={job.data.sourceMetadataProvenance === "github_fetched"} />
           </section>
-          {job.data.findings && job.data.findings.length > 0 && <section className="audit-source" aria-label="Affected resources">
+          {job.data.findings && job.data.findings.some((finding) => findingPlace(finding)) && <section className="audit-source" aria-label="Affected resources">
             <h2>Affected resources</h2>
             <ul className="mt-3 space-y-3">{job.data.findings.map((finding, index) => {
               const place = findingPlace(finding);
-              return <li key={index}><p className="text-sm font-medium text-ink">{finding.title}</p>{place ? <FindingResource value={place} /> : <p className="text-sm text-ink-muted">No resource was recorded.</p>}</li>;
+              if (!place) return null;
+              return <li key={index}>{job.data.findings!.length > 1 && <p className="text-sm font-medium text-ink">{finding.title}</p>}<FindingResource value={place} /></li>;
             })}</ul>
           </section>}
-          {job.data.findings?.length === 0 && <ClearCheckSummary coverage={job.data.coverage} tasks={job.data.tasks} />}
-          <SkippedCheckList coverage={job.data.coverage} tasks={job.data.tasks} />
           <AuditCoveragePanel key={job.data.id} coverage={job.data.coverage} tasks={job.data.tasks} status={job.data.status} />
           <section aria-label="Audit data and report">
             <h2 className="text-lg font-semibold text-ink">Download and data controls</h2>
