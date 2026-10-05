@@ -487,7 +487,7 @@ jobs:
     area: "Security",
     title: "Secret assigned in serverless environment",
     looksFor: "A Serverless Framework provider or function environment entry whose name looks like a password, secret, or token, and whose value is a non-empty literal.",
-    needs: "The Serverless Framework config. The config is not executed, and conditions are not evaluated.",
+    needs: "The Serverless Framework config. The config is not executed. An IpAddress of 0.0.0.0/0 is checked, and other condition operators are not.",
     finding: "High severity. The suggested next step is to reference the value with a Serverless variable such as ${env:TOKEN}.",
     limit: "${env:TOKEN} and ${self:custom.x} are not this finding. A value that appears only in a comment is not this finding.",
     exampleLabel: "Environment entry that this check is written to notice",
@@ -501,7 +501,7 @@ jobs:
     area: "Security",
     title: "IAM policy allows every action",
     looksFor: "A standalone IAM policy statement whose Effect is Allow, or omitted, and whose Action is * or a list containing only *.",
-    needs: "The policy JSON. The policy is not executed, and conditions are not evaluated.",
+    needs: "The policy JSON. The policy is not executed. An IpAddress of 0.0.0.0/0 is checked, and other condition operators are not.",
     finding: "High severity. The suggested next step is to list the required actions instead of allowing every action.",
     limit: "An Effect of Deny is not this finding. A statement that lists s3:GetObject is not this finding.",
     exampleLabel: "Statement that this check is written to notice",
@@ -518,7 +518,7 @@ jobs:
     looksFor: "A same-file var, local, or CloudFormation parameter Default of 0.0.0.0/0 or ::/0 used through a reference.",
     needs: "The variable, local, or parameter Default and the resource or module argument that references it, in the same file.",
     finding: "High severity. The suggested next step is to replace the referenced public range with an approved range.",
-    limit: "A private default such as 10.0.0.0/24 or 10.0.0.0/16 is not this finding. Functions, Fn::Sub, and a parameter with no Default stay unresolved. A value that appears only in a comment is not this finding.",
+    limit: "A private default such as 10.0.0.0/24 or 10.0.0.0/16 is not this finding. A parameter with no Default stays unresolved. A simple Fn::Sub or format of a known literal is a separate check. A value that appears only in a comment is not this finding.",
     exampleLabel: "Reference that this check is written to notice",
     example: `variable "cidr" {
   default = "0.0.0.0/0"
@@ -559,6 +559,44 @@ resource "aws_db_instance" "db" {
     example: `Condition:
   IpAddress:
     aws:SourceIp: 0.0.0.0/0`,
+  },
+  {
+    slug: "substituted-value-is-public",
+    ruleId: "iac.substituted-public-value",
+    area: "Security",
+    title: "Substituted value is public",
+    looksFor: "A same-file Fn::Sub or format result of 0.0.0.0/0 or ::/0.",
+    needs: "The parameter Default or literal, and the Fn::Sub or format that uses it, in the same file.",
+    finding: "High severity. The suggested next step is to replace the substituted public range with an approved range.",
+    limit: "Fn::Sub of a parameter with no Default, Fn::Sub of AWS::Region, and format of 10.0.0.0/24 are not this finding. Fn::Join and other functions stay unresolved. A value that appears only in a comment is not this finding.",
+    exampleLabel: "Substitution that this check is written to notice",
+    example: `Parameters:
+  Cidr:
+    Type: String
+    Default: 0.0.0.0/0
+Resources:
+  Sg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      SecurityGroupIngress:
+        - CidrIp:
+            Fn::Sub: "\${Cidr}"`,
+  },
+  {
+    slug: "policy-allows-any-principal",
+    ruleId: "iac.policy-any-principal",
+    area: "Security",
+    title: "Policy allows any principal",
+    looksFor: "Principal * on an Allow statement inside a resource policy.",
+    needs: "The policy or PolicyDocument inside the resource. A standalone IAM file is checked separately. The policy is not executed.",
+    finding: "High severity. The suggested next step is to name the trusted principals explicitly.",
+    limit: "An Effect of Deny is not this finding. A principal that is a specific ARN is not this finding. A comment that mentions Principal * is not this finding.",
+    exampleLabel: "Statement that this check is written to notice",
+    example: `{
+  "Effect": "Allow",
+  "Principal": "*",
+  "Action": "sts:AssumeRole"
+}`,
   },
 ];
 
