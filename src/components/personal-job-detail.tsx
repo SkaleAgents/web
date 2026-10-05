@@ -15,6 +15,11 @@ import { apiFetch, type SwarmJob, type WatchtowerSession, watchtowerFetch } from
 import { currentUserOptions } from "@/lib/session";
 import { organizationPath, scopeFromPath } from "@/lib/dashboard-routes";
 
+function FindingResource({ value }: { value: string }) {
+  const tokens = value.split(/(\.|\[|\])/);
+  return <p className="finding-place"><span>Affected resource</span><code>{tokens.map((token, index) => token === "." || token === "[" || token === "]" ? <span key={index}>{token}<wbr /></span> : token)}</code></p>;
+}
+
 export function PersonalJobDetail({ id }: { id: string }) {
   const router = useRouter();
   const scope = scopeFromPath(usePathname());
@@ -64,26 +69,31 @@ export function PersonalJobDetail({ id }: { id: string }) {
           </div>
           {openReview.isError && <p role="alert" className="text-sm text-danger">{openReview.error.message}</p>}
           {job.data.error && <p role="alert" className="text-sm text-danger">{job.data.error}</p>}
-          <div>
-            <h3 className="text-sm font-semibold text-ink">Source and coverage</h3>
-            <p className="mt-1 text-sm text-ink-muted">Specialists: {job.data.specialists.join(", ") || "none"}</p>
-            <SourceMetadata sourceRevision={job.data.sourceRevision} sourceObservedAt={job.data.sourceObservedAt} inputAvailable={job.data.retention?.inputAvailable} verified={job.data.sourceMetadataProvenance === "github_fetched"} />
-          </div>
         </section>
         {job.data.findings && <section className="audit-findings" aria-label="Findings">
-          <div className="audit-section-heading"><h2>Findings</h2><span>{job.data.findings.length} recorded</span></div>
+          <div className="audit-section-heading"><h2>Findings</h2><span>{job.data.findings.length} {job.data.findings.length === 1 ? "finding" : "findings"}</span></div>
           {job.data.findings.length === 0 ? <div className="space-y-3">
             <p className="text-sm text-ink-muted">No findings were recorded.</p>
             <ClearCheckSummary coverage={job.data.coverage} tasks={job.data.tasks} />
-          </div> : job.data.findings.map((finding, index) => <article key={index} className="audit-finding">
+          </div> : job.data.findings.map((finding, index) => {
+            const place = findingPlace(finding);
+            return <article key={index} className="audit-finding">
             <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
-            <div><h3 className="font-semibold">{finding.title}</h3><p className="mt-1 text-sm text-ink-muted">{finding.detail}</p>
-              {findingPlace(finding) && <p className="mt-2 break-all font-mono text-xs text-ink-muted">{findingPlace(finding)}</p>}
-              <p className="mt-3 text-sm"><strong>Recommended action: </strong>{finding.remediation || "No specific fix was recorded. Ask the person responsible for this resource to review the issue before changing it."}</p>
+            <div>
+              <h3>{finding.title}</h3>
+              <p className="finding-detail">{finding.detail}</p>
+              {place && <FindingResource value={place} />}
+              <p className="finding-action"><span>Recommended action</span>{finding.remediation || "No specific fix was recorded. Ask the person responsible for this resource to review the issue before changing it."}</p>
             </div>
-          </article>)}
+          </article>;
+          })}
           <SkippedCheckList coverage={job.data.coverage} tasks={job.data.tasks} />
         </section>}
+        <section className="audit-source" aria-label="Source and coverage">
+          <h2>Source and coverage</h2>
+          <p>Specialists: {job.data.specialists.join(", ") || "none"}</p>
+          <SourceMetadata sourceRevision={job.data.sourceRevision} sourceObservedAt={job.data.sourceObservedAt} inputAvailable={job.data.retention?.inputAvailable} verified={job.data.sourceMetadataProvenance === "github_fetched"} />
+        </section>
         <AuditCoveragePanel key={job.data.id} coverage={job.data.coverage} tasks={job.data.tasks} status={job.data.status} />
         <section className="rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Audit data and report">
           <h2 className="text-lg font-semibold text-ink">Download and data controls</h2>
