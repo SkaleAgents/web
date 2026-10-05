@@ -30,6 +30,7 @@ test("input cleanup stays visibly incomplete and deletion waits for actual compl
   });
   await page.goto("/jobs");
   await page.getByRole("link", { name: "View audit" }).click();
+  await page.getByRole("tab", { name: "Advanced" }).click();
   await expect(page.getByText("The recurring schedule keeps a separate input copy.", { exact: false })).toBeVisible();
   await page.getByText("Manage retained data", { exact: true }).click();
   await page.getByRole("button", { name: "Purge audit input", exact: true }).click();
@@ -67,6 +68,7 @@ test("legacy sourcePurged jobs still poll until retention input cleanup complete
 
   await page.goto("/jobs");
   await page.getByRole("link", { name: "View audit" }).click();
+  await page.getByRole("tab", { name: "Advanced" }).click();
   await expect(page.getByText("Source content was previously purged. Other input may remain.")).toBeVisible();
   await page.getByText("Manage retained data", { exact: true }).click();
   await page.getByRole("button", { name: "Purge audit input", exact: true }).click();
@@ -87,6 +89,7 @@ test("active audits require confirmed cancellation before cleanup controls appea
   });
   await page.goto("/jobs");
   await page.getByRole("link", { name: "View audit" }).click();
+  await page.getByRole("tab", { name: "Advanced" }).click();
   await expect(page.getByRole("button", { name: "Cancel audit", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Purge audit input", exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Cancel audit", exact: true }).click();
