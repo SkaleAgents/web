@@ -6,29 +6,39 @@ import PublicChecksPage from "./page";
 
 afterEach(() => cleanup());
 
-it("lists check titles without repeating what each check looks for", () => {
-  const { container } = render(<PublicChecksPage />);
+function listLinks(container: HTMLElement) {
+  return [...container.querySelectorAll("ul li a")].map((link) => link.textContent);
+}
+
+it("lists the first page of checks and every category filter", async () => {
+  const { container } = render(await PublicChecksPage({ searchParams: Promise.resolve({}) }));
   const text = container.textContent ?? "";
 
   expect(screen.getByText("Public reference / No account required")).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "What a review actually checks." })).toBeInTheDocument();
   expect(screen.getByText("This page lists the checks a review can run. It does not run a review, connect to a cloud account, or prove that a system is secure.")).toBeInTheDocument();
-  expect(screen.getByText(`${publicChecks.length} checks. Open a check to read what it looks for.`)).toBeInTheDocument();
+  expect(screen.getByText("Showing 1\u201310 of 48")).toBeInTheDocument();
   expect(text).not.toContain("The list includes a public database, wildcard permissions");
   expect(screen.getByRole("link", { name: "Start a review" })).toHaveAttribute("href", "/dashboard/jobs");
   expect(screen.getByRole("link", { name: "Set up MCP" })).toHaveAttribute("href", "/mcp-config");
 
-  for (const area of ["Security", "Reliability", "AI workloads", "Scaling and cost"] as const) {
-    const count = publicChecks.filter((check) => check.area === area).length;
-    expect(screen.getByRole("heading", { name: `${area} ${count}` })).toBeInTheDocument();
+  for (const label of ["All 48", "Security 37", "Reliability 6", "AI workloads 3", "Scaling and cost 2"]) {
+    expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
   }
+  expect(screen.getByRole("link", { name: "All 48" })).toHaveAttribute("aria-current", "page");
+  expect(screen.getByRole("link", { name: "Security 37" })).toHaveAttribute("href", "/checks?category=security");
+  expect(screen.getByRole("link", { name: "Reliability 6" })).toHaveAttribute("href", "/checks?category=reliability");
 
-  const html = container.innerHTML;
-  for (const check of publicChecks) {
-    expect(text).toContain(check.title);
-    expect(text).not.toContain(check.looksFor);
-    expect(html).toContain(`href="${publicCheckPath(check)}"`);
-  }
+  const visible = publicChecks.slice(0, 10);
+  expect(listLinks(container)).toEqual(visible.map((check) => check.title));
+  expect(container.querySelectorAll("ul li a")).toHaveLength(10);
+  expect(listLinks(container)).not.toContain(publicChecks[10]?.title);
+  for (const check of publicChecks) expect(text).not.toContain(check.looksFor);
+
+  expect(screen.getByText("Previous")).toHaveAttribute("aria-disabled", "true");
+  expect(screen.getByText("1", { selector: "[aria-current='page']" })).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "2" })).toHaveAttribute("href", "/checks?page=2");
+  expect(screen.getByRole("link", { name: "Next" })).toHaveAttribute("href", "/checks?page=2");
 
   expect(screen.getByRole("heading", { name: "What a check cannot do" })).toBeInTheDocument();
   expect(screen.getByText("It reads the text you submit. It does not call a cloud account.")).toBeInTheDocument();
@@ -41,7 +51,51 @@ it("lists check titles without repeating what each check looks for", () => {
   };
   expect(data["@type"]).toBe("ItemList");
   expect(data.itemListElement.map((item) => item.name)).toEqual(publicChecks.map((check) => check.title));
+  expect(data.itemListElement).toHaveLength(publicChecks.length);
   expect(data.itemListElement[0]?.url).toBe(`https://skaleagents.com${publicCheckPath(publicChecks[0])}`);
+});
+
+it("shows reliability checks on one page", async () => {
+  const { container } = render(await PublicChecksPage({ searchParams: Promise.resolve({ category: "reliability" }) }));
+  const reliability = publicChecks.filter((check) => check.area === "Reliability");
+
+  expect(screen.getByText("Showing 1\u20136 of 6")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Reliability 6" })).toHaveAttribute("aria-current", "page");
+  expect(listLinks(container)).toEqual(reliability.map((check) => check.title));
+  expect(listLinks(container)).not.toContain("Public network access");
+  expect(screen.queryByRole("navigation", { name: "Pagination" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "2" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Next" })).not.toBeInTheDocument();
+});
+
+it("shows the second page of security checks", async () => {
+  const { container } = render(await PublicChecksPage({ searchParams: Promise.resolve({ category: "security", page: "2" }) }));
+  const security = publicChecks.filter((check) => check.area === "Security");
+
+  expect(screen.getByText("Showing 11\u201320 of 37")).toBeInTheDocument();
+  expect(listLinks(container)).toEqual(security.slice(10, 20).map((check) => check.title));
+  expect(listLinks(container)).not.toContain(security[0]?.title);
+  expect(screen.getByRole("link", { name: "Security 37" })).toHaveAttribute("href", "/checks?category=security");
+  expect(screen.getByRole("link", { name: "Previous" })).toHaveAttribute("href", "/checks?category=security");
+  expect(screen.getByRole("link", { name: "1" })).toHaveAttribute("href", "/checks?category=security");
+  expect(screen.getByText("2", { selector: "[aria-current='page']" })).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "3" })).toHaveAttribute("href", "/checks?category=security&page=3");
+});
+
+it("treats a missing or unknown category as all and clamps the page", async () => {
+  const { container } = render(await PublicChecksPage({ searchParams: Promise.resolve({ category: "unknown", page: "0" }) }));
+  expect(screen.getByRole("link", { name: "All 48" })).toHaveAttribute("aria-current", "page");
+  expect(listLinks(container)).toEqual(publicChecks.slice(0, 10).map((check) => check.title));
+
+  cleanup();
+  render(await PublicChecksPage({ searchParams: Promise.resolve({ page: "nope" }) }));
+  expect(screen.getByText("Showing 1\u201310 of 48")).toBeInTheDocument();
+
+  cleanup();
+  render(await PublicChecksPage({ searchParams: Promise.resolve({ page: "99" }) }));
+  expect(screen.getByText("Showing 41\u201348 of 48")).toBeInTheDocument();
+  expect(screen.getByText("5", { selector: "[aria-current='page']" })).toBeInTheDocument();
+  expect(screen.getByText("Next")).toHaveAttribute("aria-disabled", "true");
 });
 
 it("still shows what a check looks for on its detail page", async () => {
