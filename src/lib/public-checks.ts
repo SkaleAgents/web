@@ -416,6 +416,57 @@ jobs:
     exampleLabel: "Header that this check is written to notice",
     example: "An RSA, EC, OpenSSH, DSA, or generic private key header",
   },
+  {
+    slug: "pipeline-prints-a-secret",
+    ruleId: "PIPE002",
+    area: "Security",
+    title: "Pipeline prints a secret",
+    looksFor: "A GitLab CI, Azure Pipelines, or Cloud Build script line that echoes or prints a secret-like variable.",
+    needs: "The pipeline text. The pipeline is not executed.",
+    finding: "High severity. The suggested next step is to remove the printed secret from the script.",
+    limit: "A script that only echoes hello is not this finding. A secret named only in a comment is not this finding.",
+    exampleLabel: "Script line that this check is written to notice",
+    example: "echo $CI_JOB_TOKEN",
+  },
+  {
+    slug: "unpinned-pipeline-image",
+    ruleId: "PIPE001",
+    area: "Security",
+    title: "Unpinned pipeline image",
+    looksFor: "A GitLab CI, Azure Pipelines, or Cloud Build image or step name that uses latest, or that has no tag and no digest.",
+    needs: "The pipeline text. The pipeline is not executed.",
+    finding: "Medium severity. The suggested next step is to pin a release tag or an image digest.",
+    limit: "A pinned tag such as node:20 is not this finding. An image named only in a comment is not this finding.",
+    exampleLabel: "Image that this check is written to notice",
+    example: "image: nginx:latest",
+  },
+  {
+    slug: "secret-assigned-in-a-terraform-variable",
+    ruleId: "TF001",
+    area: "Security",
+    title: "Secret assigned in a Terraform variable",
+    looksFor: "A tfvars assignment or Terraform variable default that gives a non-empty literal to a secret-like name.",
+    needs: "The tfvars file or the Terraform variable block. References are not evaluated.",
+    finding: "High severity. The suggested next step is to pass the value from a secret store or leave the default empty.",
+    limit: "A reference such as var.password, an empty string, and environment = \"prod\" are not this finding. A secret in a comment is not this finding.",
+    exampleLabel: "Assignment that this check is written to notice",
+    example: "password = \"hunter2\"",
+  },
+  {
+    slug: "public-input-on-a-terraform-module",
+    ruleId: "NET001",
+    area: "Security",
+    title: "Public input on a Terraform module",
+    looksFor: "A Terraform module argument set to 0.0.0.0/0 or ::/0, unless the argument is egress, destination, or ipv6 egress, or a module argument publicly_accessible = true.",
+    needs: "The module block in the submitted Terraform. The module body is not loaded and the module source is not fetched.",
+    finding: "High severity. The suggested next step is to replace the public input with an approved range or turn public access off.",
+    limit: "A module with cidr = \"10.0.0.0/24\" is not this finding. A public value that appears only in a comment is not this finding.",
+    exampleLabel: "Module argument that this check is written to notice",
+    example: `module "edge" {
+  source = "./modules/edge"
+  cidr = "0.0.0.0/0"
+}`,
+  },
 ];
 
 export const publicCheckAreas = ["Security", "Reliability", "AI workloads", "Scaling and cost"] as const;
