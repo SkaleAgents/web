@@ -1,5 +1,6 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NewJobPage from "./page";
 
@@ -22,5 +23,29 @@ it("asks for a codebase review before a pasted infrastructure file", async () =>
   expect(screen.getByRole("link", { name: "Set up MCP" })).toHaveAttribute("href", "/org/personal-cfgnns/mcp-config");
   expect(screen.getByRole("textbox", { name: "IaC content" })).toBeInTheDocument();
   expect(screen.getByText(/Paste your Terraform, CloudFormation, Kubernetes, or Pulumi YAML file, or a Dockerfile or GitHub Actions workflow/)).toBeInTheDocument();
+  expect(screen.getByText("Several text files can be added and each file is scanned on its own, while the paste box remains for a single snippet.")).toBeInTheDocument();
   expect(screen.getByText(/a container that runs as root/)).toBeInTheDocument();
+});
+
+it("fills the audit submission with both file markers after two files are chosen", async () => {
+  vi.stubGlobal("fetch", vi.fn(async () => Response.json({})));
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(<QueryClientProvider client={client}><NewJobPage /></QueryClientProvider>);
+  const dockerfile = new File(["FROM nginx:latest\n"], "Dockerfile", { type: "text/plain" });
+  const terraform = new File(["publicly_accessible = true\n"], "main.tf", { type: "text/plain" });
+  await userEvent.upload(screen.getByLabelText("Audit text files"), [dockerfile, terraform]);
+
+  await waitFor(() => {
+    const submission = document.querySelector("textarea[aria-label='Audit submission content']");
+    expect(submission).toBeInstanceOf(HTMLTextAreaElement);
+    expect((submission as HTMLTextAreaElement).value).toBe([
+      "----- skaleagents-file: Dockerfile -----",
+      "FROM nginx:latest",
+      "",
+      "----- skaleagents-file: main.tf -----",
+      "publicly_accessible = true",
+      "",
+    ].join("\n"));
+  });
+  expect(screen.getByRole("textbox", { name: "IaC content" })).toHaveValue("");
 });

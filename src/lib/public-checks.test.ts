@@ -4,12 +4,13 @@ import { publicCheckBySlug, publicChecks } from "./public-checks";
 
 it("publishes each built-in check once, with the image scan kept honest", async () => {
   expect(new Set(publicChecks.map((check) => check.slug)).size).toBe(publicChecks.length);
-  expect(new Set(publicChecks.map((check) => check.ruleId)).size).toBe(28);
+  expect(new Set(publicChecks.map((check) => check.ruleId)).size).toBe(32);
   expect(publicChecks.map((check) => check.title)).toEqual(expect.arrayContaining([
     "Public database", "Wildcard IAM permissions", "Docker socket", "Missing memory limit", "Disabled timeout", "One-connection pool",
     "Container runs as root", "Remote script piped to a shell", "Pull request target checkout of PR code", "Action pinned to @main",
     "Secret file copied into an image", "Workflow prints a secret", "Workflow permissions are broad",
     "Secret assigned in an image variable", "Secret assigned in workflow env", "Helm privileged container", "Ansible task runs as root",
+    "Storage encryption disabled", "Database backups disabled", "Possible AWS access key", "Private key material in source",
   ]));
   const image = publicCheckBySlug("container-image-scan");
   expect(image?.limit).toMatch(/not a clean image report/);
