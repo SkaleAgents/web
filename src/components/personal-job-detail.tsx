@@ -75,15 +75,18 @@ export function PersonalJobDetail({ id }: { id: string }) {
           {job.data.findings.length === 0 ? <div className="space-y-3">
             <p className="text-sm text-ink-muted">No findings were recorded.</p>
             <ClearCheckSummary coverage={job.data.coverage} tasks={job.data.tasks} />
-          </div> : job.data.findings.map((finding, index) => <article key={index} className="audit-finding">
+          </div> : job.data.findings.map((finding, index) => {
+            const place = findingPlace(finding);
+            return <article key={index} className="audit-finding">
             <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
             <div>
               <h3>{finding.title}</h3>
               <p className="finding-detail">{finding.detail}</p>
-              {findingPlace(finding) && <FindingResource value={findingPlace(finding)} />}
+              {place && <FindingResource value={place} />}
               <p className="finding-action"><span>Recommended action</span>{finding.remediation || "No specific fix was recorded. Ask the person responsible for this resource to review the issue before changing it."}</p>
             </div>
-          </article>)}
+          </article>;
+          })}
           <SkippedCheckList coverage={job.data.coverage} tasks={job.data.tasks} />
         </section>}
         <section className="audit-source" aria-label="Source and coverage">
