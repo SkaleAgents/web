@@ -467,6 +467,49 @@ jobs:
   cidr = "0.0.0.0/0"
 }`,
   },
+  {
+    slug: "secret-assigned-in-a-terraform-local",
+    ruleId: "TF002",
+    area: "Security",
+    title: "Secret assigned in a Terraform local",
+    looksFor: "A Terraform local whose name looks like a password, secret, or token, and whose value is a non-empty literal.",
+    needs: "The locals block in the submitted Terraform. Interpolations are not evaluated.",
+    finding: "High severity. The suggested next step is to pass the value from a secret store or a variable reference.",
+    limit: "password = var.password, an empty string, and environment = \"prod\" are not this finding. A secret in a comment is not this finding.",
+    exampleLabel: "Local that this check is written to notice",
+    example: `locals {
+  password = "hunter2"
+}`,
+  },
+  {
+    slug: "secret-assigned-in-serverless-environment",
+    ruleId: "SLS001",
+    area: "Security",
+    title: "Secret assigned in serverless environment",
+    looksFor: "A Serverless Framework provider or function environment entry whose name looks like a password, secret, or token, and whose value is a non-empty literal.",
+    needs: "The Serverless Framework config. The config is not executed, and conditions are not evaluated.",
+    finding: "High severity. The suggested next step is to reference the value with a Serverless variable such as ${env:TOKEN}.",
+    limit: "${env:TOKEN} and ${self:custom.x} are not this finding. A value that appears only in a comment is not this finding.",
+    exampleLabel: "Environment entry that this check is written to notice",
+    example: `provider:
+  environment:
+    password: hunter2`,
+  },
+  {
+    slug: "iam-policy-allows-every-action",
+    ruleId: "IAM001",
+    area: "Security",
+    title: "IAM policy allows every action",
+    looksFor: "A standalone IAM policy statement whose Effect is Allow, or omitted, and whose Action is * or a list containing only *.",
+    needs: "The policy JSON. The policy is not executed, and conditions are not evaluated.",
+    finding: "High severity. The suggested next step is to list the required actions instead of allowing every action.",
+    limit: "An Effect of Deny is not this finding. A statement that lists s3:GetObject is not this finding.",
+    exampleLabel: "Statement that this check is written to notice",
+    example: `{
+  "Version": "2012-10-17",
+  "Statement": [{ "Effect": "Allow", "Action": "*", "Resource": "*" }]
+}`,
+  },
 ];
 
 export const publicCheckAreas = ["Security", "Reliability", "AI workloads", "Scaling and cost"] as const;

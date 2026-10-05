@@ -4,7 +4,7 @@ import { publicCheckBySlug, publicChecks } from "./public-checks";
 
 it("publishes each built-in check once, with the image scan kept honest", async () => {
   expect(new Set(publicChecks.map((check) => check.slug)).size).toBe(publicChecks.length);
-  expect(new Set(publicChecks.map((check) => check.ruleId)).size).toBe(36);
+  expect(new Set(publicChecks.map((check) => check.ruleId)).size).toBe(39);
   expect(publicChecks.map((check) => check.title)).toEqual(expect.arrayContaining([
     "Public database", "Wildcard IAM permissions", "Docker socket", "Missing memory limit", "Disabled timeout", "One-connection pool",
     "Container runs as root", "Remote script piped to a shell", "Pull request target checkout of PR code", "Action pinned to @main",
@@ -12,6 +12,7 @@ it("publishes each built-in check once, with the image scan kept honest", async 
     "Secret assigned in an image variable", "Secret assigned in workflow env", "Helm privileged container", "Ansible task runs as root",
     "Storage encryption disabled", "Database backups disabled", "Possible AWS access key", "Private key material in source",
     "Pipeline prints a secret", "Unpinned pipeline image", "Secret assigned in a Terraform variable", "Public input on a Terraform module",
+    "Secret assigned in a Terraform local", "Secret assigned in serverless environment", "IAM policy allows every action",
   ]));
   const image = publicCheckBySlug("container-image-scan");
   expect(image?.limit).toMatch(/not a clean image report/);

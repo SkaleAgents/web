@@ -1,5 +1,6 @@
 export type CheckResult = {
   ruleId: string;
+  title?: string;
   status: "evaluated" | "skipped" | "failed";
   completeness: "complete" | "partial" | "none";
   findingCount: number;
@@ -48,7 +49,40 @@ export const checkLabels: Record<string, string> = {
   K8S008: "Missing memory limit",
   K8S012: "Secret stored in manifest",
   K8S013: "Wildcard Kubernetes RBAC",
+  NET001: "Broad network exposure",
+  IAM001: "Wildcard permission detected",
+  K8S001: "Elevated container privileges",
+  DATA003: "Object versioning not enabled",
+  DB003: "Database deletion protection disabled",
+  DB004: "Database lacks multi-zone failover",
+  COST001: "Compute sizing needs review",
+  K8S009: "Readiness probe missing",
+  K8S010: "Liveness probe missing",
+  K8S011: "Single workload replica",
+  TF001: "Secret assigned in a Terraform variable",
+  TF002: "Secret assigned in a Terraform local",
+  SLS001: "Secret assigned in serverless environment",
 };
+
+export function checkTitle(check: Pick<CheckResult, "ruleId" | "title">): string {
+  const provided = check.title?.trim();
+  if (provided) return provided;
+  return checkLabels[check.ruleId] ?? "";
+}
+
+export function evaluatedClearChecks(coverage?: AuditCoverage, tasks: CoverageTask[] = []): Array<{ id: string; title: string }> {
+  const rows = coverage?.tasks?.length ? coverage.tasks : tasks;
+  const checks: Array<{ id: string; title: string }> = [];
+  for (const task of rows) {
+    for (const check of task.checkCoverage?.checks ?? []) {
+      if (check.status !== "evaluated" || check.findingCount !== 0) continue;
+      const title = checkTitle(check);
+      if (!title) continue;
+      checks.push({ id: `${task.specialist}:${check.ruleId}`, title });
+    }
+  }
+  return checks;
+}
 
 export function findingPlace(finding: { resource?: string | null; location?: { path?: string; line?: number } | null }): string | null {
   const path = finding.location?.path;
@@ -64,7 +98,7 @@ export function skippedChecks(coverage?: AuditCoverage, tasks: CoverageTask[] = 
   const rows = coverage?.tasks?.length ? coverage.tasks : tasks;
   return rows.flatMap((task) => (task.checkCoverage?.checks ?? []).filter((check) => check.status === "skipped").map((check) => ({
     id: `${task.specialist}:${check.ruleId}`,
-    label: checkLabels[check.ruleId] ?? "Skipped check",
+    label: checkTitle(check) || "Skipped check",
     reason: check.reasonCodes.map((code) => reasonLabels[code] ?? "Check details unavailable").join(" "),
   })));
 }

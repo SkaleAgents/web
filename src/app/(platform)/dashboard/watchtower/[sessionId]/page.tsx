@@ -4,7 +4,7 @@ import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, API_URL, type PatchProposal, type ProposalGenerationResult, type SwarmFinding, type SwarmJob, type SwarmStep, type WatchtowerRedirect, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
-import { SkippedCheckList } from "@/components/audit-coverage";
+import { ClearCheckSummary, SkippedCheckList } from "@/components/audit-coverage";
 import { findingPlace } from "@/lib/audit-coverage";
 import { Button, LinkButton } from "@/components/ui";
 import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
@@ -184,7 +184,10 @@ function SessionReview({ sessionId }: { sessionId: string }) {
                 {finding.inputLocatorAvailable === false && <p className="mt-2 text-xs text-ink-muted">{finding.classification === "builtin-v1" ? "Finding retained without source. Original resource locator removed." : "Unclassified finding text removed with input."}</p>}
               </li>
             ))}
-            {job.data?.findings?.length === 0 && <li className="text-sm text-ink-muted">No findings.</li>}
+            {job.data?.findings?.length === 0 && <li className="space-y-3 text-sm text-ink-muted">
+              <p>No findings.</p>
+              <ClearCheckSummary coverage={job.data.coverage} tasks={job.data.tasks} />
+            </li>}
           </ul>
           <div className="mt-4"><SkippedCheckList coverage={job.data?.coverage} tasks={job.data?.tasks} /></div>
         </div>
