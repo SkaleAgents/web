@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie, type SwarmSchedule } from "@/lib/api";
+import { auditFileBasename, auditFileError, joinAuditFiles, type AuditFilePart } from "@/lib/audit-files";
 import { Button, FieldLabel, LinkButton, Select, TextArea, TextInput } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
@@ -23,6 +24,10 @@ export default function NewSchedulePage() {
   const [cronExpression, setCronExpression] = useState("0 * * * *");
   const [timezone, setTimezone] = useState("UTC");
   const [content, setContent] = useState("");
+  const [files, setFiles] = useState<AuditFilePart[]>([]);
+  const [fileError, setFileError] = useState("");
+  const fileInput = useRef<HTMLInputElement>(null);
+  const submission = files.length > 0 ? joinAuditFiles(files) : content;
   const [sourceMode, setSourceMode] = useState<"text" | "github">("text");
   const [repository, setRepository] = useState("");
   const [sourcePath, setSourcePath] = useState("");
@@ -43,7 +48,7 @@ export default function NewSchedulePage() {
           timezone,
           scope: sourceMode === "github"
             ? buildGithubScheduleScope(repository, sourcePath, branch, sourceFormat)
-            : { kind: "iac_text", format: "auto", content },
+            : { kind: "iac_text", format: "auto", content: submission },
           ...(sourceMode === "text" ? buildSourceMetadata(sourceRevision, sourceObservedAt) : {}),
           webhookUrl: webhookUrl || null,
         }),
@@ -97,6 +102,27 @@ export default function NewSchedulePage() {
           <Button type="button" variant={sourceMode === "github" ? "primary" : "secondary"} aria-pressed={sourceMode === "github"} onClick={() => setSourceMode("github")}>Public GitHub file</Button>
         </div></fieldset>
         {sourceMode === "text" ? <>
+          <div className="mt-4">
+            <p className="text-sm text-ink-muted">Several text files can be added and each file is scanned on its own.</p>
+            <input
+              ref={fileInput}
+              type="file"
+              multiple
+              className="mt-3 block w-full text-sm text-ink file:mr-3 file:rounded-[10px] file:border file:border-line file:bg-canvas file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink"
+              aria-label="Schedule text files"
+              onChange={(event) => {
+                const selected = [...(event.target.files ?? [])];
+                void Promise.all(selected.map(async (file) => ({ name: file.name, text: await file.text() }))).then((loaded) => {
+                  const error = auditFileError(loaded);
+                  setFileError(error ?? "");
+                  setFiles(error || loaded.length === 0 ? [] : loaded);
+                });
+              }}
+            />
+            {files.length > 0 && <p className="mt-2 text-xs text-ink-muted">{files.map((file) => auditFileBasename(file.name)).join(", ")}</p>}
+            {files.length > 0 && <Button type="button" variant="ghost" className="mt-2" onClick={() => { setFiles([]); setFileError(""); if (fileInput.current) fileInput.current.value = ""; }}>Remove selected files</Button>}
+            {fileError && <p role="alert" className="mt-2 text-sm text-danger">{fileError}</p>}
+          </div>
           <label className="mt-4 block">
             <FieldLabel>IaC content</FieldLabel>
             <TextArea value={content} onChange={(event) => setContent(event.target.value)} className="mt-1 min-h-32" placeholder={'resource "aws_security_group" "web" {}'} aria-label="Scheduled IaC content" />
@@ -111,7 +137,7 @@ export default function NewSchedulePage() {
           <p className="text-xs text-ink-muted sm:col-span-2">Each due run fetches this file at the current branch commit. A failed fetch skips the audit and shows an error. Unchanged commits do not create another audit. Public repositories only; maximum file size 256 KiB.</p>
         </div>}
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <Button type="button" disabled={!user.data || !name.trim() || !cronExpression.trim() || (sourceMode === "text" ? !content.trim() : !repository.trim() || !sourcePath.trim() || !branch.trim()) || create.isPending} onClick={() => create.mutate()}>
+          <Button type="button" disabled={!user.data || !name.trim() || !cronExpression.trim() || (sourceMode === "text" ? !submission.trim() || Boolean(fileError) : !repository.trim() || !sourcePath.trim() || !branch.trim()) || create.isPending} onClick={() => create.mutate()}>
             {create.isPending ? "Saving…" : "Create schedule"}
           </Button>
           {create.isError && <p className="text-sm text-danger">{create.error.message}</p>}

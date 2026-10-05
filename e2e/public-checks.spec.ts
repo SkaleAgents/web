@@ -9,6 +9,7 @@ test("public checks name infrastructure formats and bottleneck checks", async ({
   if (await deny.isVisible()) await deny.click();
   await expect(page.getByRole("heading", { name: "What a review actually checks." })).toBeVisible();
   await expect(page.getByText("a Dockerfile, or a GitHub Actions workflow")).toBeVisible();
+  await expect(page.getByText("GitLab CI, Azure Pipelines, Cloud Build, Terraform module arguments, and tfvars")).toBeVisible();
   await expect(page.getByText("a container that runs as root")).toBeVisible();
   for (const title of ["Public database", "Wildcard IAM permissions", "Docker socket", "Missing memory limit", "Disabled timeout", "One-connection pool"]) {
     await expect(page.getByRole("link", { name: title })).toBeVisible();
