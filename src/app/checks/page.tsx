@@ -1,7 +1,7 @@
 import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { publicCheckAreas, publicCheckPath, publicChecks, type PublicCheck } from "@/lib/public-checks";
+import { publicCheckAreas, publicCheckPath, publicCheckProposedChange, publicChecks, type PublicCheck } from "@/lib/public-checks";
 
 export const metadata: Metadata = {
   title: "Infrastructure review checks | SkaleAgents",
@@ -99,6 +99,7 @@ export default async function PublicChecksPage({ searchParams }: { searchParams:
       {visible.map((check) => (
         <li key={check.slug} className="py-3">
           <h3 className="font-semibold"><Link href={publicCheckPath(check)} className="hover:underline">{check.title}</Link></h3>
+          {publicCheckProposedChange(check) && <p className="mt-1 text-sm text-ink-muted">Proposes a line change</p>}
         </li>
       ))}
     </ul>

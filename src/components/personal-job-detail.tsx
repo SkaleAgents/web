@@ -9,6 +9,7 @@ import { AuditResultSummary } from "@/components/audit-result-summary";
 import { AuditCoveragePanel, PlainCheckList } from "@/components/audit-coverage";
 import { findingPlace } from "@/lib/audit-coverage";
 import { leadFinding, plainRisk, priorityReview } from "@/lib/audit-risk";
+import { ExactLineChange } from "@/components/exact-line-change";
 import { proposedChangeText, reviewCopyText, submittedAuditText } from "@/lib/review-edits";
 import { SourceMetadata } from "@/components/source-metadata";
 import { Button, LinkButton } from "@/components/ui";
@@ -39,6 +40,7 @@ function FixTheseFirst({ findings, content }: { findings: Array<{ title: string;
         <h3>{finding.title}</h3>
         <p className="finding-detail">{finding.detail}</p>
         <p className="finding-action"><span>Proposed change</span>{proposedChangeText(content, finding.title)}</p>
+        <ExactLineChange content={content} title={finding.title} />
         <p className="finding-action"><span>Recommended action</span>{finding.remediation || "No specific fix was recorded. Ask the person responsible for this resource to review the issue before changing it."}</p>
       </div>
     </article>)}
