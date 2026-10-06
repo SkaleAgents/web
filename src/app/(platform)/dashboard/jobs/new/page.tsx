@@ -10,7 +10,10 @@ import { currentUserOptions } from "@/lib/session";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
 import { buildSourceMetadata } from "@/lib/source-metadata";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
-import { PUBLIC_DATABASE_SAMPLE } from "@/lib/review-edits";
+import { PUBLIC_DATABASE_SAMPLE, changePhrase, exactLineEdit } from "@/lib/review-edits";
+
+const sampleEdit = exactLineEdit(PUBLIC_DATABASE_SAMPLE, "Database publicly accessible");
+const sampleExpectation = sampleEdit ? changePhrase(sampleEdit) : null;
 
 const AUDIT_SPECIALISTS = ["devsecops", "sre", "mlops", "scaling"] as const;
 const specialistDetails = {
@@ -107,7 +110,10 @@ export default function NewJobPage() {
         {fileError && <p role="alert" className="mt-2 text-sm text-danger">{fileError}</p>}
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <Button type="button" variant="secondary" onClick={() => setContent(PUBLIC_DATABASE_SAMPLE)}>Try a sample</Button>
-          <p className="text-sm text-ink-muted">This sample should report a database that is publicly accessible.</p>
+          <div className="text-sm text-ink-muted">
+            <p>This sample should report a database that is publicly accessible.</p>
+            {sampleExpectation && <p className="mt-1"><span className="font-semibold text-ink">Database publicly accessible</span> {sampleExpectation}</p>}
+          </div>
         </div>
         <textarea
           aria-hidden="true"

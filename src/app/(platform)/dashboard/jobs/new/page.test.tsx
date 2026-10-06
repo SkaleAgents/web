@@ -34,6 +34,8 @@ it("fills the paste box from Try a sample without submitting", async () => {
   render(<QueryClientProvider client={client}><NewJobPage /></QueryClientProvider>);
   expect(screen.getByLabelText("Audit text files")).toBeInTheDocument();
   expect(screen.getByText("This sample should report a database that is publicly accessible.")).toBeInTheDocument();
+  expect(screen.getByText("Database publicly accessible")).toBeInTheDocument();
+  expect(screen.getByText("publicly_accessible = true becomes publicly_accessible = false")).toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: "Try a sample" }));
   expect(screen.getByRole("textbox", { name: "IaC content" })).toHaveValue([
     'resource "aws_db_instance" "app" {',

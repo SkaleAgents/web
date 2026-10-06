@@ -12,6 +12,7 @@ import { currentUserOptions } from "@/lib/session";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 import { watchtowerSessionTitle } from "@/lib/watchtower-session";
 import { priorityReview } from "@/lib/audit-risk";
+import { ExactLineChange } from "@/components/exact-line-change";
 import { proposedChangeText, submittedAuditText } from "@/lib/review-edits";
 
 export default function WatchtowerPage() {
@@ -160,6 +161,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
               {findingPlace(finding) && <p className="mt-1 break-all font-mono text-xs text-ink-muted">{findingPlace(finding)}</p>}
               <p className="mt-1 text-sm text-ink-muted">{finding.detail}</p>
               <p className="mt-2 text-sm text-ink-muted">{proposedChangeText(content, finding.title)}</p>
+              <ExactLineChange content={content} title={finding.title} />
               <p className="mt-2 text-xs text-ink-muted">Remediation: {finding.remediation}</p>
               {finding.inputLocatorAvailable === false && <p className="mt-2 text-xs text-ink-muted">{finding.classification === "builtin-v1" ? "Finding retained without source. Original resource locator removed." : "Unclassified finding text removed with input."}</p>}
             </li>

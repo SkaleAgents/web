@@ -35,6 +35,11 @@ it("lists the first page of checks and every category filter", async () => {
   expect(listLinks(container)).toEqual(visible.map((check) => check.title));
   expect(listLinks(container)[4]).toBe("Public database");
   expect(container.querySelectorAll("ul li a")).toHaveLength(10);
+  const rows = [...container.querySelectorAll("ul li")];
+  const database = rows.find((row) => row.querySelector("a")?.textContent === "Public database");
+  const network = rows.find((row) => row.querySelector("a")?.textContent === "Public network access");
+  expect(database?.textContent).toContain("Proposes a line change");
+  expect(network?.textContent).not.toContain("Proposes a line change");
   expect(listLinks(container)).not.toContain(security[10]?.title);
   for (const check of publicChecks) expect(text).not.toContain(check.looksFor);
 
