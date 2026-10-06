@@ -4,7 +4,7 @@ import { cookieConsentRequired } from "@/lib/cookie-consent-region";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { headers } from "next/headers";
-import { IBM_Plex_Mono, IBM_Plex_Sans, Source_Sans_3 } from "next/font/google";
+import { IBM_Plex_Mono, Inter, Source_Sans_3 } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -30,10 +30,9 @@ const sourceSans = Source_Sans_3({
   weight: ["400", "500", "600"],
 });
 
-const plexSans = IBM_Plex_Sans({
-  variable: "--font-plex-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -81,7 +80,7 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${syne.variable} ${sourceSans.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${syne.variable} ${sourceSans.variable} ${inter.variable} ${plexMono.variable} h-full antialiased`}
     >
       <head>
         {apiOrigin ? <link rel="preconnect" href={apiOrigin} crossOrigin="use-credentials" /> : null}
