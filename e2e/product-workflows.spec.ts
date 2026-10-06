@@ -63,10 +63,14 @@ test("grouped navigation supports keyboard dismissal, active routes, and mobile"
   await expect(build).toBeFocused();
   await expect(build).toHaveAttribute("aria-expanded", "false");
   await page.setViewportSize({ width: 320, height: 740 });
-  for (const [label, count] of [["Explore", 3], ["Connect", 2]] as const) {
+  for (const [label, count] of [["Explore", 5], ["Connect", 2]] as const) {
     await nav.getByRole("button", { name: label, exact: true }).click();
     await expect(nav.getByRole("link")).toHaveCount(count);
-    if (label === "Explore") await expect(nav.getByRole("link", { name: /Review checks/ })).toHaveAttribute("href", "/checks");
+    if (label === "Explore") {
+      await expect(nav.getByRole("link", { name: /Review checks/ })).toHaveAttribute("href", "/checks");
+      await expect(nav.getByRole("link", { name: /Free resources/ })).toHaveAttribute("href", "/resources");
+      await expect(nav.getByRole("link", { name: /^Blog/ })).toHaveAttribute("href", "/blog");
+    }
     if (label === "Connect") await expect(nav.getByRole("link", { name: /Pricing/ })).toHaveAttribute("href", "/pricing");
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   }
@@ -108,7 +112,8 @@ test("prompt topics and search select the full text to copy", async ({ page, con
   await page.getByRole("link", { name: "Release check" }).click();
   await expect(page).toHaveURL(/\/prompts\/1$/);
   await expect(page.getByText(body)).toBeVisible();
-  await page.getByRole("button", { name: "Copy prompt", exact: true }).click();
+  await page.getByRole("button", { name: "Actions" }).click();
+  await page.getByRole("menuitem", { name: "Copy plain text" }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(body);
 });
 

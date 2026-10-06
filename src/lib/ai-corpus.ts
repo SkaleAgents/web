@@ -3,6 +3,8 @@ import { homeFaqs } from "./home-faq";
 import { planBlurbs } from "./plan-blurbs";
 import { catalogProducts } from "./product-catalog-data";
 import { publicCheckPath, publicChecks } from "./public-checks";
+import { publicResourcePath, publicResources, resourceMarkdown, resourcesIndexMarkdown } from "./public-resources";
+import { blogIndexMarkdown, postMarkdown, publicPostPath, publicPosts } from "./public-posts";
 
 export const SITE = "https://skaleagents.com";
 
@@ -57,6 +59,8 @@ const features = [
   ["Bot directory", "/bots", "Search specialist DevOps bots and open their instructions in your own assistant."],
   ["Prompt library", "/prompts", "Search community prompts and copy the instructions. Sign in to save your own."],
   ["Review checks", "/checks", "Read what each built-in check looks for. No account and no payment."],
+  ["Free resources", "/resources", "Checklists and prompts you can copy or open in your assistant. No account required."],
+  ["Blog", "/blog", "Notes on reviewing infrastructure and handing a prompt to an assistant."],
   ["MCP config", "/mcp-config", "Connect Cursor, Claude Code, Claude Desktop, ChatGPT, or Codex through OAuth."],
   ["Pricing", "/pricing", "Free, Starter, Pro, Max, and Enterprise organization plans."],
   ["Products", "/products", "CloudPloy, Crontinel, Toolblip, AmazingPlugins, Appnary, and harun.dev."],
@@ -91,7 +95,7 @@ export function llmsTxt(): string {
     "",
     "> Public DevOps review reference. Reading it does not run an audit or connect a cloud account.",
     "",
-    "SkaleAgents publishes review checks, a bot directory, a prompt library, organization pricing, and an MCP setup guide. Account pages are not public reference.",
+    "SkaleAgents publishes review checks, free checklists, a blog, a bot directory, a prompt library, organization pricing, and an MCP setup guide. Account pages are not public reference.",
     "",
     "## Start here",
     link("Home", "/", "What SkaleAgents is, which assistants it hands off to, and the limits of a review."),
@@ -102,6 +106,14 @@ export function llmsTxt(): string {
     "## Review checks",
     link("Review checks", "/checks", "What each check looks for, the input it needs, and what a result does not prove."),
     ...publicChecks.map((check) => link(check.title, publicCheckPath(check), check.looksFor)),
+    "",
+    "## Free resources",
+    link("Free resources", "/resources", "Checklists and prompts you can run in your own assistant."),
+    ...publicResources.map((resource) => link(resource.title, publicResourcePath(resource), resource.summary)),
+    "",
+    "## Blog",
+    link("Blog", "/blog", "Notes on reviews, prompts, and handing work to an assistant."),
+    ...publicPosts.map((post) => link(post.title, publicPostPath(post), post.summary)),
     "",
     "## Directories",
     link("Bot directory", "/bots", "Public bot names and descriptions. Instruction text stays on each bot page."),
@@ -239,6 +251,10 @@ function staticPage(path: string): string | null {
       ...homeFaqs.flatMap((faq) => [`### ${faq.question}`, "", faq.answerText, ""]),
     ]);
   }
+  if (path === "/resources") return resourcesIndexMarkdown();
+  if (path.startsWith("/resources/")) return resourceMarkdown(path.slice("/resources/".length));
+  if (path === "/blog") return blogIndexMarkdown();
+  if (path.startsWith("/blog/")) return postMarkdown(path.slice("/blog/".length));
   if (path === "/checks") {
     return document("Infrastructure review checks", [
       "These checks describe what a review looks for. They do not run a review, connect to a cloud account, or prove that infrastructure is secure. Infrastructure text can be Terraform, CloudFormation, Kubernetes, Pulumi YAML, Pulumi programs, Docker Compose, a Dockerfile, or a GitHub Actions workflow. The list includes a public database, wildcard permissions, a Docker socket, a missing memory limit, a disabled timeout, a one-connection pool, a container that runs as root, a workflow that checks out pull request code from pull_request_target, and an action pinned to @main.",

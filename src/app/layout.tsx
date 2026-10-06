@@ -111,7 +111,7 @@ export default async function RootLayout({
                 <div className="mx-auto w-full max-w-5xl px-6 py-5">
                   <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
                     <span>© 2026 SkaleAgents</span>
-                    <span className="flex flex-wrap gap-4"><Link href="/checks">Review checks</Link><Link href="/products">Our products</Link><Link href="/contact">Contact</Link><a href={CONSULTANCY_BOOKING_URL} referrerPolicy="no-referrer" rel="noreferrer">Book consultancy on harun.dev</a><Link href="/terms">Terms of Service</Link><Link href="/privacy">Privacy Policy</Link></span>
+                    <span className="flex flex-wrap gap-4"><Link href="/resources">Free resources</Link><Link href="/blog">Blog</Link><Link href="/checks">Review checks</Link><Link href="/products">Our products</Link><Link href="/contact">Contact</Link><a href={CONSULTANCY_BOOKING_URL} referrerPolicy="no-referrer" rel="noreferrer">Book consultancy on harun.dev</a><Link href="/terms">Terms of Service</Link><Link href="/privacy">Privacy Policy</Link></span>
                   </div>
                   <PreferredSourceControl />
                   <DeferredFooterBadges fallback={<FooterBadgesFallback />} />

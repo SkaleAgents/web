@@ -21,7 +21,7 @@ const workflows = [
     description: "A bot packages a specialist's instructions into a reusable prompt. You bring the project context and run it in your preferred assistant.",
     steps: [
       ["Find a bot", "Browse the public directory by specialty and open a bot to read its instructions."],
-      ["Choose your assistant", "Use the Grok, SuperGrok, or Claude handoff. For Codex or another assistant, copy the prompt into your session."],
+      ["Choose your assistant", "Open Actions and send the prompt to Claude, ChatGPT, Grok, Codex, or Perplexity. Copy it if you use Gemini or another agent."],
       ["Add your context", "Provide relevant code or configuration. Ask for evidence and validation steps before applying a recommendation."],
     ],
     note: "No MCP setup needed. Your AI provider's account and usage limits apply.",
