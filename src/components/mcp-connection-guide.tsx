@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui";
 import { ArchitectureReviewBrief } from "@/components/architecture-review-brief";
+import { PUBLIC_DATABASE_SAMPLE } from "@/lib/review-edits";
 
 const serverUrl = "https://skaleagents.com/mcp";
 const clients = ["Cursor", "Claude Code", "Claude Desktop", "ChatGPT", "Codex"] as const;
@@ -46,6 +47,12 @@ export function McpConnectionGuide() {
         <pre className="overflow-x-auto rounded-lg border border-line bg-canvas-elevated p-4 font-mono text-xs leading-relaxed">{config}</pre>
         <Button type="button" variant="secondary" onClick={() => void copy(config)}>{copyLabel}</Button>
         </div>
+      </div>
+      <div className="rounded-lg border border-line bg-canvas-elevated p-4">
+        <h3 className="font-semibold">What you get back</h3>
+        <p className="mt-2 text-sm leading-relaxed text-ink-muted">Sign in with Google and click Allow. A review of this public database sample names the finding and the exact line change.</p>
+        <pre className="mt-3 overflow-x-auto rounded-lg border border-line bg-canvas p-4 font-mono text-xs leading-relaxed">{PUBLIC_DATABASE_SAMPLE}</pre>
+        <p className="mt-3 text-sm leading-relaxed text-ink-muted"><span className="font-semibold text-ink">Database publicly accessible.</span> publicly_accessible = true becomes publicly_accessible = false.</p>
       </div>
       <details className="rounded-lg border border-line bg-canvas-elevated p-4"><summary className="cursor-pointer font-semibold">Need to reconnect?</summary><p className="mt-3 text-sm text-ink-muted">Use Connect or Authenticate in your client&apos;s MCP panel to start OAuth again. For Codex, run <code>codex mcp login skaleagents</code>. If the client timed out while you signed in, retry the connection.</p><p className="mt-3 text-sm text-ink-muted">Your client stores OAuth credentials and refreshes access automatically. Disconnect it below to revoke access. Signing out of this website does not disconnect your MCP clients.</p></details>
       <ArchitectureReviewBrief />

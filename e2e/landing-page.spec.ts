@@ -46,7 +46,11 @@ test("workflow choices lead to their matching product entry points", async ({ pa
   await expect(page.getByRole("link", { name: "Find a specialist bot" })).toHaveAttribute("href", "/bots");
   await page.getByText("In your editor", { exact: true }).click();
   const editor = page.getByRole("region", { name: "In your editor", exact: true });
+  await expect(editor).toContainText("https://skaleagents.com/mcp");
+  await expect(editor).toContainText("choose OAuth");
+  await expect(editor).toContainText("Click Allow");
   await expect(editor).toContainText("review_architecture");
+  await expect(editor).not.toContainText("npx");
   await expect(editor.getByRole("link", { name: "See MCP setup" })).toHaveAttribute("href", "/mcp-config");
   await page.getByText("In the web app", { exact: true }).click();
   const web = page.getByRole("region", { name: "In the web app", exact: true });
