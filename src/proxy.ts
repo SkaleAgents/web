@@ -3,6 +3,12 @@ import { markdownInternalPath } from "@/lib/markdown-path";
 import { CONSULTANCY_BOOKING_URL } from "@/lib/consultancy-link";
 
 export function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith("/reviews/s/")) {
+    const response = NextResponse.next();
+    response.headers.set("Cache-Control", "private, no-store");
+    response.headers.set("Referrer-Policy", "no-referrer");
+    return response;
+  }
   const internal = markdownInternalPath(request.nextUrl.pathname);
   if (internal) {
     return NextResponse.rewrite(new URL(internal, request.url));
@@ -28,5 +34,6 @@ export const config = {
     "/me/advisory-bookings/:path*",
     "/org/:workspaceId/consultancy/:path*",
     "/org/:workspaceId/advisory-bookings/:path*",
+    "/reviews/s/:token",
   ],
 };

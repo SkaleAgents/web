@@ -16,6 +16,7 @@ export const PRIVATE_PATHS = [
   "/login",
   "/auth/",
   "/workspace-invitations/",
+  "/reviews/",
   "/md",
 ] as const;
 
