@@ -523,7 +523,7 @@ html.dark .dashboard-frame {
 .audit-view-tabs button { border: 0; border-radius: 8px; padding: 8px 14px; background: transparent; color: var(--ink-muted); font-size: 14px; font-weight: 600; cursor: pointer; }
 .audit-view-tabs button[aria-selected="true"] { background: var(--canvas); color: var(--ink); }
 .audit-view-tabs button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.audit-risk h2 { max-width: 18em; margin-top: 14px; font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif; font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.25; }
+.audit-risk h2 { max-width: 40em; margin-top: 8px; font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif; font-size: 16px; font-weight: 600; letter-spacing: -0.011em; line-height: 1.45; }
 .audit-risk p { max-width: 42em; margin-top: 10px; color: var(--ink-muted); font-size: 15px; line-height: 1.55; }
 .audit-check-list h2 { font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
 .audit-check-list h3 { margin-top: 16px; font-size: 14px; font-weight: 600; }
