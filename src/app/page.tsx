@@ -10,7 +10,7 @@ import { HeroSignal } from "@/components/marketing/hero-signal";
 
 export const metadata: Metadata = {
   title: "SkaleAgents | DevOps bots and infrastructure reviews",
-  description: "Explore specialist DevOps bots, review code and infrastructure, and connect SkaleAgents to your AI editor with MCP. See examples and choose your workflow.",
+  description: "Connect the AI you already use. It checks your application and your infrastructure, then tells you what to change.",
   alternates: { canonical: "/", types: { "text/markdown": markdownPath("/") } },
 };
 
@@ -20,7 +20,7 @@ const features = [
   { number: "03", title: "Find it. Copy it. Get to work.", label: "Prompt library", description: "The library lists title, type, and category. Open a prompt to read it and copy the full instructions. Sign in to save your own reusable prompts.", href: "/prompts", cta: "Browse prompts" },
   { number: "04", title: "Read the review checks", label: "Public reference", description: "See what each built-in check looks for, the input it needs, and what a result does not prove. No account required.", href: "/checks", cta: "Read the checks" },
   { number: "05", title: "Set a review rhythm", label: "Scheduled audits", description: "Review saved infrastructure text or a public GitHub file on a schedule. Set the timezone and send audit alerts to a webhook.", href: "/dashboard/schedules", cta: "View schedules" },
-  { number: "06", title: "Stay in your editor", label: "MCP connection", description: "Connect Cursor or Claude Code through browser OAuth. Your assistant can call architecture review tools while you work, with credentials handled automatically.", href: "/mcp-config", cta: "MCP config" },
+  { number: "06", title: "Stay in your editor", label: "MCP connection", description: "Connect the AI you already use. It checks your application and your infrastructure, then tells you what to change.", href: "/mcp-config", cta: "MCP config" },
 ];
 
 export default function MarketingHome() {
@@ -34,8 +34,8 @@ export default function MarketingHome() {
           <p className="font-display text-[clamp(2.75rem,8vw,5.5rem)] font-bold leading-[0.95] tracking-tight">SkaleAgents</p>
           <div className="mt-6 grid items-center gap-10 md:grid-cols-[1.6fr_1fr]">
             <div>
-              <h1 id="hero-heading" className="max-w-xl text-2xl font-medium leading-snug sm:text-3xl">Control plane for AI DevOps agents</h1>
-              <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-muted">Connect your editor through MCP to review code and infrastructure where you work. Explore specialist bots, reuse prompts, or bring findings into a shared team review.</p>
+              <h1 id="hero-heading" className="max-w-xl text-2xl font-medium leading-snug sm:text-3xl">Connect the AI you already use.</h1>
+              <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-muted">It checks your application and your infrastructure, then tells you what to change.</p>
               <HeroActions />
               <a href="#examples" className="mt-10 inline-flex items-center gap-3 text-sm font-semibold text-ink-muted hover:text-ink">See what a review looks like <span className="hero-scroll-cue" aria-hidden="true">↓</span></a>
             </div>
@@ -45,7 +45,7 @@ export default function MarketingHome() {
       </section>
 
       <section id="mcp" className="marketing-section grid gap-8 border-b border-line lg:grid-cols-[1.2fr_1fr]" aria-labelledby="mcp-heading">
-        <div><p className="marketing-eyebrow">Built on MCP / Connected to your workflow</p><h2 id="mcp-heading" className="marketing-heading">Your editor is the starting point.</h2><p className="mt-4 max-w-xl leading-relaxed text-ink-muted">MCP is how your AI assistant works with SkaleAgents. Give it the code you want reviewed, call a review tool, and get findings back in the same conversation.</p><Link href="/mcp-config" className="mt-6 inline-flex items-center gap-3 rounded-[10px] bg-accent px-5 py-3 text-sm font-semibold text-accent-fg">Set up your MCP connection <span aria-hidden="true">↗</span></Link><p className="mt-3 text-sm text-ink-muted">Cursor · Claude Code · Claude Desktop · ChatGPT · Codex</p></div>
+        <div><p className="marketing-eyebrow">Built on MCP / Connected to your workflow</p><h2 id="mcp-heading" className="marketing-heading">Your editor is the starting point.</h2><p className="mt-4 max-w-xl leading-relaxed text-ink-muted">Connect the AI you already use. It checks your application and your infrastructure, then tells you what to change. The findings come back in the same conversation.</p><Link href="/mcp-config" className="mt-6 inline-flex items-center gap-3 rounded-[10px] bg-accent px-5 py-3 text-sm font-semibold text-accent-fg">Set up your MCP connection <span aria-hidden="true">↗</span></Link><p className="mt-3 text-sm text-ink-muted">Cursor · Claude Code · Claude Desktop · ChatGPT · Codex</p></div>
         <ol className="divide-y divide-line rounded-xl border border-line bg-canvas-elevated px-6">
           <li className="py-5"><p className="marketing-eyebrow">01 / Configure</p><h3 className="mt-2 font-semibold">Add SkaleAgents to your client</h3><p className="mt-1 text-sm text-ink-muted">Choose your client on the MCP page and add the hosted server URL.</p></li>
           <li className="py-5"><p className="marketing-eyebrow">02 / Authorize</p><h3 className="mt-2 font-semibold">Connect through Google OAuth</h3><p className="mt-1 text-sm text-ink-muted">Connect in your client, sign in if needed, and approve MCP access. Credentials are handled automatically.</p></li>

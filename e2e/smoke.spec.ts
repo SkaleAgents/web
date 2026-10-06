@@ -38,7 +38,7 @@ test.describe("Phase 1 page smokes", () => {
     await page.goto("/");
     await expect(page.getByText("SkaleAgents").first()).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: /Control plane for AI DevOps agents/i }),
+      page.getByRole("heading", { name: /Connect the AI you already use/i }),
     ).toBeVisible();
     await expect(
       page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true }),

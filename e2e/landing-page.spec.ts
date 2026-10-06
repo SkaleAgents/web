@@ -72,7 +72,7 @@ test("questions expand by keyboard and public content survives an API outage", a
 test("signed-in visitors retain the hero MCP shortcut", async ({ page }) => {
   await page.route("**/api/user", (route) => route.fulfill({ json: { id: "user-1", displayName: "Demo Engineer" } }));
   await page.goto("/");
-  const hero = page.getByRole("region", { name: "Control plane for AI DevOps agents" });
+  const hero = page.getByRole("region", { name: "Connect the AI you already use." });
   await expect(hero).toContainText("Welcome back, Demo Engineer");
   await expect(hero.getByRole("link", { name: "MCP config" })).toHaveAttribute("href", "/mcp-config");
 });

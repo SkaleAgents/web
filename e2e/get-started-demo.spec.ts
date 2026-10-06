@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 
 test("Get started stays on the page and restores focus when dismissed", async ({ page }) => {
   await page.goto("/");
-  const trigger = page.getByRole("region", { name: "Control plane for AI DevOps agents" }).getByRole("button", { name: "Get started" });
+  const trigger = page.getByRole("region", { name: "Connect the AI you already use." }).getByRole("button", { name: "Get started" });
   await trigger.click();
   const panel = page.getByRole("dialog", { name: "Choose how to get started." });
   await expect(panel).toBeVisible();
@@ -25,7 +25,7 @@ test("Get started stays on the page and restores focus when dismissed", async ({
 test("the hero panel opens the editable demo without sign-in", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto("/");
-  await page.getByRole("region", { name: "Control plane for AI DevOps agents" }).getByRole("button", { name: "Get started" }).click();
+  await page.getByRole("region", { name: "Connect the AI you already use." }).getByRole("button", { name: "Get started" }).click();
   const panel = page.getByRole("dialog", { name: "Choose how to get started." });
   await expect(panel).toBeVisible();
   await panel.getByRole("link", { name: "Try the editable demo" }).click();
