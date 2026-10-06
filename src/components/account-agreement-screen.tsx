@@ -19,8 +19,8 @@ export function AccountAgreementScreen({ next, oauth }: { next: string | null; o
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (user.data === null) router.replace(`/login?next=${encodeURIComponent("/auth/agreements")}`);
-  }, [router, user.data]);
+    if (user.data === null) router.replace(oauth ? "/login?oauth=1" : `/login?next=${encodeURIComponent("/auth/agreements")}`);
+  }, [oauth, router, user.data]);
 
   useEffect(() => {
     if (!user.data) return;

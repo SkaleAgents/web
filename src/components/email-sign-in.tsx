@@ -8,7 +8,7 @@ import { authPost, authenticationError, completeSignIn, type AuthResult } from "
 
 type Mode = "signin" | "signup" | "recover";
 
-export function EmailSignIn() {
+export function EmailSignIn({ oauth = false }: { oauth?: boolean }) {
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,13 +24,14 @@ export function EmailSignIn() {
     if (busy) return;
     setBusy(true); setError("");
     try {
+      const mcp = oauth ? { oauth: true } : {};
       if (mode === "signin") {
-        completeSignIn(await authPost<AuthResult>("/api/auth/password", { email: email.trim(), password }));
+        completeSignIn(await authPost<AuthResult>("/api/auth/password", { email: email.trim(), password, ...mcp }));
       } else {
         if (mode === "signup") {
-          await authPost("/api/auth/register", { email: email.trim(), password, password_confirmation: password });
+          await authPost("/api/auth/register", { email: email.trim(), password, password_confirmation: password, ...mcp });
         } else {
-          await authPost("/api/auth/email", { email: email.trim(), purpose: "password" });
+          await authPost("/api/auth/email", { email: email.trim(), purpose: "password", ...mcp });
         }
         setSent(true);
       }
@@ -46,7 +47,7 @@ export function EmailSignIn() {
       <Button className="w-full" variant="ghost" disabled={busy} onClick={() => changeMode("signin")}>Back to sign in</Button>
     </> : <>
       {mode !== "recover" && <>
-        <a className="flex w-full items-center justify-center rounded-[10px] border border-line bg-canvas px-3 py-3 text-sm font-semibold hover:bg-accent-soft" href={`${API_URL}/api/auth/google/redirect`}>
+        <a className="flex w-full items-center justify-center rounded-[10px] border border-line bg-canvas px-3 py-3 text-sm font-semibold hover:bg-accent-soft" href={oauth ? `${API_URL}/api/auth/google/redirect?oauth=1` : `${API_URL}/api/auth/google/redirect`}>
           <GoogleSignInLabel>Continue with Google</GoogleSignInLabel>
         </a>
         <div className="flex items-center gap-3 text-xs text-ink-muted"><span className="h-px flex-1 bg-line" />or use email<span className="h-px flex-1 bg-line" /></div>

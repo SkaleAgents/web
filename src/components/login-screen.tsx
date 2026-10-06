@@ -12,7 +12,7 @@ import type { OrganizationMembership } from "@/components/organization-switcher"
 import { hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
 import { Button } from "@/components/ui";
 
-export function LoginScreen({ reauthenticate = false }: { reauthenticate?: boolean }) {
+export function LoginScreen({ reauthenticate = false, oauth = false, finishConnect = false }: { reauthenticate?: boolean; oauth?: boolean; finishConnect?: boolean }) {
   const user = useQuery(currentUserOptions);
   const memberships = useQuery({
     queryKey: ["workspaces", user.data?.id ?? "guest"],
@@ -21,7 +21,7 @@ export function LoginScreen({ reauthenticate = false }: { reauthenticate?: boole
   });
   const router = useRouter();
   useEffect(() => {
-    if (!user.data || user.isError || reauthenticate) return;
+    if (!user.data || user.isError || reauthenticate || finishConnect) return;
     const params = new URLSearchParams(window.location.search);
     if (user.data.agreementRequired) {
       const next = params.get("next");
@@ -36,9 +36,10 @@ export function LoginScreen({ reauthenticate = false }: { reauthenticate?: boole
       const personalId = personalOrganizationId(memberships.data);
       if (personalId) router.replace(dashboardDestination(params.get("next"), personalId, memberships.data));
     }
-  }, [router, user.data, user.isError, reauthenticate, memberships.data]);
+  }, [router, user.data, user.isError, reauthenticate, finishConnect, memberships.data]);
   useEffect(() => {
-    const error = new URLSearchParams(window.location.search).get("error");
+    const current = new URLSearchParams(window.location.search);
+    const error = current.get("error");
     if (!error) return;
 
     toast.error(
@@ -46,24 +47,31 @@ export function LoginScreen({ reauthenticate = false }: { reauthenticate?: boole
         ? "Your Google sign-in expired. Please try again."
         : "Google sign-in failed. Please try again.",
     );
-    window.history.replaceState({}, "", "/login");
+    const next = new URLSearchParams();
+    if (current.get("oauth") === "1") next.set("oauth", "1");
+    if (current.get("finish") === "1") next.set("finish", "1");
+    const query = next.toString();
+    window.history.replaceState({}, "", query ? `/login?${query}` : "/login");
   }, []);
 
   if (user.isError) return <main className="mx-auto space-y-4 px-6 py-16" role="alert"><h1 className="text-xl font-semibold">Could not check your session</h1><Button onClick={() => void user.refetch()}>Try again</Button></main>;
   if (user.data && memberships.isError) return <main className="mx-auto space-y-4 px-6 py-16" role="alert"><h1 className="text-xl font-semibold">Could not find your organization</h1><Button onClick={() => void memberships.refetch()}>Try again</Button></main>;
-  if (user.isPending || (user.data && !reauthenticate)) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">{user.data ? "Opening your dashboard…" : "Checking your session…"}</main>;
+  if (user.isPending || (user.data && !reauthenticate && !finishConnect)) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">{user.data ? "Opening your dashboard…" : "Checking your session…"}</main>;
 
   return (
     <main className="flex flex-1 items-center justify-center py-10 sm:py-16">
       <div className="w-full max-w-md">
         <div className="mb-7">
-          <h1 className="font-display text-3xl font-bold tracking-tight text-ink">Sign in to your control plane</h1>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-ink">{oauth ? "Connect your editor" : "Sign in to your control plane"}</h1>
           <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-            Manage your audits, bots, and account in your dashboard.
+            {oauth
+              ? "Sign in or create an account, then you return to allow the MCP connection."
+              : "Manage your audits, bots, and account in your dashboard."}
           </p>
+          {finishConnect && <p className="mt-3 text-sm leading-relaxed text-ink-muted">Finish connecting from the sign-in page.</p>}
         </div>
         <div className="space-y-5 rounded-xl border border-line bg-canvas-elevated p-6 sm:p-8">
-          <EmailSignIn />
+          <EmailSignIn oauth={oauth} />
         </div>
       </div>
     </main>

@@ -44,6 +44,6 @@ export default function ConfirmEmailPage() {
       </form>
     </> : <p role="status" className="text-sm text-ink-muted">Open the link from your email. If you reloaded this page, reopen that link or request a new one.</p>}
     {error && <p role="alert" className="text-sm text-danger">{error}</p>}
-    <LinkButton href="/login" variant="secondary">Back to sign in</LinkButton>
+    <LinkButton href={link?.oauth ? "/login?oauth=1" : "/login"} variant="secondary">Back to sign in</LinkButton>
   </main>;
 }

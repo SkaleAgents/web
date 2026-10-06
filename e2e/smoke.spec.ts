@@ -12,7 +12,7 @@ test.describe("Phase 1 page smokes", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("main").getByRole("link", { name: "Continue with Google" }),
-    ).toBeVisible();
+    ).toHaveAttribute("href", /\/api\/auth\/google\/redirect$/);
   });
 
   test("directory page renders shell", async ({ page }) => {
