@@ -167,11 +167,14 @@ test("a visitor filters bots by tool and opens the assistant actions", async ({ 
   await expect(page.getByRole("link", { name: github.name })).toBeVisible();
   await expect(page.getByRole("link", { name: slack.name })).toHaveCount(0);
 
+  await page.setViewportSize({ width: 1280, height: 800 });
   await page.getByRole("link", { name: github.name }).click();
   await expect(page).toHaveURL(new RegExp(`/bots/${github.id}$`));
   await expect(page.getByText(github.promptBody)).toBeVisible();
   await page.getByRole("button", { name: "Actions" }).click();
-  const menu = page.getByRole("menu");
-  await expect(menu.getByRole("menuitem", { name: /^Open in / })).toHaveCount(4);
+  const menu = page.getByRole("menu").filter({ hasText: "Copy prompt" });
+  await expect(menu.getByRole("menuitem", { name: /Open in Grok/ })).toBeVisible();
+  await expect(menu.getByRole("menuitem", { name: /Open in Claude/ })).toBeVisible();
+  await expect(menu.getByRole("menuitem", { name: /Open in Codex/ })).toBeVisible();
   await expect(menu.getByRole("menuitem", { name: /Copy prompt/ })).toBeVisible();
 });
