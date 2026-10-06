@@ -100,7 +100,7 @@ export function BotDirectory({ manage = false, initialBots, integration }: { man
       {bots && bots.length === 0 && (
         <p className="text-sm text-ink-muted">No bots published yet. Create a draft in Studio to start your own collection.</p>
       )}
-      {Boolean(bots?.length) && filteredBots?.length === 0 && <div className="rounded-xl border border-line p-6"><h2 className="font-semibold">No bots match that search</h2><p className="my-2 text-sm text-ink-muted">Try a broader task, another specialty, or another tool.</p><Button variant="secondary" onClick={() => { setSearch(""); setSpecialty("all"); setSelectedTool("all"); }}>Clear search</Button></div>}
+      {Boolean(bots?.length) && filteredBots?.length === 0 && <div className="rounded-xl border border-line p-6"><h2 className="font-semibold">No bots match that search</h2><p className="my-2 text-sm text-ink-muted">Try a broader task, another specialty, or another tool.</p><Button variant="secondary" onClick={() => { setSearch(""); setSpecialty("all"); setSelectedTool("all"); }}>Clear filters</Button></div>}
 
       <ul className="grid gap-4 sm:grid-cols-2">
         {filteredBots?.map((bot) => (
