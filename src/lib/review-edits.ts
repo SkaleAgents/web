@@ -39,18 +39,29 @@ export function proposedChangeText(content: string | null, title: string): strin
   return changePhrase(edit);
 }
 
-export function reviewCopyText(findings: Array<{ title: string; severity: string }>, content: string | null): string {
+export function reviewCopyText(findings: Array<{ title: string; severity: string; remediation?: string }>, content: string | null): string {
   if (findings.length === 0) return NO_FINDINGS_COPY;
   const { priority, remaining } = priorityReview(findings);
   const lines: string[] = [];
   for (const finding of priority) {
     lines.push(`${finding.title} (${finding.severity})`);
-    if (content === null) continue;
-    const edit = exactLineEdit(content, finding.title);
-    if (edit) lines.push(changePhrase(edit));
+    const proposed = proposedDownloadLine(content, finding.title);
+    if (proposed) lines.push(proposed);
+    const action = storedAction(finding.remediation);
+    if (action) lines.push(action);
   }
-  for (const finding of remaining) lines.push(finding.title);
+  for (const finding of remaining) {
+    lines.push(finding.title);
+    const action = storedAction(finding.remediation);
+    if (action) lines.push(action);
+  }
   return lines.join("\n");
+}
+
+export function proposedDownloadLine(content: string | null, title: string): string | null {
+  if (content === null) return null;
+  const edit = exactLineEdit(content, title);
+  return edit ? changePhrase(edit) : null;
 }
 
 export function submittedAuditText(job: {
@@ -64,6 +75,10 @@ export function submittedAuditText(job: {
   if (job.retention?.inputAvailable === false) return null;
   const content = job.scope?.content;
   return typeof content === "string" ? content : null;
+}
+
+function storedAction(remediation?: string): string {
+  return remediation?.trim() ?? "";
 }
 
 export function changePhrase(edit: ExactLineEdit): string {

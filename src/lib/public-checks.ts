@@ -1,3 +1,5 @@
+import { changePhrase, exactLineEdit } from "@/lib/review-edits";
+
 export type PublicCheck = {
   slug: string;
   ruleId: string;
@@ -686,4 +688,33 @@ export function publicCheckBySlug(slug: string): PublicCheck | undefined {
 
 export function publicCheckPath(check: Pick<PublicCheck, "slug">): string {
   return `/checks/${check.slug}`;
+}
+
+const exactLineSamples: Record<string, { title: string; sample: string }> = {
+  "public-database": { title: "Database publicly accessible", sample: "publicly_accessible = true" },
+  "container-runs-as-root": { title: "Dockerfile runs as root", sample: "USER root" },
+  "workflow-permissions-are-broad": { title: "Workflow permissions are broad", sample: "permissions: write-all" },
+  "elevated-container-privileges": { title: "Elevated container privileges", sample: "privileged: true" },
+  "helm-privileged-container": { title: "Privileged container in a Helm template", sample: "privileged: true" },
+  "storage-encryption-disabled": { title: "Storage encryption disabled", sample: "storage_encrypted = false" },
+  "pull-request-target-checkout": {
+    title: "Pull request target checks out PR code",
+    sample: [
+      "on: pull_request_target",
+      "jobs:",
+      "  build:",
+      "    steps:",
+      "      - uses: actions/checkout@v4",
+      "        with:",
+      "          ref: ${{ github.event.pull_request.head.ref }}",
+    ].join("\n"),
+  },
+};
+
+export function publicCheckProposedChange(check: Pick<PublicCheck, "slug">): string | null {
+  const sample = exactLineSamples[check.slug];
+  if (!sample) return null;
+  const edit = exactLineEdit(sample.sample, sample.title);
+  if (!edit) return null;
+  return changePhrase(edit);
 }

@@ -2,7 +2,7 @@ import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { publicCheckBySlug, publicCheckPath, publicChecks } from "@/lib/public-checks";
+import { publicCheckBySlug, publicCheckPath, publicCheckProposedChange, publicChecks } from "@/lib/public-checks";
 
 export function generateStaticParams() {
   return publicChecks.map((check) => ({ slug: check.slug }));
@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PublicCheckPage({ params }: { params: Promise<{ slug: string }> }) {
   const check = publicCheckBySlug((await params).slug);
   if (!check) notFound();
+  const proposedChange = publicCheckProposedChange(check);
   const article = {
     "@context": "https://schema.org",
     "@type": "TechArticle",
@@ -44,6 +45,11 @@ export default async function PublicCheckPage({ params }: { params: Promise<{ sl
     </dl>
     <h2 className="mt-10 text-lg font-semibold">{check.exampleLabel}</h2>
     <pre className="mt-3 overflow-auto rounded-[10px] border border-line bg-canvas-elevated p-4 font-mono text-sm">{check.example}</pre>
+    {proposedChange && <>
+      <h2 className="mt-10 text-lg font-semibold">Proposed change</h2>
+      <p className="mt-3 text-sm leading-relaxed text-ink-muted">When this line appears once, the review proposes this change.</p>
+      <pre className="mt-3 overflow-auto rounded-[10px] border border-line bg-canvas-elevated p-4 font-mono text-sm">{proposedChange}</pre>
+    </>}
     <p className="mt-8 text-sm text-ink-muted"><Link href="/checks" className="font-semibold text-ink hover:underline">All review checks</Link>. Reading this page does not submit your infrastructure.</p>
   </main>;
 }

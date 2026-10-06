@@ -42,6 +42,63 @@ it("quotes CSV cells that contain commas and neutralizes spreadsheet formulas", 
   expect(csv).toContain("'=cmd|' /C calc'!A0");
 });
 
+it("includes the first fixes and the exact public database line", () => {
+  const handoff: ComplianceReport = {
+    controls: [{
+      theme: "access",
+      findingCount: 1,
+      findings: [{
+        severity: "high",
+        title: "Database publicly accessible",
+        remediation: "Disable public access.",
+      }],
+    }],
+  };
+  const source = {
+    content: "resource \"aws_db_instance\" \"app\" {\n  publicly_accessible = true\n}\n",
+  };
+  const files = [
+    reportToJson(handoff, source),
+    reportToCsv(handoff, source),
+    new TextDecoder().decode(reportToPdf(handoff, source)),
+  ];
+  for (const file of files) {
+    expect(file).toContain("Fix these first");
+    expect(file).toContain("publicly_accessible = false");
+    expect(file).not.toContain("aws_db_instance");
+    expect(file).not.toContain("The submitted text is no longer available.");
+  }
+});
+
+it("keeps a finding without an exact rule to its title and recommended action", () => {
+  const handoff: ComplianceReport = {
+    controls: [{
+      theme: "access",
+      findingCount: 1,
+      findings: [{ title: "Wildcard IAM permissions", severity: "high", remediation: "Replace the wildcard." }],
+    }],
+  };
+  const json = reportToJson(handoff, { content: "actions = [\"*\"]\n" });
+  expect(json).toContain("Fix these first");
+  expect(json).toContain("Wildcard IAM permissions");
+  expect(json).toContain("Replace the wildcard.");
+  expect(json).not.toContain("becomes");
+  expect(json).not.toContain("actions = ");
+});
+
+it("says the submitted text is no longer available when the source is gone", () => {
+  const handoff: ComplianceReport = {
+    controls: [{
+      theme: "access",
+      findingCount: 1,
+      findings: [{ title: "Database publicly accessible", severity: "high", remediation: "Disable public access." }],
+    }],
+  };
+  const json = reportToJson(handoff, { content: null });
+  expect(json).toContain("The submitted text is no longer available.");
+  expect(json).not.toContain("becomes");
+});
+
 it("writes a PDF that names the recorded finding and the empty-theme limit", () => {
   const pdf = new TextDecoder().decode(reportToPdf(report));
   expect(pdf.startsWith("%PDF-1.4")).toBe(true);

@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
-import { publicCheckBySlug, publicChecks } from "./public-checks";
+import { publicCheckBySlug, publicCheckProposedChange, publicChecks } from "./public-checks";
 
 it("publishes each built-in check once, with the image scan kept honest", async () => {
   expect(new Set(publicChecks.map((check) => check.slug)).size).toBe(publicChecks.length);
@@ -30,6 +30,18 @@ it("publishes each built-in check once, with the image scan kept honest", async 
   } finally {
     globalThis.fetch = originalFetch;
   }
+  expect(publicCheckProposedChange(publicCheckBySlug("public-database")!)).toBe("publicly_accessible = true becomes publicly_accessible = false");
+  expect(publicCheckProposedChange(publicCheckBySlug("container-runs-as-root")!)).toBe("USER root becomes USER nobody");
+  expect(publicCheckProposedChange(publicCheckBySlug("workflow-permissions-are-broad")!)).toBe("permissions: write-all becomes permissions: contents: read");
+  expect(publicCheckProposedChange(publicCheckBySlug("elevated-container-privileges")!)).toBe("privileged: true becomes privileged: false");
+  expect(publicCheckProposedChange(publicCheckBySlug("helm-privileged-container")!)).toBe("privileged: true becomes privileged: false");
+  expect(publicCheckProposedChange(publicCheckBySlug("storage-encryption-disabled")!)).toBe("storage_encrypted = false becomes storage_encrypted = true");
+  const checkout = publicCheckProposedChange(publicCheckBySlug("pull-request-target-checkout")!);
+  expect(checkout).toContain("ref: ${{ github.event.pull_request.head.ref }}");
+  expect(checkout).toContain("removed");
+  expect(checkout).not.toContain("becomes");
+  expect(publicCheckProposedChange(publicCheckBySlug("public-network-access")!)).toBeNull();
+  expect(publicCheckProposedChange(publicCheckBySlug("error-rate")!)).toBeNull();
   expect(urls).toContain("https://skaleagents.com/checks");
   expect(urls).toContain("https://skaleagents.com/checks/public-network-access");
   expect(urls.some((url) => url.includes("/dashboard"))).toBe(false);

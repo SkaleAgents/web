@@ -45,7 +45,7 @@ function FixTheseFirst({ findings, content }: { findings: Array<{ title: string;
   </section>;
 }
 
-function CopyReviewButton({ findings, content }: { findings: Array<{ title: string; severity: string }>; content: string | null }) {
+function CopyReviewButton({ findings, content }: { findings: Array<{ title: string; severity: string; remediation?: string }>; content: string | null }) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
   const text = reviewCopyText(findings, content);
   async function copyReview() {
