@@ -80,7 +80,15 @@ test("public headers open sign-in, private links lead to the focused form, and h
   for (const path of ["/jobs", "/schedules", "/studio", "/login", "/login?oauth=1"]) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/login(?:\?|$)/);
-    await expect(page.getByRole("main").getByRole("link", { name: "Continue with Google" })).toBeVisible();
+    const google = page.getByRole("main").getByRole("link", { name: "Continue with Google" });
+    await expect(google).toBeVisible();
+    if (path.includes("oauth=1")) {
+      await expect(google).toHaveAttribute("href", /\/api\/auth\/google\/redirect\?oauth=1$/);
+      await expect(page.getByRole("heading", { name: "Connect your editor" })).toBeVisible();
+      await expect(page.getByText("Sign in or create an account, then you return to allow the MCP connection.")).toBeVisible();
+    } else {
+      await expect(google).toHaveAttribute("href", /\/api\/auth\/google\/redirect$/);
+    }
     await expect(page.getByRole("button", { name: "Sign in with password", exact: true })).toBeVisible();
     await expect(page.getByRole("contentinfo", { name: "Account page links" }).getByRole("link", { name: "Back to public site" })).toHaveAttribute("href", "/");
   }
