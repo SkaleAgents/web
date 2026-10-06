@@ -27,7 +27,9 @@ test("public checks index lists titles and detail pages still explain the check"
   await page.getByRole("link", { name: "Public database" }).click();
   await page.waitForURL("**/checks/public-database");
   await expect(page.getByText("A database that enables public network access")).toBeVisible();
-  await expect(page.getByText("publicly_accessible = true")).toBeVisible();
+  await expect(page.locator("pre", { hasText: "aws_db_instance" })).toBeVisible();
+  await expect(page.getByText("publicly_accessible = true becomes publicly_accessible = false")).toBeVisible();
+  await expect(page.getByText("When this line appears once, the review proposes this change.")).toBeVisible();
   await page.goto("/checks/one-connection-pool", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "One-connection pool" })).toBeVisible();
   await expect(page.getByText("pool_size = 1")).toBeVisible();
