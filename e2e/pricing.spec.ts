@@ -12,6 +12,7 @@ test("shows five plans and records an Enterprise inquiry", async ({ page }) => {
   await page.route("**/api/enterprise-inquiries", async (route) => route.fulfill({ status: 201, json: { id: "inquiry-1", status: "received" } }));
   await page.goto("/pricing");
   await expect(page.getByRole("note")).toContainText("organization plans");
+  await expect(page.getByRole("note")).toContainText("Organization audits start 17 October 2026 at 00:00 UTC.");
   await expect(page.getByText("Recommended")).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(5);
   await expect(page.getByText("/ 05")).toHaveCount(0);
