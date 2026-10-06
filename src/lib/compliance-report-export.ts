@@ -15,6 +15,7 @@ export type ReportSource = { content: string | null };
 export type ComplianceControl = {
   theme?: string;
   findingCount?: number;
+  limitation?: string | null;
   findings?: ComplianceFinding[];
 };
 
@@ -26,14 +27,32 @@ export type ComplianceReport = {
     summary?: string | null;
     error?: string | null;
     partial?: boolean;
+    partialMeaning?: string;
     dispatchActor?: "user" | "scheduler";
   };
   controls?: ComplianceControl[];
   unmappedFindings?: ComplianceFinding[];
 };
 
-const emptyThemeNote = "No finding recorded. This does not mean the theme passed.";
+const zeroThemeLimitation = "No finding in this theme does not prove the control passed. Only the checks that ran against the submitted text are represented.";
+const partialMeaningWhenFalse = "No selected specialist task was skipped. This is not proof of complete coverage.";
+const partialMeaningWhenTrue = "Some checks may be missing. This is not the full picture.";
 const fixTheseFirstHeading = "Fix these first";
+
+function partialMeaningText(report: ComplianceReport): string | undefined {
+  const explicit = report.job?.partialMeaning?.trim();
+  if (explicit) return explicit;
+  if (report.job?.partial === true) return partialMeaningWhenTrue;
+  if (report.job?.partial === false) return partialMeaningWhenFalse;
+  return undefined;
+}
+
+function zeroThemeText(control: ComplianceControl): string | undefined {
+  const count = control.findingCount ?? control.findings?.length ?? 0;
+  if (count > 0) return undefined;
+  const explicit = control.limitation?.trim();
+  return explicit || zeroThemeLimitation;
+}
 
 type HandoffEntry = {
   title: string;
@@ -121,11 +140,14 @@ function findingRow(theme: string, count: string, finding: ComplianceFinding, no
 
 export function reportToCsv(report: ComplianceReport, source?: ReportSource): string {
   const rows = ["theme,finding_count,severity,title,detail,resource,remediation,specialist,note"];
+  const meaning = partialMeaningText(report);
+  if (meaning) rows.push(findingRow("partial_meaning", "", {}, meaning));
   for (const control of report.controls ?? []) {
     const findings = control.findings ?? [];
     const theme = control.theme ?? "";
+    const limitation = zeroThemeText(control);
     if (findings.length === 0) {
-      rows.push(findingRow(theme, String(control.findingCount ?? 0), {}, emptyThemeNote));
+      rows.push(findingRow(theme, String(control.findingCount ?? 0), {}, limitation ?? zeroThemeLimitation));
       continue;
     }
     for (const finding of findings) {
@@ -179,12 +201,14 @@ function wrap(text: string, width = 88): string[] {
 }
 
 function reportLines(report: ComplianceReport, source?: ReportSource): string[] {
+  const meaning = partialMeaningText(report);
   const lines = [
     "SkaleAgents compliance report",
     `Generated: ${report.generatedAt ?? "unknown"}`,
     `Audit: ${report.job?.id ?? "unknown"}`,
     `Status: ${report.job?.status ?? "unknown"}`,
     ...(report.job?.dispatchActor === "scheduler" ? ["Queued by: scheduled run"] : report.job?.dispatchActor === "user" ? ["Queued by: direct request"] : []),
+    ...(meaning ? [meaning] : []),
     "",
     "Empty themes are not a pass. Only recorded findings are listed.",
     "This file is not a certification.",
@@ -209,7 +233,7 @@ function reportLines(report: ComplianceReport, source?: ReportSource): string[] 
     const findings = control.findings ?? [];
     lines.push(...wrap(`${control.theme ?? "theme"}: ${findings.length} recorded`));
     if (findings.length === 0) {
-      lines.push(...wrap(emptyThemeNote), "");
+      lines.push(...wrap(zeroThemeText(control) ?? zeroThemeLimitation), "");
       continue;
     }
     for (const finding of findings) {
