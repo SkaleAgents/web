@@ -30,7 +30,8 @@ it("puts each finding on a CSV row and keeps an empty theme visible", () => {
   const csv = reportToCsv(report);
   expect(csv.split("\n")[0]).toBe("theme,finding_count,severity,title,detail,resource,remediation,specialist,note");
   expect(csv).toContain("access,1,high,Public network access detected");
-  expect(csv).toContain("logging,0,,,,,,,No finding recorded. This does not mean the theme passed.");
+  expect(csv).toContain("logging,0,,,,,,,No finding in this theme does not prove the control passed. Only the checks that ran against the submitted text are represented.");
+  expect(csv).toContain("No selected specialist task was skipped. This is not proof of complete coverage.");
 });
 
 it("quotes CSV cells that contain commas and neutralizes spreadsheet formulas", () => {
@@ -98,6 +99,36 @@ it("says the submitted text is no longer available when the source is gone", () 
   expect(json).toContain("The submitted text is no longer available.");
   expect(json).not.toContain("becomes");
 });
+
+it("includes the zero-theme limitation in every download", () => {
+  const limitation = "No finding in this theme does not prove the control passed. Only the checks that ran against the submitted text are represented.";
+  const limited: ComplianceReport = {
+    job: {
+      partial: false,
+      partialMeaning: "No selected specialist task was skipped. This is not proof of complete coverage.",
+    },
+    controls: [
+      { theme: "logging", findingCount: 0, findings: [], limitation },
+      { theme: "access", findingCount: 1, findings: [{ title: "Public network access detected" }], limitation: null },
+    ],
+  };
+  const json = reportToJson(limited);
+  const csv = reportToCsv(limited);
+  const pdf = pdfText(new TextDecoder().decode(reportToPdf(limited)));
+  for (const file of [json, csv, pdf]) {
+    expect(file).toContain(limitation);
+    expect(file).toContain("No selected specialist task was skipped. This is not proof of complete coverage.");
+  }
+  expect(json).toContain('"limitation": null');
+  expect(csv).not.toContain("access,1,,,,,,,No finding in this theme");
+});
+
+function pdfText(pdf: string): string {
+  return [...pdf.matchAll(/\((?:\\.|[^\\)])*\) Tj/g)].map((match) => match[0].slice(1, -4)
+    .replaceAll("\\\\", "\\")
+    .replaceAll("\\(", "(")
+    .replaceAll("\\)", ")")).join(" ");
+}
 
 it("writes a PDF that names the recorded finding and the empty-theme limit", () => {
   const pdf = new TextDecoder().decode(reportToPdf(report));
