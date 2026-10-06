@@ -28,7 +28,7 @@ function RiskLead({ findings, partial }: { findings: Array<{ title: string; seve
   </section>;
 }
 
-function FixTheseFirst({ findings, content }: { findings: Array<{ title: string; severity: string }>; content: string | null }) {
+function FixTheseFirst({ findings, content }: { findings: Array<{ title: string; severity: string; detail: string; remediation: string }>; content: string | null }) {
   const { priority } = priorityReview(findings);
   if (priority.length === 0) return null;
   return <section className="audit-findings" aria-label="Fix these first">
@@ -37,7 +37,9 @@ function FixTheseFirst({ findings, content }: { findings: Array<{ title: string;
       <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
       <div>
         <h3>{finding.title}</h3>
+        <p className="finding-detail">{finding.detail}</p>
         <p className="finding-action"><span>Proposed change</span>{proposedChangeText(content, finding.title)}</p>
+        <p className="finding-action"><span>Recommended action</span>{finding.remediation || "No specific fix was recorded. Ask the person responsible for this resource to review the issue before changing it."}</p>
       </div>
     </article>)}
   </section>;
