@@ -28,7 +28,7 @@ it("keeps the MCP connect on the Google link and says the editor is waiting for 
   expect(google).toHaveAttribute("href", expect.stringMatching(/\/api\/auth\/google\/redirect\?oauth=1$/));
   expect(screen.getByRole("heading", { name: "Connect your editor" })).toBeVisible();
   expect(screen.getByText("Sign in or create an account, then you return to allow the MCP connection.")).toBeVisible();
-  expect(screen.getByRole("button", { name: "Sign in with password", exact: true })).toBeVisible();
+  expect(screen.getByRole("button", { name: "Sign in with password" })).toBeVisible();
   expect(google.compareDocumentPosition(screen.getByLabelText("Email")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 });
 
