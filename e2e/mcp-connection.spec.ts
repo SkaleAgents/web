@@ -45,6 +45,12 @@ test("MCP configuration needs no manual key and connected clients can be disconn
 test("client setup offers URL-only connectors and client-specific editor configuration", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/mcp-config");
+  await expect(page.getByRole("heading", { name: "What you get back" })).toBeVisible();
+  await expect(page.getByText("Sign in with Google and click Allow.")).toBeVisible();
+  await expect(page.getByText("Database publicly accessible.")).toBeVisible();
+  await expect(page.getByText("publicly_accessible = true becomes publicly_accessible = false")).toBeVisible();
+  await expect(page.getByText("Create token")).toHaveCount(0);
+  await expect(page.getByText("API token")).toHaveCount(0);
   const choices = page.getByRole("group", { name: "Choose your MCP client" });
   await expect(choices.getByRole("button")).toHaveText(["Cursor", "Claude Code", "Claude Desktop", "ChatGPT", "Codex"]);
   for (const client of ["Claude Desktop", "ChatGPT"]) {
