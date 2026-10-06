@@ -20,8 +20,8 @@ export const homeFaqs: HomeFaq[] = [
   },
   {
     question: "Can I try it without an account?",
-    answerText: "Yes. Browse the public bot directory, community prompts, and review checks without signing in. Google sign-in is needed to create or manage your own bots and prompts, authorize an MCP connection, and use account-owned audit workflows.",
-    answer: <>Yes. Browse the <Link href="/bots">public bot directory</Link>, <Link href="/prompts">community prompts</Link>, and <Link href="/checks">review checks</Link> without signing in. Google sign-in is needed to create or manage your own bots and prompts, authorize an MCP connection, and use account-owned audit workflows.</>,
+    answerText: "Yes. Browse the public bot directory, community prompts, free resources, the blog, and review checks without signing in. Google sign-in is needed to create or manage your own bots and prompts, authorize an MCP connection, and use account-owned audit workflows.",
+    answer: <>Yes. Browse the <Link href="/bots">public bot directory</Link>, <Link href="/prompts">community prompts</Link>, <Link href="/resources">free resources</Link>, the <Link href="/blog">blog</Link>, and <Link href="/checks">review checks</Link> without signing in. Google sign-in is needed to create or manage your own bots and prompts, authorize an MCP connection, and use account-owned audit workflows.</>,
   },
   {
     question: "What does it cost?",
@@ -30,8 +30,8 @@ export const homeFaqs: HomeFaq[] = [
   },
   {
     question: "Which AI assistants and editors can I use?",
-    answerText: "Bot pages offer handoffs to Grok, SuperGrok, and Claude. Codex opens separately, and Copy prompt lets you paste the instructions into any assistant. For tool calls, connect Cursor, Claude Code, Claude Desktop, ChatGPT, or Codex to the hosted MCP server through OAuth. See MCP config for each client's setup and plan requirements. Opening a prompt in Grok does not link your Grok account.",
-    answer: <>Bot pages offer handoffs to Grok, SuperGrok, and Claude. Codex opens separately, and Copy prompt lets you paste the instructions into any assistant. For tool calls, connect Cursor, Claude Code, Claude Desktop, ChatGPT, or Codex to our hosted MCP server through OAuth. See <Link href="/mcp-config">MCP config</Link> for each client&apos;s setup and plan requirements. Opening a prompt in Grok does not link your Grok account.</>,
+    answerText: "Prompt and bot pages can open Claude, ChatGPT, Grok, SuperGrok, Codex, or Perplexity. Gemini copies the text first because that site does not take a prefilled prompt. You can also copy plain text, markdown, or a handoff written for another agent. For tool calls, connect Cursor, Claude Code, Claude Desktop, ChatGPT, or Codex to the hosted MCP server through OAuth. See MCP config for each client's setup and plan requirements. Opening a prompt does not link that assistant to your SkaleAgents account.",
+    answer: <>Prompt and bot pages can open Claude, ChatGPT, Grok, SuperGrok, Codex, or Perplexity. Gemini copies the text first because that site does not take a prefilled prompt. You can also copy plain text, markdown, or a handoff written for another agent. For tool calls, connect Cursor, Claude Code, Claude Desktop, ChatGPT, or Codex to the hosted MCP server through OAuth. See <Link href="/mcp-config">MCP config</Link> for each client&apos;s setup and plan requirements. Opening a prompt does not link that assistant to your SkaleAgents account.</>,
   },
   {
     question: "Do I need to connect my cloud account or repository?",

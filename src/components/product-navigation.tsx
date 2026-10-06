@@ -9,6 +9,8 @@ const groups = [
     { href: "/bots", label: "Bot directory", detail: "Find a specialist for your next review.", icon: "bot" },
     { href: "/prompts", label: "Prompt library", detail: "Open a prompt, then copy it into your assistant.", icon: "library" },
     { href: "/checks", label: "Review checks", detail: "Read what each check looks for. No account required.", icon: "audit" },
+    { href: "/resources", label: "Free resources", detail: "Checklists you can run in your own assistant.", icon: "book" },
+    { href: "/blog", label: "Blog", detail: "Short notes on reviews and prompt handoff.", icon: "note" },
   ] },
   { label: "Connect", items: [
     { href: "/mcp-config", label: "MCP config", detail: "Set up SkaleAgents in your editor or AI client.", icon: "plug" },
@@ -21,6 +23,8 @@ function NavigationIcon({ name }: { name: (typeof groups)[number]["items"][numbe
     bot: <><rect x="4" y="7" width="16" height="13" rx="3" /><path d="M12 3v4M8 12v2m8-2v2M9 17h6M1 11v5m22-5v5" /></>,
     library: <><path d="M4 4h6v16H4zM14 4l5-1 3 16-5 1zM4 8h6m-6 8h6m5-8 5-1" /></>,
     audit: <><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V2h6v2M8 12l3 3 5-6" /></>,
+    book: <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></>,
+    note: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M8 13h8M8 17h5" /></>,
     calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 2v6m10-6v6M3 10h18m-13 5h2m4 0h2m-8 3h2" /></>,
     studio: <><path d="m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-5-5L4 14v6ZM4 20h16" /></>,
     plug: <><path d="M8 2v5m8-5v5M6 7h12v3a6 6 0 0 1-12 0V7Zm6 9v6" /></>,
