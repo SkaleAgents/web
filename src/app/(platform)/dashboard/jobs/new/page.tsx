@@ -10,6 +10,7 @@ import { currentUserOptions } from "@/lib/session";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
 import { buildSourceMetadata } from "@/lib/source-metadata";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
+import { PUBLIC_DATABASE_SAMPLE } from "@/lib/review-edits";
 
 const AUDIT_SPECIALISTS = ["devsecops", "sre", "mlops", "scaling"] as const;
 const specialistDetails = {
@@ -104,6 +105,10 @@ export default function NewJobPage() {
         {files.length > 0 && <p className="mt-2 text-xs text-ink-muted">{files.map((file) => auditFileBasename(file.name)).join(", ")}</p>}
         {files.length > 0 && <Button type="button" variant="ghost" className="mt-2" onClick={() => { setFiles([]); setFileError(""); if (fileInput.current) fileInput.current.value = ""; }}>Remove selected files</Button>}
         {fileError && <p role="alert" className="mt-2 text-sm text-danger">{fileError}</p>}
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button type="button" variant="secondary" onClick={() => setContent(PUBLIC_DATABASE_SAMPLE)}>Try a sample</Button>
+          <p className="text-sm text-ink-muted">This sample should report a database that is publicly accessible.</p>
+        </div>
         <textarea
           aria-hidden="true"
           readOnly

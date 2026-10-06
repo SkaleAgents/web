@@ -1,4 +1,36 @@
-export const examples = [
+import { changePhrase, exactLineEdit } from "@/lib/review-edits";
+
+const securityInput = [
+  "ingress {",
+  "  from_port   = 22",
+  "  to_port     = 22",
+  '  protocol    = "tcp"',
+  '  cidr_blocks = ["0.0.0.0/0"]',
+  "}",
+  "",
+  'resource "aws_db_instance" "app" {',
+  "  publicly_accessible = true",
+  "}",
+].join("\n");
+
+const securityDatabaseEdit = exactLineEdit(securityInput, "Database publicly accessible");
+
+type ReviewExample = {
+  id: string;
+  label: string;
+  specialty: string;
+  title: string;
+  description: string;
+  filename: string;
+  input: string;
+  proposal?: string;
+  finding: string;
+  evidence: string;
+  fix: string;
+  prompt: string;
+};
+
+export const examples: ReviewExample[] = [
   {
     id: "security",
     label: "Security",
@@ -6,7 +38,8 @@ export const examples = [
     title: "Catch the open door before you ship.",
     description: "Bring a Terraform snippet or a Kubernetes manifest. Ask for exposed services, broad permissions, and the smallest useful fix.",
     filename: "security-group.tf",
-    input: 'ingress {\n  from_port   = 22\n  to_port     = 22\n  protocol    = "tcp"\n  cidr_blocks = ["0.0.0.0/0"]\n}',
+    input: securityInput,
+    proposal: securityDatabaseEdit?.to ? changePhrase(securityDatabaseEdit) : undefined,
     finding: "SSH is reachable from any IPv4 address.",
     evidence: "Port 22 accepts traffic from 0.0.0.0/0. Any host on the internet can attempt a connection if the instance is publicly reachable.",
     fix: "Restrict ingress to your approved access network, or use a session-based access method. Confirm the access path before removing the rule.",

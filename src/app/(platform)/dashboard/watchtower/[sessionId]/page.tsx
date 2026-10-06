@@ -11,6 +11,8 @@ import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 import { currentUserOptions } from "@/lib/session";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 import { watchtowerSessionTitle } from "@/lib/watchtower-session";
+import { priorityReview } from "@/lib/audit-risk";
+import { proposedChangeText, submittedAuditText } from "@/lib/review-edits";
 
 export default function WatchtowerPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -106,7 +108,10 @@ function SessionReview({ sessionId }: { sessionId: string }) {
   const proposals = session.data?.proposals ?? [];
   const redirects = session.data?.redirects ?? [];
   const sessionOpen = session.data?.status === "open";
-  const content = typeof job.data?.scope.content === "string" ? job.data.scope.content : "";
+  const findings = job.data?.findings ?? [];
+  const content = job.data ? submittedAuditText(job.data) : null;
+  const { priority, remaining } = priorityReview(findings);
+  const proposalContent = content ?? "";
   const allSteps = [...(job.data?.steps ?? []), ...steps].filter((step, index, all) => all.findIndex((item) => item.stepId === step.stepId) === index);
 
   return (
@@ -145,6 +150,23 @@ function SessionReview({ sessionId }: { sessionId: string }) {
         </div>
       </div>
 
+      {priority.length > 0 && <section className="rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Fix these first">
+        <h2 className="text-lg font-semibold text-ink">Fix these first</h2>
+        <ol className="mt-4 space-y-4">
+          {priority.map((finding) => (
+            <li key={finding.id ?? `${finding.specialist}-${finding.resource}-${finding.title}`} className="border-l-2 border-danger pl-3">
+              <p className="font-mono text-xs uppercase tracking-wide text-danger">{finding.severity} · {finding.specialist}</p>
+              <p className="mt-1 font-medium text-ink">{finding.title}</p>
+              {findingPlace(finding) && <p className="mt-1 break-all font-mono text-xs text-ink-muted">{findingPlace(finding)}</p>}
+              <p className="mt-1 text-sm text-ink-muted">{finding.detail}</p>
+              <p className="mt-2 text-sm text-ink-muted">{proposedChangeText(content, finding.title)}</p>
+              <p className="mt-2 text-xs text-ink-muted">Remediation: {finding.remediation}</p>
+              {finding.inputLocatorAvailable === false && <p className="mt-2 text-xs text-ink-muted">{finding.classification === "builtin-v1" ? "Finding retained without source. Original resource locator removed." : "Unclassified finding text removed with input."}</p>}
+            </li>
+          ))}
+        </ol>
+      </section>}
+
       {(sessionOpen || redirects.length > 0) && <section className="rounded-[10px] border border-line bg-canvas-elevated p-5">
         <h2 className="text-lg font-semibold text-ink">{sessionOpen ? "Redirect the swarm" : "Review instructions"}</h2>
         {sessionOpen && <p className="mt-1 text-sm text-ink-muted">Send a review instruction to the next queued swarm task. It never auto-approves a patch.</p>}
@@ -174,7 +196,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
         <div className="rounded-[10px] border border-line bg-canvas-elevated p-5">
           <h2 className="text-lg font-semibold text-ink">Findings</h2>
           <ul className="mt-4 space-y-4">
-            {job.data?.findings?.map((finding) => (
+            {remaining.map((finding) => (
               <li key={finding.id ?? `${finding.specialist}-${finding.resource}-${finding.title}`} className="border-l-2 border-danger pl-3">
                 <p className="font-mono text-xs uppercase tracking-wide text-danger">{finding.severity} · {finding.specialist}</p>
                 <p className="mt-1 font-medium text-ink">{finding.title}</p>
@@ -208,7 +230,7 @@ function SessionReview({ sessionId }: { sessionId: string }) {
         proposals={proposals}
         sessionId={sessionId}
         findings={job.data?.findings ?? []}
-        content={content}
+        content={proposalContent}
         canPropose={sessionOpen}
         apiSkipped={session.data?.skipped ?? []}
         onUpdated={() => void queryClient.invalidateQueries({ queryKey: ["watchtower-session", sessionId, userId] })}
