@@ -437,7 +437,7 @@ body:has(.retention-notice-dialog[open]) {
 .scope-switcher-options a { overflow: hidden; border-radius: 5px; padding: 0.6rem 0.7rem; color: var(--ink); text-overflow: ellipsis; white-space: nowrap; }
 .scope-switcher-options a:hover, .scope-switcher-options a[aria-current="page"] { background: var(--accent-soft); }
 .dashboard-content { width: 100%; max-width: 1440px; margin-inline: auto; padding: 2rem; }
-.dashboard-content .workspace-heading { font-family: var(--font-syne), sans-serif; font-size: clamp(1.75rem, 3vw, 2rem); font-weight: 700; letter-spacing: -0.03em; line-height: 36px; }
+.dashboard-content .workspace-heading { font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif; font-size: clamp(1.75rem, 3vw, 2rem); font-weight: 600; letter-spacing: -0.02em; line-height: 36px; }
 .dashboard-content .workspace-intro { padding-bottom: 1.25rem; }
 .dashboard-content .workspace-kicker { margin-bottom: 0.4rem; font-family: inherit; font-size: 0.8rem; text-transform: none; letter-spacing: normal; }
 @media (max-width: 1023px) {
@@ -475,8 +475,9 @@ body:has(.retention-notice-dialog[open]) {
   --accent-fg: #ffffff; --accent-soft: #eef6f4;
   --sidebar-surface: #f7f7f8; --nav-hover: #ebebee;
   background: var(--canvas); grid-template-columns: 244px minmax(0, 1fr);
-  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
-  font-size: 15px; line-height: 1.6;
+  font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px; line-height: 1.6;
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
 }
 html.dark .dashboard-frame {
@@ -505,7 +506,7 @@ html.dark .dashboard-frame {
 .dashboard-toolbar .account-nav-trigger { border: 0; }
 .dashboard-toolbar .account-nav-avatar { background: var(--accent-soft); color: var(--ink); }
 .dashboard-content { max-width: 1200px; padding: 30px 40px 72px; }
-.dashboard-content .workspace-heading { font-family: var(--font-syne), sans-serif; font-size: clamp(24px, 2.5vw, 30px); font-weight: 700; letter-spacing: -0.03em; line-height: 36px; }
+.dashboard-content .workspace-heading { font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif; font-size: clamp(24px, 2.5vw, 30px); font-weight: 600; letter-spacing: -0.02em; line-height: 36px; }
 .dashboard-content .workspace-intro { border: 0; padding-bottom: 12px; }
 .dashboard-content :is(input, textarea, select) { border-radius: 8px; }
 .dashboard-frame [data-ui="button"] { min-height: 36px; border-radius: 8px; font-weight: 500; transition: background 140ms ease, box-shadow 140ms ease; }
@@ -521,11 +522,11 @@ html.dark .dashboard-frame {
 .audit-view-tabs button { border: 0; border-radius: 8px; padding: 8px 14px; background: transparent; color: var(--ink-muted); font-size: 14px; font-weight: 600; cursor: pointer; }
 .audit-view-tabs button[aria-selected="true"] { background: var(--canvas); color: var(--ink); }
 .audit-view-tabs button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.audit-risk h2 { max-width: 16em; margin-top: 14px; font-family: var(--font-syne), sans-serif; font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; }
-.audit-risk p { max-width: 42em; margin-top: 10px; color: var(--ink-muted); font-size: 15px; line-height: 1.5; }
-.audit-check-list h2 { font-family: var(--font-syne), sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
+.audit-risk h2 { max-width: 18em; margin-top: 14px; font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif; font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.25; }
+.audit-risk p { max-width: 42em; margin-top: 10px; color: var(--ink-muted); font-size: 16px; line-height: 1.55; }
+.audit-check-list h2 { font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
 .audit-check-list h3 { margin-top: 16px; font-size: 14px; font-weight: 600; }
-.audit-check-list p, .audit-check-list li { max-width: 65ch; font-size: 15px; line-height: 1.55; }
+.audit-check-list p, .audit-check-list li { max-width: 65ch; font-size: 16px; line-height: 1.6; }
 .audit-check-list ul { margin-top: 8px; padding-left: 1.1rem; }
 .audit-check-list li + li { margin-top: 6px; }
 .audit-detail > a:first-child { padding-left: 0; font-size: 12px; min-height: 24px; }
@@ -537,17 +538,17 @@ html.dark .dashboard-frame {
 .audit-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .audit-findings { padding-block: 8px; }
 .audit-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
-.audit-section-heading h2 { font-family: var(--font-syne), sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
+.audit-section-heading h2 { font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
 .audit-section-heading span { color: var(--ink-muted); font-size: 13px; }
 .audit-finding { display: block; margin-top: 4px; padding: 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--canvas); }
 .audit-finding > div { min-width: 0; }
-.audit-finding h3 { margin-top: 12px; font-family: var(--font-syne), sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.25; }
+.audit-finding h3 { margin-top: 12px; font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.35; }
 .audit-finding + .audit-finding { margin-top: 12px; }
-.finding-detail { max-width: 65ch; margin-top: 10px; color: var(--ink); font-size: 15px; line-height: 1.6; }
+.finding-detail { max-width: 65ch; margin-top: 10px; color: var(--ink); font-size: 16px; line-height: 1.6; }
 .finding-place { max-width: 65ch; margin-top: 16px; color: var(--ink-muted); font-size: 13px; line-height: 1.5; }
 .finding-place > span { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 600; }
 .finding-place code { font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 12px; overflow-wrap: normal; }
-.finding-action { max-width: 65ch; margin-top: 18px; padding: 14px 16px; border-radius: 8px; background: var(--sidebar-surface); color: var(--ink); font-size: 15px; line-height: 1.55; }
+.finding-action { max-width: 65ch; margin-top: 18px; padding: 14px 16px; border-radius: 8px; background: var(--sidebar-surface); color: var(--ink); font-size: 16px; line-height: 1.6; }
 .finding-action span { display: block; margin-bottom: 4px; color: var(--ink-muted); font-size: 12px; font-weight: 600; }
 .audit-source { padding: 8px 0 4px; }
 .audit-source h2 { font-size: 15px; font-weight: 600; }
