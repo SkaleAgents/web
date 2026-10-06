@@ -189,7 +189,7 @@ function checkMarkdown(slug: string): string | null {
 
 export function pricingMarkdown(plans: PublicPlan[] | null): string {
   const lines = [
-    "Organization plans for infrastructure audits and monitoring. Starter, Pro, and Max are chosen by an organization owner.",
+    "Organization plans for infrastructure audits and monitoring. Starter, Pro, and Max are chosen by an organization owner. Organization audits start 17 October 2026 at 00:00 UTC.",
     "",
     "Public bots, community prompts, and the review checks are free to read.",
   ];

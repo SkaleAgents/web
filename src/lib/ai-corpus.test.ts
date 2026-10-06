@@ -96,6 +96,7 @@ it("renders public markdown and refuses account paths and prompt bodies", () => 
 
 it("does not invent a price when the plan catalog is missing", () => {
   expect(pricingMarkdown(null)).not.toMatch(/\$\d/);
+  expect(pricingMarkdown(null)).toContain("Organization audits start 17 October 2026 at 00:00 UTC.");
   expect(pricingMarkdown([{ key: "starter", name: "Starter", monthlyUsd: 29, auditLimit: 20, scheduleLimit: 1 }])).toContain("$29 / month");
   expect(publicChecks.length).toBeGreaterThan(0);
 });
