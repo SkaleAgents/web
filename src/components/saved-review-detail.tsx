@@ -34,12 +34,14 @@ export function SavedReviewDetail({ id }: { id: string }) {
   return (
     <div>
       {review.data ? <SavedReviewView review={review.data} /> : <main className="px-6 py-10">Loading the review.</main>}
-      <div className="mx-auto flex max-w-3xl flex-col gap-3 px-6 pb-10">
-        {shareOff ? <p>The share link is off.</p> : null}
-        <Button type="button" variant="secondary" disabled={shareOff || revoke.isPending} onClick={() => revoke.mutate()}>
-          Turn off the share link
-        </Button>
-      </div>
+      {review.data ? (
+        <div className="mx-auto flex max-w-3xl flex-col gap-3 px-6 pb-10">
+          {shareOff ? <p>The share link is off.</p> : null}
+          <Button type="button" variant="secondary" disabled={shareOff || revoke.isPending} onClick={() => revoke.mutate()}>
+            Turn off the share link
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }
