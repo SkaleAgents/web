@@ -111,6 +111,10 @@ export function ExampleExplorer() {
             <p className="marketing-eyebrow">02 / What a review looks like</p>
             <h4 className="mt-5 text-lg font-semibold">{example.finding}</h4>
             <p className="mt-3 text-sm leading-relaxed text-ink-muted">{example.evidence}</p>
+            {example.proposal && <div className="mt-6 border-l-2 border-accent pl-4">
+              <p className="text-sm font-semibold">Public database</p>
+              <p className="mt-2 font-mono text-xs leading-7 text-ink-muted sm:text-sm">{example.proposal}</p>
+            </div>}
             <div className="mt-6 border-l-2 border-accent pl-4">
               <p className="text-sm font-semibold">Suggested next step</p>
               <p className="mt-2 text-sm leading-relaxed text-ink-muted">{example.fix}</p>

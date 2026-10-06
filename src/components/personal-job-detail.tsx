@@ -8,7 +8,8 @@ import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retent
 import { AuditResultSummary } from "@/components/audit-result-summary";
 import { AuditCoveragePanel, PlainCheckList } from "@/components/audit-coverage";
 import { findingPlace } from "@/lib/audit-coverage";
-import { leadFinding, plainRisk } from "@/lib/audit-risk";
+import { leadFinding, plainRisk, priorityReview } from "@/lib/audit-risk";
+import { proposedChangeText, reviewCopyText, submittedAuditText } from "@/lib/review-edits";
 import { SourceMetadata } from "@/components/source-metadata";
 import { Button, LinkButton } from "@/components/ui";
 import { scheduledRunLabel } from "@/lib/audit-dispatch";
@@ -25,6 +26,39 @@ function RiskLead({ findings, partial }: { findings: Array<{ title: string; seve
     {more > 0 && <p>{more} more {more === 1 ? "finding is" : "findings are"} listed below.</p>}
     {partial && <p>Some checks may be missing. This is not the full picture.</p>}
   </section>;
+}
+
+function FixTheseFirst({ findings, content }: { findings: Array<{ title: string; severity: string }>; content: string | null }) {
+  const { priority } = priorityReview(findings);
+  if (priority.length === 0) return null;
+  return <section className="audit-findings" aria-label="Fix these first">
+    <div className="audit-section-heading"><h2>Fix these first</h2></div>
+    {priority.map((finding, index) => <article key={`${finding.severity}-${finding.title}-${index}`} className="audit-finding">
+      <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
+      <div>
+        <h3>{finding.title}</h3>
+        <p className="finding-action"><span>Proposed change</span>{proposedChangeText(content, finding.title)}</p>
+      </div>
+    </article>)}
+  </section>;
+}
+
+function CopyReviewButton({ findings, content }: { findings: Array<{ title: string; severity: string }>; content: string | null }) {
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
+  const text = reviewCopyText(findings, content);
+  async function copyReview() {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyState("copied");
+    } catch {
+      setCopyState("failed");
+    }
+  }
+  return <div>
+    <Button type="button" variant="secondary" onClick={() => void copyReview()}>Copy review</Button>
+    <p className="mt-2 text-xs text-ink-muted" aria-live="polite">{copyState === "copied" ? "Review copied." : copyState === "failed" ? "Clipboard unavailable. Select and copy the review text." : ""}</p>
+    {copyState === "failed" && <pre className="mt-2 whitespace-pre-wrap font-mono text-xs text-ink-muted">{text}</pre>}
+  </div>;
 }
 
 function FindingResource({ value }: { value: string }) {
@@ -60,6 +94,10 @@ export function PersonalJobDetail({ id }: { id: string }) {
     setView(next);
     document.getElementById(next === "general" ? "audit-general-tab" : "audit-advanced-tab")?.focus();
   }
+  const loadedJob = !deletion && accountId ? job.data : undefined;
+  const findings = loadedJob?.findings;
+  const ranked = findings ? priorityReview(findings) : null;
+  const content = loadedJob ? submittedAuditText(loadedJob) : null;
 
   return (
     <main className="audit-detail space-y-6">
@@ -80,16 +118,18 @@ export function PersonalJobDetail({ id }: { id: string }) {
           <button type="button" role="tab" id="audit-advanced-tab" aria-controls="audit-advanced-panel" aria-selected={view === "advanced"} tabIndex={view === "advanced" ? 0 : -1} onClick={() => setView("advanced")}>Advanced</button>
         </div>
         <div role="tabpanel" id="audit-general-panel" aria-labelledby="audit-general-tab" hidden={view !== "general"} className="space-y-6">
-          {job.data.findings && job.data.findings.length > 0 ? <RiskLead findings={job.data.findings} partial={job.data.partial} /> : <section className="audit-overview" aria-label="Audit overview">
+          {findings && findings.length > 0 ? <RiskLead findings={findings} partial={job.data.partial} /> : <section className="audit-overview" aria-label="Audit overview">
             <p className="audit-status text-xs font-semibold capitalize text-ink-muted">{job.data.status}{job.data.partial ? " · Partial results" : ""}{scheduledRunLabel(job.data) ? ` · ${scheduledRunLabel(job.data)}` : ""}</p>
             <AuditResultSummary job={job.data} />
             {job.data.summary && <p className="mt-2 text-sm text-ink-muted">{job.data.summary}</p>}
             {job.data.error && <p role="alert" className="mt-3 text-sm text-danger">{job.data.error}</p>}
           </section>}
-          {job.data.findings && job.data.findings.length > 0 && job.data.error && <p role="alert" className="text-sm text-danger">{job.data.error}</p>}
-          {job.data.findings && <section className="audit-findings" aria-label="Findings">
-            <div className="audit-section-heading"><h2>Findings</h2><span>{job.data.findings.length} {job.data.findings.length === 1 ? "finding" : "findings"}</span></div>
-            {job.data.findings.length === 0 ? <p className="text-sm text-ink-muted">No findings were recorded.</p> : job.data.findings.map((finding, index) => <article key={index} className="audit-finding">
+          {findings && findings.length > 0 && ranked && <FixTheseFirst findings={findings} content={content} />}
+          {findings && <CopyReviewButton findings={findings} content={content} />}
+          {findings && findings.length > 0 && job.data.error && <p role="alert" className="text-sm text-danger">{job.data.error}</p>}
+          {findings && ranked && (findings.length === 0 || ranked.remaining.length > 0) && <section className="audit-findings" aria-label="Findings">
+            <div className="audit-section-heading"><h2>Findings</h2><span>{(findings.length === 0 ? findings : ranked.remaining).length} {(findings.length === 0 ? findings : ranked.remaining).length === 1 ? "finding" : "findings"}</span></div>
+            {findings.length === 0 ? <p className="text-sm text-ink-muted">No findings were recorded.</p> : ranked.remaining.map((finding, index) => <article key={index} className="audit-finding">
               <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
               <div>
                 <h3>{finding.title}</h3>
