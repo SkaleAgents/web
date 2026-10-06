@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
 import type { Bot, Prompt } from "./api";
-import { communityPrompts, publishedPublicBots } from "./public-catalog";
+import { communityPrompts, countBotsByIntegration, publishedPublicBots } from "./public-catalog";
 
 const bot = (patch: Partial<Bot>): Bot => ({
   id: "bot",
@@ -9,6 +9,7 @@ const bot = (patch: Partial<Bot>): Bot => ({
   name: "Scout",
   description: "Reviews ingress",
   specialty: "devsecops",
+  integrations: [],
   promptBody: "Read the text.",
   visibility: "public",
   status: "published",
@@ -32,6 +33,23 @@ it("keeps only published public bots and community prompts", () => {
   expect(communityPrompts(prompts).map((item) => item.id)).toEqual(["community"]);
 });
 
+it("counts published public bots for each tool", () => {
+  const counts = countBotsByIntegration([
+    bot({ id: "github", integrations: ["github", "slack"] }),
+    bot({ id: "draft", status: "draft", integrations: ["github"] }),
+    bot({ id: "private", visibility: "private", integrations: ["aws"] }),
+    bot({ id: "k8s", integrations: ["kubernetes"] }),
+  ]);
+  expect(counts).toEqual({
+    github: 1,
+    slack: 1,
+    linear: 0,
+    terraform: 0,
+    aws: 0,
+    kubernetes: 1,
+  });
+});
+
 it("lists a published public bot in the sitemap and leaves private bots out", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (input) => {
@@ -50,6 +68,8 @@ it("lists a published public bot in the sitemap and leaves private bots out", as
   try {
     const urls = (await sitemap()).map((entry) => entry.url);
     expect(urls).toContain("https://skaleagents.com/bots/public-bot");
+    expect(urls).toContain("https://skaleagents.com/bots/integrations");
+    expect(urls).toContain("https://skaleagents.com/bots/integrations/github");
     expect(urls).toContain("https://skaleagents.com/prompts/community-prompt");
     expect(urls.some((url) => url.includes("private-bot") || url.includes("personal-prompt"))).toBe(false);
   } finally {

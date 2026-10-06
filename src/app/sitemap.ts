@@ -1,10 +1,13 @@
 import type { MetadataRoute } from "next";
+import { BOT_INTEGRATIONS } from "@/lib/api";
 import { loadCommunityPrompts, loadPublicBots } from "@/lib/public-catalog";
 import { publicCheckPath, publicChecks } from "@/lib/public-checks";
 
 const publicPaths = [
   "/",
   "/bots",
+  "/bots/integrations",
+  ...BOT_INTEGRATIONS.map((item) => `/bots/integrations/${item.slug}`),
   "/prompts",
   "/checks",
   ...publicChecks.map((check) => publicCheckPath(check)),

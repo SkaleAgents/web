@@ -341,12 +341,37 @@ export type Specialty =
   | "scaling"
   | "general";
 
+export const BOT_INTEGRATION_SLUGS = [
+  "github",
+  "slack",
+  "linear",
+  "terraform",
+  "aws",
+  "kubernetes",
+] as const;
+
+export type BotIntegration = (typeof BOT_INTEGRATION_SLUGS)[number];
+
+export const BOT_INTEGRATIONS: { slug: BotIntegration; label: string }[] = [
+  { slug: "github", label: "GitHub" },
+  { slug: "slack", label: "Slack" },
+  { slug: "linear", label: "Linear" },
+  { slug: "terraform", label: "Terraform" },
+  { slug: "aws", label: "AWS" },
+  { slug: "kubernetes", label: "Kubernetes" },
+];
+
+export function isBotIntegration(value: string): value is BotIntegration {
+  return (BOT_INTEGRATION_SLUGS as readonly string[]).includes(value);
+}
+
 export type Bot = {
   id: string;
   ownerUserId: string;
   name: string;
   description: string;
   specialty: Specialty;
+  integrations: BotIntegration[];
   promptBody: string;
   visibility: "public" | "private";
   status: "draft" | "published";
