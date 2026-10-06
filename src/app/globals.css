@@ -476,9 +476,8 @@ body:has(.retention-notice-dialog[open]) {
   --sidebar-surface: #f9f9f9; --nav-hover: #ececec;
   background: var(--canvas); grid-template-columns: 244px minmax(0, 1fr);
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  font-size: 15px; line-height: 1.5;
+  font-size: 15px; line-height: 24px;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
 }
 html.dark .dashboard-frame {
