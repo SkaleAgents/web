@@ -119,4 +119,12 @@ it("still shows what a check looks for on its detail page", async () => {
   expect(check).toBeDefined();
   render(await PublicCheckPage({ params: Promise.resolve({ slug: "public-database" }) }));
   expect(screen.getByText(check!.looksFor)).toBeInTheDocument();
+  expect(screen.getByText("When this line appears once, the review proposes this change.")).toBeInTheDocument();
+  expect(screen.getByText("publicly_accessible = true becomes publicly_accessible = false")).toBeInTheDocument();
+});
+
+it("does not invent a line change for a check without an exact rule", async () => {
+  const { container } = render(await PublicCheckPage({ params: Promise.resolve({ slug: "error-rate" }) }));
+  expect(container.textContent).not.toContain("becomes");
+  expect(screen.queryByText("When this line appears once, the review proposes this change.")).not.toBeInTheDocument();
 });

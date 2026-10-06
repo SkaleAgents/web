@@ -3,7 +3,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie, type DeletionPendingResponse, type InputCleanupResponse, type SwarmJob } from "@/lib/api";
-import { reportToCsv, reportToJson, reportToPdf, type ComplianceReport } from "@/lib/compliance-report-export";
+import { reportToCsv, reportToJson, reportToPdf, type ComplianceReport, type ReportSource } from "@/lib/compliance-report-export";
+import { submittedAuditText } from "@/lib/review-edits";
 import { Button } from "@/components/ui";
 
 const reportFormats = [
@@ -23,15 +24,15 @@ function downloadReport(name: string, blob: Blob) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function reportFile(format: ReportFormat, jobId: string, data: ComplianceReport): { name: string; blob: Blob } {
+function reportFile(format: ReportFormat, jobId: string, data: ComplianceReport, source: ReportSource): { name: string; blob: Blob } {
   const choice = reportFormats.find((item) => item.id === format) ?? reportFormats[0];
   if (format === "pdf") {
-    const pdf = reportToPdf(data);
+    const pdf = reportToPdf(data, source);
     const body = new ArrayBuffer(pdf.byteLength);
     new Uint8Array(body).set(pdf);
     return { name: choice.filename(jobId), blob: new Blob([body], { type: choice.type }) };
   }
-  const text = format === "csv" ? reportToCsv(data) : reportToJson(data);
+  const text = format === "csv" ? reportToCsv(data, source) : reportToJson(data, source);
   return { name: choice.filename(jobId), blob: new Blob([text], { type: choice.type }) };
 }
 
@@ -85,7 +86,7 @@ export function JobRetentionControls({ job, accountId, onDeletion }: {
     },
     onSuccess: ({ format, data }) => {
       if (!ownsView()) return;
-      const file = reportFile(format, job.id, data);
+      const file = reportFile(format, job.id, data, { content: submittedAuditText(job) });
       downloadReport(file.name, file.blob);
     },
   });

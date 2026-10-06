@@ -1,3 +1,6 @@
+import { priorityReview } from "@/lib/audit-risk";
+import { SUBMITTED_TEXT_UNAVAILABLE, proposedDownloadLine } from "@/lib/review-edits";
+
 export type ComplianceFinding = {
   severity?: string;
   title?: string;
@@ -6,6 +9,8 @@ export type ComplianceFinding = {
   remediation?: string;
   specialist?: string;
 };
+
+export type ReportSource = { content: string | null };
 
 export type ComplianceControl = {
   theme?: string;
@@ -28,9 +33,70 @@ export type ComplianceReport = {
 };
 
 const emptyThemeNote = "No finding recorded. This does not mean the theme passed.";
+const fixTheseFirstHeading = "Fix these first";
 
-export function reportToJson(report: unknown): string {
-  return `${JSON.stringify(report, null, 2)}\n`;
+type HandoffEntry = {
+  title: string;
+  severity: string;
+  proposedChange?: string;
+  recommendedAction?: string;
+};
+
+type HandoffSection = {
+  heading: string;
+  submittedText?: string;
+  findings: HandoffEntry[];
+};
+
+function collectedFindings(report: ComplianceReport): ComplianceFinding[] {
+  const seen = new Set<string>();
+  const findings: ComplianceFinding[] = [];
+  const groups = [
+    ...(report.controls ?? []).map((control) => control.findings ?? []),
+    report.unmappedFindings ?? [],
+  ];
+  for (const group of groups) {
+    for (const finding of group) {
+      const key = [finding.title, finding.severity, finding.detail, finding.remediation, finding.resource].join("\0");
+      if (seen.has(key)) continue;
+      seen.add(key);
+      findings.push(finding);
+    }
+  }
+  return findings;
+}
+
+function handoffSection(report: ComplianceReport, content: string | null): HandoffSection {
+  const ranked = collectedFindings(report).map((finding) => ({
+    title: finding.title ?? "",
+    severity: finding.severity ?? "",
+    remediation: finding.remediation,
+  }));
+  const section: HandoffSection = {
+    heading: fixTheseFirstHeading,
+    findings: priorityReview(ranked).priority.map((finding) => {
+      const entry: HandoffEntry = { title: finding.title, severity: finding.severity };
+      const proposed = proposedDownloadLine(content, finding.title);
+      if (proposed) entry.proposedChange = proposed;
+      const action = finding.remediation?.trim();
+      if (action) entry.recommendedAction = action;
+      return entry;
+    }),
+  };
+  if (content === null) section.submittedText = SUBMITTED_TEXT_UNAVAILABLE;
+  return section;
+}
+
+function withHandoff(report: ComplianceReport, source?: ReportSource): ComplianceReport & { fixTheseFirst?: HandoffSection } {
+  if (!source) return report;
+  return { ...report, fixTheseFirst: handoffSection(report, source.content) };
+}
+
+export function reportToJson(report: unknown, source?: ReportSource): string {
+  if (!source || !report || typeof report !== "object" || Array.isArray(report)) {
+    return `${JSON.stringify(report, null, 2)}\n`;
+  }
+  return `${JSON.stringify(withHandoff(report as ComplianceReport, source), null, 2)}\n`;
 }
 
 function csvCell(value: string): string {
@@ -53,7 +119,7 @@ function findingRow(theme: string, count: string, finding: ComplianceFinding, no
   ].map(csvCell).join(",");
 }
 
-export function reportToCsv(report: ComplianceReport): string {
+export function reportToCsv(report: ComplianceReport, source?: ReportSource): string {
   const rows = ["theme,finding_count,severity,title,detail,resource,remediation,specialist,note"];
   for (const control of report.controls ?? []) {
     const findings = control.findings ?? [];
@@ -68,6 +134,18 @@ export function reportToCsv(report: ComplianceReport): string {
   }
   for (const finding of report.unmappedFindings ?? []) {
     rows.push(findingRow("unmapped", "1", finding, ""));
+  }
+  if (source) {
+    const section = handoffSection(report, source.content);
+    if (section.findings.length > 0) {
+      rows.push("");
+      rows.push(section.heading);
+      if (section.submittedText) rows.push(section.submittedText);
+      rows.push("severity,title,proposed_change,recommended_action");
+      for (const entry of section.findings) {
+        rows.push([entry.severity, entry.title, entry.proposedChange ?? "", entry.recommendedAction ?? ""].map(csvCell).join(","));
+      }
+    }
   }
   return `${rows.join("\n")}\n`;
 }
@@ -100,7 +178,7 @@ function wrap(text: string, width = 88): string[] {
   return lines.length > 0 ? lines : [""];
 }
 
-function reportLines(report: ComplianceReport): string[] {
+function reportLines(report: ComplianceReport, source?: ReportSource): string[] {
   const lines = [
     "SkaleAgents compliance report",
     `Generated: ${report.generatedAt ?? "unknown"}`,
@@ -114,6 +192,19 @@ function reportLines(report: ComplianceReport): string[] {
   ];
   if (report.job?.summary) lines.push(...wrap(`Summary: ${report.job.summary}`), "");
   if (report.job?.error) lines.push(...wrap(`Error: ${report.job.error}`), "");
+  if (source) {
+    const section = handoffSection(report, source.content);
+    if (section.findings.length > 0) {
+      lines.push(section.heading);
+      if (section.submittedText) lines.push(...wrap(section.submittedText));
+      for (const entry of section.findings) {
+        lines.push(...wrap(`${entry.severity || "unspecified"}: ${entry.title || "Untitled finding"}`));
+        if (entry.proposedChange) lines.push(...wrap(entry.proposedChange));
+        if (entry.recommendedAction) lines.push(...wrap(`Recommended action: ${entry.recommendedAction}`));
+      }
+      lines.push("");
+    }
+  }
   for (const control of report.controls ?? []) {
     const findings = control.findings ?? [];
     lines.push(...wrap(`${control.theme ?? "theme"}: ${findings.length} recorded`));
@@ -135,9 +226,9 @@ function reportLines(report: ComplianceReport): string[] {
   return lines;
 }
 
-export function reportToPdf(report: ComplianceReport): Uint8Array {
+export function reportToPdf(report: ComplianceReport, source?: ReportSource): Uint8Array {
   const pageSize = 42;
-  const lines = reportLines(report);
+  const lines = reportLines(report, source);
   const pages: string[][] = [];
   for (let index = 0; index < lines.length; index += pageSize) pages.push(lines.slice(index, index + pageSize));
   if (pages.length === 0) pages.push([""]);
