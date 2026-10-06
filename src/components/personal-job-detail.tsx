@@ -57,8 +57,8 @@ function CopyReviewButton({ findings, content }: { findings: Array<{ title: stri
     }
   }
   return <div>
-    <Button type="button" variant="secondary" onClick={() => void copyReview()}>Copy review</Button>
-    <p className="mt-2 text-xs text-ink-muted" aria-live="polite">{copyState === "copied" ? "Review copied." : copyState === "failed" ? "Clipboard unavailable. Select and copy the review text." : ""}</p>
+    <Button type="button" variant="secondary" onClick={() => void copyReview()}>Copy findings</Button>
+    <p className="mt-2 max-w-xl text-sm text-ink-muted" aria-live="polite">{copyState === "copied" ? "Findings copied. Paste them into a chat, a note, or a pull request." : copyState === "failed" ? "Clipboard unavailable. Select and copy the findings below." : "Copies this review as plain text. Paste it into a chat, a note, or a pull request."}</p>
     {copyState === "failed" && <pre className="mt-2 whitespace-pre-wrap font-mono text-xs text-ink-muted">{text}</pre>}
   </div>;
 }
