@@ -1,0 +1,50 @@
+# Weekly blog
+
+Publish at least one new post every week. A week runs Monday through Sunday, Asia/Dhaka. The week of 5 October 2026 is already covered by the posts dated 2026-10-06. The next post is due by Sunday 18 October 2026. One post is enough. A second post is fine when you have a second concrete topic.
+
+Posts live in `src/lib/public-posts.ts`. The planning hub keeps a copy of these instructions at `docs/operations/blog-writing.md`.
+
+## Add the post
+
+Put the new record at the start of `publicPosts`, so the index shows it first. Fill every field:
+
+| Field | What to put there |
+| --- | --- |
+| `slug` | Lowercase words and hyphens. It becomes `/blog/<slug>`. |
+| `title` | The search phrase, said like a person. |
+| `description` | One sentence for the page metadata. |
+| `date` | `YYYY-MM-DD` inside the week you are covering. |
+| `summary` | The first thing the reader sees under the title. Say the problem. |
+| `sections` | Two sections. Each heading names the move. Two short paragraphs each. |
+| `links` | Two or three links to `/resources`, `/checks`, `/prompts`, `/mcp-config`, or another post. |
+
+Sitemap, `llms.txt`, and the `.md` alternate read this array. You do not register the URL anywhere else.
+
+## What the post has to do
+
+Teach one move a reviewer can use the same day. A person should be able to land from search, do the thing, and open a checklist or a prompt. Don't write a product announcement. Don't recap the homepage.
+
+Name the file, the flag, the port, or the line. If you can't point at something the reader can paste into an assistant, pick a different topic.
+
+## How to write it
+
+Write like you're talking to another developer. Second person is fine. First person is fine when you actually did the thing. Use contractions.
+
+- Short sentences. One idea each.
+- Headings should say the move. "Overview" is not a heading.
+- Show the setting. `0.0.0.0/0`, `privileged: true`, `Action "*"`.
+- No em dashes.
+- No stacks of adjectives, and no "leverage", "seamless", "robust", or "delve".
+- No closing "in summary".
+- One dry aside in the whole post, or none.
+- About 400 to 700 words.
+
+Read it out loud. If a sentence sounds like a launch post, cut it or make it a fact.
+
+## Before you merge
+
+- The slug is new.
+- The title and description are not copied from another post.
+- The date falls in a week that does not already have a post, unless you are adding an extra one on purpose.
+- At least one link goes to a resource, a check, or the prompt library.
+- `pnpm exec vitest run src/lib/public-content.test.ts` still passes.

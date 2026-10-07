@@ -1,3 +1,4 @@
+// Weekly posts: docs/blog-writing.md. At least one new post per week.
 export type PublicPostSection = {
   heading: string;
   paragraphs: readonly string[];
