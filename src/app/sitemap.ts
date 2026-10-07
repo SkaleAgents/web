@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { BOT_INTEGRATIONS } from "@/lib/api";
+import { BOT_INTEGRATIONS, SPECIALTIES } from "@/lib/api";
 import { loadCommunityPrompts, loadPublicBots } from "@/lib/public-catalog";
 import { publicCheckPath, publicChecks } from "@/lib/public-checks";
 import { publicPostPath, publishedPosts } from "@/lib/public-posts";
@@ -10,6 +10,7 @@ const publicPaths = [
   "/bot-directory",
   "/bot-directory/integrations",
   ...BOT_INTEGRATIONS.map((item) => `/bot-directory/integrations/${item.slug}`),
+  ...SPECIALTIES.map((specialty) => `/bot-directory/specialties/${specialty}`),
   "/prompts",
   "/checks",
   ...publicChecks.map((check) => publicCheckPath(check)),

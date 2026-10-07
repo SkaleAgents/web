@@ -21,13 +21,13 @@ const SPECIALTY_LABEL: Record<Specialty, string> = {
   general: "General",
 };
 
-export function BotDirectory({ manage = false, initialBots, integration }: { manage?: boolean; initialBots?: Bot[]; integration?: BotIntegration }) {
+export function BotDirectory({ manage = false, initialBots, integration, specialty: specialtyPage }: { manage?: boolean; initialBots?: Bot[]; integration?: BotIntegration; specialty?: Specialty }) {
   const pathname = usePathname();
   const personalHref = (section: string) => personalDestinationFromPath(pathname, section);
   const [search, setSearch] = useState("");
   const [specialty, setSpecialty] = useState("all");
   const [selectedTool, setSelectedTool] = useState<BotIntegration | "all">("all");
-  const [pickedSpecialties, setPickedSpecialties] = useState<Specialty[]>([]);
+  const [pickedSpecialties, setPickedSpecialties] = useState<Specialty[]>(specialtyPage ? [specialtyPage] : []);
   const [pickedTools, setPickedTools] = useState<BotIntegration[]>(integration ? [integration] : []);
   const activeTool = integration ?? (selectedTool === "all" ? undefined : selectedTool);
   const userQuery = useQuery(currentUserOptions);
@@ -56,6 +56,7 @@ export function BotDirectory({ manage = false, initialBots, integration }: { man
     return (specialty === "all" || bot.specialty === specialty) && (!activeTool || (bot.integrations ?? []).includes(activeTool));
   });
   const toolLabel = BOT_INTEGRATIONS.find((item) => item.slug === integration)?.label;
+  const specialtyLabel = specialtyPage ? SPECIALTY_LABEL[specialtyPage] : undefined;
   const listedBots = [...(filteredBots ?? [])].sort((a, b) => a.name.localeCompare(b.name));
 
   if (!manage) {
@@ -72,6 +73,7 @@ export function BotDirectory({ manage = false, initialBots, integration }: { man
         tools={pickedTools}
         onTools={setPickedTools}
         toolLabel={toolLabel}
+        specialtyLabel={specialtyLabel}
         onClear={() => { setSearch(""); setPickedSpecialties([]); setPickedTools([]); }}
       />
     );
@@ -193,6 +195,7 @@ function CatalogIndex({
   tools,
   onTools,
   toolLabel,
+  specialtyLabel,
   onClear,
 }: {
   bots?: Bot[];
@@ -206,6 +209,7 @@ function CatalogIndex({
   tools: BotIntegration[];
   onTools: (value: BotIntegration[]) => void;
   toolLabel?: string;
+  specialtyLabel?: string;
   onClear: () => void;
 }) {
   const filterKey = `${search}|${specialties.join(",")}|${tools.join(",")}`;
@@ -222,7 +226,7 @@ function CatalogIndex({
   return (
     <main className="directory-index space-y-6">
       <div className="workspace-intro">
-        <h1 className="workspace-heading">{toolLabel ? `${toolLabel} bots` : "The bot directory"}</h1>
+        <h1 className="workspace-heading">{toolLabel ? `${toolLabel} bots` : specialtyLabel ? `${specialtyLabel} reviewers` : "The bot directory"}</h1>
         <p className="mt-2 max-w-xl text-sm text-ink-muted">
           Review a pasted diff, plan, or thread. Open the prompt in the assistant you already use.
         </p>
@@ -252,7 +256,7 @@ function CatalogIndex({
       {listedBots.length > 0 && (
         <>
           <CatalogTable bots={visibleBots} />
-          {toolLabel && (
+          {(toolLabel || specialtyLabel) && (
             <p>
               <Link href="/bot-directory" className="group inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink">
                 <svg aria-hidden="true" viewBox="0 0 16 16" className="h-4 w-4 shrink-0">
@@ -444,7 +448,9 @@ function CatalogTable({ bots }: { bots: Bot[] }) {
             <Link href={`/bot-directory/${bot.id}`} className="directory-bot-name">{bot.name}</Link>
             <p className="directory-bot-desc">{bot.description || "No description"}</p>
           </div>
-          <div className="directory-specialty" role="cell"><SpecialtyPill specialty={bot.specialty} /></div>
+          <div className="directory-specialty" role="cell">
+            <SpecialtyPill specialty={bot.specialty} href={`/bot-directory/specialties/${bot.specialty}`} />
+          </div>
           <div className="directory-tools-cell" role="cell"><ToolNames slugs={bot.integrations} /></div>
           <Link href={`/bot-directory/${bot.id}`} className="directory-open">Open</Link>
         </div>
@@ -453,10 +459,12 @@ function CatalogTable({ bots }: { bots: Bot[] }) {
   );
 }
 
-function SpecialtyPill({ specialty }: { specialty: string }) {
+function SpecialtyPill({ specialty, href }: { specialty: string; href?: string }) {
   const known = specialty in SPECIALTY_LABEL;
   const label = known ? SPECIALTY_LABEL[specialty as Specialty] : specialty;
-  return <span className={`directory-pill ${known ? `directory-pill-${specialty}` : "directory-pill-general"}`}>{label}</span>;
+  const className = `directory-pill ${known ? `directory-pill-${specialty}` : "directory-pill-general"}`;
+  if (!href) return <span className={className}>{label}</span>;
+  return <Link href={href} className={className}>{label}</Link>;
 }
 
 function ToolNames({ slugs }: { slugs?: BotIntegration[] }) {
