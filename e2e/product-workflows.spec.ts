@@ -94,7 +94,8 @@ test("directory combines search and specialty filters and recovers from no match
   await page.getByRole("searchbox").fill("nothing matches");
   await expect(page.getByRole("heading", { name: "No bots match that search" })).toBeVisible();
   await page.getByRole("button", { name: "Clear filters" }).click();
-  await expect(page.getByRole("link", { name: "View prompt" })).toHaveCount(2);
+  await expect(page.getByRole("link", { name: "Release reviewer" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Network reviewer" })).toBeVisible();
 });
 
 test("prompt topics and search select the full text to copy", async ({ page, context }) => {
