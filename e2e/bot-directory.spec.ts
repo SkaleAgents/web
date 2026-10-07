@@ -183,3 +183,46 @@ test("a visitor filters bots by tool and opens the assistant actions", async ({ 
   await expect(page.getByRole("link", { name: github.name })).toBeVisible();
   await expect(page.getByRole("link", { name: slack.name })).toHaveCount(0);
 });
+
+test("a visitor pages the directory twenty reviewers at a time", async ({ page }) => {
+  const bots = Array.from({ length: 21 }, (_, index) => ({
+    id: `00000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+    ownerUserId: "00000000-0000-4000-8000-000000000041",
+    name: `Reviewer ${String(index + 1).padStart(2, "0")}`,
+    description: "Reviews a pasted change.",
+    specialty: index === 20 ? "sre" : "devops",
+    integrations: ["github"],
+    promptBody: "Review the pasted change.",
+    visibility: "public",
+    status: "published",
+    createdAt: "2026-10-06T00:00:00Z",
+    updatedAt: "2026-10-06T00:00:00Z",
+  }));
+
+  await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
+  await page.route("**/api/bots", (route) => route.fulfill({ json: { bots } }));
+
+  await page.goto("/bot-directory");
+  await expect(page.getByText(/Showing 1.20 of 21/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Reviewer 01" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Reviewer 20" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Reviewer 21" })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByText(/Showing 21.21 of 21/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Reviewer 21" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Reviewer 01" })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Previous" }).click();
+  await expect(page.getByRole("link", { name: "Reviewer 01" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Reviewer 21" })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.locator('[aria-label="Filter by specialty"]').getByRole("button").click();
+  await page.getByRole("option", { name: "SRE", exact: true }).click();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("link", { name: "Reviewer 21" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Reviewer 01" })).toHaveCount(0);
+  await expect(page.getByText(/Showing 1.1 of 1/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Next" })).toHaveCount(0);
+});

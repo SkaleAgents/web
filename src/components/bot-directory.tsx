@@ -10,6 +10,8 @@ import { Button, LinkButton, TextInput } from "@/components/ui";
 import { ToolLogo } from "@/components/tool-logo";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
+const PAGE_SIZE = 20;
+
 const SPECIALTY_LABEL: Record<Specialty, string> = {
   devops: "DevOps",
   devsecops: "DevSecOps",
@@ -206,6 +208,17 @@ function CatalogIndex({
   toolLabel?: string;
   onClear: () => void;
 }) {
+  const filterKey = `${search}|${specialties.join(",")}|${tools.join(",")}`;
+  const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
+  const pageCount = Math.max(1, Math.ceil(listedBots.length / PAGE_SIZE));
+  const page = Math.min(pageState.key === filterKey ? pageState.page : 1, pageCount);
+  const start = (page - 1) * PAGE_SIZE;
+  const visibleBots = listedBots.slice(start, start + PAGE_SIZE);
+
+  function setPage(next: number) {
+    setPageState({ key: filterKey, page: next });
+  }
+
   return (
     <main className="directory-index space-y-6">
       <div className="workspace-intro">
@@ -236,7 +249,12 @@ function CatalogIndex({
         </div>
       )}
 
-      {listedBots.length > 0 && <CatalogTable bots={listedBots} />}
+      {listedBots.length > 0 && (
+        <>
+          <CatalogTable bots={visibleBots} />
+          <DirectoryPager page={page} pageCount={pageCount} total={listedBots.length} onPage={setPage} />
+        </>
+      )}
     </main>
   );
 }
@@ -364,6 +382,38 @@ function MultiFilter({
             );
           })}
         </div>
+      )}
+    </div>
+  );
+}
+
+function pageWindow(page: number, pageCount: number): (number | "gap")[] {
+  if (pageCount <= 7) return Array.from({ length: pageCount }, (_, index) => index + 1);
+  const wanted = [1, pageCount, page - 1, page, page + 1].filter((number) => number >= 1 && number <= pageCount);
+  const sorted = [...new Set(wanted)].sort((a, b) => a - b);
+  const items: (number | "gap")[] = [];
+  for (const number of sorted) {
+    const previous = items[items.length - 1];
+    if (typeof previous === "number" && number - previous > 1) items.push("gap");
+    items.push(number);
+  }
+  return items;
+}
+
+function DirectoryPager({ page, pageCount, total, onPage }: { page: number; pageCount: number; total: number; onPage: (page: number) => void }) {
+  const start = (page - 1) * PAGE_SIZE + 1;
+  const end = Math.min(page * PAGE_SIZE, total);
+  return (
+    <div className="directory-pager">
+      <p className="text-sm text-ink-muted">{`Showing ${start}\u2013${end} of ${total}`}</p>
+      {pageCount > 1 && (
+        <nav className="directory-pages" aria-label="Pagination">
+          <button type="button" className="directory-page" disabled={page === 1} onClick={() => onPage(page - 1)}>Previous</button>
+          {pageWindow(page, pageCount).map((item, index) => item === "gap"
+            ? <span key={`gap-${index}`} className="directory-page-gap" aria-hidden="true">…</span>
+            : <button key={item} type="button" className="directory-page" aria-label={`Page ${item}`} aria-current={item === page ? "page" : undefined} onClick={() => onPage(item)}>{item}</button>)}
+          <button type="button" className="directory-page" disabled={page === pageCount} onClick={() => onPage(page + 1)}>Next</button>
+        </nav>
       )}
     </div>
   );
