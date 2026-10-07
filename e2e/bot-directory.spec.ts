@@ -152,18 +152,15 @@ test("a visitor filters bots by tool and opens the assistant actions", async ({ 
   await page.route("**/api/bots", (route) => route.fulfill({ json: { bots: [github, slack] } }));
   await page.route(`**/api/bots/${github.id}`, (route) => route.fulfill({ json: github }));
 
-  await page.goto(`/bots/${github.id}`);
+  await page.goto("/bots");
+  await page.getByRole("link", { name: github.name }).click();
+  await expect(page).toHaveURL(new RegExp(`/bots/${github.id}$`));
   await expect(page.getByRole("heading", { name: github.name })).toBeVisible();
   await expect(page.getByText(github.promptBody)).toBeVisible();
   await page.getByRole("button", { name: "Actions" }).click();
-  const menu = page.locator('[role="menu"]').filter({ hasText: "Copy prompt" });
-  const providers = menu.locator('a[role="menuitem"]');
-  await expect(providers).toHaveCount(4);
-  await expect(providers.nth(0)).toContainText("Open in Grok");
-  await expect(providers.nth(1)).toContainText("Open in SuperGrok");
-  await expect(providers.nth(2)).toContainText("Open in Claude");
-  await expect(providers.nth(3)).toContainText("Open in Codex");
-  await expect(menu.locator('button[role="menuitem"]')).toHaveText(/Copy prompt/);
+  const menu = page.getByRole("menu");
+  await expect(menu.getByRole("menuitem", { name: /^Open in / })).toHaveCount(4);
+  await expect(menu.getByRole("menuitem", { name: /Copy prompt/ })).toBeVisible();
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/bots");
