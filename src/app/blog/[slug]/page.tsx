@@ -1,14 +1,18 @@
 import { markdownPath } from "@/lib/ai-corpus";
+import { io } from "next/cache";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { publicPostBySlug, publicPostPath, publicPosts } from "@/lib/public-posts";
+import { publicPostBySlug, publicPostPath, publishedPosts } from "@/lib/public-posts";
+
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return publicPosts.map((post) => ({ slug: post.slug }));
+  return publishedPosts().map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  await io();
   const post = publicPostBySlug((await params).slug);
   if (!post) return {};
   const path = publicPostPath(post);
@@ -27,6 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  await io();
   const post = publicPostBySlug((await params).slug);
   if (!post) notFound();
   const article = {

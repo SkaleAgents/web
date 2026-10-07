@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { BOT_INTEGRATIONS } from "@/lib/api";
 import { loadCommunityPrompts, loadPublicBots } from "@/lib/public-catalog";
 import { publicCheckPath, publicChecks } from "@/lib/public-checks";
-import { publicPostPath, publicPosts } from "@/lib/public-posts";
+import { publicPostPath, publishedPosts } from "@/lib/public-posts";
 import { publicResourcePath, publicResources } from "@/lib/public-resources";
 
 const publicPaths = [
@@ -16,7 +16,6 @@ const publicPaths = [
   "/resources",
   ...publicResources.map((resource) => publicResourcePath(resource)),
   "/blog",
-  ...publicPosts.map((post) => publicPostPath(post)),
   "/mcp-config",
   "/pricing",
   "/products",
@@ -30,6 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [bots, prompts] = await Promise.all([loadPublicBots(), loadCommunityPrompts()]);
   const paths = [
     ...publicPaths,
+    ...publishedPosts().map((post) => publicPostPath(post)),
     ...(bots ?? []).map((bot) => `/bots/${bot.id}`),
     ...(prompts ?? []).map((prompt) => `/prompts/${prompt.id}`),
   ];

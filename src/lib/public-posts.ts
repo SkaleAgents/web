@@ -9,12 +9,130 @@ export type PublicPost = {
   title: string;
   description: string;
   date: string;
+  /** Monday 09:00 Asia/Dhaka, ISO-8601 with a +06:00 offset. Absent means already public. */
+  publishAt?: string;
   summary: string;
   sections: readonly PublicPostSection[];
   links: readonly { href: string; label: string }[];
 };
 
 export const publicPosts: readonly PublicPost[] = [
+  {
+    slug: "pull-request-target-checks-out-the-pr",
+    title: "pull_request_target should not check out the pull request",
+    description: "Why a pull_request_target job that checks out the head SHA runs untrusted code with the base repository's secrets.",
+    date: "2026-11-09",
+    publishAt: "2026-11-09T09:00:00+06:00",
+    summary: "pull_request_target runs in the base repo, with the base repo's secrets. Checking out the pull request head runs someone else's code in that job.",
+    sections: [
+      {
+        heading: "The trigger and the checkout are one finding",
+        paragraphs: [
+          "A workflow with `on: pull_request_target` does not run as the person who opened the pull request. GitHub runs it in the base repository, on the base repository's `GITHUB_TOKEN`, and with the secrets that repository can read. `permissions: contents: write` on that job makes the token able to push. That is useful for a label bot. It is a bad place to run the pull request. The dangerous file is the workflow in the base branch, which is why a fork can hit it before anyone merges the fork's workflow change.",
+          "The checkout that turns it into code execution is `ref: ${{ github.event.pull_request.head.sha }}`, or the same idea with `head.ref` and the fork's repository. Checking out `github.event.pull_request.head.repo.full_name` is the same grant. The job then has the pull request's files and the base repository's credentials in one process. A `pull_request` workflow is not this finding. A `pull_request_target` job that checks out the base repository and never the head is not this finding either. The check wants both halves in the same file.",
+        ],
+      },
+      {
+        heading: "Read the diff, or drop the secrets",
+        paragraphs: [
+          "If the job only needs to know what changed, fetch the diff and print the paths. Don't `actions/checkout` the head, and don't `run` a script that came from the pull request. If the job has to build or test the pull request, change the trigger to `pull_request`. That trigger checks out the merge commit and does not hand the job the base repository's secrets.",
+          "Paste the workflow. Quote the `on:` block and the checkout `ref`. The pull request target check is written for that pair, and it does not open the pull request to see them. A checkout that exists only in a reusable workflow you didn't paste is outside the file, so the check will not invent it. The action pin check is the next line to read: `uses: actions/checkout@main` is a separate finding, and it often sits in the same job. Leave the workflow unmerged until both lines are gone or you have written down why the job is allowed to keep them.",
+        ],
+      },
+    ],
+    links: [
+      { href: "/checks/pull-request-target-checkout", label: "Pull request target check" },
+      { href: "/checks/action-pinned-to-main", label: "Action pinned to @main" },
+      { href: "/blog/pin-the-action-to-a-commit", label: "Pin the action to a commit" },
+    ],
+  },
+  {
+    slug: "pin-the-action-to-a-commit",
+    title: "Pin the GitHub Action to a commit",
+    description: "Why actions/checkout@main is a moving build, and what to put on the uses line instead.",
+    date: "2026-11-02",
+    publishAt: "2026-11-02T09:00:00+06:00",
+    summary: "uses: actions/checkout@main builds whatever that branch points at today. Pin the action to the commit you actually read.",
+    sections: [
+      {
+        heading: "A branch name is not a version",
+        paragraphs: [
+          "The line `- uses: actions/checkout@main` looks pinned because it names a ref. `main` moves. So does `master`. The next push to that action repository changes what your workflow runs, including a workflow that has been green for months. You will not get a diff in your own pull request when that happens. A floating tag such as `@v4` can be moved by the action owner the same way. The check's example is `actions/checkout@main`. Treat `@master` as the same line.",
+          "A release tag is better, and it can still move. Whoever owns the tag can point `v4` at a new commit. A full 40-character commit SHA does not move. GitHub rejects a force-push that would reuse a SHA. The check looks for `@main` and `@master`. It does not look up the action repository, and it will not invent a SHA when the workflow only names a branch.",
+        ],
+      },
+      {
+        heading: "Paste the uses line you are willing to keep",
+        paragraphs: [
+          "Open the action repository at the commit you mean, read the changelog since the tag you used to run, and copy that SHA onto the `uses` line: `actions/checkout@` followed by the 40 hex characters. Keep the tag in a comment if you want a human-readable name, but the `uses` value has to be the SHA. Dependabot and similar bots can open a pull request when you want a newer SHA. That pull request is the review. A silent move on `main` is not. A workflow that calls a local action with `uses: ./actions/build` is your own code, and this check is not about that line. Third-party actions are the ones that move underneath you. Pin those.",
+          "Paste the workflow, not a description of it. Ask for the `uses` line to be quoted. If the line still says `@main`, that is the comment. The same file is worth a second pass for `pull_request_target` plus a checkout of the pull request head. Those are different findings, and one workflow can have both.",
+        ],
+      },
+    ],
+    links: [
+      { href: "/checks/action-pinned-to-main", label: "Action pinned to @main" },
+      { href: "/checks/pull-request-target-checkout", label: "Pull request target check" },
+      { href: "/blog/dockerfile-user-is-not-root", label: "End the Dockerfile on a user" },
+    ],
+  },
+  {
+    slug: "dockerfile-user-is-not-root",
+    title: "End the Dockerfile on a user that is not root",
+    description: "The last USER instruction is the user the container starts as. USER root, USER 0, or no USER at all leaves it as root.",
+    date: "2026-10-26",
+    publishAt: "2026-10-26T09:00:00+06:00",
+    summary: "The last USER line wins. If that line is root, or if the Dockerfile never switches user, the process starts as root.",
+    sections: [
+      {
+        heading: "The last USER is the one that runs",
+        paragraphs: [
+          "Docker reads the Dockerfile from top to bottom and keeps the last `USER`. `USER root` and `USER 0` are root. A file with no `USER` instruction at all is also root, because that is the image default. A comment that says the container runs as nginx is not a `USER` instruction, and neither is a name mentioned only in `CMD`. The check reads the text. It does not build the image, and it does not prove what a running host actually launched. A numeric user such as `USER 1000` counts only if that user exists in the image. The check still wants the instruction in the file.",
+          "People put `USER root` back at the bottom because a late `apt-get` or `chown` failed once. The install belongs earlier. Switch user after the packages are in the image, and leave the file there. A later stage in a multi-stage build has its own user. The last stage is the one that ships, so that stage is the one that needs the `USER` line.",
+        ],
+      },
+      {
+        heading: "Name a user the image already has",
+        paragraphs: [
+          "End on a user the image already contains: `USER node`, `USER nginx`, or a user you created with `useradd` in that file. Don't invent a name the base image lacks and then discover it at startup. If the process must bind to port 80, give it another port above 1024 and put a proxy in front, or grant the capability you can name. `USER root` is not the fix for a low port.",
+          "Paste the Dockerfile. Ask for the last `USER` line to be quoted. If there is no `USER` line, that absence is the finding. The container privilege checklist is the longer pass over the same spec, including a Docker socket mount, which is a different way to get root on the host. A memory limit belongs on the runtime spec even after the user is right. A root user inside a limit can still fill that limit. Fix the user in this file, then set the memory limit in the runtime spec. They are two comments, not one.",
+        ],
+      },
+    ],
+    links: [
+      { href: "/checks/container-runs-as-root", label: "Container runs as root" },
+      { href: "/resources/container-privilege-review", label: "Container privilege review" },
+      { href: "/blog/set-a-memory-limit", label: "Set a memory limit" },
+    ],
+  },
+  {
+    slug: "set-a-memory-limit",
+    title: "Set a memory limit on the container",
+    description: "mem_limit: 0 and a missing Kubernetes memory limit let one container consume the host.",
+    date: "2026-10-19",
+    publishAt: "2026-10-19T09:00:00+06:00",
+    summary: "A container with no memory limit, or with mem_limit set to 0, can grow until the kernel starts killing its neighbors.",
+    sections: [
+      {
+        heading: "Zero is not a limit",
+        paragraphs: [
+          "In Compose, `mem_limit: 0` means unlimited. Omitting `mem_limit` means the same thing. `mem_reservation` is a request for a share of the host, not a cap, so a file that only sets the reservation still has no limit. In a Kubernetes Pod, a container with no `resources.limits.memory` has no memory cap in that file. `resources.requests.memory` is the same kind of request. The check looks for a missing limit and for `mem_limit: 0`. It does not measure live RSS, and it cannot see a limit that exists only as a namespace policy outside the text you pasted.",
+          "When the host runs out of memory, the kernel's OOM killer picks a process. It does not have to pick the container that grew. A sidecar, a daemon, or the node agent can die first. The workload you forgot to cap is still running. That is the outage people file against the wrong service. A limit of `0` is how a Compose file says there is no cap on purpose, so delete it rather than lowering it.",
+        ],
+      },
+      {
+        heading: "Write the number on the container",
+        paragraphs: [
+          "Take the memory the process used the last time it was busy, and add headroom you can explain in the pull request. Put that number on the container that runs the process: `mem_limit: 512m` in Compose, or `resources.limits.memory: 512Mi` on the container in the Pod spec. A limit on a different container in the same file does not cover this one. Compose `mem_limit: 0` is the line to delete, not to tune.",
+          "Paste the Compose file or the manifest. Ask for the limit line to be quoted, including the container name. If the line is missing, say so in the review instead of assuming the cluster adds one later. A limit applied by a policy you didn't paste is invisible to the check. Write the number you mean, such as `mem_limit: 512m` or `memory: 512Mi`, next to that container and not on a sibling. The Docker socket post is the other host-level grant in the same kind of file: a memory limit does not make a mounted `docker.sock` safe. Quote the limit in the review comment so the next diff has to change that number on purpose.",
+        ],
+      },
+    ],
+    links: [
+      { href: "/checks/missing-memory-limit", label: "Missing memory limit" },
+      { href: "/resources/container-privilege-review", label: "Container privilege review" },
+      { href: "/blog/docker-socket-is-host-root", label: "The Docker socket is root on the host" },
+    ],
+  },
   {
     slug: "docker-socket-is-host-root",
     title: "The Docker socket is root on the host",
@@ -133,23 +251,33 @@ export function publicPostPath(post: Pick<PublicPost, "slug">): string {
   return `/blog/${post.slug}`;
 }
 
-export function publicPostBySlug(slug: string): PublicPost | undefined {
-  return publicPosts.find((post) => post.slug === slug);
+export function isPostPublished(post: Pick<PublicPost, "publishAt">, now = new Date()): boolean {
+  if (!post.publishAt) return true;
+  const publishAt = Date.parse(post.publishAt);
+  return Number.isFinite(publishAt) && now.getTime() >= publishAt;
 }
 
-export function blogIndexMarkdown(): string {
+export function publishedPosts(now = new Date()): readonly PublicPost[] {
+  return publicPosts.filter((post) => isPostPublished(post, now));
+}
+
+export function publicPostBySlug(slug: string, now = new Date()): PublicPost | undefined {
+  return publishedPosts(now).find((post) => post.slug === slug);
+}
+
+export function blogIndexMarkdown(now = new Date()): string {
   return [
     "# Blog",
     "",
     "Short notes on reviewing infrastructure and handing a prompt to an assistant.",
     "",
-    ...publicPosts.map((post) => `- [${post.title}](https://skaleagents.com${publicPostPath(post)}.md): ${post.summary}`),
+    ...publishedPosts(now).map((post) => `- [${post.title}](https://skaleagents.com${publicPostPath(post)}.md): ${post.summary}`),
     "",
   ].join("\n");
 }
 
-export function postMarkdown(slug: string): string | null {
-  const post = publicPostBySlug(slug);
+export function postMarkdown(slug: string, now = new Date()): string | null {
+  const post = publicPostBySlug(slug, now);
   if (!post) return null;
   return [
     `# ${post.title}`,
