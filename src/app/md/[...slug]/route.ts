@@ -1,4 +1,5 @@
 import { markdownDocument, type DirectoryEntry, type PublicPageDetail, type PublicPlan } from "@/lib/ai-corpus";
+import { io } from "next/cache";
 import { loadCommunityPrompt, loadCommunityPrompts, loadPublicBot, loadPublicBots } from "@/lib/public-catalog";
 
 export const revalidate = 3600;
@@ -74,12 +75,14 @@ export async function GET(_request: Request, context: { params: Promise<{ slug: 
   }
   const rest = slug.slice(1);
   const path = rest.length === 1 && rest[0] === "index" ? "/" : `/${rest.join("/")}`;
+  const scheduled = path === "/blog" || path.startsWith("/blog/");
+  if (scheduled) await io();
   const body = markdownDocument(path, await extrasFor(path));
-  if (!body) return new Response("Not found\n", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
+  if (!body) return new Response("Not found\n", { status: 404, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
   return new Response(body, {
     headers: {
       "content-type": "text/markdown; charset=utf-8",
-      "cache-control": "public, max-age=3600",
+      "cache-control": scheduled ? "public, max-age=60" : "public, max-age=3600",
       "x-robots-tag": "index, follow",
     },
   });

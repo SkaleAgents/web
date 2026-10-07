@@ -4,7 +4,7 @@ import { planBlurbs } from "./plan-blurbs";
 import { catalogProducts } from "./product-catalog-data";
 import { publicCheckPath, publicChecks } from "./public-checks";
 import { publicResourcePath, publicResources, resourceMarkdown, resourcesIndexMarkdown } from "./public-resources";
-import { blogIndexMarkdown, postMarkdown, publicPostPath, publicPosts } from "./public-posts";
+import { blogIndexMarkdown, postMarkdown, publicPostPath, publishedPosts } from "./public-posts";
 
 export const SITE = "https://skaleagents.com";
 
@@ -114,7 +114,7 @@ export function llmsTxt(): string {
     "",
     "## Blog",
     link("Blog", "/blog", "Notes on reviews, prompts, and handing work to an assistant."),
-    ...publicPosts.map((post) => link(post.title, publicPostPath(post), post.summary)),
+    ...publishedPosts().map((post) => link(post.title, publicPostPath(post), post.summary)),
     "",
     "## Directories",
     link("Bot directory", "/bots", "Public bot names and descriptions. Instruction text stays on each bot page."),

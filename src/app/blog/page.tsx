@@ -1,7 +1,8 @@
 import { markdownPath } from "@/lib/ai-corpus";
+import { io } from "next/cache";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { publicPostPath, publicPosts } from "@/lib/public-posts";
+import { publicPostPath, publishedPosts } from "@/lib/public-posts";
 
 export const metadata: Metadata = {
   title: "Blog | SkaleAgents",
@@ -9,12 +10,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/blog", types: { "text/markdown": markdownPath("/blog") } },
 };
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  await io();
+  const posts = publishedPosts();
   const itemList = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "SkaleAgents blog",
-    itemListElement: publicPosts.map((post, index) => ({
+    itemListElement: posts.map((post, index) => ({
       "@type": "ListItem",
       position: index + 1,
       name: post.title,
@@ -31,7 +34,7 @@ export default function BlogPage() {
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">Short pieces on what to read in a diff, what a check can actually see, and how to get a prompt into the assistant you already use.</p>
       </div>
       <ul className="divide-y divide-line">
-        {publicPosts.map((post) => (
+        {posts.map((post) => (
           <li key={post.slug} className="py-6">
             <p className="text-xs uppercase tracking-wide text-ink-muted">
               <time dateTime={post.date}>{post.date}</time>

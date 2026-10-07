@@ -1,6 +1,6 @@
 # Weekly blog
 
-Publish at least one new post every week. A week runs Monday through Sunday, Asia/Dhaka. The week of 12 October 2026 is covered by the post dated 2026-10-12. The next post is due by Sunday 25 October 2026. One post is enough. A second post is fine when you have a second concrete topic.
+Publish at least one new post every week. A week runs Monday through Sunday, Asia/Dhaka. Posts for the weeks of 19 October, 26 October, 2 November, and 9 November 2026 are already written. Each one becomes public on Monday at 09:00 Asia/Dhaka. The next post is due by Sunday 22 November 2026. One post is enough. A second post is fine when you have a second concrete topic.
 
 Posts live in `src/lib/public-posts.ts`. The planning hub keeps a copy of these instructions at `docs/operations/blog-writing.md`.
 
@@ -13,12 +13,13 @@ Put the new record at the start of `publicPosts`, so the index shows it first. F
 | `slug` | Lowercase words and hyphens. It becomes `/blog/<slug>`. |
 | `title` | The search phrase, said like a person. |
 | `description` | One sentence for the page metadata. |
-| `date` | `YYYY-MM-DD` inside the week you are covering. |
+| `date` | `YYYY-MM-DD` inside the week you are covering. Same calendar day as `publishAt`. |
+| `publishAt` | `YYYY-MM-DDT09:00:00+06:00`, the Monday of that week. The index, the page, the sitemap, `llms.txt`, and the markdown copy stay hidden until that instant. Leave it off only when the post should be public immediately. |
 | `summary` | The first thing the reader sees under the title. Say the problem. |
 | `sections` | Two sections. Each heading names the move. Two short paragraphs each. |
 | `links` | Two or three links to `/resources`, `/checks`, `/prompts`, `/mcp-config`, or another post. |
 
-Sitemap, `llms.txt`, and the `.md` alternate read this array. You do not register the URL anywhere else.
+Sitemap, `llms.txt`, and the `.md` alternate read the posts whose `publishAt` has passed. A future post is a 404. Sitemap and `llms.txt` can take about five minutes to list a post after 09:00. The HTML page updates on the next request. You do not register the URL anywhere else.
 
 ## What the post has to do
 
