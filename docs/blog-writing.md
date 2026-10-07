@@ -1,6 +1,6 @@
 # Weekly blog
 
-Publish at least one new post every week. A week runs Monday through Sunday, Asia/Dhaka. Posts for the weeks of 19 October, 26 October, 2 November, 9 November, and 16 November 2026 are already written. Each one becomes public on its Monday, at its own minute between 09:10 and 11:00 Asia/Dhaka. The next post is due by Sunday 29 November 2026. One post is enough. A second post is fine when you have a second concrete topic.
+Publish at least one new post every week. A week runs Monday through Sunday, Asia/Dhaka. Posts for the weeks of 19 October through 23 November 2026 are already written. Each one becomes public on its Monday, at its own minute between 09:10 and 11:00 Asia/Dhaka. The next post is due by Sunday 6 December 2026. One post is enough. A second post is fine when you have a second concrete topic.
 
 Posts live in `src/lib/public-posts.ts`. The planning hub keeps a copy of these instructions at `docs/operations/blog-writing.md`.
 
