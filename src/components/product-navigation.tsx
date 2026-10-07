@@ -8,9 +8,11 @@ const groups = [
   { label: "Explore", items: [
     { href: "/bots", label: "Bot directory", detail: "Find a specialist for your next review.", icon: "bot" },
     { href: "/prompts", label: "Prompt library", detail: "Open a prompt, then copy it into your assistant.", icon: "library" },
-    { href: "/checks", label: "Review checks", detail: "Read what each check looks for. No account required.", icon: "audit" },
+  ] },
+  { label: "Resources", items: [
     { href: "/resources", label: "Free resources", detail: "Checklists you can run in your own assistant.", icon: "book" },
     { href: "/blog", label: "Blog", detail: "Short notes on reviews and prompt handoff.", icon: "note" },
+    { href: "/checks", label: "Review checks", detail: "Read what each check looks for. No account required.", icon: "audit" },
   ] },
   { label: "Connect", items: [
     { href: "/mcp-config", label: "MCP config", detail: "Set up SkaleAgents in your editor or AI client.", icon: "plug" },

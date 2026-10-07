@@ -63,13 +63,17 @@ test("grouped navigation supports keyboard dismissal, active routes, and mobile"
   await expect(build).toBeFocused();
   await expect(build).toHaveAttribute("aria-expanded", "false");
   await page.setViewportSize({ width: 320, height: 740 });
-  for (const [label, count] of [["Explore", 5], ["Connect", 2]] as const) {
+  for (const [label, count] of [["Explore", 2], ["Resources", 3], ["Connect", 2]] as const) {
     await nav.getByRole("button", { name: label, exact: true }).click();
     await expect(nav.getByRole("link")).toHaveCount(count);
     if (label === "Explore") {
-      await expect(nav.getByRole("link", { name: /Review checks/ })).toHaveAttribute("href", "/checks");
+      await expect(nav.getByRole("link", { name: /Bot directory/ })).toHaveAttribute("href", "/bots");
+      await expect(nav.getByRole("link", { name: /Prompt library/ })).toHaveAttribute("href", "/prompts");
+    }
+    if (label === "Resources") {
       await expect(nav.getByRole("link", { name: /Free resources/ })).toHaveAttribute("href", "/resources");
       await expect(nav.getByRole("link", { name: /^Blog/ })).toHaveAttribute("href", "/blog");
+      await expect(nav.getByRole("link", { name: /Review checks/ })).toHaveAttribute("href", "/checks");
     }
     if (label === "Connect") await expect(nav.getByRole("link", { name: /Pricing/ })).toHaveAttribute("href", "/pricing");
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
