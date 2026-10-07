@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch, BOT_INTEGRATIONS, SPECIALTIES, type Bot, type BotIntegration, type Specialty } from "@/lib/api";
@@ -20,13 +20,10 @@ const SPECIALTY_LABEL: Record<Specialty, string> = {
 
 export function BotDirectory({ manage = false, initialBots, integration }: { manage?: boolean; initialBots?: Bot[]; integration?: BotIntegration }) {
   const pathname = usePathname();
-  const router = useRouter();
   const personalHref = (section: string) => personalDestinationFromPath(pathname, section);
   const [search, setSearch] = useState("");
   const [specialty, setSpecialty] = useState("all");
   const [selectedTool, setSelectedTool] = useState<BotIntegration | "all">("all");
-  const [sort, setSort] = useState<"name" | "newest">("name");
-  const [view, setView] = useState<"table" | "cards">("table");
   const activeTool = integration ?? (selectedTool === "all" ? undefined : selectedTool);
   const userQuery = useQuery(currentUserOptions);
 
@@ -49,10 +46,7 @@ export function BotDirectory({ manage = false, initialBots, integration }: { man
     `${bot.name} ${bot.description} ${bot.specialty} ${(bot.integrations ?? []).join(" ")}`.toLowerCase().includes(search.trim().toLowerCase()),
   );
   const toolLabel = BOT_INTEGRATIONS.find((item) => item.slug === integration)?.label;
-  const listedBots = [...(filteredBots ?? [])].sort((a, b) => {
-    if (sort === "newest") return (b.createdAt ?? "").localeCompare(a.createdAt ?? "");
-    return a.name.localeCompare(b.name);
-  });
+  const listedBots = [...(filteredBots ?? [])].sort((a, b) => a.name.localeCompare(b.name));
 
   if (!manage) {
     return (
@@ -66,12 +60,7 @@ export function BotDirectory({ manage = false, initialBots, integration }: { man
         specialty={specialty}
         setSpecialty={setSpecialty}
         integration={integration}
-        sort={sort}
-        setSort={setSort}
-        view={view}
-        setView={setView}
         toolLabel={toolLabel}
-        onToolChange={(value) => router.push(value === "all" ? "/bots" : `/bots/integrations/${value}`)}
         onClear={() => { setSearch(""); setSpecialty("all"); setSelectedTool("all"); }}
       />
     );
@@ -191,12 +180,7 @@ function CatalogIndex({
   specialty,
   setSpecialty,
   integration,
-  sort,
-  setSort,
-  view,
-  setView,
   toolLabel,
-  onToolChange,
   onClear,
 }: {
   bots?: Bot[];
@@ -208,133 +192,78 @@ function CatalogIndex({
   specialty: string;
   setSpecialty: (value: string) => void;
   integration?: BotIntegration;
-  sort: "name" | "newest";
-  setSort: (value: "name" | "newest") => void;
-  view: "table" | "cards";
-  setView: (value: "table" | "cards") => void;
   toolLabel?: string;
-  onToolChange: (value: BotIntegration | "all") => void;
   onClear: () => void;
 }) {
   return (
-    <main className="directory-index">
-      <p className="directory-explore">
-        <span>Explore</span>
-        <button type="button" aria-pressed={specialty === "all"} onClick={() => setSpecialty("all")}>All</button>
-        {SPECIALTIES.map((item) => (
-          <button key={item} type="button" aria-pressed={specialty === item} onClick={() => setSpecialty(item)}>
-            {SPECIALTY_LABEL[item]}
-          </button>
-        ))}
-      </p>
-      <div className="directory-explore" aria-label="Filter by tool">
-        <span>Popular tools</span>
-        <Link href="/bots" aria-current={integration ? undefined : "page"}>All</Link>
-        {BOT_INTEGRATIONS.map((item) => (
-          <Link key={item.slug} href={`/bots/integrations/${item.slug}`} aria-current={integration === item.slug ? "page" : undefined}>
-            {item.label}
-          </Link>
-        ))}
+    <main className="directory-index space-y-6">
+      <div className="workspace-intro">
+        <h1 className="workspace-heading">{toolLabel ? `${toolLabel} bots` : "The bot directory"}</h1>
+        <p className="mt-2 max-w-xl text-sm text-ink-muted">
+          Review a pasted diff, plan, or thread. Open the prompt in the assistant you already use.
+        </p>
       </div>
 
-      <p className="directory-lead">
-        <Link href="/bots/integrations">Free reviewers for the tools you already use</Link>
-      </p>
-      <h1>{toolLabel ? `${toolLabel} bots` : "The bot directory"}</h1>
-      <p className="directory-sub">Review a pasted diff, plan, or thread. Open the prompt in the assistant you already use.</p>
-
-      <div className="directory-bar">
-        <p>Find a reviewer for the artifact you already have.</p>
-        <Link href="/bots/integrations" className="directory-bar-action">Browse by tool</Link>
-      </div>
-
-      <div className="directory-controls">
-        <label className="directory-search-label">
+      <div className="space-y-3">
+        <label className="block max-w-md">
           <span className="sr-only">Search</span>
-          <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search" />
+          <TextInput type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search reviewers" />
         </label>
-        <select aria-label="Specialty" value={specialty} onChange={(event) => setSpecialty(event.target.value)}>
-          <option value="all">Any specialty</option>
-          {SPECIALTIES.map((item) => <option key={item} value={item}>{SPECIALTY_LABEL[item]}</option>)}
-        </select>
-        <select aria-label="Tool" value={integration ?? "all"} onChange={(event) => onToolChange(event.target.value as BotIntegration | "all")}>
-          <option value="all">Any tool</option>
-          {BOT_INTEGRATIONS.map((item) => <option key={item.slug} value={item.slug}>{item.label}</option>)}
-        </select>
-        <select aria-label="Sort" value={sort} onChange={(event) => setSort(event.target.value as "name" | "newest")}>
-          <option value="name">Name</option>
-          <option value="newest">Newest</option>
-        </select>
-        <div className="directory-view" role="group" aria-label="Layout">
-          <button type="button" aria-pressed={view === "table"} onClick={() => setView("table")}>Table</button>
-          <button type="button" aria-pressed={view === "cards"} onClick={() => setView("cards")}>Cards</button>
+        <div className="flex flex-wrap gap-2" aria-label="Filter by specialty">
+          <button type="button" className="filter-chip" aria-pressed={specialty === "all"} onClick={() => setSpecialty("all")}>All</button>
+          {SPECIALTIES.map((item) => (
+            <button key={item} type="button" className="filter-chip" aria-pressed={specialty === item} onClick={() => setSpecialty(item)}>
+              {SPECIALTY_LABEL[item]}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2" aria-label="Filter by tool">
+          <Link href="/bots" className="filter-chip" aria-current={integration ? undefined : "page"}>All tools</Link>
+          {BOT_INTEGRATIONS.map((item) => (
+            <Link key={item.slug} href={`/bots/integrations/${item.slug}`} className="filter-chip" aria-current={integration === item.slug ? "page" : undefined}>
+              {item.label}
+            </Link>
+          ))}
         </div>
       </div>
 
-      {bots && <p role="status" className="directory-count">{listedBots.length} of {bots.length} bots</p>}
       {pending && <p className="text-sm text-ink-muted">Loading bots…</p>}
       {error && <p className="text-sm text-danger">{error}</p>}
       {bots && bots.length === 0 && <p className="text-sm text-ink-muted">No bots published yet.</p>}
       {Boolean(bots?.length) && listedBots.length === 0 && (
-        <div className="rounded-xl border border-line p-6">
+        <div className="rounded-xl border border-line bg-canvas-elevated p-6">
           <h2 className="font-semibold">No bots match that search</h2>
           <p className="my-2 text-sm text-ink-muted">Try a broader task, another specialty, or another tool.</p>
           <Button variant="secondary" onClick={onClear}>Clear filters</Button>
         </div>
       )}
 
-      {view === "table" ? <CatalogTable bots={listedBots} /> : <CatalogCards bots={listedBots} />}
+      {listedBots.length > 0 && <CatalogTable bots={listedBots} />}
     </main>
   );
 }
 
 function CatalogTable({ bots }: { bots: Bot[] }) {
   return (
-    <div className="directory-table-wrap">
-      <table className="directory-table">
-        <thead>
-          <tr>
-            <th scope="col">Bot</th>
-            <th scope="col">Specialty</th>
-            <th scope="col">Tools</th>
-            <th scope="col"><span className="sr-only">Open</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          {bots.map((bot) => (
-            <tr key={bot.id}>
-              <td>
-                <Link href={`/bots/${bot.id}`} className="directory-bot-name">{bot.name}</Link>
-                <p className="directory-bot-desc">{bot.description || "No description"}</p>
-              </td>
-              <td><SpecialtyPill specialty={bot.specialty} /></td>
-              <td><ToolNames slugs={bot.integrations} /></td>
-              <td className="directory-open-cell">
-                <Link href={`/bots/${bot.id}`} className="directory-open">Open</Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function CatalogCards({ bots }: { bots: Bot[] }) {
-  return (
-    <ul className="directory-cards">
+    <div className="directory-rows" role="table" aria-label="Reviewers">
+      <div className="directory-row directory-row-head" role="row">
+        <span role="columnheader">Reviewer</span>
+        <span role="columnheader">Specialty</span>
+        <span role="columnheader">Tools</span>
+        <span role="columnheader"><span className="sr-only">Open</span></span>
+      </div>
       {bots.map((bot) => (
-        <li key={bot.id}>
-          <Link href={`/bots/${bot.id}`} className="directory-bot-name">{bot.name}</Link>
-          <p className="directory-bot-desc">{bot.description || "No description"}</p>
-          <div className="directory-card-meta">
-            <SpecialtyPill specialty={bot.specialty} />
-            <ToolNames slugs={bot.integrations} />
+        <div className="directory-row" role="row" key={bot.id}>
+          <div className="directory-name" role="cell">
+            <Link href={`/bots/${bot.id}`} className="directory-bot-name">{bot.name}</Link>
+            <p className="directory-bot-desc">{bot.description || "No description"}</p>
           </div>
+          <div className="directory-specialty" role="cell"><SpecialtyPill specialty={bot.specialty} /></div>
+          <div className="directory-tools-cell" role="cell"><ToolNames slugs={bot.integrations} /></div>
           <Link href={`/bots/${bot.id}`} className="directory-open">Open</Link>
-        </li>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
 
@@ -346,7 +275,7 @@ function SpecialtyPill({ specialty }: { specialty: string }) {
 
 function ToolNames({ slugs }: { slugs?: BotIntegration[] }) {
   const tools = slugs ?? [];
-  if (!tools.length) return <span className="directory-muted">None</span>;
+  if (!tools.length) return null;
   return (
     <ul className="directory-tools">
       {tools.map((slug) => {
