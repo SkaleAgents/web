@@ -5,7 +5,7 @@ export const goals = [
     description: "Start with instructions you can use today.",
     question: "What would help you get going?",
     options: [
-      { label: "Find a specialist bot", title: "Start in the bot directory.", description: "Read a specialist's instructions, then open them in your preferred assistant or copy the prompt.", note: "Browse public bots without signing in.", href: "/bots", cta: "Explore the directory" },
+      { label: "Find a specialist bot", title: "Start in the bot directory.", description: "Read a specialist's instructions, then open them in your preferred assistant or copy the prompt.", note: "Browse public bots without signing in.", href: "/bot-directory", cta: "Explore the directory" },
       { label: "Grab a ready-made prompt", title: "Start with a community prompt.", description: "Pick a prompt for the task in front of you and adapt it to your project's context.", note: "Read community prompts without signing in.", href: "/prompts", cta: "Open the prompt library" },
     ],
   },

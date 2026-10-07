@@ -67,7 +67,7 @@ test("grouped navigation supports keyboard dismissal, active routes, and mobile"
     await nav.getByRole("button", { name: label, exact: true }).click();
     await expect(nav.getByRole("link")).toHaveCount(count);
     if (label === "Explore") {
-      await expect(nav.getByRole("link", { name: /Bot directory/ })).toHaveAttribute("href", "/bots");
+      await expect(nav.getByRole("link", { name: /Bot directory/ })).toHaveAttribute("href", "/bot-directory");
       await expect(nav.getByRole("link", { name: /Prompt library/ })).toHaveAttribute("href", "/prompts");
     }
     if (label === "Resources") {
@@ -90,7 +90,7 @@ test("directory combines search and specialty filters and recovers from no match
     { id: "security", name: "Network reviewer", description: "Terraform access", specialty: "devsecops", visibility: "public", status: "published" },
     { id: "reliability", name: "Release reviewer", description: "Kubernetes health checks", specialty: "sre", visibility: "public", status: "published" },
   ] } }));
-  await page.goto("/bots");
+  await page.goto("/bot-directory");
   await page.getByRole("searchbox").fill("reviewer");
   await page.getByRole("button", { name: "Go", exact: true }).click();
   await page.getByRole("button", { name: /^Specialty/ }).click();

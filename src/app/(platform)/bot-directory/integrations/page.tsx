@@ -8,7 +8,7 @@ export const revalidate = 300;
 export const metadata: Metadata = {
   title: "Bots by tool | SkaleAgents",
   description: "Free DevOps and security reviewers grouped by GitHub, Slack, Linear, Terraform, AWS, and Kubernetes.",
-  alternates: { canonical: "/bots/integrations" },
+  alternates: { canonical: "/bot-directory/integrations" },
 };
 
 export default async function BotIntegrationsPage() {
@@ -27,7 +27,7 @@ export default async function BotIntegrationsPage() {
       <ul className="grid gap-4 sm:grid-cols-2">
         {BOT_INTEGRATIONS.map((item) => (
           <li key={item.slug} className="rounded-xl border border-line bg-canvas-elevated p-5">
-            <Link href={`/bots/integrations/${item.slug}`} className="text-lg font-medium text-ink hover:underline">
+            <Link href={`/bot-directory/integrations/${item.slug}`} className="text-lg font-medium text-ink hover:underline">
               {item.label}
             </Link>
             <p className="mt-1 text-sm text-ink-muted">
@@ -37,7 +37,7 @@ export default async function BotIntegrationsPage() {
         ))}
       </ul>
       <p>
-        <Link href="/bots" className="text-sm font-semibold text-ink underline">All bots</Link>
+        <Link href="/bot-directory" className="text-sm font-semibold text-ink underline">All bots</Link>
       </p>
     </main>
   );

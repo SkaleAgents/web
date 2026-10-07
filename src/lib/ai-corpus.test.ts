@@ -61,15 +61,15 @@ it("renders public markdown and refuses account paths and prompt bodies", () => 
   expect(markdownDocument("/login")).toBeNull();
   expect(markdownDocument("/no-such-page")).toBeNull();
 
-  const bots = markdownDocument("/bots", {
-    directory: [{ name: "Queue watcher", href: "/bots/queue-watcher", detail: "Looks at failed jobs." }],
+  const bots = markdownDocument("/bot-directory", {
+    directory: [{ name: "Queue watcher", href: "/bot-directory/queue-watcher", detail: "Looks at failed jobs." }],
   });
   expect(bots).toContain("Queue watcher");
   expect(bots).not.toContain("promptBody");
   expect(bots).toContain("does not include instruction text");
   expect(bots).not.toContain("Restart the worker");
 
-  const botPage = markdownDocument("/bots/queue-watcher", {
+  const botPage = markdownDocument("/bot-directory/queue-watcher", {
     detail: {
       kind: "bot",
       name: "Queue watcher",
@@ -80,7 +80,7 @@ it("renders public markdown and refuses account paths and prompt bodies", () => 
   });
   expect(botPage).toContain("# Queue watcher");
   expect(botPage).toContain("Restart the worker after you read the log.");
-  expect(markdownDocument("/bots/missing", { detail: { kind: "missing" } })).toBeNull();
+  expect(markdownDocument("/bot-directory/missing", { detail: { kind: "missing" } })).toBeNull();
 
   const prompts = markdownDocument("/prompts", {
     directory: [{ name: "Deploy note", href: "/prompts/deploy-note.md", detail: "deploy" }],
@@ -91,7 +91,7 @@ it("renders public markdown and refuses account paths and prompt bodies", () => 
     detail: { kind: "prompt", title: "Deploy note", tags: ["deploy"], body: "Paste the service name." },
   });
   expect(promptPage).toContain("Paste the service name.");
-  expect(markdownInternalPath("/bots/01a05d3a-1d0e-705d-a273-058a913feb38.md")).toBe("/md/public/bots/01a05d3a-1d0e-705d-a273-058a913feb38");
+  expect(markdownInternalPath("/bot-directory/01a05d3a-1d0e-705d-a273-058a913feb38.md")).toBe("/md/public/bot-directory/01a05d3a-1d0e-705d-a273-058a913feb38");
 });
 
 it("does not invent a price when the plan catalog is missing", () => {

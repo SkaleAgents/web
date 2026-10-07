@@ -7,9 +7,9 @@ import { publicResourcePath, publicResources } from "@/lib/public-resources";
 
 const publicPaths = [
   "/",
-  "/bots",
-  "/bots/integrations",
-  ...BOT_INTEGRATIONS.map((item) => `/bots/integrations/${item.slug}`),
+  "/bot-directory",
+  "/bot-directory/integrations",
+  ...BOT_INTEGRATIONS.map((item) => `/bot-directory/integrations/${item.slug}`),
   "/prompts",
   "/checks",
   ...publicChecks.map((check) => publicCheckPath(check)),
@@ -30,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const paths = [
     ...publicPaths,
     ...publishedPosts().map((post) => publicPostPath(post)),
-    ...(bots ?? []).map((bot) => `/bots/${bot.id}`),
+    ...(bots ?? []).map((bot) => `/bot-directory/${bot.id}`),
     ...(prompts ?? []).map((prompt) => `/prompts/${prompt.id}`),
   ];
   return paths.map((path) => ({

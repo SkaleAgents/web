@@ -24,10 +24,10 @@ async function extrasFor(path: string): Promise<{ plans?: PublicPlan[] | null; d
     const catalog = await loadJson<{ data: PublicPlan[] }>("/api/organization-plans");
     return { plans: catalog?.data ?? null };
   }
-  if (path === "/bots") {
+  if (path === "/bot-directory") {
     const bots = await loadPublicBots();
     return {
-      directory: bots?.map((bot) => ({ name: bot.name, href: `/bots/${bot.id}.md`, detail: `${bot.specialty}. ${bot.description}` })) ?? null,
+      directory: bots?.map((bot) => ({ name: bot.name, href: `/bot-directory/${bot.id}.md`, detail: `${bot.specialty}. ${bot.description}` })) ?? null,
     };
   }
   if (path === "/prompts") {
@@ -40,7 +40,7 @@ async function extrasFor(path: string): Promise<{ plans?: PublicPlan[] | null; d
       })) ?? null,
     };
   }
-  const botId = singlePublicId(path, "/bots/");
+  const botId = singlePublicId(path, "/bot-directory/");
   if (botId) {
     const bot = await loadPublicBot(botId);
     return {

@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title: `${bot.name} | SkaleAgents bot`,
     description: bot.description || "Specialist instructions you can read without an account.",
-    alternates: { canonical: `/bots/${bot.id}`, types: { "text/markdown": markdownPath(`/bots/${bot.id}`) } },
+    alternates: { canonical: `/bot-directory/${bot.id}`, types: { "text/markdown": markdownPath(`/bot-directory/${bot.id}`) } },
   };
 }
 

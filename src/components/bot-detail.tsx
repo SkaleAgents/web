@@ -20,7 +20,7 @@ export function BotDetail({ manage = false, initialBot }: { manage?: boolean; in
     enabled: Boolean(id) && (!manage || Boolean(user.data)),
     initialData: !manage && initialBot?.id === id ? initialBot : undefined,
   });
-  const directory = manage ? personalDestinationFromPath(pathname, "bots") : "/bots";
+  const directory = manage ? personalDestinationFromPath(pathname, "bots") : "/bot-directory";
 
   if (botQuery.isPending) {
     return <p className="text-sm text-ink-muted">Loading bot…</p>;
@@ -92,7 +92,7 @@ export function BotDetail({ manage = false, initialBot }: { manage?: boolean; in
             const label = BOT_INTEGRATIONS.find((item) => item.slug === slug)?.label ?? slug;
             return (
               <li key={slug}>
-                <Link href={`/bots/integrations/${slug}`} className="filter-chip">{label}</Link>
+                <Link href={`/bot-directory/integrations/${slug}`} className="filter-chip">{label}</Link>
               </li>
             );
           })}

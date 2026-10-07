@@ -41,7 +41,7 @@ export function BotDirectory({ manage = false, initialBots, integration }: { man
   });
 
   const bots = botsQuery.data?.filter(bot => manage ? bot.ownerUserId === userQuery.data?.id : bot.visibility === "public" && bot.status === "published");
-  const basePath = manage ? personalHref("bots") : "/bots";
+  const basePath = manage ? personalHref("bots") : "/bot-directory";
   const specialties = [...new Set(bots?.map((bot) => bot.specialty) ?? [])].sort();
   const filteredBots = bots?.filter((bot) => {
     const haystack = `${bot.name} ${bot.description} ${bot.specialty} ${(bot.integrations ?? []).join(" ")}`.toLowerCase();
@@ -108,13 +108,13 @@ export function BotDirectory({ manage = false, initialBots, integration }: { man
             </>
           ) : (
             <>
-              <Link href="/bots" className="filter-chip" aria-current={integration ? undefined : "page"}>All tools</Link>
+              <Link href="/bot-directory" className="filter-chip" aria-current={integration ? undefined : "page"}>All tools</Link>
               {BOT_INTEGRATIONS.map((item) => (
-                <Link key={item.slug} href={`/bots/integrations/${item.slug}`} className="filter-chip" aria-current={integration === item.slug ? "page" : undefined}>
+                <Link key={item.slug} href={`/bot-directory/integrations/${item.slug}`} className="filter-chip" aria-current={integration === item.slug ? "page" : undefined}>
                   {item.label}
                 </Link>
               ))}
-              <Link href="/bots/integrations" className="filter-chip">Browse by tool</Link>
+              <Link href="/bot-directory/integrations" className="filter-chip">Browse by tool</Link>
             </>
           )}
         </div>
@@ -381,12 +381,12 @@ function CatalogTable({ bots }: { bots: Bot[] }) {
       {bots.map((bot) => (
         <div className="directory-row" role="row" key={bot.id}>
           <div className="directory-name" role="cell">
-            <Link href={`/bots/${bot.id}`} className="directory-bot-name">{bot.name}</Link>
+            <Link href={`/bot-directory/${bot.id}`} className="directory-bot-name">{bot.name}</Link>
             <p className="directory-bot-desc">{bot.description || "No description"}</p>
           </div>
           <div className="directory-specialty" role="cell"><SpecialtyPill specialty={bot.specialty} /></div>
           <div className="directory-tools-cell" role="cell"><ToolNames slugs={bot.integrations} /></div>
-          <Link href={`/bots/${bot.id}`} className="directory-open">Open</Link>
+          <Link href={`/bot-directory/${bot.id}`} className="directory-open">Open</Link>
         </div>
       ))}
     </div>
@@ -408,7 +408,7 @@ function ToolNames({ slugs }: { slugs?: BotIntegration[] }) {
         const label = BOT_INTEGRATIONS.find((item) => item.slug === slug)?.label ?? slug;
         return (
           <li key={slug}>
-            <Link href={`/bots/integrations/${slug}`} className="directory-tool">
+            <Link href={`/bot-directory/integrations/${slug}`} className="directory-tool">
               <ToolLogo slug={slug} />
               <span>{label}</span>
             </Link>
@@ -427,7 +427,7 @@ function IntegrationLinks({ slugs }: { slugs?: BotIntegration[] }) {
         const label = BOT_INTEGRATIONS.find((item) => item.slug === slug)?.label ?? slug;
         return (
           <li key={slug}>
-            <Link href={`/bots/integrations/${slug}`} className="filter-chip">{label}</Link>
+            <Link href={`/bot-directory/integrations/${slug}`} className="filter-chip">{label}</Link>
           </li>
         );
       })}

@@ -60,7 +60,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
         <p>Prefer to look around first?</p>
         <div className="mt-2 flex flex-wrap justify-center gap-x-5 gap-y-2">
           <Link href="/" className="hover:text-ink hover:underline underline-offset-4">Back to public site</Link>
-          <Link href="/bots" className="hover:text-ink hover:underline underline-offset-4">Browse the directory</Link>
+          <Link href="/bot-directory" className="hover:text-ink hover:underline underline-offset-4">Browse the directory</Link>
           <Link href="/terms" className="hover:text-ink hover:underline underline-offset-4">Terms of Service</Link>
           <Link href="/privacy" className="hover:text-ink hover:underline underline-offset-4">Privacy Policy</Link>
         </div>

@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${label} security and reliability prompts | SkaleAgents`,
     description: `Free ${label} reviewer prompts. Paste the artifact, then open the prompt in Grok, Claude, or Codex.`,
-    alternates: { canonical: `/bots/integrations/${slug}` },
+    alternates: { canonical: `/bot-directory/integrations/${slug}` },
   };
 }
 

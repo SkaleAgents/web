@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 const groups = [
   { label: "Explore", items: [
-    { href: "/bots", label: "Bot directory", detail: "Find a specialist for your next review.", icon: "bot" },
+    { href: "/bot-directory", label: "Bot directory", detail: "Find a specialist for your next review.", icon: "bot" },
     { href: "/prompts", label: "Prompt library", detail: "Open a prompt, then copy it into your assistant.", icon: "library" },
   ] },
   { label: "Resources", items: [

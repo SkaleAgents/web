@@ -18,7 +18,7 @@ async function expectFocusedAccountPage(page: Page) {
   await expect(page.getByText("Connecting an MCP client?", { exact: true })).toHaveCount(0);
   const footer = page.getByRole("contentinfo", { name: "Account page links" });
   await expect(footer.getByRole("link", { name: "Back to public site" })).toHaveAttribute("href", "/");
-  await expect(footer.getByRole("link", { name: "Browse the directory" })).toHaveAttribute("href", "/bots");
+  await expect(footer.getByRole("link", { name: "Browse the directory" })).toHaveAttribute("href", "/bot-directory");
   await expect(footer.getByLabel("Color theme")).toBeVisible();
 }
 

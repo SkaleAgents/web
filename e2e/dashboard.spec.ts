@@ -73,7 +73,7 @@ test("public catalogs omit credentials and hide private resources even for a sig
       { id: "private", title: "Private prompt", body: "Secret", tags: [], ownerUserId: owner.id },
     ] } });
   });
-  await page.goto("/bots");
+  await page.goto("/bot-directory");
   await expect(page.getByRole("link", { name: "Public reviewer" })).toBeVisible();
   await expect(page.getByText("Private draft")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Edit in Studio" })).toHaveCount(0);
@@ -154,7 +154,7 @@ test("sign-in is a focused entry point with a way back to the public site", asyn
   await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
   await expect(page.getByRole("banner")).toHaveCount(0);
   const footer = page.getByRole("contentinfo", { name: "Account page links" });
-  await expect(footer.getByRole("link", { name: "Browse the directory" })).toHaveAttribute("href", "/bots");
+  await expect(footer.getByRole("link", { name: "Browse the directory" })).toHaveAttribute("href", "/bot-directory");
   await footer.getByRole("link", { name: "Back to public site" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("navigation", { name: "Main navigation" })).toBeVisible();

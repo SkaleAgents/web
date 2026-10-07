@@ -21,7 +21,7 @@ export const homeFaqs: HomeFaq[] = [
   {
     question: "Can I try it without an account?",
     answerText: "Yes. Browse the public bot directory, community prompts, free resources, the blog, and review checks without signing in. Google sign-in is needed to create or manage your own bots and prompts, authorize an MCP connection, and use account-owned audit workflows.",
-    answer: <>Yes. Browse the <Link href="/bots">public bot directory</Link>, <Link href="/prompts">community prompts</Link>, <Link href="/resources">free resources</Link>, the <Link href="/blog">blog</Link>, and <Link href="/checks">review checks</Link> without signing in. Google sign-in is needed to create or manage your own bots and prompts, authorize an MCP connection, and use account-owned audit workflows.</>,
+    answer: <>Yes. Browse the <Link href="/bot-directory">public bot directory</Link>, <Link href="/prompts">community prompts</Link>, <Link href="/resources">free resources</Link>, the <Link href="/blog">blog</Link>, and <Link href="/checks">review checks</Link> without signing in. Google sign-in is needed to create or manage your own bots and prompts, authorize an MCP connection, and use account-owned audit workflows.</>,
   },
   {
     question: "What does it cost?",
