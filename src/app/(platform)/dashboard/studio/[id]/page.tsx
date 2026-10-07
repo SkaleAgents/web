@@ -12,6 +12,7 @@ import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 import {
   apiFetch,
   ensureCsrfCookie,
+  BOT_INTEGRATIONS,
   SPECIALTIES,
   type Bot,
 } from "@/lib/api";
@@ -29,6 +30,7 @@ const schema = z.object({
   ]),
   promptBody: z.string().min(1, "Prompt required"),
   visibility: z.enum(["public", "private"]),
+  integrations: z.array(z.enum(["github", "slack", "linear", "terraform", "aws", "kubernetes"])).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -58,6 +60,7 @@ export default function StudioEditPage() {
       specialty: "general",
       promptBody: "",
       visibility: "private",
+      integrations: [],
     },
   });
 
@@ -69,6 +72,7 @@ export default function StudioEditPage() {
         specialty: bot.specialty,
         promptBody: bot.promptBody,
         visibility: bot.visibility,
+        integrations: bot.integrations ?? [],
       });
     }
   }, [bot, form]);
@@ -78,7 +82,7 @@ export default function StudioEditPage() {
       await ensureCsrfCookie();
       return apiFetch<Bot>(`/api/bots/${id}`, {
         method: "PATCH",
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, integrations: values.integrations ?? [] }),
       });
     },
     onSuccess: (updated) => {
@@ -99,7 +103,7 @@ export default function StudioEditPage() {
       await ensureCsrfCookie();
       await apiFetch<Bot>(`/api/bots/${id}`, {
         method: "PATCH",
-        body: JSON.stringify(parsed.data),
+        body: JSON.stringify({ ...parsed.data, integrations: parsed.data.integrations ?? [] }),
       });
       return apiFetch<Bot>(`/api/bots/${id}/publish`, {
         method: "POST",
@@ -200,6 +204,17 @@ export default function StudioEditPage() {
             </span>
           )}
         </label>
+        <fieldset className="space-y-2 text-sm">
+          <legend className="font-semibold">Tools</legend>
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {BOT_INTEGRATIONS.map((item) => (
+              <label key={item.slug} className="flex items-center gap-2">
+                <input type="checkbox" value={item.slug} {...form.register("integrations")} />
+                {item.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <label className="block space-y-1 text-sm">
           <span>Visibility</span>
           <select

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SPECIALTIES } from "./api";
+import { BOT_INTEGRATION_SLUGS, SPECIALTIES } from "./api";
 
 describe("SPECIALTIES", () => {
   it("matches OpenAPI specialty enum", () => {
@@ -10,6 +10,19 @@ describe("SPECIALTIES", () => {
       "mlops",
       "scaling",
       "general",
+    ]);
+  });
+});
+
+describe("BOT_INTEGRATION_SLUGS", () => {
+  it("matches the OpenAPI integration enum", () => {
+    expect(BOT_INTEGRATION_SLUGS).toEqual([
+      "github",
+      "slack",
+      "linear",
+      "terraform",
+      "aws",
+      "kubernetes",
     ]);
   });
 });

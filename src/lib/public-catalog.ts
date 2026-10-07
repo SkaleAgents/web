@@ -1,7 +1,17 @@
-import { API_URL, type Bot, type Prompt } from "@/lib/api";
+import { API_URL, BOT_INTEGRATIONS, type Bot, type BotIntegration, type Prompt } from "@/lib/api";
 
 export function publishedPublicBots(bots: Bot[]): Bot[] {
   return bots.filter((bot) => bot.visibility === "public" && bot.status === "published");
+}
+
+export function countBotsByIntegration(bots: Bot[]): Record<BotIntegration, number> {
+  const counts = Object.fromEntries(BOT_INTEGRATIONS.map((item) => [item.slug, 0])) as Record<BotIntegration, number>;
+  for (const bot of publishedPublicBots(bots)) {
+    for (const slug of bot.integrations ?? []) {
+      if (slug in counts) counts[slug] += 1;
+    }
+  }
+  return counts;
 }
 
 export function communityPrompts(prompts: Prompt[]): Prompt[] {

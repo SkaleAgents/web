@@ -12,6 +12,7 @@ import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 import {
   apiFetch,
   ensureCsrfCookie,
+  BOT_INTEGRATIONS,
   SPECIALTIES,
   type Bot,
 } from "@/lib/api";
@@ -36,6 +37,7 @@ const schema = z.object({
   ]),
   promptBody: z.string().min(1, "Prompt required"),
   visibility: z.enum(["public", "private"]),
+  integrations: z.array(z.enum(["github", "slack", "linear", "terraform", "aws", "kubernetes"])).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -53,6 +55,7 @@ export default function StudioCreatePage() {
       specialty: "general",
       promptBody: "",
       visibility: "private",
+      integrations: [],
     },
   });
 
@@ -61,7 +64,7 @@ export default function StudioCreatePage() {
       await ensureCsrfCookie();
       return apiFetch<Bot>("/api/bots", {
         method: "POST",
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, integrations: values.integrations ?? [] }),
       });
     },
     onSuccess: (bot) => {
@@ -131,6 +134,18 @@ export default function StudioCreatePage() {
             </span>
           )}
         </label>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-semibold">Tools</legend>
+          <p className="text-sm text-ink-muted">Choose the tools this reviewer is for. Leave them empty if it is not tied to one tool.</p>
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {BOT_INTEGRATIONS.map((item) => (
+              <label key={item.slug} className="flex items-center gap-2 text-sm">
+                <input type="checkbox" value={item.slug} {...form.register("integrations")} />
+                {item.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <label className="block space-y-1">
           <FieldLabel>Visibility</FieldLabel>
           <Select {...form.register("visibility")}>

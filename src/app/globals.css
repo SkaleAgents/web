@@ -125,7 +125,8 @@ body:has(.retention-notice-dialog[open]) {
 .workspace-intro { padding-bottom: 1.5rem; border-bottom: 1px solid var(--line); }
 .workspace-kicker { margin-bottom: 0.75rem; font-family: var(--font-plex-mono), monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted); }
 .filter-chip { border: 1px solid var(--line); border-radius: 999px; padding: 0.45rem 0.85rem; font-size: 0.8rem; color: var(--ink-muted); cursor: pointer; }
-.filter-chip:hover, .filter-chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
+a.filter-chip { display: inline-flex; text-decoration: none; }
+.filter-chip:hover, .filter-chip[aria-pressed="true"], .filter-chip[aria-current="page"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
 @media (max-width: 639px) {
   .product-nav { order: 3; width: 100%; justify-content: space-between; }
   .product-nav-group { position: static; }

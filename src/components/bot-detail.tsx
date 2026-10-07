@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { BotPromptActions } from "@/components/bot-prompt-actions";
-import { apiFetch, type Bot } from "@/lib/api";
+import { apiFetch, BOT_INTEGRATIONS, type Bot } from "@/lib/api";
 import { LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
@@ -86,6 +86,18 @@ export function BotDetail({ manage = false, initialBot }: { manage?: boolean; in
         <span>{bot.visibility}</span>
         <span>{bot.status}</span>
       </div>
+      {(bot.integrations ?? []).length > 0 && (
+        <ul className="flex flex-wrap gap-2" aria-label="Tools">
+          {(bot.integrations ?? []).map((slug) => {
+            const label = BOT_INTEGRATIONS.find((item) => item.slug === slug)?.label ?? slug;
+            return (
+              <li key={slug}>
+                <Link href={`/bots/integrations/${slug}`} className="filter-chip">{label}</Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       <section className="rounded-[10px] border border-line bg-canvas-elevated p-6">
         <div>
