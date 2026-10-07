@@ -44,6 +44,8 @@ Read it out loud. If a sentence sounds like a launch post, cut it or make it a f
 
 ## Before you merge
 
+Run the [grill blog post](../.cursor/skills/grill-blog-post/SKILL.md) skill on the draft. Check the claims against the shipped check or checklist first, then take out the model voice. Do not add sentences to reach 400 words.
+
 - The slug is new.
 - The title and description are not copied from another post.
 - The date falls in a week that does not already have a post, unless you are adding an extra one on purpose.
