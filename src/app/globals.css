@@ -154,7 +154,8 @@ html.dark .directory-tool-logo-terraform { color: #a067da; }
 .directory-bot-name { color: var(--ink); font-weight: 650; text-decoration: none; }
 .directory-bot-name:hover { text-decoration: underline; }
 .directory-bot-desc { display: -webkit-box; margin-top: 0.2rem; overflow: hidden; color: var(--ink-muted); font-size: 0.875rem; line-height: 1.4; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-.directory-pill { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; background: var(--canvas); padding: 0.15rem 0.55rem; color: var(--ink-muted); font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+.directory-pill { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; background: var(--canvas); padding: 0.15rem 0.55rem; color: var(--ink-muted); font-size: 0.75rem; font-weight: 600; white-space: nowrap; text-decoration: none; }
+a.directory-pill:hover { color: var(--ink); text-decoration: underline; }
 .directory-tools { display: flex; flex-wrap: wrap; gap: 0.4rem 0.85rem; margin: 0; padding: 0; list-style: none; }
 .directory-tool { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--ink); font-size: 0.875rem; text-decoration: none; white-space: nowrap; }
 .directory-tool:hover span { text-decoration: underline; }

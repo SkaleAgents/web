@@ -388,6 +388,10 @@ export const SPECIALTIES: Specialty[] = [
   "general",
 ];
 
+export function isSpecialty(value: string): value is Specialty {
+  return (SPECIALTIES as readonly string[]).includes(value);
+}
+
 export type Prompt = {
   id: string;
   ownerUserId: string | null;

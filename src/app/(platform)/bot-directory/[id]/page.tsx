@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { BotDetail } from "@/components/bot-detail";
 import { markdownPath } from "@/lib/ai-corpus";
-import { loadPublicBot } from "@/lib/public-catalog";
+import { loadPublicBot, loadPublicBots } from "@/lib/public-catalog";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const bot = await loadPublicBot((await params).id);
@@ -15,6 +15,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function BotPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const initialBot = await loadPublicBot(id);
-  return <BotDetail initialBot={initialBot} />;
+  const [initialBot, initialBots] = await Promise.all([loadPublicBot(id), loadPublicBots()]);
+  return <BotDetail initialBot={initialBot} initialBots={initialBots} />;
 }

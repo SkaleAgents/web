@@ -164,6 +164,15 @@ test("a visitor filters bots by tool and opens the assistant actions", async ({ 
   await expect(menu.getByRole("menuitem", { name: /^Grok / })).toBeVisible();
   await expect(menu.getByRole("menuitem", { name: /^Grokbot/ })).toBeVisible();
   await expect(menu.getByRole("menuitem", { name: "Copy plain text" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("heading", { name: "How to use it" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "More reviewers" })).toBeVisible();
+  await expect(page.getByRole("link", { name: slack.name })).toBeVisible();
+  await page.getByRole("link", { name: "DevOps" }).first().click();
+  await expect(page).toHaveURL(/\/bot-directory\/specialties\/devops$/);
+  await expect(page.getByRole("heading", { name: "DevOps reviewers" })).toBeVisible();
+  await expect(page.getByRole("link", { name: github.name })).toBeVisible();
+  await expect(page.getByRole("link", { name: slack.name })).toHaveCount(0);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/bot-directory");
