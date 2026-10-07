@@ -159,6 +159,12 @@ html.dark .directory-tool-logo-terraform { color: #a067da; }
 .directory-tool { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--ink); font-size: 0.875rem; text-decoration: none; white-space: nowrap; }
 .directory-tool:hover span { text-decoration: underline; }
 .directory-open { justify-self: end; color: var(--ink); font-size: 0.875rem; font-weight: 650; text-decoration: none; }
+.directory-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; }
+.directory-pages { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; }
+.directory-page { min-width: 2rem; height: 2rem; border: 1px solid transparent; border-radius: 8px; background: transparent; padding: 0 0.55rem; color: var(--ink); font: inherit; font-size: 0.875rem; font-weight: 650; cursor: pointer; }
+.directory-page[aria-current="page"] { border-color: var(--line); background: var(--canvas-elevated); }
+.directory-page:disabled { color: var(--ink-muted); cursor: default; }
+.directory-page-gap { padding-inline: 0.2rem; color: var(--ink-muted); }
 .directory-open:hover { color: var(--accent); }
 .directory-index a:focus-visible, .directory-index button:focus-visible, .directory-index input:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 @media (max-width: 760px) {
