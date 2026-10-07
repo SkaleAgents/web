@@ -78,7 +78,7 @@ test.describe("Phase 1 page smokes", () => {
     for (const path of ["/", "/bots", "/prompts", "/mcp-config"]) {
       await page.goto(path);
       await expect(page.getByRole("navigation")).toBeVisible();
-      await expect(page.getByRole("navigation").getByRole("button")).toHaveCount(2);
+      await expect(page.getByRole("navigation").getByRole("button")).toHaveCount(3);
       await expect(page.getByRole("navigation").getByRole("link", { name: "Home", exact: true })).toHaveCount(0);
       await expect(page.getByRole("link", { name: "SkaleAgents home" })).toHaveAttribute("href", "/");
       await expect(page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true })).toBeVisible();
