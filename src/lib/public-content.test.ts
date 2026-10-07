@@ -8,14 +8,27 @@ it("publishes free resources and blog posts in the sitemap, llms.txt, and markdo
   expect(new Set(publicResources.map((resource) => resource.slug)).size).toBe(3);
   expect(new Set(publicPosts.map((post) => post.slug)).size).toBe(8);
   expect(publishedPosts(new Date("2026-10-07T12:00:00+06:00"))).toHaveLength(4);
-  expect(publishedPosts(new Date("2026-11-09T09:00:00+06:00"))).toHaveLength(8);
+  expect(publishedPosts(new Date("2026-11-09T09:00:00+06:00")).some((post) => post.slug === "pull-request-target-checks-out-the-pr")).toBe(false);
+  const clocks: string[] = [];
   for (const post of publicPosts) {
     if (!post.publishAt) continue;
-    expect(post.publishAt).toBe(`${post.date}T09:00:00+06:00`);
+    const match = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2}):00\+06:00$/.exec(post.publishAt);
+    expect(match?.[1]).toBe(post.date);
+    const minutes = Number(match?.[2]) * 60 + Number(match?.[3]);
+    expect(minutes).toBeGreaterThanOrEqual(9 * 60 + 10);
+    expect(minutes).toBeLessThanOrEqual(11 * 60);
     expect(new Date(post.publishAt).getUTCDay()).toBe(1);
+    clocks.push(post.publishAt.slice(11, 16));
+    const opens = new Date(post.publishAt);
+    expect(isPostPublished(post, new Date(opens.getTime() - 1000))).toBe(false);
+    expect(isPostPublished(post, opens)).toBe(true);
   }
-  const beforeMemoryLimit = new Date("2026-10-19T08:59:59+06:00");
-  const memoryLimitOpens = new Date("2026-10-19T09:00:00+06:00");
+  expect(new Set(clocks).size).toBe(clocks.length);
+  const latest = new Date(Math.max(...publicPosts.flatMap((post) => post.publishAt ? [Date.parse(post.publishAt)] : [])));
+  expect(publishedPosts(latest)).toHaveLength(8);
+  const memoryLimit = publicPosts.find((post) => post.slug === "set-a-memory-limit");
+  const memoryLimitOpens = new Date(memoryLimit?.publishAt ?? "");
+  const beforeMemoryLimit = new Date(memoryLimitOpens.getTime() - 1000);
   expect(postMarkdown("set-a-memory-limit", beforeMemoryLimit)).toBeNull();
   expect(blogIndexMarkdown(beforeMemoryLimit)).not.toContain("set-a-memory-limit");
   expect(postMarkdown("set-a-memory-limit", memoryLimitOpens)).toContain("mem_limit: 0");
