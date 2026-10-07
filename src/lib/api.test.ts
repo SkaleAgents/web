@@ -59,7 +59,7 @@ describe("buildAssistantPromptUrl", () => {
       "Claude",
       "ChatGPT",
       "Grok",
-      "SuperGrok",
+      "Grokbot",
       "Codex",
       "Perplexity",
       "Gemini",

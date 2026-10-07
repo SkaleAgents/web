@@ -29,7 +29,7 @@ describe("prompt copy text", () => {
 });
 
 describe("assistant handoff", () => {
-  it("lists Claude, ChatGPT, Grok, SuperGrok, Codex, Perplexity, and Gemini", () => {
+  it("lists Claude, ChatGPT, Grok, Grokbot, Codex, Perplexity, and Gemini", () => {
     expect(ASSISTANT_OPTIONS.map((option) => option.id)).toEqual([
       "claude",
       "chatgpt",
@@ -41,7 +41,7 @@ describe("assistant handoff", () => {
     ]);
   });
 
-  it("prefills Claude, ChatGPT, Grok, SuperGrok, and Perplexity", () => {
+  it("prefills Claude, ChatGPT, Grok, Grokbot, and Perplexity", () => {
     for (const id of ["claude", "chatgpt", "grok", "supergrok", "perplexity"] as const) {
       const handoff = assistantHandoff(id, title, body);
       expect(handoff.mode).toBe("prefill");

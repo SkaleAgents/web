@@ -9,7 +9,23 @@ import {
   markdownPromptText,
   plainPromptText,
   type AssistantHandoff,
+  type AssistantId,
 } from "@/lib/bot-links";
+
+const ASSISTANT_LOGO: Record<AssistantId, string> = {
+  claude: "/assistant-logos/claude.svg",
+  chatgpt: "/assistant-logos/chatgpt.png",
+  grok: "/assistant-logos/grok.png",
+  supergrok: "/assistant-logos/grok.png",
+  codex: "/assistant-logos/codex.png",
+  perplexity: "/assistant-logos/perplexity.svg",
+  gemini: "/assistant-logos/gemini.svg",
+};
+
+function menuTitle(id: AssistantId, label: string) {
+  if (id === "grok" || id === "supergrok") return label;
+  return `Open in ${label}`;
+}
 import { Button } from "@/components/ui";
 
 const COPY_OPTIONS: ReadonlyArray<{
@@ -171,14 +187,15 @@ export function BotPromptActions({
           {ASSISTANT_OPTIONS.map((assistant) => {
             const handoff = assistantHandoff(assistant.id, title, prompt);
             const label = (
-              <>
-                <span className="block text-sm font-semibold text-ink">
-                  Open in {assistant.label}
+              <span className="flex items-start gap-2">
+                {/* Fixed 16px marks, including SVGs the image optimizer will not process. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={ASSISTANT_LOGO[assistant.id]} alt="" width={16} height={16} className="mt-0.5 h-4 w-4 shrink-0 object-contain" />
+                <span>
+                  <span className="block text-sm font-semibold text-ink">{menuTitle(assistant.id, assistant.label)}</span>
+                  <span className="block text-xs text-ink-muted">{assistant.description}</span>
                 </span>
-                <span className="block text-xs text-ink-muted">
-                  {assistant.description}
-                </span>
-              </>
+              </span>
             );
             if (handoff.mode === "copy-then-open") {
               return (
@@ -215,8 +232,16 @@ export function BotPromptActions({
               type="button"
               onClick={() => void writeClipboard(option.text(title, prompt), option.notice)}
             >
-              <span className="block text-sm font-semibold text-ink">{option.label}</span>
-              <span className="block text-xs text-ink-muted">{option.description}</span>
+              <span className="flex items-start gap-2">
+                <svg aria-hidden="true" viewBox="0 0 16 16" className="mt-0.5 h-4 w-4 shrink-0">
+                  <rect x="4" y="3.5" width="8" height="9" rx="1.2" fill="none" stroke="currentColor" strokeWidth="1.4" />
+                  <path d="M6.5 3.5v-1h3v1" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                </svg>
+                <span>
+                  <span className="block text-sm font-semibold text-ink">{option.label}</span>
+                  <span className="block text-xs text-ink-muted">{option.description}</span>
+                </span>
+              </span>
             </button>
           ))}
         </div>,

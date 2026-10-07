@@ -42,9 +42,7 @@ export function BotDetail({ manage = false, initialBot }: { manage?: boolean; in
         <p className="text-sm text-danger">
           {botQuery.error instanceof Error ? botQuery.error.message : "Request failed"}
         </p>
-        <Link href={directory} className="text-sm font-semibold text-ink underline">
-          Back to directory
-        </Link>
+        <BackLink href={directory}>Back to bot-directory</BackLink>
       </main>
     );
   }
@@ -57,9 +55,7 @@ export function BotDetail({ manage = false, initialBot }: { manage?: boolean; in
         <p className="text-sm text-ink-muted">
           It may be private to another user, or the id is wrong.
         </p>
-        <Link href={directory} className="text-sm font-semibold text-ink underline">
-          Back to directory
-        </Link>
+        <BackLink href={directory}>Back to bot-directory</BackLink>
       </main>
     );
   }
@@ -69,9 +65,7 @@ export function BotDetail({ manage = false, initialBot }: { manage?: boolean; in
   return (
     <main className="mx-auto max-w-3xl space-y-6">
       <p>
-        <Link href={directory} className="text-sm text-ink-muted hover:text-ink hover:underline">
-          {manage ? "Back to my bots" : "Back to directory"}
-        </Link>
+        <BackLink href={directory}>{manage ? "Back to my bots" : "Back to bot-directory"}</BackLink>
       </p>
       <div>
         <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
@@ -82,17 +76,15 @@ export function BotDetail({ manage = false, initialBot }: { manage?: boolean; in
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-ink-muted">Category</span>
           <span className={`directory-pill directory-pill-${bot.specialty}`}>{category}</span>
         </div>
-        {(bot.integrations ?? []).length > 0 && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-ink-muted">Tools</span>
-            <ToolMarks slugs={bot.integrations} />
-          </div>
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-xs font-semibold text-ink-muted">Tools</span>
+          {(bot.integrations ?? []).length > 0 ? <ToolMarks slugs={bot.integrations} /> : <span className="text-sm text-ink-muted">None</span>}
+        </div>
         {manage && (
           <p className="font-mono text-xs uppercase tracking-wide text-ink-muted">
             {bot.visibility} · {bot.status}
@@ -115,6 +107,17 @@ export function BotDetail({ manage = false, initialBot }: { manage?: boolean; in
         </pre>
       </section>
     </main>
+  );
+}
+
+function BackLink({ href, children }: { href: string; children: string }) {
+  return (
+    <Link href={href} className="group inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink">
+      <svg aria-hidden="true" viewBox="0 0 16 16" className="h-4 w-4 shrink-0">
+        <path d="M10 3.2 5.2 8 10 12.8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <span className="group-hover:underline">{children}</span>
+    </Link>
   );
 }
 
