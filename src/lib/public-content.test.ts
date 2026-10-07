@@ -6,7 +6,7 @@ import { publicResources } from "./public-resources";
 
 it("publishes free resources and blog posts in the sitemap, llms.txt, and markdown", async () => {
   expect(new Set(publicResources.map((resource) => resource.slug)).size).toBe(3);
-  expect(new Set(publicPosts.map((post) => post.slug)).size).toBe(3);
+  expect(new Set(publicPosts.map((post) => post.slug)).size).toBe(4);
   const originalFetch = globalThis.fetch;
   globalThis.fetch = () => Promise.reject(new Error("offline"));
   let urls: string[] = [];
@@ -19,6 +19,7 @@ it("publishes free resources and blog posts in the sitemap, llms.txt, and markdo
   expect(urls).toContain("https://skaleagents.com/resources/public-exposure-review");
   expect(urls).toContain("https://skaleagents.com/blog");
   expect(urls).toContain("https://skaleagents.com/blog/review-terraform-before-you-merge");
+  expect(urls).toContain("https://skaleagents.com/blog/docker-socket-is-host-root");
   const text = llmsTxt();
   expect(text).toContain("](https://skaleagents.com/resources.md)");
   expect(text).toContain("](https://skaleagents.com/resources/wildcard-iam-review.md)");

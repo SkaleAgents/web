@@ -16,6 +16,34 @@ export type PublicPost = {
 
 export const publicPosts: readonly PublicPost[] = [
   {
+    slug: "docker-socket-is-host-root",
+    title: "The Docker socket is root on the host",
+    description: "Why a Compose volume for /var/run/docker.sock hands the container the machine that runs Docker.",
+    date: "2026-10-12",
+    summary: "A volume line that looks like a CI convenience is a root shell on the Docker host. Here is the line to refuse, and the volume to ask for instead.",
+    sections: [
+      {
+        heading: "The line that looks like a helper",
+        paragraphs: [
+          "The usual Compose snippet is two paths and a colon: `/var/run/docker.sock:/var/run/docker.sock`. People add it so a container can build an image, run a test, or talk to a local registry. The socket is the Docker API. A process that can write to it can create a container, bind-mount `/` from the host, and start that container as root. On the host, `docker.sock` is typically mode 660 and group `docker`. Inside the app container, that same file is just a path. The mount does not drop the privilege. It moves it.",
+          "A Kubernetes `hostPath` to `/var/run/docker.sock` is the same grant with a different filename. So is a sidecar that mounts the outer socket so the job can shell out to `docker run`. If the comment above the volume says temporary, read the line anyway. Temporary mounts are how this survives review. `privileged: true` is not the safer replacement. That flag is a different way to get root on the node, and the elevated container check is written for it separately.",
+        ],
+      },
+      {
+        heading: "Ask for a directory, not the engine",
+        paragraphs: [
+          "Ask for the directory the job needs. A bind of `./artifacts:/work` or a named volume cannot start a container on the host. If the job must build an image, keep the builder outside the app container. Give that builder a registry credential for one repository, not the socket. Do not pass `/var/run/docker.sock` through so the app can call Docker. If a tool documents \"mount the socket\" as the setup step, treat that sentence as the finding, then look for the flag that takes a remote builder or a registry instead.",
+          "Paste the Compose file or the manifest. Do not describe it. The line to quote is the volume. The container privilege checklist is written for that paste, and the Docker socket check looks for the same path: `volumes`, then `/var/run/docker.sock`. If that line is not in the text you submitted, the check will not invent it. A socket mounted only at runtime, outside the file, is outside the check. Quote the line in the review comment so the next diff has to delete it on purpose.",
+        ],
+      },
+    ],
+    links: [
+      { href: "/resources/container-privilege-review", label: "Container privilege review" },
+      { href: "/checks/docker-socket", label: "Docker socket check" },
+      { href: "/checks/elevated-container-privileges", label: "Elevated container check" },
+    ],
+  },
+  {
     slug: "review-terraform-before-you-merge",
     title: "Review Terraform before you merge",
     description: "What to look for in a Terraform diff before it opens a port or a policy you cannot take back.",
