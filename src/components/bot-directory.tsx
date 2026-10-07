@@ -252,6 +252,11 @@ function CatalogIndex({
       {listedBots.length > 0 && (
         <>
           <CatalogTable bots={visibleBots} />
+          {toolLabel && (
+            <p>
+              <Link href="/bot-directory" className="text-sm text-ink-muted hover:text-ink hover:underline">Back to directory</Link>
+            </p>
+          )}
           <DirectoryPager page={page} pageCount={pageCount} total={listedBots.length} onPage={setPage} />
         </>
       )}
