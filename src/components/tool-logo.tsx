@@ -1,53 +1,47 @@
 import type { BotIntegration } from "@/lib/api";
 
+// Product marks published by each vendor, used only to identify the tool.
+// Slack: slack.com media kit. Linear: linear.app favicon.
+// Terraform: developer.hashicorp.com product icon (light #7b42bc, dark #a067da).
+// AWS: aws.amazon.com smile touch icon. Kubernetes: CNCF artwork icon.
+
+const box = { "aria-hidden": true as const, width: 16, height: 16, className: "directory-tool-logo" };
+
+function RasterMark({ src }: { src: string }) {
+  // Fixed 16px vendor marks, including an SVG the image optimizer will not process.
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img {...box} src={src} alt="" />;
+}
+
 export function ToolLogo({ slug }: { slug: BotIntegration }) {
-  const common = { "aria-hidden": true as const, viewBox: "0 0 24 24", width: 16, height: 16, className: "directory-tool-logo" };
   switch (slug) {
     case "github":
       return (
-        <svg {...common}>
+        <svg {...box} viewBox="0 0 24 24">
           <path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.36 1.12 2.94.86.09-.67.35-1.12.63-1.38-2.22-.26-4.55-1.14-4.55-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05a9.3 9.3 0 0 1 5.01 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.81 0 .27.18.6.69.49A10.04 10.04 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
         </svg>
       );
     case "slack":
-      return (
-        <svg {...common}>
-          <path fill="#E01E5A" d="M6 15.2a2 2 0 1 1-2 2H6v-2Zm1 0a2 2 0 0 1 2-2 2 2 0 0 1 2 2v4.6a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-4.6Z" />
-          <path fill="#36C5F0" d="M8.8 6a2 2 0 1 1 2-2v2h-2Zm0 1a2 2 0 0 1 2 2 2 2 0 0 1-2 2H4.2a2 2 0 0 1-2-2 2 2 0 0 1 2-2h4.6Z" />
-          <path fill="#2EB67D" d="M18 8.8a2 2 0 1 1 2-2h-2v2Zm-1 0a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4.2a2 2 0 0 1 2-2 2 2 0 0 1 2 2v4.6Z" />
-          <path fill="#ECB22E" d="M15.2 18a2 2 0 1 1-2 2v-2h2Zm0-1a2 2 0 0 1-2-2 2 2 0 0 1 2-2h4.6a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-4.6Z" />
-        </svg>
-      );
+      return <RasterMark src="/tool-logos/slack.png" />;
     case "linear":
       return (
-        <svg {...common}>
-          <path fill="currentColor" d="M3.4 16.7 16.2 3.9A9.2 9.2 0 0 0 12 2.8 9.2 9.2 0 0 0 3.4 16.7Z" />
-          <path fill="currentColor" d="M4.6 18.2 18.2 4.6A9.2 9.2 0 0 1 20.8 12c0 1.5-.4 3-1 4.3L8.7 19.8a9.2 9.2 0 0 1-4.1-1.6Z" />
-          <path fill="currentColor" d="M9.6 20.2 20.2 9.6c.4.8.6 1.6.6 2.4a9.2 9.2 0 0 1-11.2 8.2Z" />
+        <svg {...box} viewBox="0 0 16 16">
+          <rect width="16" height="16" rx="2" fill="#000" />
+          <path
+            fill="#fff"
+            d="M2.147 9.383c-.027-.114.109-.186.192-.103l4.381 4.38c.083.083.011.219-.103.192a6.02 6.02 0 0 1-4.47-4.47ZM2 7.627a.12.12 0 0 0 .035.091l6.247 6.247a.12.12 0 0 0 .091.035q.428-.027.836-.111a.117.117 0 0 0 .057-.198L2.31 6.734a.117.117 0 0 0-.198.057 6 6 0 0 0-.11.836Zm.505-2.062a.12.12 0 0 0 .025.132l7.773 7.773a.12.12 0 0 0 .132.025q.322-.144.623-.322a.118.118 0 0 0 .022-.185L3.012 4.92a.118.118 0 0 0-.185.022q-.178.3-.322.623m1.014-1.396a.12.12 0 0 1-.005-.163 6.006 6.006 0 1 1 8.48 8.48.12.12 0 0 1-.163-.005z"
+          />
         </svg>
       );
     case "terraform":
       return (
-        <svg {...common}>
-          <path fill="#7B42BC" d="M9.4 2.2 1.6 6.6v8.8l7.8 4.4V11L17.2 6.6 9.4 2.2Z" />
-          <path fill="#5C4EE5" d="M10.6 11.6v8.2l7.8-4.4V7.2l-7.8 4.4Z" />
-          <path fill="#4040B2" d="M18.4 6.6v8.8L22.4 13V4.2l-4 2.4Z" />
+        <svg {...box} viewBox="0 0 16 16" className="directory-tool-logo directory-tool-logo-terraform">
+          <path fill="currentColor" d="M1 0v5.05l4.349 2.527V2.526L1 0zM10.175 5.344l-4.35-2.525v5.05l4.35 2.527V5.344zM10.651 10.396V5.344L15 2.819v5.05l-4.349 2.527zM10.174 16l-4.349-2.526v-5.05l4.349 2.525V16z" />
         </svg>
       );
     case "aws":
-      return (
-        <svg {...common}>
-          <path fill="#FF9900" d="M6.2 16.2c2.4 1.8 8.8 1.8 11.4 0l1 1.5c-3.2 2.2-10.2 2.2-13.4 0l1-1.5Z" />
-          <path fill="#FF9900" d="M16.2 14.2 18.4 17.4 21.2 11l-7.4 1.6 2.2 1.4c.5.3.9.4.2.2Z" />
-        </svg>
-      );
+      return <RasterMark src="/tool-logos/aws.png" />;
     case "kubernetes":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="10" fill="#326CE5" />
-          <circle cx="12" cy="12" r="2.1" fill="#fff" />
-          <path fill="#fff" d="M11.2 2.4h1.6l.5 6.2h-2.6l.5-6.2Zm8.9 4.3.8 1.4-5.6 2.8-1.3-1.3 6.1-2.9ZM21.6 12.8l-.8 1.4-6.1-2.9 1.3-1.3 5.6 2.8ZM13.6 21.6h-1.6l-.5-6.2h2.6l-.5 6.2ZM3.9 17.3l-.8-1.4 5.6-2.8 1.3 1.3-6.1 2.9ZM2.4 11.2l.8-1.4 6.1 2.9-1.3 1.3-5.6-2.8Z" />
-        </svg>
-      );
+      return <RasterMark src="/tool-logos/kubernetes.svg" />;
   }
 }
