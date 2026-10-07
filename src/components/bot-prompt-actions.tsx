@@ -149,7 +149,10 @@ export function BotPromptActions({
           setMenuOpen((open) => !open);
         }}
         >
-          Actions <span className="ml-2 text-xs" aria-hidden="true">⌄</span>
+          Actions
+          <svg aria-hidden="true" viewBox="0 0 16 16" className="ml-1.5 h-4 w-4 shrink-0">
+            <path d="M4 6.2 8 10l4-3.8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </Button>
       </span>
       {menuOpen && menuBox && createPortal(
