@@ -9,7 +9,7 @@ export type PublicPost = {
   title: string;
   description: string;
   date: string;
-  /** Monday 09:00 Asia/Dhaka, ISO-8601 with a +06:00 offset. Absent means already public. */
+  /** Monday morning Asia/Dhaka, ISO-8601 with +06:00. A minute between 09:10 and 11:00. Absent means already public. */
   publishAt?: string;
   summary: string;
   sections: readonly PublicPostSection[];
@@ -22,7 +22,7 @@ export const publicPosts: readonly PublicPost[] = [
     title: "pull_request_target should not check out the pull request",
     description: "Why a pull_request_target job that checks out the head SHA runs untrusted code with the base repository's secrets.",
     date: "2026-11-09",
-    publishAt: "2026-11-09T09:00:00+06:00",
+    publishAt: "2026-11-09T10:47:00+06:00",
     summary: "pull_request_target runs in the base repo, with the base repo's secrets. Checking out the pull request head runs someone else's code in that job.",
     sections: [
       {
@@ -51,7 +51,7 @@ export const publicPosts: readonly PublicPost[] = [
     title: "Pin the GitHub Action to a commit",
     description: "Why actions/checkout@main is a moving build, and what to put on the uses line instead.",
     date: "2026-11-02",
-    publishAt: "2026-11-02T09:00:00+06:00",
+    publishAt: "2026-11-02T09:32:00+06:00",
     summary: "uses: actions/checkout@main builds whatever that branch points at today. Pin the action to the commit you actually read.",
     sections: [
       {
@@ -80,7 +80,7 @@ export const publicPosts: readonly PublicPost[] = [
     title: "End the Dockerfile on a user that is not root",
     description: "The last USER instruction is the user the container starts as. USER root, USER 0, or no USER at all leaves it as root.",
     date: "2026-10-26",
-    publishAt: "2026-10-26T09:00:00+06:00",
+    publishAt: "2026-10-26T10:15:00+06:00",
     summary: "The last USER line wins. If that line is root, or if the Dockerfile never switches user, the process starts as root.",
     sections: [
       {
@@ -109,7 +109,7 @@ export const publicPosts: readonly PublicPost[] = [
     title: "Set a memory limit on the container",
     description: "mem_limit: 0 and a missing Kubernetes memory limit let one container consume the host.",
     date: "2026-10-19",
-    publishAt: "2026-10-19T09:00:00+06:00",
+    publishAt: "2026-10-19T09:23:00+06:00",
     summary: "A container with no memory limit, or with mem_limit set to 0, can grow until the kernel starts killing its neighbors.",
     sections: [
       {
