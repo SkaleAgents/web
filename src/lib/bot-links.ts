@@ -26,8 +26,8 @@ export const ASSISTANT_OPTIONS: ReadonlyArray<{
   { id: "grok", label: "Grok", description: "Open with the prompt prefilled" },
   {
     id: "supergrok",
-    label: "SuperGrok",
-    description: "Open Grok with your active plan",
+    label: "Grokbot",
+    description: "Open Grokbot with your active plan",
   },
   { id: "codex", label: "Codex", description: "Open Cloud Codex" },
   { id: "perplexity", label: "Perplexity", description: "Open a search with the prompt" },

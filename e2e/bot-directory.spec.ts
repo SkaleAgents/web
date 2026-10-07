@@ -108,12 +108,13 @@ test("a signed-in creator can publish a bot into the directory", async ({ page }
   await expect(page.getByRole("link", { name: /^Open in / })).toHaveCount(0);
   await page.getByRole("button", { name: "Actions" }).click();
   const menu = page.getByRole("menu");
-  const providers = menu.getByRole("menuitem", { name: /^Open in / });
-  await expect(providers).toHaveCount(7);
-  expect(new URL(await providers.nth(0).getAttribute("href") ?? "").searchParams.get("q")).toBe(prompt);
-  expect(new URL(await providers.nth(1).getAttribute("href") ?? "").searchParams.get("q")).toBe(prompt);
-  await expect(providers.nth(4)).toHaveAttribute("href", "https://chatgpt.com/codex");
-  await expect(providers.nth(6)).not.toHaveAttribute("href", /.+/);
+  await expect(menu.getByRole("menuitem", { name: /^Open in / })).toHaveCount(5);
+  await expect(menu.getByRole("menuitem", { name: /^Grok / })).toBeVisible();
+  await expect(menu.getByRole("menuitem", { name: /^Grokbot/ })).toBeVisible();
+  expect(new URL(await menu.getByRole("menuitem", { name: "Open in Claude" }).getAttribute("href") ?? "").searchParams.get("q")).toBe(prompt);
+  expect(new URL(await menu.getByRole("menuitem", { name: "Open in ChatGPT" }).getAttribute("href") ?? "").searchParams.get("q")).toBe(prompt);
+  await expect(menu.getByRole("menuitem", { name: "Open in Codex" })).toHaveAttribute("href", "https://chatgpt.com/codex");
+  await expect(menu.getByRole("menuitem", { name: "Open in Gemini" })).not.toHaveAttribute("href", /.+/);
   await menu.getByRole("menuitem", { name: "Copy plain text" }).click();
   await expect(
     page.getByText("Prompt copied. Paste it into any assistant."),
@@ -159,7 +160,9 @@ test("a visitor filters bots by tool and opens the assistant actions", async ({ 
   await expect(page.getByText(github.promptBody)).toBeVisible();
   await page.getByRole("button", { name: "Actions" }).click();
   const menu = page.getByRole("menu");
-  await expect(menu.getByRole("menuitem", { name: /^Open in / })).toHaveCount(7);
+  await expect(menu.getByRole("menuitem", { name: /^Open in / })).toHaveCount(5);
+  await expect(menu.getByRole("menuitem", { name: /^Grok / })).toBeVisible();
+  await expect(menu.getByRole("menuitem", { name: /^Grokbot/ })).toBeVisible();
   await expect(menu.getByRole("menuitem", { name: "Copy plain text" })).toBeVisible();
 
   await page.setViewportSize({ width: 390, height: 844 });
