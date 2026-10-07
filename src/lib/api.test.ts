@@ -56,10 +56,13 @@ describe("buildAssistantPromptUrl", () => {
     const prompt = "Review the deployment and explain the safest next step.";
 
     expect(ASSISTANT_OPTIONS.map((option) => option.label)).toEqual([
+      "Claude",
+      "ChatGPT",
       "Grok",
       "SuperGrok",
-      "Claude",
       "Codex",
+      "Perplexity",
+      "Gemini",
     ]);
     expect(new URL(buildAssistantPromptUrl("grok", prompt)).searchParams.get("q")).toBe(prompt);
     expect(new URL(buildAssistantPromptUrl("supergrok", prompt)).searchParams.get("q")).toBe(prompt);

@@ -14,6 +14,7 @@ import {
   type Prompt,
 } from "@/lib/api";
 import { parsePromptTags } from "@/lib/tags";
+import { BotPromptActions } from "@/components/bot-prompt-actions";
 import { Button, LinkButton, TextInput } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
@@ -81,15 +82,6 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
     return (tag === null || (manage ? prompt.tags.includes(tag) : categories.includes(tag)))
       && haystack.toLowerCase().includes(search.trim().toLowerCase());
   });
-
-  async function copyPrompt(body: string) {
-    try {
-      await navigator.clipboard.writeText(body);
-      toast.success("Prompt copied. Paste it into your assistant and add your context.");
-    } catch {
-      toast.error("Could not copy. Open the prompt and select the text.");
-    }
-  }
 
   return (
     <main className="space-y-8">
@@ -188,7 +180,7 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
             <details><summary className="cursor-pointer text-sm font-semibold">Read full prompt</summary>
             <pre className="mt-3 whitespace-pre-wrap break-words font-mono text-sm text-ink">{prompt.body}</pre>
             </details>
-            <Button type="button" variant="secondary" onClick={() => void copyPrompt(prompt.body)}>Copy prompt</Button>
+            <div className="mt-4"><BotPromptActions title={prompt.title} prompt={prompt.body} align="left" /></div>
           </li>
         ))}
       </ul>
@@ -200,6 +192,7 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
               <th className="px-4 py-3 font-semibold" scope="col">Title</th>
               <th className="px-4 py-3 font-semibold" scope="col">Type</th>
               <th className="px-4 py-3 font-semibold" scope="col">Category</th>
+              <th className="px-4 py-3 font-semibold" scope="col">Use it</th>
             </tr>
           </thead>
           <tbody>
@@ -212,6 +205,7 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
                 </td>
                 <td className="px-4 py-4 text-ink-muted">{promptType(prompt.ownerUserId)}</td>
                 <td className="px-4 py-4 text-ink-muted">{promptCategoryLabel(prompt.tags)}</td>
+                <td className="px-4 py-4"><BotPromptActions title={prompt.title} prompt={prompt.body} align="left" /></td>
               </tr>
             ))}
           </tbody>

@@ -13,7 +13,10 @@ const nextConfig: NextConfig = {
   },
   headers() {
     const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082").origin;
-    return [{ source: "/auth/confirm", headers: [
+    return [{ source: "/reviews/s/:token", headers: [
+      { key: "Referrer-Policy", value: "no-referrer" },
+      { key: "Cache-Control", value: "no-store, private" },
+    ] }, { source: "/auth/confirm", headers: [
       { key: "Referrer-Policy", value: "no-referrer" },
       { key: "Cache-Control", value: "no-store, private" },
       { key: "Content-Security-Policy", value: `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; connect-src 'self' ${apiOrigin}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` },

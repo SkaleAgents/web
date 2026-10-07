@@ -77,7 +77,7 @@ export function BotDetail({ manage = false, initialBot }: { manage?: boolean; in
           <LinkButton href={directory} variant="secondary">
             Back to directory
           </LinkButton>
-          <BotPromptActions prompt={bot.promptBody} />
+          <BotPromptActions title={bot.name} prompt={bot.promptBody} />
         </div>
       </div>
 

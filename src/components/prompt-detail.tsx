@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { apiFetch, type Prompt } from "@/lib/api";
-import { Button, LinkButton } from "@/components/ui";
+import { BotPromptActions } from "@/components/bot-prompt-actions";
+import { LinkButton } from "@/components/ui";
 import { promptCategoryLabel, promptType } from "@/lib/prompt-labels";
 
 export function PromptDetail({ initialPrompt }: { initialPrompt?: Prompt }) {
@@ -20,15 +20,6 @@ export function PromptDetail({ initialPrompt }: { initialPrompt?: Prompt }) {
     },
   });
   const prompt = promptsQuery.data?.find((item) => item.id === id && !item.ownerUserId);
-
-  async function copyPrompt(body: string) {
-    try {
-      await navigator.clipboard.writeText(body);
-      toast.success("Prompt copied. Paste it into your assistant and add your context.");
-    } catch {
-      toast.error("Could not copy. Select the prompt text instead.");
-    }
-  }
 
   if (promptsQuery.isPending) {
     return <p className="text-sm text-ink-muted">Loading prompt…</p>;
@@ -59,7 +50,7 @@ export function PromptDetail({ initialPrompt }: { initialPrompt?: Prompt }) {
         </div>
         <div className="flex flex-wrap gap-2">
           <LinkButton href="/prompts" variant="secondary">Back to library</LinkButton>
-          <Button type="button" onClick={() => void copyPrompt(prompt.body)}>Copy prompt</Button>
+          <BotPromptActions title={prompt.title} prompt={prompt.body} />
         </div>
       </div>
       <pre className="whitespace-pre-wrap break-words rounded-[10px] border border-line bg-canvas-elevated p-6 font-mono text-sm leading-6 text-ink">{prompt.body}</pre>
