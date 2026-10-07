@@ -170,7 +170,11 @@ test("a visitor filters bots by tool and opens the assistant actions", async ({ 
   await expect(tools).toBeVisible();
   expect(await tools.evaluate((node) => node.scrollWidth <= node.clientWidth + 1)).toBe(true);
 
-  await tools.getByRole("link", { name: "GitHub" }).click();
+  await tools.getByRole("button", { name: /^Tool/ }).click();
+  await page.getByRole("option", { name: "GitHub", exact: true }).click();
+  await expect(page.getByRole("link", { name: slack.name })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await page.getByRole("link", { name: "GitHub", exact: true }).click();
   await expect(page).toHaveURL(/\/bots\/integrations\/github$/);
   await expect(page.getByRole("heading", { name: "GitHub bots" })).toBeVisible();
   await expect(page.getByRole("link", { name: github.name })).toBeVisible();
