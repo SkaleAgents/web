@@ -17,7 +17,7 @@ sign-in buttons. Local mock sign-in uses the same header location.
 
 ## What each page does
 
-- `/bots`: search name, description, and specialty; combine search with specialty
+- `/bot-directory`: search name, description, and specialty; combine search with specialty
   filters; open the existing bot detail and assistant actions.
 - `/prompts`: search full prompt text and filter by tag; expand instructions or
   copy the full body. Signed-in users can expand the save form.

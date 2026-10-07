@@ -152,8 +152,9 @@ test("a visitor filters bots by tool and opens the assistant actions", async ({ 
   await page.route(`**/api/bots/${github.id}`, (route) => route.fulfill({ json: github }));
 
   await page.goto("/bots");
+  await expect(page).toHaveURL(/\/bot-directory$/);
   await page.getByRole("link", { name: github.name }).click();
-  await expect(page).toHaveURL(new RegExp(`/bots/${github.id}$`));
+  await expect(page).toHaveURL(new RegExp(`/bot-directory/${github.id}$`));
   await expect(page.getByRole("heading", { name: github.name })).toBeVisible();
   await expect(page.getByText(github.promptBody)).toBeVisible();
   await page.getByRole("button", { name: "Actions" }).click();
@@ -162,7 +163,7 @@ test("a visitor filters bots by tool and opens the assistant actions", async ({ 
   await expect(menu.getByRole("menuitem", { name: "Copy plain text" })).toBeVisible();
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/bots");
+  await page.goto("/bot-directory");
   await expect(page.getByRole("heading", { name: "Bot directory" })).toBeVisible();
   await expect(page.getByRole("link", { name: github.name })).toBeVisible();
   await expect(page.getByRole("link", { name: slack.name })).toBeVisible();
@@ -175,7 +176,9 @@ test("a visitor filters bots by tool and opens the assistant actions", async ({ 
   await expect(page.getByRole("link", { name: slack.name })).toHaveCount(0);
   await page.keyboard.press("Escape");
   await page.getByRole("link", { name: "GitHub", exact: true }).click();
-  await expect(page).toHaveURL(/\/bots\/integrations\/github$/);
+  await expect(page).toHaveURL(/\/bot-directory\/integrations\/github$/);
+  await page.goto("/bots/integrations/github");
+  await expect(page).toHaveURL(/\/bot-directory\/integrations\/github$/);
   await expect(page.getByRole("heading", { name: "GitHub bots" })).toBeVisible();
   await expect(page.getByRole("link", { name: github.name })).toBeVisible();
   await expect(page.getByRole("link", { name: slack.name })).toHaveCount(0);

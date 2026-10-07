@@ -71,7 +71,7 @@ test("client setup offers URL-only connectors and client-specific editor configu
 
 test("public headers open sign-in, private links lead to the focused form, and home highlights MCP", async ({ page }) => {
   await page.route("**/api/user", (route) => route.fulfill({ status: 401, json: {} }));
-  for (const path of ["/", "/bots", "/prompts", "/mcp-config"]) {
+  for (const path of ["/", "/bot-directory", "/prompts", "/mcp-config"]) {
     await page.goto(path);
     const signIn = page.getByRole("banner").getByRole("link", { name: "Sign in", exact: true });
     await expect(signIn).toHaveCount(1);

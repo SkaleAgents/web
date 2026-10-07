@@ -25,7 +25,7 @@ const workflows = [
       ["Add your context", "Provide relevant code or configuration. Ask for evidence and validation steps before applying a recommendation."],
     ],
     note: "No MCP setup needed. Your AI provider's account and usage limits apply.",
-    href: "/bots",
+    href: "/bot-directory",
     cta: "Find a specialist bot",
     codeTitle: "A useful first request",
     code: "Review this configuration.\n\nFor each finding:\n  Cite the relevant code.\n  Explain the operational impact.\n  Suggest a focused fix.\n  Show how to verify it.\n\nAsk me for any missing context.",

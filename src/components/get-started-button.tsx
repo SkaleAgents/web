@@ -37,7 +37,7 @@ export function GetStartedButton({ variant = "primary", className }: Pick<Compon
           <p className="mt-2 text-sm leading-relaxed text-ink-muted">Change the demo settings and watch the sample findings update, or find a specialist prompt for your assistant.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <LinkButton href="/#sample-demo" variant="secondary" onClick={close}>Try the editable demo</LinkButton>
-            <LinkButton href="/bots" variant="ghost" onClick={close}>Browse public bots</LinkButton>
+            <LinkButton href="/bot-directory" variant="ghost" onClick={close}>Browse public bots</LinkButton>
           </div>
         </div>
 

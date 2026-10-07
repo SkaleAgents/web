@@ -33,7 +33,7 @@ test("the starting-point picker recommends the matching route and can be reset",
   await picker.scrollIntoViewIfNeeded();
   await expect(picker.getByRole("radio", { name: "Try a specialist", exact: true })).toBeEnabled();
   const choices = [
-    ["Try a specialist", "Find a specialist bot", "/bots"],
+    ["Try a specialist", "Find a specialist bot", "/bot-directory"],
     ["Try a specialist", "Grab a ready-made prompt", "/prompts"],
     ["Review infrastructure", "Inside my editor", "/mcp-config"],
     ["Review infrastructure", "In a shared web review", "/dashboard/jobs"],

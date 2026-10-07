@@ -43,7 +43,7 @@ test("clipboard failure reveals a selectable prompt", async ({ page }) => {
 
 test("workflow choices lead to their matching product entry points", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("link", { name: "Find a specialist bot" })).toHaveAttribute("href", "/bots");
+  await expect(page.getByRole("link", { name: "Find a specialist bot" })).toHaveAttribute("href", "/bot-directory");
   await page.getByText("In your editor", { exact: true }).click();
   const editor = page.getByRole("region", { name: "In your editor", exact: true });
   await expect(editor).toContainText("https://skaleagents.com/mcp");
@@ -70,7 +70,7 @@ test("questions expand by keyboard and public content survives an API outage", a
   await expect(page.getByRole("link", { name: "pricing page" })).toHaveAttribute("href", "/pricing");
   await page.keyboard.press("Enter");
   await expect(page.getByRole("link", { name: "pricing page" })).toBeHidden();
-  await expect(page.getByRole("link", { name: "Explore the directory" }).first()).toHaveAttribute("href", "/bots");
+  await expect(page.getByRole("link", { name: "Explore the directory" }).first()).toHaveAttribute("href", "/bot-directory");
 });
 
 test("signed-in visitors retain the hero MCP shortcut", async ({ page }) => {

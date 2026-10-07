@@ -13,7 +13,7 @@ pnpm dev
 ```
 
 - `localhost:3000/` → landing
-- Product routes: `/login`, `/bots`, `/studio`, `/prompts`, and `/mcp-config`
+- Product routes: `/login`, `/bot-directory`, `/studio`, `/prompts`, and `/mcp-config`
 - Old `/settings` and `/settings/mcp` bookmarks redirect to `/mcp-config`.
 - API: Sail on `:8082` (`NEXT_PUBLIC_API_URL`)
 

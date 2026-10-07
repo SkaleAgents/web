@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 const features = [
-  { number: "01", title: "Find your specialist", label: "Bot directory", description: "Search by task and filter by specialty. Read a bot's instructions, then open them in your assistant with your own project context.", href: "/bots", cta: "Explore bots" },
+  { number: "01", title: "Find your specialist", label: "Bot directory", description: "Search by task and filter by specialty. Read a bot's instructions, then open them in your assistant with your own project context.", href: "/bot-directory", cta: "Explore bots" },
   { number: "02", title: "Write a review playbook", label: "Creator Studio", description: "Start with a security, reliability, or capacity template. Customize the instructions, save a draft, and publish publicly or keep it private.", href: "/dashboard/studio", cta: "Open Studio" },
   { number: "03", title: "Find it. Copy it. Get to work.", label: "Prompt library", description: "The library lists title, type, and category. Open a prompt to read it and copy the full instructions. Sign in to save your own reusable prompts.", href: "/prompts", cta: "Browse prompts" },
   { number: "04", title: "Read the review checks", label: "Public reference", description: "See what each built-in check looks for, the input it needs, and what a result does not prove. No account required.", href: "/checks", cta: "Read the checks" },

@@ -24,7 +24,7 @@ export function HeroActions() {
     <div className="mt-8">
       <div className="flex flex-wrap gap-3">
         <LinkButton href="/mcp-config" className="px-5 py-3">MCP config <span aria-hidden="true" className="ml-3">↗</span></LinkButton>
-        <LinkButton href="/bots" variant="secondary" className="px-5 py-3">
+        <LinkButton href="/bot-directory" variant="secondary" className="px-5 py-3">
           Explore the directory <span aria-hidden="true" className="ml-3">↗</span>
         </LinkButton>
         {!user && <GetStartedButton variant="ghost" className="px-5 py-3" />}

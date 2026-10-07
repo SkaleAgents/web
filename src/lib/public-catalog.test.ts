@@ -67,9 +67,9 @@ it("lists a published public bot in the sitemap and leaves private bots out", as
   };
   try {
     const urls = (await sitemap()).map((entry) => entry.url);
-    expect(urls).toContain("https://skaleagents.com/bots/public-bot");
-    expect(urls).toContain("https://skaleagents.com/bots/integrations");
-    expect(urls).toContain("https://skaleagents.com/bots/integrations/github");
+    expect(urls).toContain("https://skaleagents.com/bot-directory/public-bot");
+    expect(urls).toContain("https://skaleagents.com/bot-directory/integrations");
+    expect(urls).toContain("https://skaleagents.com/bot-directory/integrations/github");
     expect(urls).toContain("https://skaleagents.com/prompts/community-prompt");
     expect(urls.some((url) => url.includes("private-bot") || url.includes("personal-prompt"))).toBe(false);
   } finally {

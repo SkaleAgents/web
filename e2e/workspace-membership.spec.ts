@@ -76,7 +76,7 @@ test("keeps an invite through sign-in and resumes the exact accept route", async
   expect(await page.evaluate(() => location.href.includes("browser-fixture-invitation-credential"))).toBe(false);
 
   signedIn = true;
-  await page.goto("/bots");
+  await page.goto("/bot-directory");
   await expect(page).toHaveURL(/\/workspace-invitations\/accept$/);
   await expect(page.getByRole("heading", { name: "Accept organization invitation" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Accept invitation" })).toBeVisible();

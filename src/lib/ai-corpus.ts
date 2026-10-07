@@ -57,7 +57,7 @@ export type PublicPlan = {
 };
 
 const features = [
-  ["Bot directory", "/bots", "Search specialist DevOps bots and open their instructions in your own assistant."],
+  ["Bot directory", "/bot-directory", "Search specialist DevOps bots and open their instructions in your own assistant."],
   ["Prompt library", "/prompts", "Search community prompts and copy the instructions. Sign in to save your own."],
   ["Review checks", "/checks", "Read what each built-in check looks for. No account and no payment."],
   ["Free resources", "/resources", "Checklists and prompts you can copy or open in your assistant. No account required."],
@@ -117,7 +117,7 @@ export function llmsTxt(): string {
     ...publishedPosts().map((post) => link(post.title, publicPostPath(post), post.summary)),
     "",
     "## Directories",
-    link("Bot directory", "/bots", "Public bot names and descriptions. Instruction text stays on each bot page."),
+    link("Bot directory", "/bot-directory", "Public bot names and descriptions. Instruction text stays on each bot page."),
     link("Prompt library", "/prompts", "Public prompt titles and tags. Prompt text stays on each prompt page."),
     link("MCP config", "/mcp-config", "How to add SkaleAgents to an AI editor. Credentials are handled by the client."),
     "",
@@ -398,7 +398,7 @@ export function markdownDocument(
   if (extras?.detail?.kind === "bot") return botPageMarkdown(extras.detail);
   if (extras?.detail?.kind === "prompt") return promptPageMarkdown(extras.detail);
   if (path === "/pricing") return pricingMarkdown(extras?.plans ?? null);
-  if (path === "/bots") {
+  if (path === "/bot-directory") {
     return directoryMarkdown(
       "Bot directory",
       "Public specialist bots. This file lists names and descriptions. It does not include instruction text.",
