@@ -128,9 +128,9 @@ body:has(.retention-notice-dialog[open]) {
 a.filter-chip { display: inline-flex; text-decoration: none; }
 .filter-chip:hover, .filter-chip[aria-pressed="true"], .filter-chip[aria-current="page"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
 @media (max-width: 639px) {
-  .product-nav { order: 3; width: 100%; justify-content: space-between; }
+  .product-nav { order: 3; width: 100%; justify-content: space-between; gap: 0; }
   .product-nav-group { position: static; }
-  .product-nav-trigger { padding-inline: 0.6rem; }
+  .product-nav-trigger { padding-inline: 0.35rem; gap: 0.25rem; }
   .product-nav-panel { width: 100%; left: 0; right: 0; }
 }
 
