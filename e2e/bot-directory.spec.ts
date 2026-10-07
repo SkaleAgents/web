@@ -158,9 +158,18 @@ test("a visitor filters bots by tool and opens the assistant actions", async ({ 
   await expect(page.getByRole("heading", { name: github.name })).toBeVisible();
   await expect(page.getByText(github.promptBody)).toBeVisible();
   await page.getByRole("button", { name: "Actions" }).click();
-  const menu = page.getByRole("menu");
-  await expect(menu.getByRole("menuitem", { name: /^Open in / })).toHaveCount(4);
-  await expect(menu.getByRole("menuitem", { name: /Copy prompt/ })).toBeVisible();
+  const openIn = await page.getByRole("menuitem", { name: /^Open in / }).evaluateAll((nodes) =>
+    nodes.map((node) => ({
+      tag: node.tagName,
+      text: (node.textContent ?? "").replace(/\s+/g, " ").trim(),
+    })),
+  );
+  expect(openIn).toEqual([
+    { tag: "A", text: "Open in GrokOpen with the prompt prefilled" },
+    { tag: "A", text: "Open in SuperGrokOpen Grok with your active plan" },
+    { tag: "A", text: "Open in ClaudeOpen a new chat with the prompt" },
+    { tag: "A", text: "Open in CodexOpen Cloud Codex" },
+  ]);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/bots");
