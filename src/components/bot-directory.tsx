@@ -216,6 +216,7 @@ function CatalogIndex({
       </div>
 
       <DirectoryToolbar
+        key={search}
         search={search}
         onSearch={onSearch}
         specialties={specialties}
@@ -256,7 +257,6 @@ function DirectoryToolbar({
   onTools: (value: BotIntegration[]) => void;
 }) {
   const [draft, setDraft] = useState(search);
-  useEffect(() => setDraft(search), [search]);
 
   return (
     <div className="directory-toolbar">
