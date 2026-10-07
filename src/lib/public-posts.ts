@@ -18,64 +18,6 @@ export type PublicPost = {
 
 export const publicPosts: readonly PublicPost[] = [
   {
-    slug: "dont-echo-a-secret-in-the-workflow",
-    title: "Don't echo a secret in a GitHub Actions run",
-    description: "A run script that echoes a secrets expression is the finding. The check reads the workflow and does not run the job.",
-    date: "2026-11-23",
-    publishAt: "2026-11-23T09:51:00+06:00",
-    summary: "run: echo ${{ secrets.API_KEY }} puts the secret in the script output. The check reads the workflow. It does not run the job.",
-    sections: [
-      {
-        heading: "The echo is the finding",
-        paragraphs: [
-          "The line is `run: echo ${{ secrets.API_KEY }}`. The workflow-prints-a-secret check looks for a run script that echoes or prints a `${{ secrets. }}` expression. It reads the workflow YAML. It does not run the workflow.",
-          "`run: echo \"hello\"` is not this finding. An env mapping that names `secrets.GITHUB_TOKEN` and does not print it is not this finding either.",
-        ],
-      },
-      {
-        heading: "Take it out of the script output",
-        paragraphs: [
-          "The suggested next step is to remove the secret from the script output. If the step needs the value, set it on `env` and use that name in the command. Don't echo the `${{ secrets. }}` expression.",
-          "Echoing a shell variable that holds the secret is not the line this check looks for. I would still block that echo in review. Search the workflow for `secrets.` inside a `run` script. That expression is the line to delete. Copying `.env` into an image is a different check.",
-        ],
-      },
-    ],
-    links: [
-      { href: "/checks/workflow-prints-a-secret", label: "Workflow prints a secret" },
-      { href: "/checks/secret-file-copied-into-an-image", label: "Secret file copied into an image" },
-      { href: "/blog/pin-the-action-to-a-commit", label: "Pin the action to a commit" },
-    ],
-  },
-  {
-    slug: "dont-pipe-curl-to-bash",
-    title: "Don't pipe curl to bash in a Dockerfile",
-    description: "A RUN that pipes curl or wget into a shell builds whatever that URL returns, and the check only reads the Dockerfile.",
-    date: "2026-11-16",
-    publishAt: "2026-11-16T10:26:00+06:00",
-    summary: "RUN curl -fsSL https://example.com/install.sh | bash builds whatever that URL returns today. The check reads the Dockerfile. It does not download the script.",
-    sections: [
-      {
-        heading: "The pipe is the finding",
-        paragraphs: [
-          "The line is `RUN curl -fsSL https://example.com/install.sh | bash`. `wget` piped to `sh` is the same shape. The remote-script check looks for a Dockerfile `RUN` that downloads with curl or wget and pipes it to sh or bash. It reads the Dockerfile text. It does not fetch the remote script.",
-          "A download that is saved to a file and not piped to a shell is not this finding. `RUN curl -fsSL https://example.com/install.sh -o install.sh` does not match. The same pipe in a package.json `postinstall` script is a different check.",
-        ],
-      },
-      {
-        heading: "Read the file, then pin the sum",
-        paragraphs: [
-          "The suggested next step is to download the script, review it, and pin a checksum before you run it. Saving the file is what takes the line out of this finding. The checksum is still the next step the check names, because a later build can fetch a different file from the same URL. The check does not fetch the script, so it cannot tell you the sum is the one you read.",
-          "Write the script to a file, check `sha256sum -c` against the sum from the copy you read, then run that file. Drop the Dockerfile on the review and point at the `RUN`. A pipe to `bash` or `sh` is the line to change.",
-        ],
-      },
-    ],
-    links: [
-      { href: "/checks/remote-script-piped-to-a-shell", label: "Remote script piped to a shell" },
-      { href: "/checks/package-script-pipes-a-download-to-a-shell", label: "Package script piped to a shell" },
-      { href: "/blog/dockerfile-user-is-not-root", label: "End the Dockerfile on a user" },
-    ],
-  },
-  {
     slug: "pull-request-target-checks-out-the-pr",
     title: "pull_request_target should not check out the pull request",
     description: "Why a pull_request_target job that checks out the head SHA runs untrusted code with the base repository's secrets.",
