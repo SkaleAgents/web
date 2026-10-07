@@ -23,20 +23,20 @@ export const publicPosts: readonly PublicPost[] = [
     description: "Why a pull_request_target job that checks out the head SHA runs untrusted code with the base repository's secrets.",
     date: "2026-11-09",
     publishAt: "2026-11-09T10:47:00+06:00",
-    summary: "pull_request_target runs in the base repo, with the base repo's secrets. Checking out the pull request head runs someone else's code in that job.",
+    summary: "pull_request_target runs in the base repo and can read that repo's secrets. Checking out the pull request head runs the pull request's code in that job.",
     sections: [
       {
         heading: "The trigger and the checkout are one finding",
         paragraphs: [
-          "A workflow with `on: pull_request_target` does not run as the person who opened the pull request. GitHub runs it in the base repository, on the base repository's `GITHUB_TOKEN`, and with the secrets that repository can read. `permissions: contents: write` on that job makes the token able to push. That is useful for a label bot. It is a bad place to run the pull request. The dangerous file is the workflow in the base branch, which is why a fork can hit it before anyone merges the fork's workflow change.",
-          "The checkout that turns it into code execution is `ref: ${{ github.event.pull_request.head.sha }}`, or the same idea with `head.ref` and the fork's repository. Checking out `github.event.pull_request.head.repo.full_name` is the same grant. The job then has the pull request's files and the base repository's credentials in one process. A `pull_request` workflow is not this finding. A `pull_request_target` job that checks out the base repository and never the head is not this finding either. The check wants both halves in the same file.",
+          "A workflow with `on: pull_request_target` runs in the base repository. It can read that repository's secrets. The workflow that matters is the one on the base branch, which is why a fork can hit it before anyone merges the fork's workflow change.",
+          "The checkout this check is written for is `ref: ${{ github.event.pull_request.head.sha }}`, or the same idea with `head.ref`. The pull-request-target check looks for `pull_request_target` together with a checkout of the head ref or head sha. It reads the workflow YAML. It does not open the pull request. A `pull_request` workflow is not this finding. A `pull_request_target` job that checks out only the base repository is not this finding either. Both halves have to be in the file you paste.",
         ],
       },
       {
-        heading: "Read the diff, or drop the secrets",
+        heading: "Read the diff without running it",
         paragraphs: [
-          "If the job only needs to know what changed, fetch the diff and print the paths. Don't `actions/checkout` the head, and don't `run` a script that came from the pull request. If the job has to build or test the pull request, change the trigger to `pull_request`. That trigger checks out the merge commit and does not hand the job the base repository's secrets.",
-          "Paste the workflow. Quote the `on:` block and the checkout `ref`. The pull request target check is written for that pair, and it does not open the pull request to see them. A checkout that exists only in a reusable workflow you didn't paste is outside the file, so the check will not invent it. The action pin check is the next line to read: `uses: actions/checkout@main` is a separate finding, and it often sits in the same job. Leave the workflow unmerged until both lines are gone or you have written down why the job is allowed to keep them.",
+          "If the job only needs the diff, fetch the diff and print the paths. Don't `actions/checkout` the head, and don't `run` a script from the pull request. If the job has to build the pull request, use `pull_request`. A `pull_request` from a fork does not receive the base repository's secrets. A `pull_request` from a branch in the same repository can.",
+          "Paste the workflow. Quote the `on:` block and the checkout `ref`. `permissions: contents: write` is a different line. This check does not read it. `uses: actions/checkout@main` is the action-pin check.",
         ],
       },
     ],
@@ -52,20 +52,20 @@ export const publicPosts: readonly PublicPost[] = [
     description: "Why actions/checkout@main is a moving build, and what to put on the uses line instead.",
     date: "2026-11-02",
     publishAt: "2026-11-02T09:32:00+06:00",
-    summary: "uses: actions/checkout@main builds whatever that branch points at today. Pin the action to the commit you actually read.",
+    summary: "uses: actions/checkout@main builds whatever that branch points at today. A SHA names the commit you read. A tag can still move.",
     sections: [
       {
         heading: "A branch name is not a version",
         paragraphs: [
-          "The line `- uses: actions/checkout@main` looks pinned because it names a ref. `main` moves. So does `master`. The next push to that action repository changes what your workflow runs, including a workflow that has been green for months. You will not get a diff in your own pull request when that happens. A floating tag such as `@v4` can be moved by the action owner the same way. The check's example is `actions/checkout@main`. Treat `@master` as the same line.",
-          "A release tag is better, and it can still move. Whoever owns the tag can point `v4` at a new commit. A full 40-character commit SHA does not move. GitHub rejects a force-push that would reuse a SHA. The check looks for `@main` and `@master`. It does not look up the action repository, and it will not invent a SHA when the workflow only names a branch.",
+          "The line `- uses: actions/checkout@main` names a branch. `main` moves. So does `master`. The next push to that action changes your workflow, and you will not get a diff in your own pull request when that happens. The action-pinned-to-main check looks for `@main` and `@master`. Its example is `actions/checkout@main`. It does not look up the action repository, and it does not invent a SHA when the workflow only names a branch. It does not flag `@v4`.",
+          "A release tag can still be moved by whoever owns the tag. A 40-character commit SHA names one commit. Moving the branch does not change that commit. The check accepts a release tag or a full SHA. I still want the SHA on the `uses` line, because the tag can move. That is the review bar.",
         ],
       },
       {
-        heading: "Paste the uses line you are willing to keep",
+        heading: "Copy the SHA you actually read",
         paragraphs: [
-          "Open the action repository at the commit you mean, read the changelog since the tag you used to run, and copy that SHA onto the `uses` line: `actions/checkout@` followed by the 40 hex characters. Keep the tag in a comment if you want a human-readable name, but the `uses` value has to be the SHA. Dependabot and similar bots can open a pull request when you want a newer SHA. That pull request is the review. A silent move on `main` is not. A workflow that calls a local action with `uses: ./actions/build` is your own code, and this check is not about that line. Third-party actions are the ones that move underneath you. Pin those.",
-          "Paste the workflow, not a description of it. Ask for the `uses` line to be quoted. If the line still says `@main`, that is the comment. The same file is worth a second pass for `pull_request_target` plus a checkout of the pull request head. Those are different findings, and one workflow can have both.",
+          "Open the commit you read and copy that SHA onto the `uses` line: `actions/checkout@` followed by the 40 hex characters. A comment can keep the tag name. A local action, `uses: ./actions/build`, is your code. This check is about someone else's action.",
+          "Paste the workflow and ask for the `uses` line. If it still says `@main` or `@master`, that is the comment. A `pull_request_target` checkout of the pull request head is a different check. Pinning the SHA does not make that checkout safe.",
         ],
       },
     ],
@@ -81,20 +81,20 @@ export const publicPosts: readonly PublicPost[] = [
     description: "The last USER instruction is the user the container starts as. USER root, USER 0, or no USER at all leaves it as root.",
     date: "2026-10-26",
     publishAt: "2026-10-26T10:15:00+06:00",
-    summary: "The last USER line wins. If that line is root, or if the Dockerfile never switches user, the process starts as root.",
+    summary: "The last USER line wins. If that line is root or 0, or if the Dockerfile has no USER, the check flags it.",
     sections: [
       {
         heading: "The last USER is the one that runs",
         paragraphs: [
-          "Docker reads the Dockerfile from top to bottom and keeps the last `USER`. `USER root` and `USER 0` are root. A file with no `USER` instruction at all is also root, because that is the image default. A comment that says the container runs as nginx is not a `USER` instruction, and neither is a name mentioned only in `CMD`. The check reads the text. It does not build the image, and it does not prove what a running host actually launched. A numeric user such as `USER 1000` counts only if that user exists in the image. The check still wants the instruction in the file.",
-          "People put `USER root` back at the bottom because a late `apt-get` or `chown` failed once. The install belongs earlier. Switch user after the packages are in the image, and leave the file there. A later stage in a multi-stage build has its own user. The last stage is the one that ships, so that stage is the one that needs the `USER` line.",
+          "The container-runs-as-root check reads the Dockerfile text. It flags a last `USER` of `root` or `0`, or a file with no `USER` instruction. It does not build the image. A comment is not a `USER` line. A name that shows up only in `CMD` is not one either. No finding does not prove the container that is running is unprivileged.",
+          "Each Docker stage has its own user, and the last stage is the image you ship. A `USER` in an earlier stage does not apply to the last stage. If the last stage has no `USER` line, say so in review. The check is written for the last `USER` in the file, or for no `USER` at all.",
         ],
       },
       {
         heading: "Name a user the image already has",
         paragraphs: [
-          "End on a user the image already contains: `USER node`, `USER nginx`, or a user you created with `useradd` in that file. Don't invent a name the base image lacks and then discover it at startup. If the process must bind to port 80, give it another port above 1024 and put a proxy in front, or grant the capability you can name. `USER root` is not the fix for a low port.",
-          "Paste the Dockerfile. Ask for the last `USER` line to be quoted. If there is no `USER` line, that absence is the finding. The container privilege checklist is the longer pass over the same spec, including a Docker socket mount, which is a different way to get root on the host. A memory limit belongs on the runtime spec even after the user is right. A root user inside a limit can still fill that limit. Fix the user in this file, then set the memory limit in the runtime spec. They are two comments, not one.",
+          "End the last stage on a user the image already has: `USER node`, `USER nginx`, or a user you created with `useradd` in that file. That is the check's suggested next step. `USER 1000` is not this finding. The check does not build the image, so a passing file still does not prove that user exists when the container starts. If the process must bind to port 80, move it above 1024 or name the capability you mean. `USER root` is not the fix for a low port.",
+          "Paste the Dockerfile and ask for the last `USER` line. If there is no `USER` line, that is the finding.",
         ],
       },
     ],
@@ -110,20 +110,20 @@ export const publicPosts: readonly PublicPost[] = [
     description: "mem_limit: 0 and a missing Kubernetes memory limit let one container consume the host.",
     date: "2026-10-19",
     publishAt: "2026-10-19T09:23:00+06:00",
-    summary: "A container with no memory limit, or with mem_limit set to 0, can grow until the kernel starts killing its neighbors.",
+    summary: "A container with no memory limit, or with mem_limit set to 0, can grow until the host runs out of memory.",
     sections: [
       {
         heading: "Zero is not a limit",
         paragraphs: [
-          "In Compose, `mem_limit: 0` means unlimited. Omitting `mem_limit` means the same thing. `mem_reservation` is a request for a share of the host, not a cap, so a file that only sets the reservation still has no limit. In a Kubernetes Pod, a container with no `resources.limits.memory` has no memory cap in that file. `resources.requests.memory` is the same kind of request. The check looks for a missing limit and for `mem_limit: 0`. It does not measure live RSS, and it cannot see a limit that exists only as a namespace policy outside the text you pasted.",
-          "When the host runs out of memory, the kernel's OOM killer picks a process. It does not have to pick the container that grew. A sidecar, a daemon, or the node agent can die first. The workload you forgot to cap is still running. That is the outage people file against the wrong service. A limit of `0` is how a Compose file says there is no cap on purpose, so delete it rather than lowering it.",
+          "In Compose, `mem_limit: 0` means no cap. Leaving `mem_limit` out means the same thing. `mem_reservation` is not a cap. In a Pod, a container with no `resources.limits.memory` has no memory limit in that file. `resources.requests.memory` does not set one.",
+          "The missing-memory-limit check looks for a container with no memory limit, or a Compose memory limit of 0. It reads the workload text. It does not measure live memory use. A limit that exists only as a cluster policy, outside the file, is not visible to it. When the host runs out of memory, the kernel does not have to kill the container that grew.",
         ],
       },
       {
         heading: "Write the number on the container",
         paragraphs: [
-          "Take the memory the process used the last time it was busy, and add headroom you can explain in the pull request. Put that number on the container that runs the process: `mem_limit: 512m` in Compose, or `resources.limits.memory: 512Mi` on the container in the Pod spec. A limit on a different container in the same file does not cover this one. Compose `mem_limit: 0` is the line to delete, not to tune.",
-          "Paste the Compose file or the manifest. Ask for the limit line to be quoted, including the container name. If the line is missing, say so in the review instead of assuming the cluster adds one later. A limit applied by a policy you didn't paste is invisible to the check. Write the number you mean, such as `mem_limit: 512m` or `memory: 512Mi`, next to that container and not on a sibling. The Docker socket post is the other host-level grant in the same kind of file: a memory limit does not make a mounted `docker.sock` safe. Quote the limit in the review comment so the next diff has to change that number on purpose.",
+          "Delete `mem_limit: 0`. Don't lower it and call that a limit. Put a number you can explain on that container: `mem_limit: 512m` in Compose, or `resources.limits.memory: 512Mi` in the Pod. A limit on a sibling container does not cover this one.",
+          "Paste the Compose file or the manifest and ask for the limit line, with the container name. If the line is missing, say so. Don't assume the cluster adds one later.",
         ],
       },
     ],
@@ -138,20 +138,20 @@ export const publicPosts: readonly PublicPost[] = [
     title: "The Docker socket is root on the host",
     description: "Why a Compose volume for /var/run/docker.sock hands the container the machine that runs Docker.",
     date: "2026-10-12",
-    summary: "A volume line that looks like a CI convenience is a root shell on the Docker host. Here is the line to refuse, and the volume to ask for instead.",
+    summary: "A Compose volume for /var/run/docker.sock lets that container talk to the Docker API on the host.",
     sections: [
       {
-        heading: "The line that looks like a helper",
+        heading: "The socket is the Docker API",
         paragraphs: [
-          "The usual Compose snippet is two paths and a colon: `/var/run/docker.sock:/var/run/docker.sock`. People add it so a container can build an image, run a test, or talk to a local registry. The socket is the Docker API. A process that can write to it can create a container, bind-mount `/` from the host, and start that container as root. On the host, `docker.sock` is typically mode 660 and group `docker`. Inside the app container, that same file is just a path. The mount does not drop the privilege. It moves it.",
-          "A Kubernetes `hostPath` to `/var/run/docker.sock` is the same grant with a different filename. So is a sidecar that mounts the outer socket so the job can shell out to `docker run`. If the comment above the volume says temporary, read the line anyway. Temporary mounts are how this survives review. `privileged: true` is not the safer replacement. That flag is a different way to get root on the node, and the elevated container check is written for it separately.",
+          "The usual Compose line is `/var/run/docker.sock:/var/run/docker.sock`. The socket is the Docker API. A process that can write to it can create a container, mount the host filesystem, and start that container as root. The mount does not drop that privilege.",
+          "A Kubernetes `hostPath` of `/var/run/docker.sock` is the same kind of mount. The Docker socket check looks for a socket mount or another host path, including that Compose volume. It reads the manifest or Compose file. It does not inspect a running host. A socket mounted only at runtime, outside the file, is outside the check. `privileged: true` on a Kubernetes container is a different check.",
         ],
       },
       {
-        heading: "Ask for a directory, not the engine",
+        heading: "Mount the directory the job needs",
         paragraphs: [
-          "Ask for the directory the job needs. A bind of `./artifacts:/work` or a named volume cannot start a container on the host. If the job must build an image, keep the builder outside the app container. Give that builder a registry credential for one repository, not the socket. Do not pass `/var/run/docker.sock` through so the app can call Docker. If a tool documents \"mount the socket\" as the setup step, treat that sentence as the finding, then look for the flag that takes a remote builder or a registry instead.",
-          "Paste the Compose file or the manifest. Do not describe it. The line to quote is the volume. The container privilege checklist is written for that paste, and the Docker socket check looks for the same path: `volumes`, then `/var/run/docker.sock`. If that line is not in the text you submitted, the check will not invent it. A socket mounted only at runtime, outside the file, is outside the check. Quote the line in the review comment so the next diff has to delete it on purpose.",
+          "Ask for the directory the job writes, such as `./artifacts:/work`, or a named volume. Those cannot start a container on the host. If the job must build an image, keep the builder outside the app container and give it a credential for one repository.",
+          "Paste the file and quote the volume line. If a tool's setup says to mount the socket, that sentence is the thing to question.",
         ],
       },
     ],
@@ -166,20 +166,20 @@ export const publicPosts: readonly PublicPost[] = [
     title: "Review Terraform before you merge",
     description: "What to look for in a Terraform diff before it opens a port or a policy you cannot take back.",
     date: "2026-10-06",
-    summary: "A merge is a bad time to discover that a security group allows the internet. Here is the pass I run on the diff first.",
+    summary: "A merge is a bad time to discover that a security group allows the internet. Read reachability in the diff before you read the IAM.",
     sections: [
       {
         heading: "Read the diff for reachability, then for identity",
         paragraphs: [
-          "Start with anything that changes who can connect. That is a cidr_blocks entry, an ingress block, a publicly_accessible flag, or a bucket ACL. If the diff adds 0.0.0.0/0, stop and name the port.",
-          "Then read the IAM. A statement with Action \"*\" or Resource \"*\" is a second change hiding in the same pull request. The network line gets the comments. The policy line ships anyway.",
+          "Start with who can connect. Look for cidr_blocks, an ingress block, publicly_accessible, or a bucket ACL. If the diff adds 0.0.0.0/0, name the port. The public-network-access check reads that text. It looks for 0.0.0.0/0 or ::/0 used as a source outside an explicit egress rule. A public range that appears only in a comment is not an ingress rule. The check does not connect to a cloud account.",
+          "Then read the IAM. actions = [\"*\"] is the pattern the wildcard-IAM check is written for. A Resource of \"*\" in the same statement is still worth a comment in review. The network line gets the comments. The policy line is the one that ships.",
         ],
       },
       {
         heading: "Paste the file, not a summary of the file",
         paragraphs: [
           "An assistant will invent a resource name if you only describe the change. Paste the .tf file, or the plan snippet that shows the address. Ask it to quote the line.",
-          "The public exposure checklist and the wildcard IAM checklist are written for that paste. Each one ends with a prompt you can open in Claude or ChatGPT.",
+          "The public exposure checklist and the wildcard IAM checklist are written for that paste.",
         ],
       },
     ],
@@ -200,14 +200,14 @@ export const publicPosts: readonly PublicPost[] = [
         heading: "The check looks at text you already have",
         paragraphs: [
           "SkaleAgents review checks read infrastructure text: Terraform, CloudFormation, Kubernetes, a Dockerfile, Compose, a workflow. They do not log into the account. If the risky setting is only in the console, the check cannot see it.",
-          "That limit is the useful part. A finding means the text contains the pattern. It does not mean the account is safe, and it does not mean the account is owned.",
+          "A finding means the text contains the pattern. It does not mean the account is safe. No finding does not prove the setting is absent outside that file.",
         ],
       },
       {
         heading: "Use a checklist when you are not ready to submit a job",
         paragraphs: [
-          "The free resources are the same kind of question, written so you can run them in the assistant you already pay for. The container privilege review is the one I use on a manifest before it goes to a cluster.",
-          "When you want the same questions saved as a job, the review checks page lists what each built-in check looks for.",
+          "The free resources are the same questions, written so you can run them in the assistant you already use. I use the container privilege review on a manifest before it goes to a cluster.",
+          "When you want those questions saved on a job, the review checks page lists what each check looks for.",
         ],
       },
     ],
@@ -222,19 +222,19 @@ export const publicPosts: readonly PublicPost[] = [
     title: "Hand a DevOps prompt to Claude or ChatGPT",
     description: "How to open a SkaleAgents prompt in Claude, ChatGPT, or another assistant without retyping it.",
     date: "2026-10-06",
-    summary: "The prompt is only useful if it lands in the chat you already have open. The Actions menu does that copy, or opens the assistant with the text filled in.",
+    summary: "The prompt is only useful if it lands in the chat you already have open. Actions copies it, or opens the assistant with the text filled in.",
     sections: [
       {
         heading: "Open it, or copy the shape you need",
         paragraphs: [
-          "On a prompt, a bot, or a free resource, Actions can open Claude, ChatGPT, Grok, SuperGrok, Codex, or Perplexity. Claude, ChatGPT, Grok, and Perplexity get the prompt in the link when it is short enough.",
-          "Copy plain text when you want the body alone. Copy as markdown when you want a heading you can drop into notes. Copy for an agent when the next assistant needs the task name and a rule: use only the files you provide, and ask if one is missing.",
+          "On a prompt, a bot, or a free resource, Actions lists Claude, ChatGPT, Grok, SuperGrok, Codex, Perplexity, and Gemini. Claude, ChatGPT, Grok, SuperGrok, and Perplexity get the prompt in the link when the encoded body is at most 1800 characters. Codex opens the Codex page and does not put the prompt in the link.",
+          "Copy plain text for the body alone. Copy as markdown when you want a heading above the body. Copy for an agent when the next assistant needs the task name and the rule: use only the context you provide, and ask if a file, log, or config is missing.",
         ],
       },
       {
         heading: "Gemini and long prompts",
         paragraphs: [
-          "Gemini does not take a reliable prefilled link, so Actions copies the agent handoff and opens Gemini for you to paste. The same copy happens for any assistant when the encoded prompt is longer than 1800 characters. The page says so, instead of opening a chat that silently dropped the text.",
+          "Gemini always copies that agent handoff and opens Gemini. The notice says to paste it. The same copy happens for a prefilled assistant when the encoded body is longer than 1800 characters. The notice then says the link was too long to prefill.",
           "After it opens, paste the config or the log under the prompt. The prompt cannot review a file it never received.",
         ],
       },
