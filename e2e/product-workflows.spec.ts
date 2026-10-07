@@ -92,10 +92,13 @@ test("directory combines search and specialty filters and recovers from no match
   ] } }));
   await page.goto("/bots");
   await page.getByRole("searchbox").fill("reviewer");
-  await page.getByRole("button", { name: "SRE", exact: true }).click();
+  await page.getByRole("button", { name: "Go", exact: true }).click();
+  await page.getByRole("button", { name: /^Specialty/ }).click();
+  await page.getByRole("option", { name: "SRE", exact: true }).click();
   await expect(page.getByRole("link", { name: "Release reviewer" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Network reviewer" })).toHaveCount(0);
   await page.getByRole("searchbox").fill("nothing matches");
+  await page.getByRole("button", { name: "Go", exact: true }).click();
   await expect(page.getByRole("heading", { name: "No bots match that search" })).toBeVisible();
   await page.getByRole("button", { name: "Clear filters" }).click();
   await expect(page.getByRole("link", { name: "Release reviewer" })).toBeVisible();

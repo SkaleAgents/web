@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch, BOT_INTEGRATIONS, SPECIALTIES, type Bot, type BotIntegration, type Specialty } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { Button, LinkButton, TextInput } from "@/components/ui";
+import { ToolLogo } from "@/components/tool-logo";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
 const SPECIALTY_LABEL: Record<Specialty, string> = {
@@ -24,6 +25,8 @@ export function BotDirectory({ manage = false, initialBots, integration }: { man
   const [search, setSearch] = useState("");
   const [specialty, setSpecialty] = useState("all");
   const [selectedTool, setSelectedTool] = useState<BotIntegration | "all">("all");
+  const [pickedSpecialties, setPickedSpecialties] = useState<Specialty[]>([]);
+  const [pickedTools, setPickedTools] = useState<BotIntegration[]>(integration ? [integration] : []);
   const activeTool = integration ?? (selectedTool === "all" ? undefined : selectedTool);
   const userQuery = useQuery(currentUserOptions);
 
@@ -40,11 +43,16 @@ export function BotDirectory({ manage = false, initialBots, integration }: { man
   const bots = botsQuery.data?.filter(bot => manage ? bot.ownerUserId === userQuery.data?.id : bot.visibility === "public" && bot.status === "published");
   const basePath = manage ? personalHref("bots") : "/bots";
   const specialties = [...new Set(bots?.map((bot) => bot.specialty) ?? [])].sort();
-  const filteredBots = bots?.filter((bot) =>
-    (specialty === "all" || bot.specialty === specialty) &&
-    (!activeTool || (bot.integrations ?? []).includes(activeTool)) &&
-    `${bot.name} ${bot.description} ${bot.specialty} ${(bot.integrations ?? []).join(" ")}`.toLowerCase().includes(search.trim().toLowerCase()),
-  );
+  const filteredBots = bots?.filter((bot) => {
+    const haystack = `${bot.name} ${bot.description} ${bot.specialty} ${(bot.integrations ?? []).join(" ")}`.toLowerCase();
+    if (!haystack.includes(search.trim().toLowerCase())) return false;
+    if (!manage) {
+      const specialtyOk = pickedSpecialties.length === 0 || pickedSpecialties.includes(bot.specialty);
+      const toolOk = pickedTools.length === 0 || pickedTools.some((tool) => (bot.integrations ?? []).includes(tool));
+      return specialtyOk && toolOk;
+    }
+    return (specialty === "all" || bot.specialty === specialty) && (!activeTool || (bot.integrations ?? []).includes(activeTool));
+  });
   const toolLabel = BOT_INTEGRATIONS.find((item) => item.slug === integration)?.label;
   const listedBots = [...(filteredBots ?? [])].sort((a, b) => a.name.localeCompare(b.name));
 
@@ -56,12 +64,13 @@ export function BotDirectory({ manage = false, initialBots, integration }: { man
         pending={botsQuery.isPending}
         error={botsQuery.isError ? (botsQuery.error instanceof Error ? botsQuery.error.message : "Failed to load") : null}
         search={search}
-        setSearch={setSearch}
-        specialty={specialty}
-        setSpecialty={setSpecialty}
-        integration={integration}
+        onSearch={setSearch}
+        specialties={pickedSpecialties}
+        onSpecialties={setPickedSpecialties}
+        tools={pickedTools}
+        onTools={setPickedTools}
         toolLabel={toolLabel}
-        onClear={() => { setSearch(""); setSpecialty("all"); setSelectedTool("all"); }}
+        onClear={() => { setSearch(""); setPickedSpecialties([]); setPickedTools([]); }}
       />
     );
   }
@@ -176,10 +185,11 @@ function CatalogIndex({
   pending,
   error,
   search,
-  setSearch,
-  specialty,
-  setSpecialty,
-  integration,
+  onSearch,
+  specialties,
+  onSpecialties,
+  tools,
+  onTools,
   toolLabel,
   onClear,
 }: {
@@ -188,10 +198,11 @@ function CatalogIndex({
   pending: boolean;
   error: string | null;
   search: string;
-  setSearch: (value: string) => void;
-  specialty: string;
-  setSpecialty: (value: string) => void;
-  integration?: BotIntegration;
+  onSearch: (value: string) => void;
+  specialties: Specialty[];
+  onSpecialties: (value: Specialty[]) => void;
+  tools: BotIntegration[];
+  onTools: (value: BotIntegration[]) => void;
   toolLabel?: string;
   onClear: () => void;
 }) {
@@ -204,28 +215,15 @@ function CatalogIndex({
         </p>
       </div>
 
-      <div className="space-y-3">
-        <label className="block max-w-md">
-          <span className="sr-only">Search</span>
-          <TextInput type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search reviewers" />
-        </label>
-        <div className="flex flex-wrap gap-2" aria-label="Filter by specialty">
-          <button type="button" className="filter-chip" aria-pressed={specialty === "all"} onClick={() => setSpecialty("all")}>All</button>
-          {SPECIALTIES.map((item) => (
-            <button key={item} type="button" className="filter-chip" aria-pressed={specialty === item} onClick={() => setSpecialty(item)}>
-              {SPECIALTY_LABEL[item]}
-            </button>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-2" aria-label="Filter by tool">
-          <Link href="/bots" className="filter-chip" aria-current={integration ? undefined : "page"}>All tools</Link>
-          {BOT_INTEGRATIONS.map((item) => (
-            <Link key={item.slug} href={`/bots/integrations/${item.slug}`} className="filter-chip" aria-current={integration === item.slug ? "page" : undefined}>
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </div>
+      <DirectoryToolbar
+        key={search}
+        search={search}
+        onSearch={onSearch}
+        specialties={specialties}
+        onSpecialties={onSpecialties}
+        tools={tools}
+        onTools={onTools}
+      />
 
       {pending && <p className="text-sm text-ink-muted">Loading bots…</p>}
       {error && <p className="text-sm text-danger">{error}</p>}
@@ -240,6 +238,134 @@ function CatalogIndex({
 
       {listedBots.length > 0 && <CatalogTable bots={listedBots} />}
     </main>
+  );
+}
+
+function DirectoryToolbar({
+  search,
+  onSearch,
+  specialties,
+  onSpecialties,
+  tools,
+  onTools,
+}: {
+  search: string;
+  onSearch: (value: string) => void;
+  specialties: Specialty[];
+  onSpecialties: (value: Specialty[]) => void;
+  tools: BotIntegration[];
+  onTools: (value: BotIntegration[]) => void;
+}) {
+  const [draft, setDraft] = useState(search);
+
+  return (
+    <div className="directory-toolbar">
+      <form
+        className="directory-search"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSearch(draft);
+        }}
+      >
+        <label className="min-w-0 flex-1">
+          <span className="sr-only">Search</span>
+          <TextInput type="search" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Search reviewers" />
+        </label>
+        <Button type="submit">Go</Button>
+      </form>
+      <div className="directory-filters">
+        <MultiFilter
+          label="Specialty"
+          menuLabel="Filter by specialty"
+          options={SPECIALTIES.map((item) => ({ value: item, label: SPECIALTY_LABEL[item] }))}
+          selected={specialties}
+          onChange={(value) => onSpecialties(value as Specialty[])}
+        />
+        <MultiFilter
+          label="Tool"
+          menuLabel="Filter by tool"
+          options={BOT_INTEGRATIONS.map((item) => ({ value: item.slug, label: item.label, logo: item.slug }))}
+          selected={tools}
+          onChange={(value) => onTools(value as BotIntegration[])}
+        />
+      </div>
+    </div>
+  );
+}
+
+function MultiFilter({
+  label,
+  menuLabel,
+  options,
+  selected,
+  onChange,
+}: {
+  label: string;
+  menuLabel: string;
+  options: { value: string; label: string; logo?: BotIntegration }[];
+  selected: string[];
+  onChange: (value: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const labelId = useId();
+  const valueId = useId();
+  const menuId = useId();
+  const chosen = options.filter((option) => selected.includes(option.value)).map((option) => option.label);
+  const summary = chosen.length === 0 ? "Any" : chosen.length === 1 ? chosen[0] : `${chosen.length} selected`;
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointer(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  function toggle(value: string) {
+    onChange(selected.includes(value) ? selected.filter((item) => item !== value) : [...selected, value]);
+  }
+
+  return (
+    <div className="directory-filter" ref={rootRef} aria-label={menuLabel}>
+      <span className="directory-filter-label" id={labelId}>{label}</span>
+      <button
+        type="button"
+        className="directory-filter-trigger"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={menuId}
+        aria-labelledby={`${labelId} ${valueId}`}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span id={valueId} className="directory-filter-value">{summary}</span>
+        <svg aria-hidden="true" viewBox="0 0 16 16" className="directory-filter-chevron">
+          <path d="M4 6.2 8 10l4-3.8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {open && (
+        <div className="directory-menu" id={menuId} role="listbox" aria-multiselectable="true" aria-label={menuLabel}>
+          {options.map((option) => {
+            const on = selected.includes(option.value);
+            return (
+              <button key={option.value} type="button" role="option" aria-selected={on} onClick={() => toggle(option.value)}>
+                <span className="directory-check" aria-hidden="true" />
+                {option.logo && <ToolLogo slug={option.logo} />}
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -282,7 +408,10 @@ function ToolNames({ slugs }: { slugs?: BotIntegration[] }) {
         const label = BOT_INTEGRATIONS.find((item) => item.slug === slug)?.label ?? slug;
         return (
           <li key={slug}>
-            <Link href={`/bots/integrations/${slug}`}>{label}</Link>
+            <Link href={`/bots/integrations/${slug}`} className="directory-tool">
+              <ToolLogo slug={slug} />
+              <span>{label}</span>
+            </Link>
           </li>
         );
       })}
