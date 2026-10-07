@@ -16,6 +16,7 @@ test("free resources and blog pages link through and open a prompt menu", async 
 
   await page.goto("/blog");
   await expect(page.getByRole("heading", { name: "Notes from the review desk." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "The Docker socket is root on the host" })).toBeVisible();
   await page.getByRole("link", { name: "Review Terraform before you merge" }).click();
   await expect(page).toHaveURL(/\/blog\/review-terraform-before-you-merge$/);
   await page.getByRole("link", { name: "Wildcard IAM review" }).click();

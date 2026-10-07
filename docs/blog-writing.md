@@ -1,6 +1,6 @@
 # Weekly blog
 
-Publish at least one new post every week. A week runs Monday through Sunday, Asia/Dhaka. The week of 5 October 2026 is already covered by the posts dated 2026-10-06. The next post is due by Sunday 18 October 2026. One post is enough. A second post is fine when you have a second concrete topic.
+Publish at least one new post every week. A week runs Monday through Sunday, Asia/Dhaka. The week of 12 October 2026 is covered by the post dated 2026-10-12. The next post is due by Sunday 25 October 2026. One post is enough. A second post is fine when you have a second concrete topic.
 
 Posts live in `src/lib/public-posts.ts`. The planning hub keeps a copy of these instructions at `docs/operations/blog-writing.md`.
 
