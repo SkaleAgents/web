@@ -8,6 +8,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { OrganizationSettingsManager } from "@/components/organization-settings-manager";
+import { LinkButton } from "@/components/ui";
 
 type Organization = { id: string; name: string; role: "owner" | "member" | "viewer" };
 
@@ -39,10 +40,13 @@ function OrganizationGate({ workspaceId, children }: { workspaceId: string; chil
 export function OrganizationOverview({ workspaceId }: { workspaceId: string }) {
   const root = useOrganizationRoot(workspaceId);
   return <OrganizationGate workspaceId={workspaceId}>{organization => <main className="space-y-7">
-    <div className="workspace-intro">
-      <p className="workspace-kicker">Organization overview</p>
-      <h1 className="workspace-heading">{organization.name}</h1>
-      <p className="mt-2 text-sm text-ink-muted">Work created here belongs to this organization. Your personal work stays in Personal.</p>
+    <div className="workspace-intro flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p className="workspace-kicker">Organization overview</p>
+        <h1 className="workspace-heading">{organization.name}</h1>
+        <p className="mt-2 text-sm text-ink-muted">Work created here belongs to this organization. Your personal work stays in Personal.</p>
+      </div>
+      <LinkButton href={`${root}/jobs/new`}>Start a shared audit</LinkButton>
     </div>
     <div className="grid gap-3 sm:grid-cols-2">
       <Link className="rounded-lg border border-line bg-canvas-elevated p-5 hover:bg-canvas" href={`${root}/jobs`}>
