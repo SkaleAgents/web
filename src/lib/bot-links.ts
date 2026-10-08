@@ -1,4 +1,5 @@
 const GROK_URL = "https://grok.com/";
+const GROKBOT_URL = "https://x.ai/bot";
 const CLAUDE_URL = "https://claude.ai/new";
 const CHATGPT_URL = "https://chatgpt.com/";
 const CODEX_URL = "https://chatgpt.com/codex";
@@ -27,7 +28,7 @@ export const ASSISTANT_OPTIONS: ReadonlyArray<{
   {
     id: "supergrok",
     label: "Grokbot",
-    description: "Open Grokbot with your active plan",
+    description: "Copy the prompt, then open Grok Bot",
   },
   { id: "codex", label: "Codex", description: "Open Cloud Codex" },
   { id: "perplexity", label: "Perplexity", description: "Open a search with the prompt" },
@@ -38,7 +39,7 @@ const BASE_URL: Record<AssistantId, string> = {
   claude: CLAUDE_URL,
   chatgpt: CHATGPT_URL,
   grok: GROK_URL,
-  supergrok: GROK_URL,
+  supergrok: GROKBOT_URL,
   codex: CODEX_URL,
   perplexity: PERPLEXITY_URL,
   gemini: GEMINI_URL,
@@ -48,7 +49,6 @@ const PREFILL = new Set<AssistantId>([
   "claude",
   "chatgpt",
   "grok",
-  "supergrok",
   "perplexity",
 ]);
 
@@ -101,6 +101,14 @@ export function assistantHandoff(
       href: GEMINI_URL,
       text: agentPromptText(title, body),
       notice: "Prompt copied. Paste it into Gemini.",
+    };
+  }
+  if (assistant === "supergrok") {
+    return {
+      mode: "copy-then-open",
+      href: GROKBOT_URL,
+      text: agentPromptText(title, body),
+      notice: "Prompt copied. Paste it into Grok Bot.",
     };
   }
   if (encodeURIComponent(body).length > ASSISTANT_QUERY_LIMIT) {

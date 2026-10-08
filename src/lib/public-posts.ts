@@ -227,14 +227,14 @@ export const publicPosts: readonly PublicPost[] = [
       {
         heading: "Open it, or copy the shape you need",
         paragraphs: [
-          "On a prompt, a bot, or a free resource, Actions lists Claude, ChatGPT, Grok, Grokbot, Codex, Perplexity, and Gemini. Claude, ChatGPT, Grok, Grokbot, and Perplexity get the prompt in the link when the encoded body is at most 1800 characters. Codex opens the Codex page and does not put the prompt in the link.",
+          "On a prompt, a bot, or a free resource, Actions lists Claude, ChatGPT, Grok, Grokbot, Codex, Perplexity, and Gemini. Claude, ChatGPT, Grok, and Perplexity get the prompt in the link when the encoded body is at most 1800 characters. Codex opens the Codex page and does not put the prompt in the link.",
           "Copy plain text for the body alone. Copy as markdown when you want a heading above the body. Copy for an agent when the next assistant needs the task name and the rule: use only the context you provide, and ask if a file, log, or config is missing.",
         ],
       },
       {
-        heading: "Gemini and long prompts",
+        heading: "Gemini, Grokbot, and long prompts",
         paragraphs: [
-          "Gemini always copies that agent handoff and opens Gemini. The notice says to paste it. The same copy happens for a prefilled assistant when the encoded body is longer than 1800 characters. The notice then says the link was too long to prefill.",
+          "Gemini always copies that agent handoff and opens Gemini. Grokbot copies the same handoff and opens Grok Bot at x.ai/bot, because Grok Bot has no public prefill link. The notice says to paste it. The same copy happens for a prefilled assistant when the encoded body is longer than 1800 characters. The notice then says the link was too long to prefill.",
           "After it opens, paste the config or the log under the prompt. The prompt cannot review a file it never received.",
         ],
       },

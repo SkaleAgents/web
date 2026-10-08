@@ -65,7 +65,7 @@ describe("buildAssistantPromptUrl", () => {
       "Gemini",
     ]);
     expect(new URL(buildAssistantPromptUrl("grok", prompt)).searchParams.get("q")).toBe(prompt);
-    expect(new URL(buildAssistantPromptUrl("supergrok", prompt)).searchParams.get("q")).toBe(prompt);
+    expect(buildAssistantPromptUrl("supergrok", prompt)).toBe("https://x.ai/bot");
     expect(new URL(buildAssistantPromptUrl("claude", prompt)).searchParams.get("q")).toBe(prompt);
     expect(buildAssistantPromptUrl("codex", prompt)).toBe("https://chatgpt.com/codex");
   });
