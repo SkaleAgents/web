@@ -26,8 +26,8 @@ export const goals = [
     description: "Turn your review process into reusable instructions.",
     question: "Who should be able to find it?",
     options: [
-      { label: "Keep it private", title: "Make a private bot in Studio.", description: "Write your instructions, choose a specialty, and select Private in Creator Studio. Refine the bot as a draft before publishing.", note: "Sign-in is needed. Private bots are available to their owner.", href: "/dashboard/studio", cta: "Open Creator Studio" },
-      { label: "Share it publicly", title: "Publish a bot for the community.", description: "Write your specialist's instructions and select Public in Creator Studio. Publish when you're ready for it to appear in the directory.", note: "Sign in to create and publish a bot from your dashboard.", href: "/dashboard/studio", cta: "Open Creator Studio" },
+      { label: "Keep it private", title: "Make a private bot in Studio.", description: "Write your instructions, choose a specialty, and select Private in Creator Studio. Refine the bot as a draft before publishing.", note: "Sign-in is needed. Private bots are available to their owner.", href: "/me/studio", cta: "Open Creator Studio" },
+      { label: "Share it publicly", title: "Publish a bot for the community.", description: "Write your specialist's instructions and select Public in Creator Studio. Publish when you're ready for it to appear in the directory.", note: "Sign in to create and publish a bot from your dashboard.", href: "/me/studio", cta: "Open Creator Studio" },
     ],
   },
 ];

@@ -38,8 +38,8 @@ test("the starting-point picker recommends the matching route and can be reset",
     ["Review infrastructure", "Inside my editor", "/mcp-config"],
     ["Review infrastructure", "In a shared web review", "/me/jobs"],
     ["Review infrastructure", "On a recurring schedule", "/me/schedules"],
-    ["Build my own bot", "Keep it private", "/dashboard/studio"],
-    ["Build my own bot", "Share it publicly", "/dashboard/studio"],
+    ["Build my own bot", "Keep it private", "/me/studio"],
+    ["Build my own bot", "Share it publicly", "/me/studio"],
   ];
   for (const [goal, preference, href] of choices) {
     await picker.getByText(goal, { exact: true }).click();
