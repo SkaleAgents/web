@@ -18,6 +18,35 @@ export type PublicPost = {
 
 export const publicPosts: readonly PublicPost[] = [
   {
+    slug: "dont-pipe-curl-to-bash",
+    title: "Don't pipe curl to bash in a Dockerfile",
+    description: "A RUN that pipes curl or wget into a shell builds whatever that URL returns, and the check only reads the Dockerfile.",
+    date: "2026-11-16",
+    publishAt: "2026-11-16T09:41:00+06:00",
+    summary: "RUN curl -fsSL https://example.com/install.sh | bash builds whatever that URL returns today. The check reads the Dockerfile. It does not download the script.",
+    sections: [
+      {
+        heading: "The pipe is the finding",
+        paragraphs: [
+          "The line is `RUN curl -fsSL https://example.com/install.sh | bash`. `wget` piped to `sh` is the same shape. The remote-script check looks for a Dockerfile `RUN` that downloads with curl or wget and pipes it to sh or bash. It reads the Dockerfile text. It does not fetch the remote script.",
+          "A download that is saved to a file and not piped to a shell is not this finding. `RUN curl -fsSL https://example.com/install.sh -o install.sh` does not match. The same pipe in a package.json `postinstall` script is a different check.",
+        ],
+      },
+      {
+        heading: "Read the file, then pin the sum",
+        paragraphs: [
+          "The suggested next step is to download the script, review it, and pin a checksum before you run it. Saving the file is what takes the line out of this finding. The checksum is still the next step the check names, because a later build can fetch a different file from the same URL. The check does not fetch the script, so it cannot tell you the sum is the one you read.",
+          "Write the script to a file, check `sha256sum -c` against the sum from the copy you read, then run that file. Drop the Dockerfile on the review and point at the `RUN`. A pipe to `bash` or `sh` is the line to change.",
+        ],
+      },
+    ],
+    links: [
+      { href: "/checks/remote-script-piped-to-a-shell", label: "Remote script piped to a shell" },
+      { href: "/checks/package-script-pipes-a-download-to-a-shell", label: "Package script piped to a shell" },
+      { href: "/blog/dockerfile-user-is-not-root", label: "End the Dockerfile on a user" },
+    ],
+  },
+  {
     slug: "pull-request-target-checks-out-the-pr",
     title: "pull_request_target should not check out the pull request",
     description: "Why a pull_request_target job that checks out the head SHA runs untrusted code with the base repository's secrets.",
