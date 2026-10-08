@@ -113,7 +113,9 @@ test("a signed-in creator can publish a bot into the directory", async ({ page }
   await expect(menu.getByRole("menuitem", { name: /^Grokbot/ })).toBeVisible();
   expect(new URL(await menu.getByRole("menuitem", { name: "Open in Claude" }).getAttribute("href") ?? "").searchParams.get("q")).toBe(prompt);
   expect(new URL(await menu.getByRole("menuitem", { name: "Open in ChatGPT" }).getAttribute("href") ?? "").searchParams.get("q")).toBe(prompt);
+  expect(new URL(await menu.getByRole("menuitem", { name: /^Grok / }).getAttribute("href") ?? "").searchParams.get("q")).toBe(prompt);
   await expect(menu.getByRole("menuitem", { name: "Open in Codex" })).toHaveAttribute("href", "https://chatgpt.com/codex");
+  await expect(menu.getByRole("menuitem", { name: /^Grokbot/ })).not.toHaveAttribute("href", /.+/);
   await expect(menu.getByRole("menuitem", { name: "Open in Gemini" })).not.toHaveAttribute("href", /.+/);
   await menu.getByRole("menuitem", { name: "Copy plain text" }).click();
   await expect(

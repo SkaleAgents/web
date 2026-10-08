@@ -41,8 +41,8 @@ describe("assistant handoff", () => {
     ]);
   });
 
-  it("prefills Claude, ChatGPT, Grok, Grokbot, and Perplexity", () => {
-    for (const id of ["claude", "chatgpt", "grok", "supergrok", "perplexity"] as const) {
+  it("prefills Claude, ChatGPT, Grok, and Perplexity", () => {
+    for (const id of ["claude", "chatgpt", "grok", "perplexity"] as const) {
       const handoff = assistantHandoff(id, title, body);
       expect(handoff.mode).toBe("prefill");
       if (handoff.mode !== "prefill") continue;
@@ -72,6 +72,15 @@ describe("assistant handoff", () => {
       href: "https://gemini.google.com/app",
       text: agentPromptText(title, body),
       notice: "Prompt copied. Paste it into Gemini.",
+    });
+  });
+
+  it("copies an agent handoff and opens Grok Bot without a query", () => {
+    expect(assistantHandoff("supergrok", title, body)).toEqual({
+      mode: "copy-then-open",
+      href: "https://x.ai/bot",
+      text: agentPromptText(title, body),
+      notice: "Prompt copied. Paste it into Grok Bot.",
     });
   });
 
