@@ -30,9 +30,9 @@ describe("organization pricing", () => {
   it("links paid plans to organization billing when enrollment is open", async () => {
     vi.mocked(apiFetch).mockResolvedValueOnce({ ...catalog, enrollmentOpen: true });
     render(<PricingPlans />);
-    expect(await screen.findByRole("link", { name: "Choose Starter" })).toHaveAttribute("href", "/dashboard/billing");
-    expect(screen.getByRole("link", { name: "Choose Pro" })).toHaveAttribute("href", "/dashboard/billing");
-    expect(screen.getByRole("link", { name: "Choose Max" })).toHaveAttribute("href", "/dashboard/billing");
+    expect(await screen.findByRole("link", { name: "Choose Starter" })).toHaveAttribute("href", "/me/billing");
+    expect(screen.getByRole("link", { name: "Choose Pro" })).toHaveAttribute("href", "/me/billing");
+    expect(screen.getByRole("link", { name: "Choose Max" })).toHaveAttribute("href", "/me/billing");
     expect(screen.queryByText("Enrollment coming soon")).not.toBeInTheDocument();
   });
 

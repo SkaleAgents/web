@@ -37,8 +37,8 @@ test("paid plans link to billing when enrollment is open", async ({ page }) => {
     { key: "enterprise", name: "Enterprise", monthlyUsd: null, auditLimit: null, scheduleLimit: null, minimumIntervalHours: null, recommended: false, checkoutMode: "contact" },
   ] } }));
   await page.goto("/pricing");
-  await expect(page.getByRole("link", { name: "Choose Starter" })).toHaveAttribute("href", "/dashboard/billing");
-  await expect(page.getByRole("link", { name: "Choose Pro" })).toHaveAttribute("href", "/dashboard/billing");
-  await expect(page.getByRole("link", { name: "Choose Max" })).toHaveAttribute("href", "/dashboard/billing");
+  await expect(page.getByRole("link", { name: "Choose Starter" })).toHaveAttribute("href", "/me/billing");
+  await expect(page.getByRole("link", { name: "Choose Pro" })).toHaveAttribute("href", "/me/billing");
+  await expect(page.getByRole("link", { name: "Choose Max" })).toHaveAttribute("href", "/me/billing");
   await expect(page.getByText("Enrollment coming soon")).toHaveCount(0);
 });
