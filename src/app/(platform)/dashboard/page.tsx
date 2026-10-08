@@ -46,7 +46,7 @@ export default function DashboardPage() {
       {stats.map(stat => <Link key={stat.href} href={stat.href} className="rounded-xl border border-line bg-canvas-elevated p-5 transition-colors hover:border-accent">
         <p className="text-sm text-ink-muted">{stat.label}</p>
         <p className="mt-3 font-display text-3xl font-bold">{stat.error ? <span className="text-sm font-normal text-danger">Unavailable</span> : stat.value ?? "…"}</p>
-        <p className="mt-3 text-xs text-ink-muted">Open {stat.label.toLowerCase()} ↗</p>
+        <p className="mt-3 text-xs text-ink-muted">Open {stat.label.toLowerCase()}</p>
       </Link>)}
     </section>
     <section aria-labelledby="recent-audits" className="rounded-xl border border-line bg-canvas-elevated p-5">
@@ -55,6 +55,6 @@ export default function DashboardPage() {
         <div className="min-w-0"><Link href={href(`jobs/${job.id}`)} className="break-words text-sm font-medium hover:underline">{job.summary || `Audit ${job.id}`}</Link><p className="mt-1 text-xs text-ink-muted">{new Date(job.createdAt).toLocaleString()}</p></div><span className="rounded-full border border-line px-3 py-1 text-xs capitalize">{job.status}</span>
       </li>)}</ul>}
     </section>
-    <section aria-labelledby="manage-account"><h2 id="manage-account" className="mb-4 text-lg font-semibold">Explore your account</h2><div className="grid gap-4 sm:grid-cols-2">{tools.map(tool => <Link key={tool.section} href={tool.section === "settings" ? "/account/settings" : href(tool.section)} className="rounded-xl border border-line p-5 transition-colors hover:bg-canvas-elevated"><h3 className="font-semibold">{tool.title} <span aria-hidden="true" className="text-accent">↗</span></h3><p className="mt-2 text-sm text-ink-muted">{tool.detail}</p></Link>)}</div></section>
+    <section aria-labelledby="manage-account"><h2 id="manage-account" className="mb-4 text-lg font-semibold">Explore your account</h2><div className="grid gap-4 sm:grid-cols-2">{tools.map(tool => <Link key={tool.section} href={tool.section === "settings" ? "/account/settings" : href(tool.section)} className="rounded-xl border border-line p-5 transition-colors hover:bg-canvas-elevated"><h3 className="font-semibold">{tool.title}</h3><p className="mt-2 text-sm text-ink-muted">{tool.detail}</p></Link>)}</div></section>
   </main>;
 }
