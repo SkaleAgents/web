@@ -157,6 +157,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   return <div className={`dashboard-frame ${collapsed ? "is-collapsed" : ""} ${menuOpen ? "is-menu-open" : ""}`} onKeyDown={event => {
     if (event.key === "Escape" && menuOpen) { event.preventDefault(); closeMenu(); }
   }}>
+    {menuOpen ? <button type="button" className="dashboard-menu-scrim" aria-label="Dismiss menu" onClick={closeMenu} /> : null}
     <aside className="dashboard-sidebar">
       <nav ref={navigation} aria-label="Dashboard navigation" className="dashboard-navigation">
         <div className="dashboard-brand">
@@ -217,6 +218,7 @@ function DashboardIcon({ href }: { href: string }) {
     jobs: <><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V2h6v2m-7 8 3 3 5-6" /></>,
     schedules: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 2v6m10-6v6M3 10h18m-13 5h2m4 0h2" /></>,
     workspaces: <><circle cx="9" cy="8" r="3" /><path d="M3 20v-1a6 6 0 0 1 12 0v1H3Zm13-9a3 3 0 1 0 0-6m1 9a5 5 0 0 1 4 5v1h-3" /></>,
+    organizations: <><circle cx="9" cy="8" r="3" /><path d="M3 20v-1a6 6 0 0 1 12 0v1H3Zm13-9a3 3 0 1 0 0-6m1 9a5 5 0 0 1 4 5v1h-3" /></>,
     billing: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18M7 15h4" /></>,
     bots: <><rect x="4" y="7" width="16" height="13" rx="3" /><path d="M12 3v4M8 12v2m8-2v2M9 17h6" /></>,
     studio: <><path d="m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-5-5L4 14v6ZM4 20h16" /></>,

@@ -38,11 +38,11 @@ function installDialog() {
   };
 }
 
-function mockDashboard(policy: RetentionPolicy) {
+function mockDashboard(policy: RetentionPolicy, jobs: Array<{ id: string; summary: string; status: string; createdAt: string }> = []) {
   installDialog();
   const fetcher = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
-    if (url.endsWith("/api/jobs")) return Response.json({ jobs: [] });
+    if (url.endsWith("/api/jobs")) return Response.json({ jobs });
     if (url.endsWith("/api/schedules")) return Response.json({ schedules: [] });
     if (url.endsWith("/api/bots")) return Response.json({ bots: [] });
     if (url.endsWith("/api/account/retention") && (!init?.method || init.method === "GET")) return Response.json(policy);
@@ -61,8 +61,11 @@ function mockDashboard(policy: RetentionPolicy) {
   return fetcher;
 }
 
-async function renderDashboard(policy = pendingPolicy) {
-  const fetcher = mockDashboard(policy);
+async function renderDashboard(
+  policy = pendingPolicy,
+  jobs: Array<{ id: string; summary: string; status: string; createdAt: string }> = [],
+) {
+  const fetcher = mockDashboard(policy, jobs);
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   await setSessionUser(client, { id: "owner", displayName: "Harun R Rayhan", email: "owner@example.com", grokSubject: null });
   render(<QueryClientProvider client={client}><DashboardPage /></QueryClientProvider>);
@@ -137,4 +140,22 @@ it("records acceptance from the dashboard dialog", async () => {
     expect.stringContaining("/api/account/retention/acknowledge"),
     expect.objectContaining({ method: "POST" }),
   );
+});
+
+it("links recent audits to the job detail page", async () => {
+  await renderDashboard({
+    ...pendingPolicy,
+    noticeArchived: true,
+    noticeDeliveredAt: "2026-09-25T00:00:00Z",
+    legacyNotBefore: "2026-10-25T00:00:00Z",
+  }, [
+    { id: "job-1", summary: "Ingress review", status: "completed", createdAt: "2026-10-08T10:00:00Z" },
+    { id: "job-2", summary: "IAM review", status: "completed", createdAt: "2026-10-08T09:00:00Z" },
+    { id: "job-3", summary: "Network review", status: "completed", createdAt: "2026-10-08T08:00:00Z" },
+    { id: "job-4", summary: "Older review", status: "completed", createdAt: "2026-10-08T07:00:00Z" },
+  ]);
+
+  expect(await screen.findByRole("link", { name: "Ingress review" })).toHaveAttribute("href", "/org/personal-cfgnns/jobs/job-1");
+  expect(screen.getByRole("link", { name: "View all audits" })).toHaveAttribute("href", "/org/personal-cfgnns/jobs");
+  expect(screen.queryByRole("link", { name: "Older review" })).not.toBeInTheDocument();
 });

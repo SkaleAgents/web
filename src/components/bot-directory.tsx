@@ -139,7 +139,7 @@ export function BotDirectory({ manage = false, initialBots, integration, special
         </p>
       )}
       {bots && bots.length === 0 && (
-        <p className="text-sm text-ink-muted">No bots published yet. Create a draft in Studio to start your own collection.</p>
+        <p className="text-sm text-ink-muted">No bots yet. Create a draft in Studio to start your own collection.</p>
       )}
       {Boolean(bots?.length) && filteredBots?.length === 0 && <div className="rounded-xl border border-line p-6"><h2 className="font-semibold">No bots match that search</h2><p className="my-2 text-sm text-ink-muted">Try a broader task, another specialty, or another tool.</p><Button variant="secondary" onClick={() => { setSearch(""); setSpecialty("all"); setSelectedTool("all"); }}>Clear filters</Button></div>}
 
