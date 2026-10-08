@@ -649,7 +649,8 @@ html.dark .finding-severity:is([data-severity="high"], [data-severity="critical"
 .dashboard-toolbar-divider { width: 1px; height: 20px; background: var(--line); margin-inline: 4px; flex-shrink: 0; }
 .dashboard-frame.is-collapsed .dashboard-brand-logo { display: inline-flex; }
 .dashboard-frame.is-collapsed .dashboard-brand-logo .brand-wordmark { display: none; }
-.dashboard-toolbar .dashboard-collapse-toggle { flex-shrink: 0; }
+.dashboard-brand .dashboard-collapse-toggle--brand { margin-left: auto; }
+.dashboard-toolbar .dashboard-collapse-toggle--toolbar { flex-shrink: 0; }
 @media (max-width: 1023px) {
   .dashboard-sidebar { display: none; position: fixed; top: 56px; bottom: 0; left: 0; width: min(280px, 85vw); border-right: 1px solid var(--line); box-shadow: 12px 0 28px rgb(0 0 0 / 8%); }
   .dashboard-frame.is-menu-open .dashboard-sidebar { display: block; }

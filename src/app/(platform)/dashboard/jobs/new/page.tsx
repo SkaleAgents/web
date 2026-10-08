@@ -27,7 +27,6 @@ type AuditSpecialist = (typeof AUDIT_SPECIALISTS)[number];
 export default function NewJobPage() {
   const pathname = usePathname();
   const jobsPath = personalDestinationFromPath(pathname, "jobs");
-  const mcpPath = personalDestinationFromPath(pathname, "mcp-config");
   const router = useRouter();
   const queryClient = useQueryClient();
   const user = useQuery(currentUserOptions);
@@ -82,7 +81,7 @@ export default function NewJobPage() {
     <section className="rounded-xl border border-line bg-canvas-elevated p-5" aria-labelledby="codebase-heading">
       <h2 id="codebase-heading" className="text-base font-semibold text-ink">Review the codebase</h2>
       <p className="mt-2 text-sm text-ink-muted">Add SkaleAgents in your editor, then ask it to scan Terraform, CloudFormation, Kubernetes, Pulumi YAML, a Pulumi program, or Docker Compose in the open project. For the rest of the codebase, ask it to review application source for a disabled timeout, a one-connection pool, an unbounded retry limit, an unlimited database pool, or a root container user. The same scan reports a public database, wildcard permissions, the Docker socket, and a missing memory limit. This does not connect to a live cloud account.</p>
-      <LinkButton href={mcpPath} className="mt-4">Set up MCP</LinkButton>
+      <LinkButton href="/mcp-config" className="mt-4">Set up MCP</LinkButton>
     </section>
       <form className="overflow-hidden rounded-xl border border-line bg-canvas-elevated" onSubmit={(event) => { event.preventDefault(); if (user.data && submission.trim() && !fileError && specialists.length && !create.isPending) create.mutate(); }}>
       <fieldset disabled={create.isPending} className="min-w-0">
