@@ -46,10 +46,11 @@ export default function JobsPage() {
         <div className="flex flex-wrap gap-2">{["all", "issues", "queued", "running", "completed", "failed"].map((item) => <button key={item} type="button" className="filter-chip capitalize" aria-pressed={status === item} onClick={() => { setStatus(item); setPage(1); }}>{item === "all" ? "All jobs" : item === "issues" ? "Issues found" : item} {jobs.data ? `(${jobs.data.filter((job) => matchesFilter(job, item)).length})` : ""}</button>)}</div>
         {(user.isPending || user.data && jobs.isPending) && <p className="text-sm text-ink-muted">Loading jobs…</p>}
         {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Sign in in the header to access your audit jobs.</p>}
-        {jobs.isError && (
-          <div className="rounded-[10px] border border-line p-4">
+        {user.data && jobs.isError && (
+          <div className="rounded-[10px] border border-line p-4" role="alert">
             <p className="text-sm text-danger">{jobs.error.message}</p>
-            <p className="mt-2 text-sm text-ink-muted">Use Sign in in the header to access your audit jobs.</p>
+            <p className="mt-2 text-sm text-ink-muted">Could not load audit jobs. Try again.</p>
+            <Button type="button" variant="secondary" className="mt-3" onClick={() => void jobs.refetch()}>Try again</Button>
           </div>
         )}
         {jobs.data?.length === 0 && <div className="rounded-xl border border-dashed border-line p-6 text-sm text-ink-muted"><p>No audits yet. Create one to review your infrastructure.</p><LinkButton href={href("jobs/new")} className="mt-4">New audit</LinkButton></div>}
