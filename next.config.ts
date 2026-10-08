@@ -27,6 +27,8 @@ const nextConfig: NextConfig = {
       { source: "/bots", destination: "/bot-directory", permanent: true },
       { source: "/bots.md", destination: "/bot-directory.md", permanent: true },
       { source: "/bots/:path*", destination: "/bot-directory/:path*", permanent: true },
+      { source: "/bot-directory/categories", destination: "/bot-directory/specialties", permanent: true },
+      { source: "/bot-directory/categories/:slug", destination: "/bot-directory/specialties/:slug", permanent: true },
       { source: "/settings/mcp", destination: "/dashboard/mcp-config", permanent: false },
       { source: "/dashboard/workspaces/:workspaceId/retention", destination: "/org/:workspaceId/settings/retention", permanent: false },
       { source: "/dashboard/workspaces/:workspaceId/:path*", destination: "/org/:workspaceId/:path*", permanent: false },

@@ -1,3 +1,4 @@
+import { ToolLogo } from "@/components/tool-logo";
 import { BOT_INTEGRATIONS } from "@/lib/api";
 import { countBotsByIntegration, loadPublicBots } from "@/lib/public-catalog";
 import type { Metadata } from "next";
@@ -27,8 +28,9 @@ export default async function BotIntegrationsPage() {
       <ul className="grid gap-4 sm:grid-cols-2">
         {BOT_INTEGRATIONS.map((item) => (
           <li key={item.slug} className="rounded-xl border border-line bg-canvas-elevated p-5">
-            <Link href={`/bot-directory/integrations/${item.slug}`} className="text-lg font-medium text-ink hover:underline">
-              {item.label}
+            <Link href={`/bot-directory/integrations/${item.slug}`} className="inline-flex items-center gap-2 text-lg font-medium text-ink hover:underline">
+              <ToolLogo slug={item.slug} />
+              <span>{item.label}</span>
             </Link>
             <p className="mt-1 text-sm text-ink-muted">
               {counts[item.slug]} published {counts[item.slug] === 1 ? "bot" : "bots"}
@@ -36,8 +38,9 @@ export default async function BotIntegrationsPage() {
           </li>
         ))}
       </ul>
-      <p>
-        <Link href="/bot-directory" className="text-sm font-semibold text-ink underline">All bots</Link>
+      <p className="flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold">
+        <Link href="/bot-directory" className="text-ink underline">All bots</Link>
+        <Link href="/bot-directory/specialties" className="text-ink underline">Bots by specialty</Link>
       </p>
     </main>
   );

@@ -181,6 +181,15 @@ test("a visitor filters bots by tool and opens the assistant actions", async ({ 
   await expect(page.getByRole("heading", { name: "DevOps reviewers" })).toBeVisible();
   await expect(page.getByRole("link", { name: github.name })).toBeVisible();
   await expect(page.getByRole("link", { name: slack.name })).toHaveCount(0);
+  await page.goto("/bot-directory/specialties");
+  await expect(page.getByRole("heading", { name: "Bots by specialty" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "DevOps" })).toBeVisible();
+  await page.goto("/bot-directory/categories");
+  await expect(page).toHaveURL(/\/bot-directory\/specialties$/);
+  await page.goto("/bot-directory/integrations");
+  await expect(page.getByRole("heading", { name: "Bots by tool" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "GitHub" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Bots by specialty" })).toBeVisible();
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/bot-directory");

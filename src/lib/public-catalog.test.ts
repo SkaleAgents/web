@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
 import type { Bot, Prompt } from "./api";
-import { communityPrompts, countBotsByIntegration, publishedPublicBots } from "./public-catalog";
+import { communityPrompts, countBotsByIntegration, countBotsBySpecialty, publishedPublicBots } from "./public-catalog";
 
 const bot = (patch: Partial<Bot>): Bot => ({
   id: "bot",
@@ -50,6 +50,23 @@ it("counts published public bots for each tool", () => {
   });
 });
 
+it("counts published public bots for each specialty", () => {
+  const counts = countBotsBySpecialty([
+    bot({ id: "one", specialty: "sre" }),
+    bot({ id: "two", specialty: "sre" }),
+    bot({ id: "three", specialty: "mlops" }),
+    bot({ id: "draft", specialty: "devops", status: "draft" }),
+  ]);
+  expect(counts).toEqual({
+    devops: 0,
+    devsecops: 0,
+    sre: 2,
+    mlops: 1,
+    scaling: 0,
+    general: 0,
+  });
+});
+
 it("lists a published public bot in the sitemap and leaves private bots out", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (input) => {
@@ -70,6 +87,7 @@ it("lists a published public bot in the sitemap and leaves private bots out", as
     expect(urls).toContain("https://skaleagents.com/bot-directory/public-bot");
     expect(urls).toContain("https://skaleagents.com/bot-directory/integrations");
     expect(urls).toContain("https://skaleagents.com/bot-directory/integrations/github");
+    expect(urls).toContain("https://skaleagents.com/bot-directory/specialties");
     expect(urls).toContain("https://skaleagents.com/bot-directory/specialties/mlops");
     expect(urls).toContain("https://skaleagents.com/prompts/community-prompt");
     expect(urls.some((url) => url.includes("private-bot") || url.includes("personal-prompt"))).toBe(false);

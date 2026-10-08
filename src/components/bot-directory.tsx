@@ -230,6 +230,12 @@ function CatalogIndex({
         <p className="mt-2 max-w-xl text-sm text-ink-muted">
           Review a pasted diff, plan, or thread. Open the prompt in the assistant you already use.
         </p>
+        {!toolLabel && !specialtyLabel && (
+          <p className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold">
+            <Link href="/bot-directory/specialties" className="text-ink underline">Browse by specialty</Link>
+            <Link href="/bot-directory/integrations" className="text-ink underline">Browse by tool</Link>
+          </p>
+        )}
       </div>
 
       <DirectoryToolbar
@@ -247,9 +253,17 @@ function CatalogIndex({
       {bots && bots.length === 0 && <p className="text-sm text-ink-muted">No bots published yet.</p>}
       {Boolean(bots?.length) && listedBots.length === 0 && (
         <div className="rounded-xl border border-line bg-canvas-elevated p-6">
-          <h2 className="font-semibold">No bots match that search</h2>
-          <p className="my-2 text-sm text-ink-muted">Try a broader task, another specialty, or another tool.</p>
-          <Button variant="secondary" onClick={onClear}>Clear filters</Button>
+          <h2 className="font-semibold">{specialtyLabel ? `No ${specialtyLabel} reviewers yet` : "No bots match that search"}</h2>
+          <p className="my-2 text-sm text-ink-muted">
+            {specialtyLabel
+              ? "Pick another specialty, or browse the full directory."
+              : "Try a broader task, another specialty, or another tool."}
+          </p>
+          {specialtyLabel ? (
+            <LinkButton href="/bot-directory/specialties" variant="secondary">All specialties</LinkButton>
+          ) : (
+            <Button variant="secondary" onClick={onClear}>Clear filters</Button>
+          )}
         </div>
       )}
 
