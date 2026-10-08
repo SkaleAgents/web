@@ -133,6 +133,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     setMenuOpen(false);
     if (menuOpen) menuToggle.current?.focus();
   }
+  const collapseIcon = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M9 4v16" /></svg>;
+  const collapseToggle = (placement: "brand" | "toolbar") => (
+    <button
+      type="button"
+      className={`dashboard-collapse-toggle dashboard-collapse-toggle--${placement}`}
+      aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+      onClick={() => setCollapsed(value => !value)}
+    >
+      {collapseIcon}
+    </button>
+  );
   const item = ({ href, label }: NavigationItem) => (
     <Link key={href} href={href} onClick={closeMenu}
       aria-label={label} title={collapsed ? label : undefined}
@@ -150,7 +161,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <nav ref={navigation} aria-label="Dashboard navigation" className="dashboard-navigation">
         <div className="dashboard-brand">
           <span className="dashboard-brand-logo"><BrandLogo href={root} /></span>
-
+          {!collapsed ? collapseToggle("brand") : null}
         </div>
         <div id="dashboard-sections" className={`dashboard-sections ${menuOpen ? "is-open" : ""}`}>
           <div className="dashboard-section-list">
@@ -177,8 +188,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="dashboard-main">
       <header className="dashboard-toolbar">
         <div className="flex min-w-0 items-center gap-2 text-sm">
-          <button type="button" className="dashboard-collapse-toggle" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            onClick={() => setCollapsed(value => !value)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M9 4v16" /></svg></button>
+          {collapsed ? collapseToggle("toolbar") : null}
           <button ref={menuToggle} type="button" className="dashboard-menu-toggle"
             aria-expanded={menuOpen} aria-controls="dashboard-sections"
             onClick={() => setMenuOpen(!menuOpen)}>

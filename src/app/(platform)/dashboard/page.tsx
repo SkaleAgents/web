@@ -13,7 +13,7 @@ const tools = [
   { section: "organizations", title: "Organizations", detail: "Manage memberships and invitations." },
   { section: "studio", title: "Creator Studio", detail: "Write a bot, refine its instructions, and publish when ready." },
   { section: "prompts", title: "My prompts", detail: "Save instructions for your next review." },
-  { section: "mcp-config", title: "MCP connections", detail: "Connect your editor and manage its access." },
+  { section: "mcp-config", title: "MCP connections", detail: "See connected clients and disconnect access." },
   { section: "settings", title: "Account settings", detail: "Manage notifications, security, and retention." },
 ];
 
@@ -33,7 +33,7 @@ export default function DashboardPage() {
     { label: "Scheduled audits", href: href("schedules"), value: schedules.data?.length, error: schedules.isError },
     { label: "My bots", href: href("bots"), value: bots.data?.filter(bot => bot.ownerUserId === accountId).length, error: bots.isError },
   ];
-  const recent = [...(jobs.data ?? [])].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)).slice(0, 5);
+  const recent = [...(jobs.data ?? [])].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)).slice(0, 3);
 
   return <main className="space-y-8">
     {accountId ? <RetentionNotice key={accountId} accountId={accountId} presentation="dialog" /> : null}

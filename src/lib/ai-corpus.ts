@@ -272,7 +272,7 @@ function staticPage(path: string): string | null {
     return document("MCP config", [
       "Add SkaleAgents to Cursor, Claude Code, Claude Desktop, ChatGPT, or Codex, then approve access in the browser. The client handles credentials.",
       "",
-      "Connection management for signed-in users is at /dashboard/mcp-config. That page is not public reference.",
+      "Client setup steps live only on this page. Connection management for signed-in users is at /dashboard/mcp-config.",
     ]);
   }
   if (path === "/privacy") return privacyMarkdown();

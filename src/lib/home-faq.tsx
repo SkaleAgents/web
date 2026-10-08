@@ -45,8 +45,8 @@ export const homeFaqs: HomeFaq[] = [
   },
   {
     question: "Can I keep my bots private and revoke tool access?",
-    answerText: "Yes. Creator Studio supports public and private bots, with drafts kept out of the public directory. MCP clients are authorized through OAuth and tied to your Google-backed account. Disconnect a client from MCP config to remove its access.",
-    answer: <>Yes. Creator Studio supports public and private bots, with drafts kept out of the public directory. MCP clients are authorized through OAuth and tied to your Google-backed account. Disconnect a client from <Link href="/mcp-config">MCP config</Link> to remove its access.</>,
+    answerText: "Yes. Creator Studio supports public and private bots, with drafts kept out of the public directory. MCP clients are authorized through OAuth and tied to your Google-backed account. Disconnect a client from MCP connections in your dashboard to remove its access.",
+    answer: <>Yes. Creator Studio supports public and private bots, with drafts kept out of the public directory. MCP clients are authorized through OAuth and tied to your Google-backed account. Disconnect a client from <Link href="/dashboard/mcp-config">MCP connections</Link> in your dashboard to remove its access.</>,
   },
   {
     question: "What are the current limits?",

@@ -41,7 +41,7 @@ test("switcher names the organization and sidebar groups can collapse", async ({
   await expect(group).toHaveAttribute("aria-expanded", "true");
   await group.click();
   await expect(group).toHaveAttribute("aria-expanded", "false");
-  await page.getByRole("banner").getByRole("button", { name: "Collapse sidebar" }).click();
+  await page.getByRole("navigation", { name: "Dashboard navigation" }).getByRole("button", { name: "Collapse sidebar" }).click();
   await expect(page.getByRole("banner").getByRole("button", { name: "Expand sidebar" })).toBeVisible();
 });
 
