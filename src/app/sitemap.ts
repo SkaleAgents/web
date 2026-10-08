@@ -10,6 +10,7 @@ const publicPaths = [
   "/bot-directory",
   "/bot-directory/integrations",
   ...BOT_INTEGRATIONS.map((item) => `/bot-directory/integrations/${item.slug}`),
+  "/bot-directory/specialties",
   ...SPECIALTIES.map((specialty) => `/bot-directory/specialties/${specialty}`),
   "/prompts",
   "/checks",

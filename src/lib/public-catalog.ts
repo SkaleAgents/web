@@ -1,4 +1,4 @@
-import { API_URL, BOT_INTEGRATIONS, type Bot, type BotIntegration, type Prompt } from "@/lib/api";
+import { API_URL, BOT_INTEGRATIONS, SPECIALTIES, type Bot, type BotIntegration, type Prompt, type Specialty } from "@/lib/api";
 
 export function publishedPublicBots(bots: Bot[]): Bot[] {
   return bots.filter((bot) => bot.visibility === "public" && bot.status === "published");
@@ -10,6 +10,14 @@ export function countBotsByIntegration(bots: Bot[]): Record<BotIntegration, numb
     for (const slug of bot.integrations ?? []) {
       if (slug in counts) counts[slug] += 1;
     }
+  }
+  return counts;
+}
+
+export function countBotsBySpecialty(bots: Bot[]): Record<Specialty, number> {
+  const counts = Object.fromEntries(SPECIALTIES.map((specialty) => [specialty, 0])) as Record<Specialty, number>;
+  for (const bot of publishedPublicBots(bots)) {
+    if (bot.specialty in counts) counts[bot.specialty] += 1;
   }
   return counts;
 }
