@@ -234,7 +234,7 @@ export const publicPosts: readonly PublicPost[] = [
       {
         heading: "Gemini, Grokbot, and long prompts",
         paragraphs: [
-          "Gemini always copies that agent handoff and opens Gemini. Grokbot copies the same handoff and opens Grok Bot at x.ai/bot, because Grok Bot has no public prefill link. The notice says to paste it. The same copy happens for a prefilled assistant when the encoded body is longer than 1800 characters. The notice then says the link was too long to prefill.",
+          "Gemini always copies that agent handoff and opens Gemini. Grokbot copies the same handoff, including the page's .md URL when one exists, and opens Grok Bot at x.ai/bot, because Grok Bot has no public prefill link. Copy for an agent does the same. The notice says to paste it. The same copy happens for a prefilled assistant when the encoded body is longer than 1800 characters. The notice then says the link was too long to prefill.",
           "After it opens, paste the config or the log under the prompt. The prompt cannot review a file it never received.",
         ],
       },

@@ -28,45 +28,48 @@ function menuTitle(id: AssistantId, label: string) {
 }
 import { Button } from "@/components/ui";
 
-const COPY_OPTIONS: ReadonlyArray<{
-  id: string;
-  label: string;
-  description: string;
-  text: (title: string, body: string) => string;
-  notice: string;
-}> = [
-  {
-    id: "plain",
-    label: "Copy plain text",
-    description: "Prompt body only",
-    text: (_title, body) => plainPromptText(body),
-    notice: "Prompt copied. Paste it into any assistant.",
-  },
-  {
-    id: "markdown",
-    label: "Copy as markdown",
-    description: "A heading plus the prompt",
-    text: markdownPromptText,
-    notice: "Markdown copied. Paste it into any assistant.",
-  },
-  {
-    id: "agent",
-    label: "Copy for an agent",
-    description: "Title, rules, and the prompt",
-    text: agentPromptText,
-    notice: "Agent handoff copied. Paste it into any assistant.",
-  },
-];
-
 export function BotPromptActions({
   prompt,
   title = "Prompt",
   align = "right",
+  markdownUrl,
 }: {
   prompt: string;
   title?: string;
   align?: "left" | "right";
+  markdownUrl?: string;
 }) {
+  const copyOptions: ReadonlyArray<{
+    id: string;
+    label: string;
+    description: string;
+    text: string;
+    notice: string;
+  }> = [
+    {
+      id: "plain",
+      label: "Copy plain text",
+      description: "Prompt body only",
+      text: plainPromptText(prompt),
+      notice: "Prompt copied. Paste it into any assistant.",
+    },
+    {
+      id: "markdown",
+      label: "Copy as markdown",
+      description: "A heading plus the prompt",
+      text: markdownPromptText(title, prompt),
+      notice: "Markdown copied. Paste it into any assistant.",
+    },
+    {
+      id: "agent",
+      label: "Copy for an agent",
+      description: markdownUrl ? "Title, rules, markdown link, and the prompt" : "Title, rules, and the prompt",
+      text: agentPromptText(title, prompt, markdownUrl),
+      notice: markdownUrl
+        ? "Agent handoff copied with the markdown link. Paste it into any assistant."
+        : "Agent handoff copied. Paste it into any assistant.",
+    },
+  ];
   const [menuOpen, setMenuOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [copyFailed, setCopyFailed] = useState(false);
@@ -185,7 +188,7 @@ export function BotPromptActions({
           }}
         >
           {ASSISTANT_OPTIONS.map((assistant) => {
-            const handoff = assistantHandoff(assistant.id, title, prompt);
+            const handoff = assistantHandoff(assistant.id, title, prompt, markdownUrl);
             const label = (
               <span className="flex items-start gap-2">
                 {/* Fixed 16px marks, including SVGs the image optimizer will not process. */}
@@ -224,13 +227,13 @@ export function BotPromptActions({
               </a>
             );
           })}
-          {COPY_OPTIONS.map((option) => (
+          {copyOptions.map((option) => (
             <button
               key={option.id}
               className="block w-full rounded-md px-3 py-2 text-left hover:bg-accent-soft"
               role="menuitem"
               type="button"
-              onClick={() => void writeClipboard(option.text(title, prompt), option.notice)}
+              onClick={() => void writeClipboard(option.text, option.notice)}
             >
               <span className="flex items-start gap-2">
                 <svg aria-hidden="true" viewBox="0 0 16 16" className="mt-0.5 h-4 w-4 shrink-0">

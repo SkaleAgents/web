@@ -7,6 +7,7 @@ import { apiFetch, type Prompt } from "@/lib/api";
 import { BotPromptActions } from "@/components/bot-prompt-actions";
 import { LinkButton } from "@/components/ui";
 import { promptCategoryLabel, promptType } from "@/lib/prompt-labels";
+import { absoluteMarkdown } from "@/lib/site-url";
 
 export function PromptDetail({ initialPrompt }: { initialPrompt?: Prompt }) {
   const params = useParams<{ id: string }>();
@@ -50,7 +51,7 @@ export function PromptDetail({ initialPrompt }: { initialPrompt?: Prompt }) {
         </div>
         <div className="flex flex-wrap gap-2">
           <LinkButton href="/prompts" variant="secondary">Back to library</LinkButton>
-          <BotPromptActions title={prompt.title} prompt={prompt.body} />
+          <BotPromptActions title={prompt.title} prompt={prompt.body} markdownUrl={absoluteMarkdown(`/prompts/${prompt.id}`)} />
         </div>
       </div>
       <pre className="whitespace-pre-wrap break-words rounded-[10px] border border-line bg-canvas-elevated p-6 font-mono text-sm leading-6 text-ink">{prompt.body}</pre>

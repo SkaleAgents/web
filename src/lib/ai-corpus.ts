@@ -6,7 +6,8 @@ import { publicCheckPath, publicChecks } from "./public-checks";
 import { publicResourcePath, publicResources, resourceMarkdown, resourcesIndexMarkdown } from "./public-resources";
 import { blogIndexMarkdown, postMarkdown, publicPostPath, publishedPosts } from "./public-posts";
 
-export const SITE = "https://skaleagents.com";
+export { SITE, absoluteMarkdown, markdownPath } from "./site-url";
+import { SITE, absoluteMarkdown, markdownPath } from "./site-url";
 
 export const INDEXNOW_KEY = "7c4e9a1b6d2f48e0a5c3b8d71f06e294";
 
@@ -66,14 +67,6 @@ const features = [
   ["Pricing", "/pricing", "Free, Starter, Pro, Max, and Enterprise organization plans."],
   ["Products", "/products", "CloudPloy, Crontinel, Toolblip, AmazingPlugins, Appnary, and harun.dev."],
 ] as const;
-
-export function markdownPath(path: string): string {
-  return path === "/" ? "/index.md" : `${path}.md`;
-}
-
-export function absoluteMarkdown(path: string): string {
-  return `${SITE}${markdownPath(path)}`;
-}
 
 export function robotsPolicy(): MetadataRoute.Robots {
   const rule = { allow: "/" as const, disallow: [...PRIVATE_PATHS] };

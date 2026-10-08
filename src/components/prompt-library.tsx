@@ -17,6 +17,7 @@ import { parsePromptTags } from "@/lib/tags";
 import { BotPromptActions } from "@/components/bot-prompt-actions";
 import { Button, LinkButton, TextInput } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
+import { absoluteMarkdown } from "@/lib/site-url";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 import { promptCategories, promptCategoryLabel, promptType } from "@/lib/prompt-labels";
 
@@ -180,7 +181,14 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
             <details><summary className="cursor-pointer text-sm font-semibold">Read full prompt</summary>
             <pre className="mt-3 whitespace-pre-wrap break-words font-mono text-sm text-ink">{prompt.body}</pre>
             </details>
-            <div className="mt-4"><BotPromptActions title={prompt.title} prompt={prompt.body} align="left" /></div>
+            <div className="mt-4">
+              <BotPromptActions
+                title={prompt.title}
+                prompt={prompt.body}
+                align="left"
+                markdownUrl={!manage && !prompt.ownerUserId ? absoluteMarkdown(`/prompts/${prompt.id}`) : undefined}
+              />
+            </div>
           </li>
         ))}
       </ul>
@@ -205,7 +213,14 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
                 </td>
                 <td className="px-4 py-4 text-ink-muted">{promptType(prompt.ownerUserId)}</td>
                 <td className="px-4 py-4 text-ink-muted">{promptCategoryLabel(prompt.tags)}</td>
-                <td className="px-4 py-4"><BotPromptActions title={prompt.title} prompt={prompt.body} align="left" /></td>
+                <td className="px-4 py-4">
+                  <BotPromptActions
+                    title={prompt.title}
+                    prompt={prompt.body}
+                    align="left"
+                    markdownUrl={!manage && !prompt.ownerUserId ? absoluteMarkdown(`/prompts/${prompt.id}`) : undefined}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>

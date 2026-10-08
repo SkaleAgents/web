@@ -25,6 +25,20 @@ describe("prompt copy text", () => {
         body,
       ].join("\n"),
     );
+    const markdownUrl = "https://skaleagents.com/bot-directory/example.md";
+    expect(agentPromptText(title, body, markdownUrl)).toBe(
+      [
+        `Task: ${title}`,
+        "",
+        "Follow the instructions below. Use only the context the user provides. If a file, log, or config is missing, ask for it before giving a finding.",
+        "",
+        `Source (markdown): ${markdownUrl}`,
+        "Fetch that page if you can read URLs. Otherwise use the instructions below.",
+        "",
+        "Instructions:",
+        body,
+      ].join("\n"),
+    );
   });
 });
 
@@ -81,6 +95,13 @@ describe("assistant handoff", () => {
       href: "https://x.ai/bot",
       text: agentPromptText(title, body),
       notice: "Prompt copied. Paste it into Grok Bot.",
+    });
+    const markdownUrl = "https://skaleagents.com/bot-directory/example.md";
+    expect(assistantHandoff("supergrok", title, body, markdownUrl)).toEqual({
+      mode: "copy-then-open",
+      href: "https://x.ai/bot",
+      text: agentPromptText(title, body, markdownUrl),
+      notice: "Prompt copied with the markdown link. Paste it into Grok Bot.",
     });
   });
 

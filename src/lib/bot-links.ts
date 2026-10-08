@@ -28,7 +28,7 @@ export const ASSISTANT_OPTIONS: ReadonlyArray<{
   {
     id: "supergrok",
     label: "Grokbot",
-    description: "Copy the prompt, then open Grok Bot",
+    description: "Copy with the markdown link, then open Grok Bot",
   },
   { id: "codex", label: "Codex", description: "Open Cloud Codex" },
   { id: "perplexity", label: "Perplexity", description: "Open a search with the prompt" },
@@ -63,8 +63,17 @@ export function markdownPromptText(title: string, body: string): string {
   return `# ${title}\n\n${body}`;
 }
 
-export function agentPromptText(title: string, body: string): string {
-  return [`Task: ${title}`, "", AGENT_RULES, "", "Instructions:", body].join("\n");
+export function agentPromptText(title: string, body: string, markdownUrl?: string): string {
+  const lines = [`Task: ${title}`, "", AGENT_RULES];
+  if (markdownUrl) {
+    lines.push(
+      "",
+      `Source (markdown): ${markdownUrl}`,
+      "Fetch that page if you can read URLs. Otherwise use the instructions below.",
+    );
+  }
+  lines.push("", "Instructions:", body);
+  return lines.join("\n");
 }
 
 export type AssistantHandoff =
@@ -91,6 +100,7 @@ export function assistantHandoff(
   assistant: AssistantId,
   title: string,
   body: string,
+  markdownUrl?: string,
 ): AssistantHandoff {
   if (assistant === "codex") {
     return { mode: "open", href: CODEX_URL };
@@ -107,15 +117,17 @@ export function assistantHandoff(
     return {
       mode: "copy-then-open",
       href: GROKBOT_URL,
-      text: agentPromptText(title, body),
-      notice: "Prompt copied. Paste it into Grok Bot.",
+      text: agentPromptText(title, body, markdownUrl),
+      notice: markdownUrl
+        ? "Prompt copied with the markdown link. Paste it into Grok Bot."
+        : "Prompt copied. Paste it into Grok Bot.",
     };
   }
   if (encodeURIComponent(body).length > ASSISTANT_QUERY_LIMIT) {
     return {
       mode: "copy-then-open",
       href: new URL(BASE_URL[assistant]).toString(),
-      text: agentPromptText(title, body),
+      text: agentPromptText(title, body, markdownUrl),
       notice: "Prompt copied. The link was too long to prefill, so paste it into the chat.",
     };
   }
