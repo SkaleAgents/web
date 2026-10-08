@@ -92,7 +92,7 @@ export function BotDirectory({ manage = false, initialBots, integration, special
             then take it to Grok, Claude, Codex, or your preferred assistant.
           </p>
         </div>
-        <LinkButton href={manage ? personalHref("studio") : "/dashboard/bots"}>{manage ? "Create bot" : "Manage your bots"}</LinkButton>
+        <LinkButton href={manage ? personalHref("studio") : "/me/bots"}>{manage ? "Create bot" : "Manage your bots"}</LinkButton>
       </div>
 
       <section aria-label="Find a bot" className="space-y-4">

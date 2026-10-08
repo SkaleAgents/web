@@ -142,7 +142,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
     {user.isError || organizations.isError || catalog.isError ? <p role="alert" className="text-sm text-danger">Billing details could not be loaded. Refresh the page and try again.</p> : null}
     {organizations.isPending || catalog.isPending || user.isPending ? <p role="status" className="text-sm text-ink-muted">Loading billing details…</p> : null}
     {fixedOrganizationUnavailable ? <p role="alert" className="text-sm text-danger">Billing unavailable for this organization.</p> : null}
-    {organizations.isSuccess && owned.length === 0 && !fixedOrganizationId ? <p className="text-sm text-ink-muted">You do not own an organization yet. <Link href="/dashboard/workspaces" className="underline">Create one in Organizations</Link>.</p> : null}
+    {organizations.isSuccess && owned.length === 0 && !fixedOrganizationId ? <p className="text-sm text-ink-muted">You do not own an organization yet. <Link href="/me/organizations" className="underline">Create one in Organizations</Link>.</p> : null}
     {owned.length > 0 && !fixedOrganizationId ? <div className="space-y-2">
       <label className="block max-w-sm text-sm font-medium text-ink" htmlFor="billing-organization">Organization</label>
       <select id="billing-organization" className="w-full max-w-sm rounded-md border border-line bg-canvas-elevated px-3 py-2 text-ink" value={organizationId} onChange={(event) => { setSelectedId(event.target.value); setCheckoutLink(null); change.reset(); cancel.reset(); }}>

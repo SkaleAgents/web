@@ -94,7 +94,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
             <ProductNavigation key={pathname} />
           </div>
           <div className="ml-auto flex flex-wrap items-center justify-end gap-3 text-sm sm:ml-0">
-            {userQuery.data && <LinkButton href="/dashboard" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>}
+            {userQuery.data && <LinkButton href="/me" variant="ghost" className="px-3 py-1.5">Dashboard</LinkButton>}
             <ThemeSwitcher />
             <SessionAccountAction user={userQuery.data} pending={userQuery.isPending} />
           </div>

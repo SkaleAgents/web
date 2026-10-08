@@ -65,7 +65,7 @@ export function ExampleExplorerPreview() {
           </div>
         </div>
       </div>
-      <div className="mt-5 flex justify-end"><LinkButton href="/dashboard/jobs" variant="ghost">Bring your own infrastructure to an audit <span aria-hidden="true" className="ml-2">↗</span></LinkButton></div>
+      <div className="mt-5 flex justify-end"><LinkButton href="/me/jobs" variant="ghost">Bring your own infrastructure to an audit <span aria-hidden="true" className="ml-2">↗</span></LinkButton></div>
     </div>
   );
 }
@@ -94,7 +94,7 @@ export function SampleReviewDemoPreview() {
           <ul className="mt-5 divide-y divide-line">{review.findings.map((finding) => <li key={finding.field} className="py-4 first:pt-0"><div className="flex flex-wrap items-center justify-between gap-2"><code className="text-xs text-ink-muted">{finding.field}</code><span className="rounded border border-line px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-ink-muted">Review this</span></div><h4 className="mt-2 font-semibold">{finding.title}</h4><p className="mt-2 text-sm leading-relaxed text-ink-muted">{finding.detail}</p></li>)}</ul>
         </div>
       </div>
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-4"><div><Button type="button" variant="secondary" disabled>Copy demo settings</Button><p className="mt-2 text-xs text-ink-muted" aria-live="polite" /></div><LinkButton href="/dashboard/jobs" variant="ghost">Review your own infrastructure <span className="ml-2" aria-hidden="true">↗</span></LinkButton></div>
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-4"><div><Button type="button" variant="secondary" disabled>Copy demo settings</Button><p className="mt-2 text-xs text-ink-muted" aria-live="polite" /></div><LinkButton href="/me/jobs" variant="ghost">Review your own infrastructure <span className="ml-2" aria-hidden="true">↗</span></LinkButton></div>
     </>
   );
 }

@@ -84,7 +84,7 @@ test("public catalogs omit credentials and hide private resources even for a sig
   let connections = 0;
   await page.route("**/api/oauth/connections", route => { connections++; return route.fulfill({ json: { connections: [] } }); });
   await page.goto("/mcp-config");
-  await expect(page.getByRole("link", { name: "Open MCP connections" })).toHaveAttribute("href", "/dashboard/mcp-config");
+  await expect(page.getByRole("link", { name: "Open MCP connections" })).toHaveAttribute("href", "/me/mcp-config");
   expect(connections).toBe(0);
   expect([...publicRequests].sort()).toEqual(["/api/bots", "/api/prompts"]);
 });

@@ -99,7 +99,7 @@ export function SampleReviewDemo() {
           <Button type="button" variant="secondary" disabled={Boolean(review.error)} onClick={() => void copySettings()}>Copy demo settings</Button>
           <p className="mt-2 text-xs text-ink-muted" aria-live="polite">{copyState === "copied" ? "Demo settings copied." : copyState === "failed" ? "Clipboard unavailable. Select and copy the JSON in the editor." : ""}</p>
         </div>
-        <LinkButton href="/dashboard/jobs" variant="ghost">Review your own infrastructure <span className="ml-2" aria-hidden="true">↗</span></LinkButton>
+        <LinkButton href="/me/jobs" variant="ghost">Review your own infrastructure <span className="ml-2" aria-hidden="true">↗</span></LinkButton>
       </div>
     </>
   );

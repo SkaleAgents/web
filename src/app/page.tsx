@@ -19,7 +19,7 @@ const features = [
   { number: "02", title: "Write a review playbook", label: "Creator Studio", description: "Start with a security, reliability, or capacity template. Customize the instructions, save a draft, and publish publicly or keep it private.", href: "/dashboard/studio", cta: "Open Studio" },
   { number: "03", title: "Find it. Copy it. Get to work.", label: "Prompt library", description: "The library lists title, type, and category. Open a prompt to read it and copy the full instructions. Sign in to save your own reusable prompts.", href: "/prompts", cta: "Browse prompts" },
   { number: "04", title: "Read the review checks", label: "Public reference", description: "See what each built-in check looks for, the input it needs, and what a result does not prove. No account required.", href: "/checks", cta: "Read the checks" },
-  { number: "05", title: "Set a review rhythm", label: "Scheduled audits", description: "Review saved infrastructure text or a public GitHub file on a schedule. Set the timezone and send audit alerts to a webhook.", href: "/dashboard/schedules", cta: "View schedules" },
+  { number: "05", title: "Set a review rhythm", label: "Scheduled audits", description: "Review saved infrastructure text or a public GitHub file on a schedule. Set the timezone and send audit alerts to a webhook.", href: "/me/schedules", cta: "View schedules" },
   { number: "06", title: "Stay in your editor", label: "MCP connection", description: "Connect the AI you already use. It checks your application and your infrastructure, then tells you what to change.", href: "/mcp-config", cta: "MCP config" },
 ];
 
