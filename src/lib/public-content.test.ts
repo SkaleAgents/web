@@ -6,9 +6,10 @@ import { publicResources } from "./public-resources";
 
 it("publishes free resources and blog posts in the sitemap, llms.txt, and markdown", async () => {
   expect(new Set(publicResources.map((resource) => resource.slug)).size).toBe(3);
-  expect(new Set(publicPosts.map((post) => post.slug)).size).toBe(8);
+  expect(new Set(publicPosts.map((post) => post.slug)).size).toBe(9);
   expect(publishedPosts(new Date("2026-10-07T12:00:00+06:00"))).toHaveLength(4);
   expect(publishedPosts(new Date("2026-11-09T09:00:00+06:00")).some((post) => post.slug === "pull-request-target-checks-out-the-pr")).toBe(false);
+  expect(publishedPosts(new Date("2026-11-16T09:40:00+06:00")).some((post) => post.slug === "dont-pipe-curl-to-bash")).toBe(false);
   const clocks: string[] = [];
   for (const post of publicPosts) {
     if (!post.publishAt) continue;
@@ -25,7 +26,7 @@ it("publishes free resources and blog posts in the sitemap, llms.txt, and markdo
   }
   expect(new Set(clocks).size).toBe(clocks.length);
   const latest = new Date(Math.max(...publicPosts.flatMap((post) => post.publishAt ? [Date.parse(post.publishAt)] : [])));
-  expect(publishedPosts(latest)).toHaveLength(8);
+  expect(publishedPosts(latest)).toHaveLength(9);
   const memoryLimit = publicPosts.find((post) => post.slug === "set-a-memory-limit");
   const memoryLimitOpens = new Date(memoryLimit?.publishAt ?? "");
   const beforeMemoryLimit = new Date(memoryLimitOpens.getTime() - 1000);
