@@ -1,5 +1,6 @@
 import { markdownPath } from "@/lib/ai-corpus";
 import { BotPromptActions } from "@/components/bot-prompt-actions";
+import { absoluteMarkdown } from "@/lib/site-url";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -52,7 +53,11 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
       </ul>
       <div className="mt-10 flex flex-wrap items-start justify-between gap-4">
         <h2 className="text-lg font-semibold">{resource.promptTitle}</h2>
-        <BotPromptActions title={resource.promptTitle} prompt={resource.prompt} />
+        <BotPromptActions
+          title={resource.promptTitle}
+          prompt={resource.prompt}
+          markdownUrl={absoluteMarkdown(publicResourcePath(resource))}
+        />
       </div>
       <pre className="mt-3 whitespace-pre-wrap break-words rounded-[10px] border border-line bg-canvas-elevated p-4 font-mono text-sm leading-6">{resource.prompt}</pre>
       <p className="mt-8 text-sm text-ink-muted">

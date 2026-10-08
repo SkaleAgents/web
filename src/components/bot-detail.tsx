@@ -7,6 +7,7 @@ import { BotPromptActions } from "@/components/bot-prompt-actions";
 import { ToolLogo } from "@/components/tool-logo";
 import { apiFetch, BOT_INTEGRATIONS, type Bot, type BotIntegration, type Specialty } from "@/lib/api";
 import { relatedReviewers } from "@/lib/related-reviewers";
+import { absoluteMarkdown } from "@/lib/site-url";
 import { currentUserOptions } from "@/lib/session";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
@@ -126,7 +127,15 @@ export function BotDetail({ manage = false, initialBot, initialBots }: { manage?
               Open this prompt in the assistant you already use.
             </p>
           </div>
-          <BotPromptActions title={bot.name} prompt={bot.promptBody} />
+          <BotPromptActions
+            title={bot.name}
+            prompt={bot.promptBody}
+            markdownUrl={
+              bot.visibility === "public" && bot.status === "published"
+                ? absoluteMarkdown(`/bot-directory/${bot.id}`)
+                : undefined
+            }
+          />
         </div>
         <pre className="mt-5 whitespace-pre-wrap break-words rounded-[10px] border border-line bg-canvas px-4 py-4 font-mono text-sm leading-6 text-ink">
           {bot.promptBody}

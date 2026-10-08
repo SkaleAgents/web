@@ -117,6 +117,12 @@ test("a signed-in creator can publish a bot into the directory", async ({ page }
   await expect(menu.getByRole("menuitem", { name: "Open in Codex" })).toHaveAttribute("href", "https://chatgpt.com/codex");
   await expect(menu.getByRole("menuitem", { name: /^Grokbot/ })).not.toHaveAttribute("href", /.+/);
   await expect(menu.getByRole("menuitem", { name: "Open in Gemini" })).not.toHaveAttribute("href", /.+/);
+  await menu.getByRole("menuitem", { name: "Copy for an agent" }).click();
+  await expect(page.getByText("Agent handoff copied with the markdown link. Paste it into any assistant.")).toBeVisible();
+  expect(await page.evaluate(() => (window as unknown as { copiedPrompt?: string }).copiedPrompt)).toContain(
+    `https://skaleagents.com/bot-directory/${botId}.md`,
+  );
+  await page.getByRole("button", { name: "Actions" }).click();
   await menu.getByRole("menuitem", { name: "Copy plain text" }).click();
   await expect(
     page.getByText("Prompt copied. Paste it into any assistant."),
