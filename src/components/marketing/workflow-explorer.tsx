@@ -57,7 +57,7 @@ const workflows = [
       ["Repeat when needed", "Create a scheduled audit with a cron expression and timezone. An optional webhook receives completion or failure alerts."],
     ],
     note: "Schedules review the supplied IaC text. They don't automatically track changes in your repository.",
-    href: "/dashboard/jobs",
+    href: "/me/jobs",
     cta: "Open audit jobs",
     codeTitle: "Your review checklist",
     code: "Scope       Infrastructure text\nSpecialists Selected for the task\nContext     Optional telemetry\n\nInspect findings in Watchtower.\nDiscuss the proposed remediation.\nValidate changes in your own workflow.",

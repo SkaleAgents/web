@@ -84,7 +84,7 @@ export function PricingPlans() {
         </div>
         {plan.checkoutMode === "contact" ? <button type="button" onClick={() => { setFormOpen(true); setSubmitted(false); }} className="w-full bg-accent px-4 py-3 text-sm font-semibold text-accent-fg hover:opacity-90">Contact us</button>
           : plan.checkoutMode === "self_service" ? (enrollmentOpen
-            ? <Link href="/dashboard/billing" className="border border-line px-4 py-3 text-center text-sm font-semibold hover:bg-accent-soft">Choose {plan.name}</Link>
+            ? <Link href="/me/billing" className="border border-line px-4 py-3 text-center text-sm font-semibold hover:bg-accent-soft">Choose {plan.name}</Link>
             : <p className="border border-line bg-canvas px-4 py-3 text-center text-sm font-semibold text-ink-muted">Enrollment coming soon</p>)
           : <Link href="/login" className="border border-line px-4 py-3 text-center text-sm font-semibold hover:bg-accent-soft">Get started free</Link>}
       </article>)}

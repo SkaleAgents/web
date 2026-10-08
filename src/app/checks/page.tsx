@@ -75,7 +75,7 @@ export default async function PublicChecksPage({ searchParams }: { searchParams:
       <h1 className="mt-4 max-w-3xl font-display text-[clamp(2.5rem,6vw,4.5rem)] font-semibold leading-tight tracking-tight">What a review actually checks.</h1>
       <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">This page lists the checks a review can run. It does not run a review, connect to a cloud account, or prove that a system is secure.</p>
       <p className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
-        <Link href="/dashboard/jobs" className="underline decoration-line underline-offset-4">Start a review</Link>
+        <Link href="/me/jobs" className="underline decoration-line underline-offset-4">Start a review</Link>
         <Link href="/mcp-config" className="underline decoration-line underline-offset-4">Set up MCP</Link>
       </p>
     </div>

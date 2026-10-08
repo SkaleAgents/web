@@ -78,6 +78,6 @@ export function EnterpriseInquiries() {
                       </li>)}
                     </ul>}
                 </>}
-    <LinkButton href="/dashboard" variant="secondary">Back to dashboard</LinkButton>
+    <LinkButton href="/me" variant="secondary">Back to dashboard</LinkButton>
   </main>;
 }

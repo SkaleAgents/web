@@ -20,7 +20,7 @@ it("lists the first page of checks and every category filter", async () => {
   expect(screen.getByText("Showing 1\u201310 of 48")).toBeInTheDocument();
   expect(container.innerHTML).toContain("Showing 1\u201310 of 48");
   expect(text).not.toContain("The list includes a public database, wildcard permissions");
-  expect(screen.getByRole("link", { name: "Start a review" })).toHaveAttribute("href", "/dashboard/jobs");
+  expect(screen.getByRole("link", { name: "Start a review" })).toHaveAttribute("href", "/me/jobs");
   expect(screen.getByRole("link", { name: "Set up MCP" })).toHaveAttribute("href", "/mcp-config");
 
   for (const label of ["All 48", "Security 37", "Reliability 6", "AI workloads 3", "Scaling and cost 2"]) {

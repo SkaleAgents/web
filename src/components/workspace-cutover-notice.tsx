@@ -30,7 +30,7 @@ export function WorkspaceCutoverNoticeView({ workspaceId }: { workspaceId: strin
       : user.isError ? <p role="alert" className="text-sm text-danger">Could not load your account. Refresh the page and try again.</p>
         : user.data ? <NoticeContent key={`${user.data.id}:${workspaceId}`} accountId={user.data.id} workspaceId={workspaceId} />
           : <LinkButton href="/login">Sign in to view the organization notice</LinkButton>}
-    <LinkButton href="/dashboard/workspaces" variant="secondary">Back to organizations</LinkButton>
+    <LinkButton href="/me/organizations" variant="secondary">Back to organizations</LinkButton>
   </main>;
 }
 

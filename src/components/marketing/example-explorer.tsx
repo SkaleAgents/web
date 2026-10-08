@@ -157,7 +157,7 @@ export function ExampleExplorer() {
         </div>
       </div>
       </div>
-      <div className="mt-5 flex justify-end"><LinkButton href="/dashboard/jobs" variant="ghost">Bring your own infrastructure to an audit <span aria-hidden="true" className="ml-2">↗</span></LinkButton></div>
+      <div className="mt-5 flex justify-end"><LinkButton href="/me/jobs" variant="ghost">Bring your own infrastructure to an audit <span aria-hidden="true" className="ml-2">↗</span></LinkButton></div>
     </div>
   );
 }

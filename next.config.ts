@@ -36,6 +36,8 @@ const nextConfig: NextConfig = {
       { source: "/dashboard/workspaces", destination: "/dashboard/organizations", permanent: false },
       { source: "/dashboard/billing", has: [{ type: "query", key: "organization", value: "(?<workspaceId>[0-9a-fA-F-]{36})" }], destination: "/org/:workspaceId/billing", permanent: false },
       { source: "/dashboard/billing", destination: "/dashboard/organizations", permanent: false },
+      { source: "/me/billing", has: [{ type: "query", key: "organization", value: "(?<workspaceId>[0-9a-fA-F-]{36})" }], destination: "/org/:workspaceId/billing", permanent: false },
+      { source: "/me/billing", destination: "/me/organizations", permanent: false },
       { source: "/dashboard/staff/:path*", destination: "/staff/:path*", permanent: false },
       { source: "/workspaces", destination: "/dashboard/organizations", permanent: false },
       { source: "/workspaces/:workspaceId/:path*", destination: "/org/:workspaceId/:path*", permanent: false },

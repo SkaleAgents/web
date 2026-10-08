@@ -153,7 +153,7 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
         </form>
         </details>
       ) : (
-        <LinkButton href={manage ? personalDestinationFromPath(pathname, "prompts") : "/dashboard/prompts"} variant="secondary">Manage your prompts</LinkButton>
+        <LinkButton href={manage ? personalDestinationFromPath(pathname, "prompts") : "/me/prompts"} variant="secondary">Manage your prompts</LinkButton>
       )}
 
       {promptsQuery.isPending && (
