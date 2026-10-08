@@ -157,7 +157,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   return <div className={`dashboard-frame ${collapsed ? "is-collapsed" : ""} ${menuOpen ? "is-menu-open" : ""}`} onKeyDown={event => {
     if (event.key === "Escape" && menuOpen) { event.preventDefault(); closeMenu(); }
   }}>
-    {menuOpen ? <button type="button" className="dashboard-menu-scrim" aria-label="Close menu" onClick={closeMenu} /> : null}
+    {menuOpen ? <button type="button" className="dashboard-menu-scrim" aria-label="Dismiss menu" onClick={closeMenu} /> : null}
     <aside className="dashboard-sidebar">
       <nav ref={navigation} aria-label="Dashboard navigation" className="dashboard-navigation">
         <div className="dashboard-brand">
