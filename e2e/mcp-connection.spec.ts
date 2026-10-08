@@ -29,13 +29,18 @@ test("MCP configuration needs no manual key and connected clients can be disconn
     connected = false;
     return route.fulfill({ json: { ok: true } });
   });
-  await page.goto("/settings/mcp");
-  await expect(page).toHaveURL(/\/mcp-config$/);
+  await page.goto("/mcp-config");
   await expect(page.getByRole("heading", { name: "MCP config", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Create token" })).toHaveCount(0);
   await page.getByRole("button", { name: "Copy MCP config" }).click();
   const config = JSON.parse(await page.evaluate(() => navigator.clipboard.readText()));
   expect(config.mcpServers.skaleagents).toEqual({ url: "https://skaleagents.com/mcp" });
+
+  await page.goto("/settings/mcp");
+  await expect(page).toHaveURL(/\/mcp-config$/);
+  await expect(page.getByRole("heading", { name: "MCP connections", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open MCP setup guide" })).toHaveAttribute("href", "/mcp-config");
+  await expect(page.getByRole("button", { name: "Copy MCP config" })).toHaveCount(0);
   await expect(page.locator("p").filter({ hasText: /^Claude Desktop$/ })).toBeVisible();
   await page.getByRole("button", { name: "Disconnect", exact: true }).click();
   await expect(page.getByText(/No clients connected yet/)).toBeVisible();
