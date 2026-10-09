@@ -1,5 +1,5 @@
-import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { publicCheckBySlug, publicCheckPath, publicCheckProposedChange, publicChecks } from "@/lib/public-checks";
@@ -12,12 +12,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const check = publicCheckBySlug((await params).slug);
   if (!check) return {};
   const path = publicCheckPath(check);
-  return {
+  return pageMetadata({
+    path,
     title: `${check.title} | SkaleAgents review check`,
     description: check.looksFor,
-    alternates: { canonical: path, types: { "text/markdown": markdownPath(path) } },
-    openGraph: { title: check.title, description: check.looksFor, url: path },
-  };
+    pad: `A SkaleAgents ${check.area} review check: the input it needs and what a result does not prove.`,
+  });
 }
 
 export default async function PublicCheckPage({ params }: { params: Promise<{ slug: string }> }) {

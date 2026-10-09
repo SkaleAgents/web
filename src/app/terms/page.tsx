@@ -1,12 +1,8 @@
-import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Terms of Service | SkaleAgents",
-  description: "Terms for using SkaleAgents.",
-  alternates: { canonical: "/terms", types: { "text/markdown": markdownPath("/terms") } },
-};
+export const metadata: Metadata = pageMetadata({ path: "/terms", title: "Terms of Service | SkaleAgents", description: "Terms for using SkaleAgents, including accounts, plans and billing, acceptable use, account deletion, and how disputes are handled under Wyoming law." });
 
 export default function TermsPage() {
   return <main className="policy-page py-4 text-ink">

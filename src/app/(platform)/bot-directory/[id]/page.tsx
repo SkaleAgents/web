@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import { notFound } from "next/navigation";
 import { BotDetail } from "@/components/bot-detail";
-import { markdownPath } from "@/lib/ai-corpus";
 import { loadPublicBot, loadPublicBots } from "@/lib/public-catalog";
 
 const RESERVED_IDS = new Set(["integrations", "specialties", "categories"]);
@@ -11,11 +11,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (RESERVED_IDS.has(id)) return { title: "Bot | SkaleAgents" };
   const bot = await loadPublicBot(id);
   if (!bot) return { title: "Bot | SkaleAgents" };
-  return {
+  return pageMetadata({
+    path: `/bot-directory/${bot.id}`,
     title: `${bot.name} | SkaleAgents bot`,
     description: bot.description || "Specialist instructions you can read without an account.",
-    alternates: { canonical: `/bot-directory/${bot.id}`, types: { "text/markdown": markdownPath(`/bot-directory/${bot.id}`) } },
-  };
+    pad: "Read this specialist's instructions, then open them in your assistant.",
+  });
 }
 
 export default async function BotPage({ params }: { params: Promise<{ id: string }> }) {

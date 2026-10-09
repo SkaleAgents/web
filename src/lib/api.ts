@@ -379,6 +379,15 @@ export type Bot = {
   updatedAt: string;
 };
 
+export const SPECIALTY_LABEL: Record<Specialty, string> = {
+  devops: "DevOps",
+  devsecops: "DevSecOps",
+  sre: "SRE",
+  mlops: "MLOps",
+  scaling: "Scaling",
+  general: "General",
+};
+
 export const SPECIALTIES: Specialty[] = [
   "devops",
   "devsecops",

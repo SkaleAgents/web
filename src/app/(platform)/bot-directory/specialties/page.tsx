@@ -1,6 +1,7 @@
 import { SPECIALTIES, type Specialty } from "@/lib/api";
 import { countBotsBySpecialty, loadPublicBots } from "@/lib/public-catalog";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
 
 export const revalidate = 300;
@@ -14,11 +15,7 @@ const SPECIALTY_LABEL: Record<Specialty, string> = {
   general: "General",
 };
 
-export const metadata: Metadata = {
-  title: "Bots by specialty | SkaleAgents",
-  description: "Free reviewers grouped by DevOps, DevSecOps, SRE, MLOps, Scaling, and General.",
-  alternates: { canonical: "/bot-directory/specialties" },
-};
+export const metadata: Metadata = pageMetadata({ path: "/bot-directory/specialties", title: "Bots by specialty | SkaleAgents", description: "Free reviewers grouped by DevOps, DevSecOps, SRE, MLOps, Scaling, and General.", markdown: false });
 
 export default async function BotSpecialtiesPage() {
   const bots = await loadPublicBots();

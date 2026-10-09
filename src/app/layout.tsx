@@ -50,16 +50,14 @@ export const metadata: Metadata = {
   title: "SkaleAgents",
   description: "The control plane for AI DevOps agents, audits, and collaborative remediation.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://skaleagents.com"),
-  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     siteName: "SkaleAgents",
     title: "SkaleAgents | AI DevOps control plane",
     description: "Run AI DevOps audits and review remediation with your team.",
-    url: "/",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "SkaleAgents | AI DevOps control plane",
     description: "Run AI DevOps audits and review remediation with your team.",
   },

@@ -2,15 +2,12 @@ import { ToolLogo } from "@/components/tool-logo";
 import { BOT_INTEGRATIONS } from "@/lib/api";
 import { countBotsByIntegration, loadPublicBots } from "@/lib/public-catalog";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Bots by tool | SkaleAgents",
-  description: "Free DevOps and security reviewers grouped by GitHub, Slack, Linear, Terraform, AWS, and Kubernetes.",
-  alternates: { canonical: "/bot-directory/integrations" },
-};
+export const metadata: Metadata = pageMetadata({ path: "/bot-directory/integrations", title: "Bots by tool | SkaleAgents", description: "Free DevOps and security reviewers grouped by GitHub, Slack, Linear, Terraform, AWS, and Kubernetes.", markdown: false });
 
 export default async function BotIntegrationsPage() {
   const bots = await loadPublicBots();

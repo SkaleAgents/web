@@ -1,7 +1,7 @@
-import { markdownPath } from "@/lib/ai-corpus";
 import { BotPromptActions } from "@/components/bot-prompt-actions";
 import { absoluteMarkdown } from "@/lib/site-url";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { publicResourceBySlug, publicResourcePath, publicResources } from "@/lib/public-resources";
@@ -14,12 +14,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const resource = publicResourceBySlug((await params).slug);
   if (!resource) return {};
   const path = publicResourcePath(resource);
-  return {
+  return pageMetadata({
+    path,
     title: `${resource.title} | SkaleAgents`,
     description: resource.summary,
-    alternates: { canonical: path, types: { "text/markdown": markdownPath(path) } },
-    openGraph: { title: resource.title, description: resource.summary, url: path },
-  };
+    pad: "A free SkaleAgents checklist and prompt you can copy.",
+  });
 }
 
 export default async function ResourcePage({ params }: { params: Promise<{ slug: string }> }) {

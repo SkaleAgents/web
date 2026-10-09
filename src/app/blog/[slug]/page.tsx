@@ -1,6 +1,6 @@
-import { markdownPath } from "@/lib/ai-corpus";
 import { io } from "next/cache";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { publicPostBySlug, publicPostPath, publishedPosts } from "@/lib/public-posts";
@@ -16,24 +16,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = publicPostBySlug((await params).slug);
   if (!post) return {};
   const path = publicPostPath(post);
-  return {
+  return pageMetadata({
+    path,
     title: `${post.title} | SkaleAgents`,
     description: post.description,
-    alternates: { canonical: path, types: { "text/markdown": markdownPath(path) } },
-    openGraph: {
-      title: post.title,
-      description: post.description,
-      url: path,
-      type: "article",
-      publishedTime: post.date,
-    },
-  };
+    type: "article",
+    publishedTime: post.date,
+    pad: "A short SkaleAgents note on reviewing infrastructure.",
+  });
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   await io();
   const post = publicPostBySlug((await params).slug);
   if (!post) notFound();
+  const posts = publishedPosts();
+  const index = posts.findIndex((item) => item.slug === post.slug);
+  const related = [posts[(index + 1) % posts.length], posts[(index + posts.length - 1) % posts.length]].filter((other, i, all) => other.slug !== post.slug && all.findIndex((x) => x.slug === other.slug) === i);
   const article = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -62,6 +61,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           ))}
         </section>
       ))}
+      <h2 className="mt-10 text-lg font-semibold">More from the blog</h2>
+      <ul className="mt-3 space-y-2 text-sm font-semibold">
+        {related.map((other) => (
+          <li key={other.slug}><Link href={publicPostPath(other)} className="underline decoration-line underline-offset-4">{other.title}</Link></li>
+        ))}
+      </ul>
       <h2 className="mt-10 text-lg font-semibold">Keep going</h2>
       <ul className="mt-3 space-y-2 text-sm font-semibold">
         {post.links.map((link) => (
