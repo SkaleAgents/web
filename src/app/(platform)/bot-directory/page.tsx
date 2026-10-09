@@ -13,11 +13,11 @@ export default async function BotsPage() {
   const initialBots = await loadPublicBots();
   return <>
     <BotDirectory initialBots={initialBots} />
-    <nav aria-label="Browse by specialty" className="mt-10">
+    <div className="mt-10">
       <h2 className="text-lg font-semibold">Browse by specialty</h2>
       <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
         {SPECIALTIES.map((specialty) => <li key={specialty}><Link href={`/bot-directory/specialties/${specialty}`} className="underline decoration-line underline-offset-4">{SPECIALTY_LABEL[specialty]}</Link></li>)}
       </ul>
-    </nav>
+    </div>
   </>;
 }
