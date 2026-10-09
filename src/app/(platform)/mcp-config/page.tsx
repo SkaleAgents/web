@@ -1,13 +1,9 @@
-import { markdownPath } from "@/lib/ai-corpus";
 import { McpConnectionGuide } from "@/components/mcp-connection-guide";
 import { LinkButton } from "@/components/ui";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = {
-  title: "MCP config | SkaleAgents",
-  description: "Connect the AI you already use. It checks your application and your infrastructure, then tells you what to change.",
-  alternates: { canonical: "/mcp-config", types: { "text/markdown": markdownPath("/mcp-config") } },
-};
+export const metadata: Metadata = pageMetadata({ path: "/mcp-config", title: "MCP config | SkaleAgents", description: "Connect the AI you already use. It checks your application and your infrastructure, then tells you what to change." });
 
 export default function McpConfigPage() {
   return <main className="space-y-8">

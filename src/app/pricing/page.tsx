@@ -1,12 +1,8 @@
-import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import { PricingPlans } from "@/components/pricing-plans";
 
-export const metadata: Metadata = {
-  title: "Organization pricing | SkaleAgents",
-  description: "Compare Free, Starter, Pro, Max, and Enterprise organization plans for infrastructure audits and monitoring.",
-  alternates: { canonical: "/pricing", types: { "text/markdown": markdownPath("/pricing") } },
-};
+export const metadata: Metadata = pageMetadata({ path: "/pricing", title: "Organization pricing | SkaleAgents", description: "Compare Free, Starter, Pro, Max, and Enterprise organization plans for infrastructure audits and monitoring, with the limits and billing for each plan." });
 
 export default function PricingPage() {
   return <main>

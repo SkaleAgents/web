@@ -1,13 +1,9 @@
-import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
 import { publicResourcePath, publicResources } from "@/lib/public-resources";
 
-export const metadata: Metadata = {
-  title: "Free resources | SkaleAgents",
-  description: "Checklists and prompts for public exposure, wildcard IAM, and container privilege. Copy one or open it in your assistant. No account required.",
-  alternates: { canonical: "/resources", types: { "text/markdown": markdownPath("/resources") } },
-};
+export const metadata: Metadata = pageMetadata({ path: "/resources", title: "Free resources | SkaleAgents", description: "Checklists and prompts for public exposure, wildcard IAM, and container privilege. Copy one or open it in your assistant. No account required." });
 
 export default function ResourcesPage() {
   const itemList = {

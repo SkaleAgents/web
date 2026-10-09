@@ -1,11 +1,7 @@
-import { markdownPath } from "@/lib/ai-corpus";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = {
-  title: "Contact SkaleAgents",
-  description: "Get in touch about your SkaleAgents account, audits, billing, or organization plan.",
-  alternates: { canonical: "/contact", types: { "text/markdown": markdownPath("/contact") } },
-};
+export const metadata: Metadata = pageMetadata({ path: "/contact", title: "Contact SkaleAgents", description: "Get in touch about your SkaleAgents account, audits, billing, or organization plan. Email info@skaleagents.com and we reply by email." });
 
 export default function ContactPage() {
   return <main className="mx-auto w-full max-w-3xl py-8 sm:py-14">

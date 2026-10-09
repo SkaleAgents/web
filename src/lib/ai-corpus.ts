@@ -7,7 +7,7 @@ import { publicResourcePath, publicResources, resourceMarkdown, resourcesIndexMa
 import { blogIndexMarkdown, postMarkdown, publicPostPath, publishedPosts } from "./public-posts";
 
 export { SITE, absoluteMarkdown, markdownPath } from "./site-url";
-import { SITE, absoluteMarkdown, markdownPath } from "./site-url";
+import { SITE, absoluteMarkdown } from "./site-url";
 
 export const INDEXNOW_KEY = "7c4e9a1b6d2f48e0a5c3b8d71f06e294";
 

@@ -1,6 +1,6 @@
-import { markdownPath } from "@/lib/ai-corpus";
 import { homeFaqJsonLd, homeFaqs } from "@/lib/home-faq";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
 import { HeroActions } from "@/components/marketing/hero-actions";
 import { DeferredMarketingWidget } from "@/components/marketing/deferred-marketing-widget";
@@ -8,11 +8,7 @@ import { ExampleExplorerPreview, SampleReviewDemoPreview, StartPickerPreview } f
 import { WorkflowExplorer } from "@/components/marketing/workflow-explorer";
 import { HeroSignal } from "@/components/marketing/hero-signal";
 
-export const metadata: Metadata = {
-  title: "SkaleAgents | DevOps bots and infrastructure reviews",
-  description: "Connect the AI you already use. It checks your application and your infrastructure, then tells you what to change.",
-  alternates: { canonical: "/", types: { "text/markdown": markdownPath("/") } },
-};
+export const metadata: Metadata = pageMetadata({ path: "/", title: "SkaleAgents | DevOps bots and infrastructure reviews", description: "Connect the AI you already use. It checks your application and your infrastructure, then tells you what to change." });
 
 const features = [
   { number: "01", title: "Find your specialist", label: "Bot directory", description: "Search by task and filter by specialty. Read a bot's instructions, then open them in your assistant with your own project context.", href: "/bot-directory", cta: "Explore bots" },

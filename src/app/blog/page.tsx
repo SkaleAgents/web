@@ -1,14 +1,10 @@
-import { markdownPath } from "@/lib/ai-corpus";
 import { io } from "next/cache";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
 import { publicPostPath, publishedPosts } from "@/lib/public-posts";
 
-export const metadata: Metadata = {
-  title: "Blog | SkaleAgents",
-  description: "Notes on reviewing Terraform, what a cloud review can see, and how to hand a prompt to Claude or ChatGPT.",
-  alternates: { canonical: "/blog", types: { "text/markdown": markdownPath("/blog") } },
-};
+export const metadata: Metadata = pageMetadata({ path: "/blog", title: "Blog | SkaleAgents", description: "Notes on reviewing Terraform, what a cloud review can see, and how to hand a prompt to Claude or ChatGPT before you merge a change." });
 
 export default async function BlogPage() {
   await io();
