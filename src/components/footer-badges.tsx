@@ -92,6 +92,37 @@ function AgentWiseBadge() {
   );
 }
 
+function DevToolBadge() {
+  return <span style={{ display: "inline-flex", alignItems: "center", padding: "6px 12px", background: "#10b981", color: "#fff", borderRadius: 6, fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, whiteSpace: "nowrap" }}>Listed on DevTool.io</span>;
+}
+
+function LaunchSoarBadge() {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "5px 10px", border: "1px solid #e5e7eb", borderRadius: 9999, background: "#fff", color: "#111827", fontFamily: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial", lineHeight: 1 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="https://launchsoar.com/logo.png" alt="Launch" style={{ height: 18, width: "auto" }} />
+      <span style={{ display: "flex", flexDirection: "column", gap: 2, lineHeight: 1.1 }}>
+        <span style={{ fontSize: 12, opacity: 0.8 }}>Listed on</span>
+        <span style={{ fontSize: 14, fontWeight: 700 }}>Launch</span>
+      </span>
+    </span>
+  );
+}
+
+function LaunchVoidBadge() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="220" height="54" viewBox="0 0 220 54" fill="none" style={{ width: "100%", height: "auto" }}>
+      <rect width="220" height="54" rx="12" fill="#0F1115" />
+      <rect x="0.5" y="0.5" width="219" height="53" rx="11.5" stroke="#14B8A6" strokeOpacity="0.3" />
+      <g transform="translate(16, 15)" color="#14B8A6">
+        <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" fill="none" stroke="currentColor" strokeWidth="2" /></svg>
+      </g>
+      <text x="52" y="22" fontFamily="system-ui, -apple-system, sans-serif" fontSize="11" fill="#FFFFFF" opacity="0.7">Featured on</text>
+      <text x="52" y="40" fontFamily="system-ui, -apple-system, sans-serif" fontSize="15" fontWeight="600" fill="#FFFFFF">LaunchVoid</text>
+    </svg>
+  );
+}
+
 export function FooterBadges() {
   const slider = useRef<HTMLDivElement>(null);
   const [manual, setManual] = useState(false);
@@ -117,7 +148,7 @@ export function FooterBadges() {
             <div key={String(duplicate)} className="footer-badge-group" aria-hidden={duplicate ? true : undefined}>
               {directoryBadgeEntries.map((badge) => (
                 <a key={badge.href} href={badge.href} target="_blank" rel={badge.rel} title={badge.title} aria-label={badge.ariaLabel} tabIndex={duplicate ? -1 : undefined} style={badge.variant === "bowora" ? { display: "inline-flex", alignItems: "center", gap: 10, width: 170, height: 50, backgroundColor: "#fff", color: "#000", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", padding: "8px 14px", borderRadius: 8, textDecoration: "none", border: "1px solid #E8E8E8" } : badge.variant === "ainexfinder" ? { display: "inline-flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "#7150E6", border: "1px solid #6347D1", borderRadius: 10, textDecoration: "none", fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif", lineHeight: 1 } : badge.variant === "agentwise" ? { display: "inline-flex", width: 200, height: 48 } : { width: badge.displayWidth }} data-topaitools4u-badge={badge.name === "TopAITools4U" ? "verified-listing" : undefined}>
-                  {badge.variant === "agenthunter" ? <AgentHunterBadge /> : badge.variant === "ainexfinder" ? <AInexfinderBadge /> : badge.variant === "bowora" ? <BoworaBadge /> : badge.variant === "agentwise" ? <AgentWiseBadge /> : <BadgeImage name={badge.name} src={badge.src} width={badge.width} height={badge.height} alt={badge.alt} loading={badge.loading} decoding={badge.decoding} imageStyle={badge.imageStyle} />}
+                  {badge.variant === "agenthunter" ? <AgentHunterBadge /> : badge.variant === "ainexfinder" ? <AInexfinderBadge /> : badge.variant === "bowora" ? <BoworaBadge /> : badge.variant === "agentwise" ? <AgentWiseBadge /> : badge.variant === "devtool" ? <DevToolBadge /> : badge.variant === "launchsoar" ? <LaunchSoarBadge /> : badge.variant === "launchvoid" ? <LaunchVoidBadge /> : <BadgeImage name={badge.name} src={badge.src} width={badge.width} height={badge.height} alt={badge.alt} loading={badge.loading} decoding={badge.decoding} imageStyle={badge.imageStyle} />}
                 </a>
               ))}
             </div>

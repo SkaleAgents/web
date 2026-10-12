@@ -87,7 +87,23 @@ const requestedLinks = [
   ["https://t0ai.com", "T0 AI Tools Directory", null],
 ] as const;
 
+const oct12Hosts = [
+  "devtool.io", "wallof.tools", "backlinkhubs.com", "launchandloop.com", "mossai.org", "launchsoar.com", "zplatform.ai", "spacerrapps.com",
+  "topaitoolsreview.com", "marketingdb.live", "theaitoolsdir.com", "directorycritic.info", "ai-findr.com", "publishyoursaas.com", "tap4ai.org",
+  "popwebtools.com", "spotstartups.com", "toollisted.com", "toolsify.ai", "thesaasdir.com", "launchvoid.com", "toolsclaw.com", "dofollow.tools",
+  "launchnest.io", "launchpadly.co", "ainewtool.site", "saasgrow.ai", "saasaur.com", "leanvibe.io", "stackledge.com", "appstackbuilder.com",
+  "indexof.ai", "alphashot.com", "prolaunch.net", "curlship.com",
+];
+
 describe("FooterBadges", () => {
+  it("links each of the 35 directories added on 2026-10-12 exactly once", () => {
+    const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
+    const hosts = Array.from(page.querySelectorAll("a[href]")).map((link) => new URL(link.getAttribute("href")!).hostname.replace(/^www\./, ""));
+
+    for (const host of oct12Hosts) expect(hosts.filter((h) => h === host), host).toHaveLength(1);
+    expect(hosts.filter((h) => h === "saasgrow.app")).toHaveLength(1);
+  });
+
   it("includes each new directory link once in the initial homepage HTML", () => {
     const markup = renderToStaticMarkup(<FooterBadges />);
     const page = new DOMParser().parseFromString(markup, "text/html");
@@ -98,9 +114,6 @@ describe("FooterBadges", () => {
     }
 
     expect(markup).not.toContain("hJHZDJxqO5");
-    expect(markup).not.toContain("ainewtool.site");
-    expect(markup).not.toContain("launchnest.io");
-    expect(markup).not.toContain("launchpadly.co");
     expect(links.filter((link) => link.getAttribute("href") === "https://saascity.io")).toHaveLength(1);
   });
 
