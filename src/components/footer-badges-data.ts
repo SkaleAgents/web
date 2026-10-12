@@ -61,6 +61,18 @@ export const directoryLinks = [
   ["AiHeron", "https://www.aiheron.com/", "", "AiHeron AI nav"],
   ["Okei AI Tools", "https://okeiai.com/", "", "Okei AI Tools Directory"],
   ["T0 AI Tools Directory", "https://t0ai.com", "", "T0 AI Tools Directory"],
+  ["MossAI Tools", "https://mossai.org", "", "MossAI Tools"],
+  ["Featured on Topaitoolsreview.com", "https://topaitoolsreview.com", ""],
+  ["Directory Critic", "https://www.directorycritic.info/", ""],
+  ["AI Findr Tools Diresctory", "https://ai-findr.com/", "", "AI Findr Tools Directory"],
+  ["Tap4 AI Tools Diresctory", "https://tap4ai.org/", "", "Tap4 AI Tools Directory"],
+  ["Toolsify AI Tools Diresctory", "https://toolsify.ai/", "", "Toolsify AI Tools Directory"],
+  ["Featured on TheSaaSDir", "https://thesaasdir.com/", "noopener"],
+  ["Featured on LaunchNest", "https://launchnest.io/", "noopener"],
+  ["Featured on Launchpadly", "https://launchpadly.co/", "noopener"],
+  ["Featured on AI New Tool", "https://ainewtool.site/", "noopener"],
+  ["Featured on saasgrow.ai", "https://saasgrow.ai/", "noopener"],
+  ["Featured on Curlship", "https://curlship.com/", "noopener"],
 ] as const;
 
 export type DirectoryBadgeEntry = {
@@ -74,7 +86,7 @@ export type DirectoryBadgeEntry = {
   rel?: string;
   displayWidth: number;
   ariaLabel?: string;
-  variant?: "agenthunter" | "ainexfinder" | "bowora" | "agentwise";
+  variant?: "agenthunter" | "ainexfinder" | "bowora" | "agentwise" | "devtool" | "launchsoar" | "launchvoid";
   loading?: "eager" | "lazy" | null;
   decoding?: "async" | "auto" | "sync" | null;
   imageStyle?: CSSProperties;
@@ -123,6 +135,29 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "ToolNav", href: "https://toolnav.ai/", src: "https://toolnav.ai/badges/toolnav-dark.svg", width: 220, height: 60, alt: "ToolNav AI", rel: "noopener noreferrer", displayWidth: 140.8 },
   { name: "AgentWise", href: "https://agentwise.org/agent/skaleagents", src: null, rel: "noopener", displayWidth: 200, variant: "agentwise" },
   { name: "AIGCList", href: "https://aigclist.com", src: "https://aigclist.com/imgs/badge.svg", width: 240, height: 56, alt: "Featured on AIGCLIST", rel: "noopener", displayWidth: 153.6 },
+  { name: "DevTool.io", href: "https://devtool.io", src: null, rel: "noopener", displayWidth: 168, variant: "devtool" },
+  { name: "Wall of Tools", href: "https://wallof.tools/dev-tools/skaleagents", src: "https://wallof.tools/badge/toolwall-badge-light.svg", width: 188, height: 56, alt: "Featured on Wall of Tools", rel: "noopener", displayWidth: 128.9 },
+  { name: "BacklinkHubs", href: "https://backlinkhubs.com/?utm_source=badge&utm_medium=embed&utm_campaign=backlinkhubs", src: "https://backlinkhubs.com/badge.svg?theme=light&label=Listed%20on%20Backlinkhubs", alt: "Listed on Backlinkhubs", rel: "noopener noreferrer", displayWidth: 153.6, imageStyle: { height: "48px", width: "auto" } },
+  { name: "Launch and Loop", href: "https://www.launchandloop.com/product/skaleagents", src: "https://www.launchandloop.com/api/badge/skaleagents?theme=dark", width: 170, height: 46, alt: "SkaleAgents on Launch & Loop", rel: "dofollow", displayWidth: 141.9 },
+  { name: "LaunchSoar", href: "https://launchsoar.com", src: null, rel: "noopener noreferrer", displayWidth: 128, variant: "launchsoar" },
+  { name: "zPlatform", href: "https://zplatform.ai/", src: "https://zplatform.ai/badges/zplatform-featured.png", width: 200, height: 60, alt: "Featured on zPlatform", rel: "noopener", displayWidth: 128.0 },
+  { name: "SpacerrApps", href: "https://spacerrapps.com/apps/skaleagents?utm_source=badge&utm_medium=referral&utm_campaign=featured", src: "https://spacerrapps.com/badge/skaleagents.svg?v=3&theme=dark", width: 234, height: 54, alt: "SkaleAgents is featured on SpacerrApps", rel: "noopener", displayWidth: 153.6 },
+  { name: "MarketingDB", href: "https://marketingdb.live", src: "https://marketingdb.live/badge.svg", width: 190, height: 44, alt: "Launched on MarketingDB", rel: "noopener noreferrer nofollow sponsored", displayWidth: 153.6 },
+  { name: "The AI Tools Dir", href: "https://theaitoolsdir.com/product/skaleagents?ref=badge", src: "https://theaitoolsdir.com/badge/skaleagents.svg", width: 160, height: 44, alt: "Featured on TheAIToolsDir", rel: "dofollow", displayWidth: 139.6 },
+  { name: "Publish Your SaaS", href: "https://publishyoursaas.com", src: "https://publishyoursaas.com/publishyoursaas-badge.svg", width: 240, height: 60, alt: "Listed on PublishYourSaaS", rel: "noopener", displayWidth: 153.6 },
+  { name: "PopWebTools", href: "https://www.popwebtools.com", src: "https://www.popwebtools.com/images/featured-badge-light.png", width: 240, height: 86, alt: "Featured on PopWebTools", rel: "noopener noreferrer", displayWidth: 107.2, imageStyle: { display: "block", border: 0 } },
+  { name: "Spot Startups", href: "https://spotstartups.com", src: "https://spotstartups.com/assets/badges/spotstartups.com_badge_light.svg", width: 175, height: 55, alt: "Featured on Spot Startups - A Free Product Hunt Alternative", displayWidth: 122.2 },
+  { name: "ToolListed", href: "https://www.toollisted.com?utm_source=skaleagents.com&utm_medium=badge&utm_campaign=free_submission", src: "https://www.toollisted.com/badges/toollisted-badge-light.png", width: 171, height: 54, alt: "Featured on ToolListed", rel: "noopener", displayWidth: 121.6 },
+  { name: "LaunchVoid", href: "https://launchvoid.com", src: null, title: "Featured on LaunchVoid", rel: "noopener", displayWidth: 153.6, variant: "launchvoid" },
+  { name: "ToolsClaw", href: "https://toolsclaw.com", src: "https://toolsclaw.com/badge/toolsclaw.com-badge.svg", width: 200, height: 54, alt: "Featured on ToolsClaw", rel: "noopener noreferrer", displayWidth: 142.2 },
+  { name: "dofollow.tools", href: "https://dofollow.tools", src: "https://dofollow.tools/badge/badge_dark.svg", width: 200, height: 54, alt: "Featured on Dofollow.Tools", displayWidth: 142.2 },
+  { name: "SaaSaur", href: "https://saasaur.com/project/skaleagents", src: "https://saasaur.com/assets/badges/featured-on-light.svg", width: 200, height: 60, alt: "Featured on SaaSaur", rel: "noopener noreferrer", displayWidth: 128.0 },
+  { name: "LeanVibe", href: "https://leanvibe.io/vibe/skaleagents", src: "https://leanvibe.io/api/badge/skaleagents?type=featured&view=light", alt: "Featured on LeanVibe.io", rel: "noopener noreferrer", displayWidth: 153.6, imageStyle: { display: "block", height: "42px", width: "auto", border: 0 } },
+  { name: "StackLedge", href: "https://www.stackledge.com/tools/skaleagents?ref=badge&t=bdg_8f840fbe6301639483859597d3b204d5", src: "https://www.stackledge.com/badge?token=bdg_8f840fbe6301639483859597d3b204d5", width: 200, height: 54, alt: "Featured on StackLedge", rel: "noopener", displayWidth: 142.2 },
+  { name: "App Stack Builder", href: "https://appstackbuilder.com", src: "https://appstackbuilder.com/badge-light.svg", width: 200, height: 54, alt: "Featured on appstackbuilder", rel: "dofollow", displayWidth: 142.2 },
+  { name: "IndexOf.AI", href: "https://indexof.ai/tool/skaleagents?ref=skaleagents", src: "https://indexof.ai/badge-light.svg", width: 200, height: 40, alt: "Featured on IndexOf.AI", rel: "noopener", displayWidth: 153.6 },
+  { name: "AlphaShot", href: "https://alphashot.com/products/skaleagents?utm_source=alphashot&utm_medium=badge&utm_campaign=embed", src: "https://alphashot.com/badge/skaleagents.svg", width: 200, height: 54, alt: "Featured on AlphaShot", rel: "noopener", displayWidth: 142.2 },
+  { name: "Pro Launch", href: "https://prolaunch.net", src: "https://prolaunch.net/images/badges/featured-light.svg", alt: "Pro Launch Featured Badge", title: "Pro Launch Featured Badge", displayWidth: 153.6, imageStyle: { width: "240px", height: "auto" } },
 ];
 
 export const directoryBadgeEntries: DirectoryBadgeEntry[] = [
