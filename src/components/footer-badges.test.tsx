@@ -102,10 +102,11 @@ const oct13Hosts = [
   "launchit.fast", "letslaunch.today", "meoai.net", "microsaasexamples.com", "oranyx.ai", "productdirs.com", "saascubes.com", "sellwithboost.com",
   "stork.ai", "submitforbacklinks.com", "submitstartup.io", "submityouraitool.com", "thankjohn.com", "thedevtoolsdir.com", "toolbit.ai", "toolsapp.cc",
   "toplistly.com", "tulimoa.com", "ufind.best", "youraihunt.com",
+  "yourhack.ai", "roozna.com", "superlaunchlist.com",
 ];
 
 describe("FooterBadges", () => {
-  it("links each of the 45 directories added on 2026-10-13 exactly once", () => {
+  it("links each of the 48 directories added on 2026-10-13 exactly once", () => {
     const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
     const hosts = Array.from(page.querySelectorAll("a[href]")).map((link) => new URL(link.getAttribute("href")!).hostname.replace(/^www\./, ""));
 
