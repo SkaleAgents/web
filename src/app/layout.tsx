@@ -4,7 +4,7 @@ import { cookieConsentRequired } from "@/lib/cookie-consent-region";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { headers } from "next/headers";
-import { IBM_Plex_Mono, Inter, Source_Sans_3 } from "next/font/google";
+import { IBM_Plex_Mono, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -24,10 +24,11 @@ const syne = localFont({
   display: "swap",
 });
 
-const sourceSans = Source_Sans_3({
+const sourceSans = localFont({
+  src: "./fonts/SourceSans3.woff2",
   variable: "--font-source-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: "400 600",
+  display: "swap",
 });
 
 const inter = Inter({
