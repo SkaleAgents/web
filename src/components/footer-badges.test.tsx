@@ -28,6 +28,8 @@ const requestedBadges = [
   ["https://www.direct2app.com", "Featured On Direct2App"],
   ["https://firstlook.tools", "Featured on First Look"],
   ["https://indieshowcase.io", "Featured"],
+  ["https://launchboard.dev", "Featured on LaunchBoard"],
+  ["https://fazier.com/launches/skaleagents.com", "Fazier badge"],
   ["https://submito.net", "Listed on Submito"],
   ["https://toolfame.com/item/skaleagents", "Featured on toolfame.com"],
   ["https://toolhunter.ai/ai-tool/skaleagents?ref=badge", "Featured on Toolhunter"],
@@ -75,7 +77,6 @@ const addedBadgeImages = [
 const requestedLinks = [
   ["https://newaiforyou.com", "NewAIForYou", "noopener noreferrer"],
   ["https://www.launch-list.org", "Launch List", "noopener noreferrer"],
-  ["https://www.launchboard.dev/", "LaunchBoard", "noopener noreferrer"],
   ["https://startupproject.org/", "Startup Project", "noopener noreferrer"],
   ["https://directoryhunt.org", "Directory Hunt", "noopener"],
   ["https://newtools.site", "NewTools", "noopener"],
