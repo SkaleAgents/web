@@ -95,7 +95,23 @@ const oct12Hosts = [
   "indexof.ai", "alphashot.com", "prolaunch.net", "curlship.com",
 ];
 
+const oct13Hosts = [
+  "aiblog.tools", "aihunt.one", "aiindex.tools", "buildway.cc", "describepicture.cc", "easydofollow.dev", "elf08.com", "hotools.com", "saasdb.net",
+  "saastool.site", "shareyourstartup.com", "useneedle.net", "agentwork.tools", "ai-directory.com", "aiboom.tools", "aifinderplus.com", "aitrovex.com",
+  "aiwizard.ai", "allstartups.info", "backlink2web.com", "bestofweb.site", "dynamite-ai.com", "freeai.run", "intelligenttools.co", "justsimple.tools",
+  "launchit.fast", "letslaunch.today", "meoai.net", "microsaasexamples.com", "oranyx.ai", "productdirs.com", "saascubes.com", "sellwithboost.com",
+  "stork.ai", "submitforbacklinks.com", "submitstartup.io", "submityouraitool.com", "thankjohn.com", "thedevtoolsdir.com", "toolbit.ai", "toolsapp.cc",
+  "toplistly.com", "tulimoa.com", "ufind.best", "youraihunt.com",
+];
+
 describe("FooterBadges", () => {
+  it("links each of the 45 directories added on 2026-10-13 exactly once", () => {
+    const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
+    const hosts = Array.from(page.querySelectorAll("a[href]")).map((link) => new URL(link.getAttribute("href")!).hostname.replace(/^www\./, ""));
+
+    for (const host of oct13Hosts) expect(hosts.filter((h) => h === host), host).toHaveLength(1);
+  });
+
   it("links each of the 35 directories added on 2026-10-12 exactly once", () => {
     const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
     const hosts = Array.from(page.querySelectorAll("a[href]")).map((link) => new URL(link.getAttribute("href")!).hostname.replace(/^www\./, ""));

@@ -123,6 +123,19 @@ function LaunchVoidBadge() {
   );
 }
 
+function UfindBadge() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="140.8" height="40" viewBox="0 0 140.8 40" style={{ width: "100%", height: "auto" }}>
+      <rect width="140.8" height="40" fill="#000000" rx="8" />
+      <g transform="translate(14, 11)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" /></svg>
+      </g>
+      <text x="40" y="15.2" fill="#ffffff" fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fontSize="10" fontWeight="400">Featured on</text>
+      <text x="40" y="30" fill="#ffffff" fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fontSize="14" fontWeight="600">ufind.best</text>
+    </svg>
+  );
+}
+
 export function FooterBadges() {
   const slider = useRef<HTMLDivElement>(null);
   const [manual, setManual] = useState(false);
@@ -148,7 +161,7 @@ export function FooterBadges() {
             <div key={String(duplicate)} className="footer-badge-group" aria-hidden={duplicate ? true : undefined}>
               {directoryBadgeEntries.map((badge) => (
                 <a key={badge.href} href={badge.href} target="_blank" rel={badge.rel} title={badge.title} aria-label={badge.ariaLabel} tabIndex={duplicate ? -1 : undefined} style={badge.variant === "bowora" ? { display: "inline-flex", alignItems: "center", gap: 10, width: 170, height: 50, backgroundColor: "#fff", color: "#000", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", padding: "8px 14px", borderRadius: 8, textDecoration: "none", border: "1px solid #E8E8E8" } : badge.variant === "ainexfinder" ? { display: "inline-flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "#7150E6", border: "1px solid #6347D1", borderRadius: 10, textDecoration: "none", fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif", lineHeight: 1 } : badge.variant === "agentwise" ? { display: "inline-flex", width: 200, height: 48 } : { width: badge.displayWidth }} data-topaitools4u-badge={badge.name === "TopAITools4U" ? "verified-listing" : undefined}>
-                  {badge.variant === "agenthunter" ? <AgentHunterBadge /> : badge.variant === "ainexfinder" ? <AInexfinderBadge /> : badge.variant === "bowora" ? <BoworaBadge /> : badge.variant === "agentwise" ? <AgentWiseBadge /> : badge.variant === "devtool" ? <DevToolBadge /> : badge.variant === "launchsoar" ? <LaunchSoarBadge /> : badge.variant === "launchvoid" ? <LaunchVoidBadge /> : <BadgeImage name={badge.name} src={badge.src} width={badge.width} height={badge.height} alt={badge.alt} loading={badge.loading} decoding={badge.decoding} imageStyle={badge.imageStyle} />}
+                  {badge.variant === "agenthunter" ? <AgentHunterBadge /> : badge.variant === "ainexfinder" ? <AInexfinderBadge /> : badge.variant === "bowora" ? <BoworaBadge /> : badge.variant === "agentwise" ? <AgentWiseBadge /> : badge.variant === "devtool" ? <DevToolBadge /> : badge.variant === "launchsoar" ? <LaunchSoarBadge /> : badge.variant === "launchvoid" ? <LaunchVoidBadge /> : badge.variant === "ufind" ? <UfindBadge /> : <BadgeImage name={badge.name} src={badge.src} width={badge.width} height={badge.height} alt={badge.alt} loading={badge.loading} decoding={badge.decoding} imageStyle={badge.imageStyle} />}
                 </a>
               ))}
             </div>
