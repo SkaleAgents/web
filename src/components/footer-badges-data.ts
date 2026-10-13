@@ -106,6 +106,9 @@ export const directoryLinks = [
   ["Featured on Toplistly", "https://toplistly.com/", "noopener"],
   ["Featured on Tulimoa", "https://tulimoa.com/", "noopener"],
   ["Featured on Your AI Hunt", "https://youraihunt.com/", "noopener"],
+  ["Featured on yourhack.ai", "https://yourhack.ai/", "noopener"],
+  ["Featured on Roozna", "https://roozna.com/", "noopener"],
+  ["Featured on SuperLaunchList", "https://superlaunchlist.com/", "noopener"],
 ] as const;
 
 export type DirectoryBadgeEntry = {
