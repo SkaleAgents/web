@@ -26,7 +26,7 @@ export const directoryBadges = [
   ["SaaSFame", "https://saasfame.com/item/skaleagents", "https://saasfame.com/badge-light.svg", 170, 54],
   ["Vantaige", "https://vantaige.io/ai-tool/skaleagents?utm_source=badge&utm_medium=embed", "https://vantaige.io/badges/vantaige-badge-dark.svg", 200, 56],
   ["ProductFame", "https://productfame.com", "https://productfame.com/badges/featured-light.svg", 195, 54],
-  ["ToolPilot", "https://www.toolpilot.ai", "https://www.toolpilot.ai/cdn/shop/files/f-b_20x4_crop_center.png?v=1695882701", 454, 100],
+  ["ToolPilot", "https://www.toolpilot.ai", "https://www.toolpilot.ai/cdn/shop/files/f-b.png?v=1695882701", 454, 100],
   ["Wired Business", "https://wired.business", "https://wired.business/badge0-white.svg", 200, 54],
   ["Sidehunt", "https://sidehunt.io/project/skaleagents", "https://sidehunt.io/badges/sidehunt-badge-light.svg", 200, 60],
   ["Aura++", "https://auraplusplus.com/projects/skaleagents", "https://auraplusplus.com/images/badges/featured-on-light.svg", 150, 44],
