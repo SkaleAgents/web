@@ -73,6 +73,39 @@ export const directoryLinks = [
   ["Featured on AI New Tool", "https://ainewtool.site/", "noopener"],
   ["Featured on saasgrow.ai", "https://saasgrow.ai/", "noopener"],
   ["Featured on Curlship", "https://curlship.com/", "noopener"],
+  ["Find us on AIBlog.Tools", "https://aiblog.tools", ""],
+  ["AIHunt", "https://aihunt.one", ""],
+  ["BuildWay", "https://www.buildway.cc", ""],
+  ["AI Image Describer", "https://describepicture.cc/", "", "AI Image Describer"],
+  ["The Elf Directory", "https://elf08.com/", ""],
+  ["HoTools", "https://hotools.com/", "", "HoTools - Online Tools Directory"],
+  ["Featured on AI Directory", "https://ai-directory.com/", "noopener"],
+  ["Featured on aifinderplus.com", "https://aifinderplus.com/", "noopener"],
+  ["Featured on AITroveX", "https://aitrovex.com/", "noopener"],
+  ["Featured on Aiwizard", "https://aiwizard.ai/", "noopener"],
+  ["Featured on AllStartups.Info", "https://allstartups.info/", "noopener"],
+  ["Featured on Backlink2Web", "https://backlink2web.com/", "noopener"],
+  ["Featured on Best of Web", "https://bestofweb.site/", "noopener"],
+  ["Featured on Dynamite AI", "https://dynamite-ai.com/", "noopener"],
+  ["Featured on freeai.run", "https://freeai.run/", "noopener"],
+  ["Featured on Intelligent Tools", "https://intelligenttools.co/", "noopener"],
+  ["Featured on justsimple", "https://justsimple.tools/", "noopener"],
+  ["Featured on LetsLaunch", "https://letslaunch.today/", "noopener"],
+  ["Featured on Meoai", "https://meoai.net/", "noopener"],
+  ["Featured on Micro SaaS Examples", "https://microsaasexamples.com/", "noopener"],
+  ["Featured on Oranyx", "https://oranyx.ai/", "noopener"],
+  ["Featured on productdirs", "https://productdirs.com/", "noopener"],
+  ["Stork Verified", "https://www.stork.ai/", "nofollow"],
+  ["Featured on SubmitForBacklinks", "https://submitforbacklinks.com/", "noopener"],
+  ["Featured on SubmitStartup", "https://submitstartup.io/", "noopener"],
+  ["Featured on SubmitYourAITool", "https://submityouraitool.com/", "noopener"],
+  ["Featured on Thank John", "https://thankjohn.com/", "noopener"],
+  ["Featured on thedevtoolsdir.com", "https://thedevtoolsdir.com/", "noopener"],
+  ["Featured on toolbit", "https://toolbit.ai/", "noopener"],
+  ["Featured on toolsapp.cc", "https://toolsapp.cc/", "noopener"],
+  ["Featured on Toplistly", "https://toplistly.com/", "noopener"],
+  ["Featured on Tulimoa", "https://tulimoa.com/", "noopener"],
+  ["Featured on Your AI Hunt", "https://youraihunt.com/", "noopener"],
 ] as const;
 
 export type DirectoryBadgeEntry = {
@@ -86,7 +119,7 @@ export type DirectoryBadgeEntry = {
   rel?: string;
   displayWidth: number;
   ariaLabel?: string;
-  variant?: "agenthunter" | "ainexfinder" | "bowora" | "agentwise" | "devtool" | "launchsoar" | "launchvoid";
+  variant?: "agenthunter" | "ainexfinder" | "bowora" | "agentwise" | "devtool" | "launchsoar" | "launchvoid" | "ufind";
   loading?: "eager" | "lazy" | null;
   decoding?: "async" | "auto" | "sync" | null;
   imageStyle?: CSSProperties;
@@ -158,6 +191,18 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "IndexOf.AI", href: "https://indexof.ai/tool/skaleagents?ref=skaleagents", src: "https://indexof.ai/badge-light.svg", width: 200, height: 40, alt: "Featured on IndexOf.AI", rel: "noopener", displayWidth: 153.6 },
   { name: "AlphaShot", href: "https://alphashot.com/products/skaleagents?utm_source=alphashot&utm_medium=badge&utm_campaign=embed", src: "https://alphashot.com/badge/skaleagents.svg", width: 200, height: 54, alt: "Featured on AlphaShot", rel: "noopener", displayWidth: 142.2 },
   { name: "Pro Launch", href: "https://prolaunch.net", src: "https://prolaunch.net/images/badges/featured-light.svg", alt: "Pro Launch Featured Badge", title: "Pro Launch Featured Badge", displayWidth: 153.6, imageStyle: { width: "240px", height: "auto" } },
+  { name: "AiIndex.tools", href: "https://aiindex.tools", src: "https://aiindex.tools/badge-featured-light.svg", width: 260, height: 72, alt: "Featured on AiIndex.tools", rel: "noopener noreferrer", displayWidth: 138.7 },
+  { name: "EasyDoFollow", href: "https://easydofollow.dev/dev-tools/skaleagents", src: "https://easydofollow.dev/badge/easydofollow-badge-light.svg", width: 188, height: 56, alt: "Featured on EasyDoFollow", rel: "noopener", displayWidth: 128.9 },
+  { name: "SaasDB", href: "https://saasdb.net", src: "https://saasdb.net/badge/featured-light.svg", width: 200, height: 60, alt: "Featured on SaasDB", rel: "dofollow", displayWidth: 128 },
+  { name: "SaaSTool.site", href: "https://saastool.site/item/skaleagents", src: "https://saastool.site/badges/saastool-light.svg", width: 210, height: 54, alt: "Featured on SaaSTool.site", rel: "noopener noreferrer", displayWidth: 149.3 },
+  { name: "Share Your Startup", href: "https://shareyourstartup.com/s/skaleagents", src: "https://shareyourstartup.com/badge/466.svg", width: 250, height: 54, alt: "Featured on Share Your Startup", rel: "noopener", displayWidth: 153.6 },
+  { name: "Needle Directory", href: "https://useneedle.net/directory/skaleagents", src: "https://useneedle.net/badges/needle-directory.svg", width: 220, height: 44, alt: "Listed on Needle Directory", rel: "noopener noreferrer", displayWidth: 153.6 },
+  { name: "AgentWork.Tools", href: "https://agentwork.tools", src: "https://agentwork.tools/badge/badge_dark.svg", width: 200, height: 54, alt: "Featured on AgentWork.Tools", rel: "noopener noreferrer", displayWidth: 142.2 },
+  { name: "AIBoom.Tools", href: "https://aiboom.tools", src: "https://aiboom.tools/badge/badge_light.svg", width: 139, height: 44, alt: "Featured on AIBoom.Tools", displayWidth: 121.3 },
+  { name: "LaunchIt", href: "https://launchit.fast", src: "https://launchit.fast/img/launching.svg", width: 200, height: 54, alt: "Featured on LaunchIt", rel: "noopener", displayWidth: 142.2 },
+  { name: "SaaS Cubes", href: "https://saascubes.com", src: "https://saascubes.com/images/badges/badge-dark.png", width: 175, height: 54, alt: "Listed on SaaS Cubes", title: "Listed on SaaS Cubes", rel: "noopener", displayWidth: 124.4 },
+  { name: "Sell With Boost", href: "https://sellwithboost.com", src: "https://sellwithboost.com/badge/listing.svg", width: 160, height: 40, alt: "Listed on Sell With boost", rel: "noopener noreferrer", displayWidth: 153.6 },
+  { name: "ufind.best", href: "https://ufind.best", src: null, rel: "noopener", displayWidth: 135.2, variant: "ufind" },
 ];
 
 export const directoryBadgeEntries: DirectoryBadgeEntry[] = [
