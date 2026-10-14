@@ -29,14 +29,20 @@ const publicPaths = [
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://skaleagents.com";
   const [bots, prompts] = await Promise.all([loadPublicBots(), loadCommunityPrompts()]);
+  const posts = publishedPosts();
+  // Only dated content gets lastModified: a made-up date on every page teaches Google to ignore the field.
+  const dates = new Map<string, string>(posts.map((post) => [publicPostPath(post), post.date]));
+  const latest = posts.map((post) => post.date).sort().at(-1);
+  if (latest) dates.set("/blog", latest);
   const paths = [
     ...publicPaths,
-    ...publishedPosts().map((post) => publicPostPath(post)),
+    ...posts.map((post) => publicPostPath(post)),
     ...(bots ?? []).map((bot) => `/bot-directory/${bot.id}`),
     ...(prompts ?? []).map((prompt) => `/prompts/${prompt.id}`),
   ];
   return paths.map((path) => ({
     url: `${base}${path}`,
+    ...(dates.has(path) && { lastModified: dates.get(path) }),
     changeFrequency: "weekly" as const,
     priority: path === "/" ? 1 : path.startsWith("/checks") || path.startsWith("/resources") || path.startsWith("/blog") ? 0.8 : 0.7,
   }));
