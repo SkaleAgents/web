@@ -35,12 +35,16 @@ it("publishes free resources and blog posts in the sitemap, llms.txt, and markdo
   expect(blogIndexMarkdown(memoryLimitOpens)).toContain("set-a-memory-limit");
   const originalFetch = globalThis.fetch;
   globalThis.fetch = () => Promise.reject(new Error("offline"));
-  let urls: string[] = [];
+  let entries: Awaited<ReturnType<typeof sitemap>> = [];
   try {
-    urls = (await sitemap()).map((entry) => entry.url);
+    entries = await sitemap();
   } finally {
     globalThis.fetch = originalFetch;
   }
+  const urls = entries.map((entry) => entry.url);
+  const lastModified = (url: string) => entries.find((entry) => entry.url === url)?.lastModified;
+  expect(lastModified("https://skaleagents.com/blog/docker-socket-is-host-root")).toBe("2026-10-12");
+  expect(lastModified("https://skaleagents.com/pricing")).toBeUndefined();
   expect(urls).toContain("https://skaleagents.com/resources");
   expect(urls).toContain("https://skaleagents.com/resources/public-exposure-review");
   expect(urls).toContain("https://skaleagents.com/blog");
