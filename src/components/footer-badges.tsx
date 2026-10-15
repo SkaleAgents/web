@@ -123,6 +123,21 @@ function LaunchVoidBadge() {
   );
 }
 
+function LaunchAIBadge() {
+  return (
+    <>
+      <span aria-hidden="true" style={{ display: "block", width: 34, height: 34, flex: "0 0 auto", overflow: "hidden", borderRadius: 5 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="https://launchai.tools/brand/launchai-rocket-mark-web.png" alt="" width={34} height={34} loading="lazy" decoding="async" style={{ display: "block", width: "100%", height: "100%", objectFit: "contain", borderRadius: "inherit" }} />
+      </span>
+      <span style={{ display: "grid", gap: 2, lineHeight: 1.05 }}>
+        <span style={{ color: "#5f6966", fontSize: 11, fontWeight: 700, letterSpacing: 0, textTransform: "uppercase" }}>Featured on</span>
+        <strong style={{ fontSize: 19, fontWeight: 800, letterSpacing: 0 }}>LaunchAI</strong>
+      </span>
+    </>
+  );
+}
+
 function UfindBadge() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="140.8" height="40" viewBox="0 0 140.8 40" style={{ width: "100%", height: "auto" }}>
@@ -160,8 +175,8 @@ export function FooterBadges() {
           {(clientReady ? [false, true] : [false]).map((duplicate) => (
             <div key={String(duplicate)} className="footer-badge-group" aria-hidden={duplicate ? true : undefined}>
               {directoryBadgeEntries.map((badge) => (
-                <a key={badge.href} href={badge.href} target="_blank" rel={badge.rel} title={badge.title} aria-label={badge.ariaLabel} tabIndex={duplicate ? -1 : undefined} style={badge.variant === "bowora" ? { display: "inline-flex", alignItems: "center", gap: 10, width: 170, height: 50, backgroundColor: "#fff", color: "#000", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", padding: "8px 14px", borderRadius: 8, textDecoration: "none", border: "1px solid #E8E8E8" } : badge.variant === "ainexfinder" ? { display: "inline-flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "#7150E6", border: "1px solid #6347D1", borderRadius: 10, textDecoration: "none", fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif", lineHeight: 1 } : badge.variant === "agentwise" ? { display: "inline-flex", width: 200, height: 48 } : { width: badge.displayWidth }} data-topaitools4u-badge={badge.name === "TopAITools4U" ? "verified-listing" : undefined}>
-                  {badge.variant === "agenthunter" ? <AgentHunterBadge /> : badge.variant === "ainexfinder" ? <AInexfinderBadge /> : badge.variant === "bowora" ? <BoworaBadge /> : badge.variant === "agentwise" ? <AgentWiseBadge /> : badge.variant === "devtool" ? <DevToolBadge /> : badge.variant === "launchsoar" ? <LaunchSoarBadge /> : badge.variant === "launchvoid" ? <LaunchVoidBadge /> : badge.variant === "ufind" ? <UfindBadge /> : <BadgeImage name={badge.name} src={badge.src} width={badge.width} height={badge.height} alt={badge.alt} loading={badge.loading} decoding={badge.decoding} imageStyle={badge.imageStyle} />}
+                <a key={badge.href} href={badge.href} target="_blank" rel={badge.rel} title={badge.title} aria-label={badge.ariaLabel} tabIndex={duplicate ? -1 : undefined} style={badge.variant === "bowora" ? { display: "inline-flex", alignItems: "center", gap: 10, width: 170, height: 50, backgroundColor: "#fff", color: "#000", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", padding: "8px 14px", borderRadius: 8, textDecoration: "none", border: "1px solid #E8E8E8" } : badge.variant === "ainexfinder" ? { display: "inline-flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "#7150E6", border: "1px solid #6347D1", borderRadius: 10, textDecoration: "none", fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif", lineHeight: 1 } : badge.variant === "agentwise" ? { display: "inline-flex", width: 200, height: 48 } : badge.variant === "launchai" ? { display: "inline-flex", alignItems: "center", gap: 10, boxSizing: "border-box", height: 56, padding: "10px 13px", border: "1px solid #1f2a24", borderRadius: 6, background: "#f8f8f6", color: "#17211b", fontFamily: "Arial, Helvetica, sans-serif", textDecoration: "none" } : { width: badge.displayWidth }} data-topaitools4u-badge={badge.name === "TopAITools4U" ? "verified-listing" : undefined} data-launchai-badge={badge.variant === "launchai" ? "featured" : undefined}>
+                  {badge.variant === "agenthunter" ? <AgentHunterBadge /> : badge.variant === "ainexfinder" ? <AInexfinderBadge /> : badge.variant === "bowora" ? <BoworaBadge /> : badge.variant === "agentwise" ? <AgentWiseBadge /> : badge.variant === "devtool" ? <DevToolBadge /> : badge.variant === "launchsoar" ? <LaunchSoarBadge /> : badge.variant === "launchvoid" ? <LaunchVoidBadge /> : badge.variant === "ufind" ? <UfindBadge /> : badge.variant === "launchai" ? <LaunchAIBadge /> : <BadgeImage name={badge.name} src={badge.src} width={badge.width} height={badge.height} alt={badge.alt} loading={badge.loading} decoding={badge.decoding} imageStyle={badge.imageStyle} />}
                 </a>
               ))}
             </div>
