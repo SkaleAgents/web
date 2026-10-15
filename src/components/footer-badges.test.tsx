@@ -28,7 +28,6 @@ const requestedBadges = [
   ["https://www.direct2app.com", "Featured On Direct2App"],
   ["https://firstlook.tools", "Featured on First Look"],
   ["https://indieshowcase.io", "Featured"],
-  ["https://launchboard.dev", "Featured on LaunchBoard"],
   ["https://fazier.com/launches/skaleagents.com", "Fazier badge"],
   ["https://submito.net", "Listed on Submito"],
   ["https://toolfame.com/item/skaleagents", "Featured on toolfame.com"],
@@ -48,6 +47,9 @@ const requestedBadges = [
   ["https://toolnav.ai/", "ToolNav AI"],
   ["https://agentwise.org/agent/skaleagents", null],
   ["https://aigclist.com", "Featured on AIGCLIST"],
+  ["https://goodsaas.xyz/saas/skaleagents", "SkaleAgents on goodSaaS"],
+  ["https://toolroots.com", "Featured on ToolRoots"],
+  ["https://indieascent.com/p/skaleagents", "Featured on IndieAscent"],
 ] as const;
 
 const addedBadgeImages = [
@@ -75,6 +77,9 @@ const addedBadgeImages = [
 ] as const;
 
 const requestedLinks = [
+  ["https://hiproducty.com", "HiProducty", ""],
+  ["https://launchboard.dev", "LaunchBoard", ""],
+  ["https://smolsaas.com", "Smol SaaS", ""],
   ["https://newaiforyou.com", "NewAIForYou", "noopener noreferrer"],
   ["https://www.launch-list.org", "Launch List", "noopener noreferrer"],
   ["https://startupproject.org/", "Startup Project", "noopener noreferrer"],

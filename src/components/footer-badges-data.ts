@@ -38,6 +38,9 @@ export const directoryBadges = [
 ] as const;
 
 export const directoryLinks = [
+  ["HiProducty", "https://hiproducty.com", ""],
+  ["LaunchBoard", "https://launchboard.dev", ""],
+  ["Smol SaaS", "https://smolsaas.com", ""],
   ["AI Tool Trek", "https://aitooltrek.com"],
   ["AI Toolz Dir", "https://www.aitoolzdir.com"],
   ["AiTop10 Tools", "https://aitop10.tools/"],
@@ -219,7 +222,6 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "SaaS Cubes", href: "https://saascubes.com", src: "https://saascubes.com/images/badges/badge-dark.png", width: 175, height: 54, alt: "Listed on SaaS Cubes", title: "Listed on SaaS Cubes", rel: "noopener", displayWidth: 124.4 },
   { name: "Sell With Boost", href: "https://sellwithboost.com", src: "https://sellwithboost.com/badge/listing.svg", width: 160, height: 40, alt: "Listed on Sell With boost", rel: "noopener noreferrer", displayWidth: 153.6 },
   { name: "Fazier", href: "https://fazier.com/launches/skaleagents.com", src: "https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=launched&theme=light", width: 120, alt: "Fazier badge", displayWidth: 89.9 },
-  { name: "LaunchBoard", href: "https://launchboard.dev", src: "https://launchboard.dev/featured.svg", width: 240, height: 60, alt: "Featured on LaunchBoard", rel: "noopener", displayWidth: 153.6 },
   { name: "ufind.best", href: "https://ufind.best", src: null, rel: "noopener", displayWidth: 135.2, variant: "ufind" },
   { name: "SaaSLineup", href: "https://saaslineup.com/product/skaleagents?ref=badge", src: "https://saaslineup.com/badge/skaleagents.svg", width: 160, height: 44, alt: "Featured on SaaSLineup", rel: "dofollow", displayWidth: 139.6 },
   { name: "LemonLaunch", href: "https://lemonlaunch.dev/", src: "https://lemonlaunch.dev/badge/lemonlaunch-badge-light.svg", width: 188, height: 56, alt: "Featured on LemonLaunch", rel: "noopener", displayWidth: 128.9 },
@@ -235,10 +237,12 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "Smartees", href: "https://smartees.tech/t/skaleagents", src: "https://smartees.tech/badge/smartees-listed-dark.svg", width: 184, height: 44, alt: "Featured on Smartees", rel: "noopener", loading: "lazy", displayWidth: 153.6 },
   { name: "TheMicroSaaSDir", href: "https://themicrosaasdir.com/product/skaleagents?ref=badge", src: "https://themicrosaasdir.com/badge/skaleagents.svg", width: 182, height: 46, alt: "Featured on TheMicroSaaSDir", rel: "dofollow", displayWidth: 151.9 },
   { name: "AITrustList", href: "https://aitrustlist.com", src: "https://aitrustlist.com/badge-light.svg", alt: "Featured on AITrustList", rel: "noopener noreferrer", displayWidth: 153.6, imageStyle: { height: "54px", width: "auto" } },
-  { name: "Hiproducty", href: "https://hiproducty.com", src: "https://hiproducty.com/badge.svg", alt: "Featured on Hiproducty", rel: "noopener noreferrer", displayWidth: 153.6 },
   { name: "BestskyTools", href: "https://bestsky.tools?utm_source=badge", src: "https://assets.bestsky.tools/badges/featured-light.svg", width: 150, alt: "Featured on BestskyTools", displayWidth: 150 },
   { name: "outdr.lol", href: "https://www.outdr.lol/card/skaleagents.com", src: "https://www.outdr.lol/badge/skaleagents.com.svg?theme=light", width: 168, height: 40, alt: "Domain Rating 14 on outdr.lol", rel: "noopener", displayWidth: 153.6 },
   { name: "Adsly", href: "https://adsly.io/?ref=badge", src: "https://adsly.io/badges/adsly-badge-dark.svg", width: 134, height: 44, alt: "Featured on Adsly", rel: "noopener", displayWidth: 116.9, imageStyle: { width: "134px", height: "44px" } },
+  { name: "goodSaaS", href: "https://goodsaas.xyz/saas/skaleagents", src: "https://goodsaas.xyz/badge/skaleagents.svg?theme=dark", alt: "SkaleAgents on goodSaaS", rel: "noopener", displayWidth: 153.6 },
+  { name: "ToolRoots", href: "https://toolroots.com", src: "https://toolroots.com/badge.svg", width: 181, height: 32, alt: "Featured on ToolRoots", rel: "noopener", displayWidth: 153.6 },
+  { name: "IndieAscent", href: "https://indieascent.com/p/skaleagents", src: "https://indieascent.com/badge/standard-light.svg", width: 200, height: 54, alt: "Featured on IndieAscent", rel: "noopener", displayWidth: 142.2 },
 ];
 
 export const directoryBadgeEntries: DirectoryBadgeEntry[] = [
