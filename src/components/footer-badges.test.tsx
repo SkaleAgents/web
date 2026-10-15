@@ -106,7 +106,31 @@ const oct13Hosts = [
   "yourhack.ai", "roozna.com", "superlaunchlist.com",
 ];
 
+const oct15Hosts = [
+  "saaslineup.com", "domainrank.app", "noonlaunch.com", "lemonlaunch.dev", "indiestore.co", "launchai.tools", "bunny.directory", "alltoolsdirectory.com",
+  "tooluck.org", "aitoolslist.tools", "in-sla.org", "newwebdirectory.com", "nextlaunch.io", "launchbuck.com", "debutpin.com", "launchfinds.com",
+  "startupfinds.com", "startupscrolls.com", "whatai.cc", "deepdhai.com", "navdh.com", "steeldirectory.net", "finetools.ai", "ontoplist.com",
+  "smartees.tech", "themicrosaasdir.com", "aitrustlist.com", "hiproducty.com", "bestsky.tools", "outdr.lol", "seektool.ai", "adsly.io", "boostdomainrating.com",
+];
+
 describe("FooterBadges", () => {
+  it("links each of the 33 directories added on 2026-10-15 exactly once", () => {
+    const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
+    const hosts = Array.from(page.querySelectorAll("a[href]")).map((link) => new URL(link.getAttribute("href")!).hostname.replace(/^www\./, ""));
+
+    for (const host of oct15Hosts) expect(hosts.filter((h) => h === host), host).toHaveLength(1);
+  });
+
+  it("keeps the supplied image sources and the LaunchAI badge", () => {
+    const { container } = render(<FooterBadges />);
+    const primary = container.querySelector('.footer-badge-group:not([aria-hidden="true"])')!;
+    const srcs = Array.from(primary.querySelectorAll("img")).map((img) => img.getAttribute("src"));
+
+    for (const src of ["https://saaslineup.com/badge/skaleagents.svg", "https://adsly.io/badges/adsly-badge-dark.svg", "https://www.outdr.lol/badge/skaleagents.com.svg?theme=light", "https://launchai.tools/brand/launchai-rocket-mark-web.png"]) {
+      expect(srcs.filter((s) => s === src), src).toHaveLength(1);
+    }
+    expect(primary.querySelector('a[data-launchai-badge="featured"]')).toHaveTextContent(/Featured on\s*LaunchAI/);
+  });
   it("links each of the 48 directories added on 2026-10-13 exactly once", () => {
     const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
     const hosts = Array.from(page.querySelectorAll("a[href]")).map((link) => new URL(link.getAttribute("href")!).hostname.replace(/^www\./, ""));
