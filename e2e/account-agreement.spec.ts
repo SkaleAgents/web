@@ -45,6 +45,7 @@ test("saves current versions and resumes a personal organization destination", a
     return route.fulfill({ json: status });
   });
   await page.goto("/auth/agreements?next=%2Fme%2Fjobs");
+  await page.getByRole("checkbox", { name: /Set up a passkey/ }).uncheck();
   await page.getByRole("checkbox", { name: /Terms of Service/ }).check();
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).toHaveURL(`/org/${personal}/jobs`);

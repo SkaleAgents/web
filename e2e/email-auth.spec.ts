@@ -96,6 +96,8 @@ test("sign-up has its own page, states the terms, and a new account's link says 
   await page.goto(`/auth/confirm#token=${token}&purpose=signin`);
   await expect(page.getByRole("heading", { name: "Create your account" })).toBeVisible();
   await expect(page.getByLabel("Your name")).toBeVisible();
-  await expect(page.getByText(/By creating an account, you agree to the/)).toBeVisible();
+  await expect(page.getByRole("checkbox", { name: /Set up a passkey/ })).toBeChecked();
+  await expect(page.getByRole("button", { name: "Create account" })).toBeDisabled();
+  await page.getByRole("checkbox", { name: /Terms of Service/ }).check();
   await expect(page.getByRole("button", { name: "Create account" })).toBeEnabled();
 });
