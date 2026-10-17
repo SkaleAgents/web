@@ -1,7 +1,7 @@
 import { expect, test } from "./fixtures";
 
 test.beforeEach(async ({ page }) => {
-  await page.route("**/api/account/passkeys", route => route.fulfill({ json: { accountId: "alice", hasPassword: false, passkeys: [] } }));
+  await page.route("**/api/account/passkeys", route => route.fulfill({ json: { accountId: "alice", passkeys: [] } }));
   await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "alice", enabled: false } }));
 });
 

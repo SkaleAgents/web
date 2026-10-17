@@ -73,22 +73,3 @@ test("Google and GitHub come first, then email with passkeys inside it", async (
   await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
   expect(authRequests).toEqual([]);
 });
-
-for (const requiresPassword of [false, true]) {
-  test(`signup confirmation uses the chosen password, other browser: ${requiresPassword}`, async ({ page }) => {
-    const token = "b".repeat(64);
-    await page.route("**/api/auth/email/inspect", route => route.fulfill({ json: { email: "person@example.com", purpose: "register", requiresPassword } }));
-    await page.route("**/api/auth/email/confirm", route => {
-      expect(route.request().postDataJSON()).toEqual({ token, purpose: "register", ...(requiresPassword ? { email: "person@example.com", password: "chosen-password123" } : {}) });
-      return route.fulfill({ status: 422, json: { message: "This link is already used." } });
-    });
-    await page.goto(`/auth/confirm#token=${token}&purpose=register`);
-    await expect(page.getByRole("heading", { name: "Confirm your email" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Confirm email and sign in" })).toBeEnabled();
-    await expect(page.getByLabel("New password")).toHaveCount(0);
-    if (requiresPassword) await page.getByLabel("Password", { exact: true }).fill("chosen-password123");
-    else await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
-    await page.getByRole("button", { name: "Confirm email and sign in" }).click();
-    await expect(page.getByRole("main").getByRole("alert")).toHaveText("This link is already used.");
-  });
-}
