@@ -53,14 +53,15 @@ export function passkeysSupported() {
 }
 
 export function authenticationError(error: unknown): string {
-  if (error instanceof DOMException && error.name === "NotAllowedError") return "Passkey request cancelled or unavailable. Try again, or use a password or email link.";
+  if (error instanceof DOMException && error.name === "NotAllowedError") return "Passkey request cancelled or unavailable. Try again, or use another sign-in option.";
   if (error instanceof DOMException && error.name === "InvalidStateError") return "This device already has a passkey for your account. Try signing in with it.";
   return error instanceof Error ? error.message : "Could not complete sign-in. Try again.";
 }
 
-export async function signInWithPasskey(email: string): Promise<AuthResult> {
-  if (!passkeysSupported()) throw new Error("Passkeys aren't supported here. Use a password or email link.");
-  const result = await authPost<{ challengeId: string; publicKey: { challenge: string; rpId: string; timeout: number; userVerification: UserVerificationRequirement } }>("/api/auth/passkeys/options", { email });
+// Without an email the browser offers every discoverable passkey saved for this site.
+export async function signInWithPasskey(email?: string): Promise<AuthResult> {
+  if (!passkeysSupported()) throw new Error("Passkeys aren't supported here. Use another sign-in option.");
+  const result = await authPost<{ challengeId: string; publicKey: { challenge: string; rpId: string; timeout: number; userVerification: UserVerificationRequirement } }>("/api/auth/passkeys/options", email ? { email } : {});
   const credential = await navigator.credentials.get({ publicKey: { ...result.publicKey, challenge: decode(result.publicKey.challenge) } }) as PublicKeyCredential | null;
   if (!credential) throw new Error("No passkey selected. Try another sign-in method.");
   const response = credential.response as AuthenticatorAssertionResponse;

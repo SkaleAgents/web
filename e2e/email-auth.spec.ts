@@ -12,7 +12,7 @@ test("password sign-in reports failures and allows a retry", async ({ page }) =>
     expect(route.request().postDataJSON()).toEqual({ email: "person@example.com", password: "test-password123" });
     return route.fulfill({ status: 422, json: { message: "Email or password is incorrect." } });
   });
-  await page.goto("/login");
+  await page.goto("/login/email");
   await page.getByLabel("Email", { exact: true }).fill("person@example.com");
   await page.getByLabel("Password", { exact: true }).fill("test-password123");
   await page.getByRole("button", { name: "Sign in with password" }).click();
@@ -32,7 +32,7 @@ test("signup asks for email and password before verification and recovery stays 
     expect(route.request().postDataJSON()).toEqual({ email: "person@example.com", purpose: "password" });
     return route.fulfill({ status: 202, json: {} });
   });
-  await page.goto("/login");
+  await page.goto("/login/email");
   await page.getByLabel("Email", { exact: true }).fill("person@example.com");
   await page.getByRole("button", { name: "Create an account", exact: true }).click();
   await page.getByLabel("Password", { exact: true }).fill("chosen-password123");
@@ -76,23 +76,27 @@ test("email tokens are stripped before scripts and require explicit confirmation
   expect(leaked).toEqual([]);
 });
 
-test("Google comes first with a direct email and password form", async ({ page }) => {
+test("Google and GitHub come first and email sign-in sits behind more options", async ({ page }) => {
   const authRequests: string[] = [];
   page.on("request", request => { if (request.url().includes("/api/auth/")) authRequests.push(request.url()); });
   await page.goto("/login");
   const main = page.getByRole("main");
   await expect(main.getByRole("link", { name: "Continue with Google" })).toBeVisible();
-  await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
-  await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
-  await expect(main.getByRole("button", { name: "Next", exact: true })).toHaveCount(0);
-  await expect(main.getByRole("button", { name: /Touch ID|magic link/ })).toHaveCount(0);
+  await expect(main.getByRole("link", { name: "Continue with GitHub" })).toBeVisible();
+  await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
+  await expect(main.getByRole("link", { name: "Continue with email" })).toBeHidden();
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
+  await main.getByText("More options").click();
+  await main.getByRole("link", { name: "Continue with email" }).click();
+  await expect(page).toHaveURL(/\/login\/email$/);
+  await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
   await page.getByLabel("Password", { exact: true }).fill("unsubmitted-password");
   await page.getByRole("button", { name: "Create an account", exact: true }).click();
   await expect(page.getByLabel("Password", { exact: true })).toHaveValue("");
+  await expect(main.getByText("By creating an account, you agree to the")).toBeVisible();
   expect(authRequests).toEqual([]);
 });
 

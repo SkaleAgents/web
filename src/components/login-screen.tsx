@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 import { toast } from "sonner";
+import Link from "next/link";
 import { EmailSignIn } from "@/components/email-sign-in";
+import { SignInOptions } from "@/components/sign-in-options";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { currentUserOptions } from "@/lib/session";
@@ -12,7 +14,8 @@ import type { OrganizationMembership } from "@/components/organization-switcher"
 import { hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
 import { Button } from "@/components/ui";
 
-export function LoginScreen({ reauthenticate = false, oauth = false, finishConnect = false }: { reauthenticate?: boolean; oauth?: boolean; finishConnect?: boolean }) {
+export function LoginScreen({ reauthenticate = false, oauth = false, finishConnect = false, email = false }: { reauthenticate?: boolean; oauth?: boolean; finishConnect?: boolean; email?: boolean }) {
+  const basePath = reauthenticate ? "/auth/reauth" : "/login";
   const user = useQuery(currentUserOptions);
   const memberships = useQuery({
     queryKey: ["workspaces", user.data?.id ?? "guest"],
@@ -42,10 +45,13 @@ export function LoginScreen({ reauthenticate = false, oauth = false, finishConne
     const error = current.get("error");
     if (!error) return;
 
+    const provider = error.startsWith("github") ? "GitHub" : "Google";
     toast.error(
       error === "invalid_state"
-        ? "Your Google sign-in expired. Please try again."
-        : "Google sign-in failed. Please try again.",
+        ? "Your sign-in expired. Please try again."
+        : error.endsWith("not_configured")
+          ? `${provider} sign-in isn't available yet. Try another option.`
+          : `${provider} sign-in failed. If this email already has an account, sign in the way you did before.`,
     );
     const next = new URLSearchParams();
     if (current.get("oauth") === "1") next.set("oauth", "1");
@@ -71,7 +77,10 @@ export function LoginScreen({ reauthenticate = false, oauth = false, finishConne
           {finishConnect && <p className="mt-3 text-sm leading-relaxed text-ink-muted">Finish connecting from the sign-in page.</p>}
         </div>
         <div className="space-y-5 rounded-xl border border-line bg-canvas-elevated p-6 sm:p-8">
-          <EmailSignIn oauth={oauth} />
+          {email ? <>
+            <EmailSignIn oauth={oauth} />
+            <Link className="block border-t border-line pt-4 text-center text-sm text-ink-muted hover:text-ink" href={`${basePath}${oauth ? "?oauth=1" : ""}`}>← All sign-in options</Link>
+          </> : <SignInOptions oauth={oauth} emailPath={`${basePath}/email`} />}
         </div>
       </div>
     </main>

@@ -57,7 +57,7 @@ test("workflow choices lead to their matching product entry points", async ({ pa
   await expect(web).toContainText("don't automatically track changes");
   await web.getByRole("link", { name: "Open audit jobs" }).click();
   await expect(page).toHaveURL(/\/login\?next=%2Fme%2Fjobs$/);
-  await expect(page.getByRole("button", { name: "Sign in with password" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Continue with Google" })).toBeVisible();
 });
 
 test("questions expand by keyboard and public content survives an API outage", async ({ page }) => {

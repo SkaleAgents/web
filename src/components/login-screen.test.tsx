@@ -15,7 +15,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function renderLogin(props: { oauth?: boolean; finishConnect?: boolean } = {}) {
+function renderLogin(props: { oauth?: boolean; finishConnect?: boolean; email?: boolean } = {}) {
   vi.mocked(apiFetch).mockRejectedValue(new ApiError("Unauthorized", 401));
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(<QueryClientProvider client={client}><LoginScreen {...props} /></QueryClientProvider>);
@@ -28,8 +28,20 @@ it("keeps the MCP connect on the Google link and says the editor is waiting for 
   expect(google).toHaveAttribute("href", expect.stringMatching(/\/api\/auth\/google\/redirect\?oauth=1$/));
   expect(screen.getByRole("heading", { name: "Connect your editor" })).toBeVisible();
   expect(screen.getByText("Sign in or create an account, then you return to allow the MCP connection.")).toBeVisible();
-  expect(screen.getByRole("button", { name: "Sign in with password" })).toBeVisible();
-  expect(google.compareDocumentPosition(screen.getByLabelText("Email")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  const github = screen.getByRole("link", { name: "Continue with GitHub" });
+  expect(github).toHaveAttribute("href", expect.stringMatching(/\/api\/auth\/github\/redirect\?oauth=1$/));
+  expect(google.compareDocumentPosition(github) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(screen.queryByLabelText("Email")).toBeNull();
+  expect(screen.getByRole("link", { name: "Continue with email" })).toHaveAttribute("href", "/login/email");
+  expect(screen.getByRole("link", { name: "Terms of Service" })).toHaveAttribute("href", "/terms");
+});
+
+it("puts the password form on its own email page with a way back", async () => {
+  renderLogin({ oauth: true, email: true });
+
+  expect(await screen.findByRole("button", { name: "Sign in with password" })).toBeVisible();
+  expect(screen.queryByRole("link", { name: "Continue with Google" })).toBeNull();
+  expect(screen.getByRole("link", { name: "← All sign-in options" })).toHaveAttribute("href", "/login?oauth=1");
 });
 
 it("leaves the Google link unchanged when this is not an MCP connect", async () => {
