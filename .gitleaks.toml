@@ -1,0 +1,7 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "StackLedge badge token: public by design, ships in the footer HTML"
+paths = ['''src/components/footer-badges-data\.ts''']
+regexes = ['''bdg_[0-9a-f]{32}''']
