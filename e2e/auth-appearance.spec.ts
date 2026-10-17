@@ -25,6 +25,9 @@ async function expectFocusedAccountPage(page: Page) {
 test("login, signup, recovery, confirmation, and reauthentication have no navigation header", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ status: 401, json: {} }));
   await page.goto("/login");
+  await expect(page.getByRole("link", { name: "Continue with Google" })).toBeVisible();
+  await expectFocusedAccountPage(page);
+  await page.goto("/login/email");
   await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
   await expectFocusedAccountPage(page);
   await page.getByRole("button", { name: "Create an account", exact: true }).click();
@@ -34,7 +37,7 @@ test("login, signup, recovery, confirmation, and reauthentication have no naviga
   await page.getByRole("button", { name: "Forgot password?" }).click();
   await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();
   await expectFocusedAccountPage(page);
-  for (const path of ["/auth/confirm", "/auth/reauth"]) {
+  for (const path of ["/auth/confirm", "/auth/reauth", "/auth/reauth/email"]) {
     await page.goto(path);
     await expectFocusedAccountPage(page);
   }

@@ -95,7 +95,7 @@ test("public headers open sign-in, private links lead to the focused form, and h
     } else {
       await expect(google).toHaveAttribute("href", /\/api\/auth\/google\/redirect$/);
     }
-    await expect(page.getByRole("button", { name: "Sign in with password", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Continue with Google" })).toBeVisible();
     await expect(page.getByRole("contentinfo", { name: "Account page links" }).getByRole("link", { name: "Back to public site" })).toHaveAttribute("href", "/");
   }
   await page.goto("/");

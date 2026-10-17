@@ -102,10 +102,10 @@ test("login recovers from a session error without showing a misleading sign-in f
   await page.route("**/api/user", route => route.fulfill(failed ? { status: 503, json: {} } : { status: 401, json: {} }));
   await page.goto("/login");
   await expect(page.getByRole("heading", { name: "Could not check your session" })).toBeVisible();
-  await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Continue with Google" })).toHaveCount(0);
   failed = false;
   await page.getByRole("button", { name: "Try again", exact: true }).click();
-  await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Continue with Google" })).toBeVisible();
 });
 
 test("login accepts dashboard destinations and rejects external redirects", async ({ page }) => {
@@ -116,7 +116,7 @@ test("login accepts dashboard destinations and rejects external redirects", asyn
   await page.goto("/login?next=https%3A%2F%2Fevil.example%2Fdashboard");
   await expect(page).toHaveURL(`/org/${personalId}`);
   await page.goto("/auth/reauth?next=%2Fdashboard%2Fsettings");
-  await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Continue with Google" })).toBeVisible();
   await expect(page).toHaveURL(/\/auth\/reauth\?next=/);
 });
 
@@ -151,7 +151,7 @@ test("sign-in is a focused entry point with a way back to the public site", asyn
   await page.route("**/api/user", route => route.fulfill({ status: 401, json: {} }));
   await page.goto("/login");
   await expect(page.getByRole("navigation", { name: "Main navigation" })).toHaveCount(0);
-  await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Continue with Google" })).toBeVisible();
   await expect(page.getByRole("banner")).toHaveCount(0);
   const footer = page.getByRole("contentinfo", { name: "Account page links" });
   await expect(footer.getByRole("link", { name: "Browse the directory" })).toHaveAttribute("href", "/bot-directory");

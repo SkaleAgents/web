@@ -95,7 +95,7 @@ export function llmsTxt(): string {
     link("Home", "/", "What SkaleAgents is, which assistants it hands off to, and the limits of a review."),
     link("Pricing", "/pricing", "Free, Starter, Pro, Max, and Enterprise. Dollar amounts are loaded from the live plan catalog."),
     link("Products", "/products", "Other products from the same team. Made by Binary Labs LLC."),
-    link("Contact", "/contact", "Email info@skaleagents.com about an account, an audit, billing, or a plan."),
+    link("Contact", "/contact", "Contact SkaleAgents about an account, an audit, billing, or a plan."),
     "",
     "## Review checks",
     link("Review checks", "/checks", "What each check looks for, the input it needs, and what a result does not prove."),
@@ -135,7 +135,7 @@ export function siteJsonLd(): string {
         "@type": "Organization",
         name: "SkaleAgents",
         url: SITE,
-        email: "info@skaleagents.com",
+        contactPoint: { "@type": "ContactPoint", contactType: "customer support", url: `${SITE}/contact` },
         parentOrganization: {
           "@type": "Organization",
           name: "Binary Labs LLC",
@@ -265,7 +265,7 @@ function staticPage(path: string): string | null {
   }
   if (path === "/contact") {
     return document("Contact SkaleAgents", [
-      "Questions about an account, an audit, billing, or an organization plan: email info@skaleagents.com.",
+      "Questions about an account, an audit, billing, or an organization plan: use the contact page at /contact.",
     ]);
   }
   if (path === "/mcp-config") {
@@ -284,7 +284,7 @@ function privacyMarkdown(): string {
   return document("SkaleAgents Privacy Policy", [
     "Effective October 2, 2026. Version 2026-10-02. The HTML page is the binding copy.",
     "",
-    "Binary Labs LLC, 1309 Coffeen Avenue, Sheridan, WY 82801, USA, operates SkaleAgents. For privacy requests, email info@skaleagents.com. This policy covers the SkaleAgents website, account, dashboards, APIs, and MCP connections.",
+    "Binary Labs LLC, 1309 Coffeen Avenue, Sheridan, WY 82801, USA, operates SkaleAgents. For privacy requests, use the contact page at /contact. This policy covers the SkaleAgents website, account, dashboards, APIs, and MCP connections.",
     "",
     "## Information we process",
     "",
@@ -320,7 +320,7 @@ function termsMarkdown(): string {
   return document("SkaleAgents Terms of Service", [
     "Effective October 2, 2026. Version 2026-10-02. The HTML page is the binding copy.",
     "",
-    "SkaleAgents is operated by Binary Labs LLC, 1309 Coffeen Avenue, Sheridan, WY 82801, USA. Contact info@skaleagents.com. These terms apply to the SkaleAgents website, accounts, dashboards, APIs, and MCP connections.",
+    "SkaleAgents is operated by Binary Labs LLC, 1309 Coffeen Avenue, Sheridan, WY 82801, USA. Contact us through the contact page at /contact. These terms apply to the SkaleAgents website, accounts, dashboards, APIs, and MCP connections.",
     "",
     "## Accounts and organizations",
     "",
@@ -336,7 +336,7 @@ function termsMarkdown(): string {
     "",
     "## Plans and payment",
     "",
-    "Available features and limits depend on the plan shown when you subscribe. Checkout shows the price and billing interval before you confirm payment. Starter, Pro, and Max subscription payments are non-refundable except where required by law. For billing questions, contact info@skaleagents.com.",
+    "Available features and limits depend on the plan shown when you subscribe. Checkout shows the price and billing interval before you confirm payment. Starter, Pro, and Max subscription payments are non-refundable except where required by law. For billing questions, use the contact page at /contact.",
     "",
     "A new paid subscription starts a full monthly billing cycle after payment is verified. Upgrading during a paid cycle keeps that cycle; we collect the prorated price difference before the higher plan takes effect. A downgrade or cancellation takes effect at the end of the current paid cycle. Cancellation does not itself create a refund. We may change future plan prices or features with notice; a change does not rewrite an already paid period.",
     "",
@@ -346,7 +346,7 @@ function termsMarkdown(): string {
     "",
     "## Ending use and disputes",
     "",
-    "You may stop using SkaleAgents and request account deletion by contacting us. Contact info@skaleagents.com first about a dispute. These terms are governed by the laws of Wyoming, USA, except where mandatory local consumer law applies.",
+    "You may stop using SkaleAgents and request account deletion by contacting us. Contact us through the contact page at /contact first about a dispute. These terms are governed by the laws of Wyoming, USA, except where mandatory local consumer law applies.",
     "",
     "## Changes",
     "",

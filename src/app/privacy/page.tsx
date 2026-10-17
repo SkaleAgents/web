@@ -8,7 +8,7 @@ export default function PrivacyPage() {
   return <main className="policy-page py-4 text-ink">
     <p className="text-sm font-semibold uppercase tracking-wide text-ink-muted">Effective October 2, 2026 · Version 2026-10-02</p>
     <h1 className="font-display text-4xl font-bold">SkaleAgents Privacy Policy</h1>
-    <p>Binary Labs LLC, 1309 Coffeen Avenue, Sheridan, WY 82801, USA, operates SkaleAgents. For privacy requests, email <a href="mailto:info@skaleagents.com">info@skaleagents.com</a>. This policy covers the SkaleAgents website, account, dashboards, APIs, and MCP connections.</p>
+    <p>Binary Labs LLC, 1309 Coffeen Avenue, Sheridan, WY 82801, USA, operates SkaleAgents. For privacy requests, use our <Link href="/contact">contact page</Link>. This policy covers the SkaleAgents website, account, dashboards, APIs, and MCP connections.</p>
     <h2>Information we process</h2>
     <p>We process account identifiers, email addresses, profile details, sign-in and security records, organization membership, invitations, API tokens, preferences, support messages, and service activity. When you use product features, we process the prompts, bot settings, audit inputs, findings, schedules, and other content you submit. Billing features may add purchase or invoice records. We receive limited identity information from a sign-in provider when you choose that provider.</p>
     <h2>Why we process it</h2>

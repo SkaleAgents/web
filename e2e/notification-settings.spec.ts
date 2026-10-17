@@ -87,7 +87,7 @@ test("guests reach the sign-in form and make no private preference requests", as
   });
   await page.goto("/settings");
   await expect(page).toHaveURL(/\/login\?next=%2Fdashboard%2Fsettings$/);
-  await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Continue with Google" })).toBeVisible();
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   expect(privateRequests).toBe(0);
 });
