@@ -45,7 +45,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
     pathname === "/me" || pathname.startsWith("/me/") || pathname.startsWith("/org/") || pathname === "/account/settings" ||
     pathname === "/staff" || pathname.startsWith("/staff/");
   const invitation = pathname === WORKSPACE_INVITATION_PATH;
-  const authentication = pathname === "/login" || pathname.startsWith("/login/") || pathname.startsWith("/auth/");
+  const authentication = ["/login", "/signup"].some((path) => pathname === path || pathname.startsWith(`${path}/`)) || pathname.startsWith("/auth/");
 
   if (dashboard && userQuery.data?.agreementRequired) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">Opening account agreement…</main>;
 
