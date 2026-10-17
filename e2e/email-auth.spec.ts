@@ -5,48 +5,27 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/sanctum/csrf-cookie", route => route.fulfill({ status: 204 }));
 });
 
-test("password sign-in reports failures and allows a retry", async ({ page }) => {
+test("email sign-in sends a magic link, offers a resend, and reports failures", async ({ page }) => {
   let requests = 0;
-  await page.route("**/api/auth/password", route => {
-    requests++;
-    expect(route.request().postDataJSON()).toEqual({ email: "person@example.com", password: "test-password123" });
-    return route.fulfill({ status: 422, json: { message: "Email or password is incorrect." } });
-  });
-  await page.goto("/login/email");
-  await page.getByLabel("Email", { exact: true }).fill("person@example.com");
-  await page.getByLabel("Password", { exact: true }).fill("test-password123");
-  await page.getByRole("button", { name: "Sign in with password" }).click();
-  await expect(page.getByRole("main").getByRole("alert")).toHaveText("Email or password is incorrect.");
-  await expect(page.getByRole("button", { name: "Sign in with password" })).toBeEnabled();
-  expect(requests).toBe(1);
-});
-
-test("signup asks for email and password before verification and recovery stays separate", async ({ page }) => {
-  let registrations = 0;
-  await page.route("**/api/auth/register", route => {
-    registrations++;
-    expect(route.request().postDataJSON()).toEqual({ email: "person@example.com", password: "chosen-password123", password_confirmation: "chosen-password123" });
-    return route.fulfill({ status: 202, json: { message: "Check your email to finish signing up." } });
-  });
   await page.route("**/api/auth/email", route => {
-    expect(route.request().postDataJSON()).toEqual({ email: "person@example.com", purpose: "password" });
-    return route.fulfill({ status: 202, json: {} });
+    requests++;
+    expect(route.request().postDataJSON()).toEqual({ email: "person@example.com", purpose: "signin" });
+    return requests === 1
+      ? route.fulfill({ status: 202, json: {} })
+      : route.fulfill({ status: 429, json: { message: "Too many requests. Try again shortly." } });
   });
   await page.goto("/login/email");
-  await page.getByLabel("Email", { exact: true }).fill("person@example.com");
-  await page.getByRole("button", { name: "Create an account", exact: true }).click();
-  await page.getByLabel("Password", { exact: true }).fill("chosen-password123");
-  await page.getByRole("button", { name: "Create account", exact: true }).click();
-  await expect(page.getByRole("main").getByRole("heading", { name: "Check your email" })).toBeVisible();
-  expect(registrations).toBe(1);
-  await page.getByRole("button", { name: "Resend email" }).click();
-  await expect.poll(() => registrations).toBe(2);
-  await page.getByRole("button", { name: "Back to sign in" }).click();
-  await expect(page.getByLabel("Password", { exact: true })).toHaveValue("");
-  await page.getByRole("button", { name: "Forgot password?" }).click();
   await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
-  await page.getByRole("button", { name: "Send reset link" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("password-reset link");
+  await expect(page.getByText("New here? The link creates your account.")).toBeVisible();
+  await page.getByLabel("Email", { exact: true }).fill("person@example.com");
+  await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+  await expect(page.getByRole("main").getByRole("heading", { name: "Check your email" })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("status")).toContainText("person@example.com");
+  await page.getByRole("button", { name: "Resend email" }).click();
+  await expect(page.getByRole("main").getByRole("alert")).toHaveText("Too many requests. Try again shortly.");
+  expect(requests).toBe(2);
+  await page.getByRole("button", { name: "Use a different email" }).click();
+  await expect(page.getByLabel("Email", { exact: true })).toHaveValue("person@example.com");
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -76,27 +55,22 @@ test("email tokens are stripped before scripts and require explicit confirmation
   expect(leaked).toEqual([]);
 });
 
-test("Google and GitHub come first and email sign-in sits behind more options", async ({ page }) => {
+test("Google and GitHub come first, then email with passkeys inside it", async ({ page }) => {
   const authRequests: string[] = [];
   page.on("request", request => { if (request.url().includes("/api/auth/")) authRequests.push(request.url()); });
   await page.goto("/login");
   const main = page.getByRole("main");
   await expect(main.getByRole("link", { name: "Continue with Google" })).toBeVisible();
   await expect(main.getByRole("link", { name: "Continue with GitHub" })).toBeVisible();
-  await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
-  await expect(main.getByRole("link", { name: "Continue with email" })).toBeHidden();
+  await expect(main.getByRole("button", { name: "Sign in with a passkey" })).toHaveCount(0);
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
-  await main.getByText("More options").click();
   await main.getByRole("link", { name: "Continue with email" }).click();
   await expect(page).toHaveURL(/\/login\/email$/);
+  await expect(main.getByRole("button", { name: "Sign in with a passkey" })).toBeVisible();
   await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
-  await page.getByLabel("Password", { exact: true }).fill("unsubmitted-password");
-  await page.getByRole("button", { name: "Create an account", exact: true }).click();
-  await expect(page.getByLabel("Password", { exact: true })).toHaveValue("");
-  await expect(main.getByText("By creating an account, you agree to the")).toBeVisible();
   expect(authRequests).toEqual([]);
 });
 

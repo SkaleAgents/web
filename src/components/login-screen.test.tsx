@@ -36,10 +36,11 @@ it("keeps the MCP connect on the Google link and says the editor is waiting for 
   expect(screen.getByRole("link", { name: "Terms of Service" })).toHaveAttribute("href", "/terms");
 });
 
-it("puts the password form on its own email page with a way back", async () => {
+it("puts the email sign-in link form on its own page with a way back", async () => {
   renderLogin({ oauth: true, email: true });
 
-  expect(await screen.findByRole("button", { name: "Sign in with password" })).toBeVisible();
+  expect(await screen.findByRole("button", { name: "Email me a sign-in link" })).toBeVisible();
+  expect(screen.queryByLabelText("Password")).toBeNull();
   expect(screen.queryByRole("link", { name: "Continue with Google" })).toBeNull();
   expect(screen.getByRole("link", { name: "← All sign-in options" })).toHaveAttribute("href", "/login?oauth=1");
 });

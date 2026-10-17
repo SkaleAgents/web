@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button, FieldLabel, LinkButton, TextInput } from "@/components/ui";
 import { authPost, authenticationError, completeSignIn, type AuthResult } from "@/lib/email-auth";
+import { offerPasskeyAfterSignIn } from "@/components/passkey-prompt";
 
 const subscribe = () => () => {};
 const getLink = () => window.__skaleEmailLink ?? null;
@@ -26,7 +27,11 @@ export default function ConfirmEmailPage() {
       <form className="space-y-4" onSubmit={async (event) => {
         event.preventDefault(); setBusy(true); setError("");
         const data = new FormData(event.currentTarget);
-        try { completeSignIn(await authPost<AuthResult>("/api/auth/email/confirm", { ...link, ...Object.fromEntries(data) })); }
+        try {
+          const result = await authPost<AuthResult>("/api/auth/email/confirm", { ...link, ...Object.fromEntries(data) });
+          if (link.purpose === "signin") offerPasskeyAfterSignIn();
+          completeSignIn(result);
+        }
         catch (err) { setError(authenticationError(err)); setBusy(false); }
       }}>
         <fieldset disabled={busy || !details.data || details.isError} className="space-y-4">
