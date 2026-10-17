@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PasskeyPrompt } from "@/components/passkey-prompt";
 
 export const metadata: Metadata = {
   title: "Organization | SkaleAgents",
@@ -6,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function OrganizationLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <><PasskeyPrompt />{children}</>;
 }
