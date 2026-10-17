@@ -8,6 +8,21 @@ export class ApiError extends Error {
   }
 }
 
+export class PasskeyRequiredError extends ApiError {
+  constructor(message: string, public readonly hasPasskey: boolean) {
+    super(message, 403);
+    this.name = "PasskeyRequiredError";
+  }
+}
+
+type PasskeyConfirmer = (hasPasskey: boolean) => Promise<void>;
+let confirmPasskey: PasskeyConfirmer | null = null;
+
+// The mounted dialog registers here; protected requests wait for it, then retry once.
+export function setPasskeyConfirmer(confirmer: PasskeyConfirmer | null) {
+  confirmPasskey = confirmer;
+}
+
 export const API_REQUEST_TIMEOUT_MS = 15_000;
 
 export class ApiTimeoutError extends Error {
@@ -97,7 +112,14 @@ export async function apiFetch<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
-  return withDeadline(init.signal, (signal) => apiRequest<T>(`${API_URL}${path}`, { ...init, signal }));
+  const run = () => withDeadline(init.signal, (signal) => apiRequest<T>(`${API_URL}${path}`, { ...init, signal }));
+  try {
+    return await run();
+  } catch (error) {
+    if (!(error instanceof PasskeyRequiredError) || !confirmPasskey) throw error;
+    await confirmPasskey(error.hasPasskey);
+    return run();
+  }
 }
 
 async function apiRequest<T>(url: string, init: RequestInit): Promise<T> {
@@ -120,10 +142,11 @@ async function apiRequest<T>(url: string, init: RequestInit): Promise<T> {
   if (!res.ok) {
     let message = res.statusText;
     try {
-      const data = (await res.json()) as { error?: string; message?: string };
+      const data = (await res.json()) as { error?: string; message?: string; code?: string; hasPasskey?: boolean };
       message = data.error ?? data.message ?? message;
-    } catch {
-      /* ignore */
+      if (res.status === 403 && data.code === "passkey_required") throw new PasskeyRequiredError(message, data.hasPasskey === true);
+    } catch (error) {
+      if (error instanceof PasskeyRequiredError) throw error;
     }
     throw new ApiError(message, res.status);
   }

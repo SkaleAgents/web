@@ -72,6 +72,28 @@ export async function signInWithPasskey(email?: string): Promise<AuthResult> {
   });
 }
 
+// Re-proves presence with an existing passkey so protected actions work for the next five minutes.
+export async function confirmWithPasskey(): Promise<void> {
+  if (!passkeysSupported()) throw new Error("Passkeys aren't supported in this browser.");
+  const result = await authPost<{ challengeId: string; publicKey: { challenge: string; rpId: string; timeout: number; userVerification: UserVerificationRequirement; allowCredentials?: Array<{ type: PublicKeyCredentialType; id: string }> } }>("/api/account/passkey-confirmation/options", {});
+  const credential = await navigator.credentials.get({ publicKey: {
+    ...result.publicKey, challenge: decode(result.publicKey.challenge),
+    allowCredentials: result.publicKey.allowCredentials?.map((key) => ({ ...key, id: decode(key.id) })),
+  } }) as PublicKeyCredential | null;
+  if (!credential) throw new Error("No passkey selected.");
+  const response = credential.response as AuthenticatorAssertionResponse;
+  await authPost("/api/account/passkey-confirmation", {
+    challengeId: result.challengeId, id: encode(credential.rawId),
+    clientDataJSON: encode(response.clientDataJSON), authenticatorData: encode(response.authenticatorData),
+    signature: encode(response.signature), userHandle: response.userHandle ? encode(response.userHandle) : "",
+  });
+}
+
+export function deviceName(): string {
+  const platform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform || navigator.platform || "";
+  return platform ? `${platform} passkey` : "My device";
+}
+
 export type PasskeySettings = {
   accountId: string;
   passkeys: Array<{ id: string; name: string; created_at: string; last_used_at: string | null }>;
