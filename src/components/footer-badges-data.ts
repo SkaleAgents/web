@@ -125,6 +125,10 @@ export const directoryLinks = [
   ["Featured on Finetools", "https://finetools.ai/", "noopener"],
   ["SeekTool.ai Tools Directory", "https://seektool.ai/", "", "SeekTool.ai Tools Directory"],
   ["Featured on BoostDomainRating", "https://boostdomainrating.com/", "noopener"],
+  ["BestAITool AI Tools Diresctory", "https://bestaitool.app/", "", "BestAITool AI Tools Directory"],
+  ["Top AI Tools", "https://top4ai.com", "", "Top AI Tools"],
+  ["Featured on WTAI Navigation", "https://wtai.cc/", "noopener"],
+  ["Featured on TheToolPicker", "https://www.thetoolpicker.com?ref=skaleagents", "noopener"],
 ] as const;
 
 export type DirectoryBadgeEntry = {
@@ -243,6 +247,12 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "goodSaaS", href: "https://goodsaas.xyz/saas/skaleagents", src: "https://goodsaas.xyz/badge/skaleagents.svg?theme=dark", alt: "SkaleAgents on goodSaaS", rel: "noopener", displayWidth: 153.6 },
   { name: "ToolRoots", href: "https://toolroots.com", src: "https://toolroots.com/badge.svg", width: 181, height: 32, alt: "Featured on ToolRoots", rel: "noopener", displayWidth: 153.6 },
   { name: "IndieAscent", href: "https://indieascent.com/p/skaleagents", src: "https://indieascent.com/badge/standard-light.svg", width: 200, height: 54, alt: "Featured on IndieAscent", rel: "noopener", displayWidth: 142.2 },
+  { name: "GetSEOO Directory", href: "https://directory.getseoo.com", src: "https://directory.getseoo.com/badges/getseoo-badge-dark.svg", width: 240, height: 54, alt: "Featured on GetSEOO Directory", rel: "noopener", displayWidth: 153.6 },
+  { name: "IndieLineup", href: "https://indielineup.com/product/skaleagents?ref=badge", src: "https://indielineup.com/badge/skaleagents.svg", width: 182, height: 46, alt: "Featured on IndieLineup", rel: "dofollow", displayWidth: 151.9 },
+  { name: "Launchelion", href: "https://launchelion.com", src: "https://launchelion.com/api/badge", width: 229, height: 64, alt: "Featured on Launchelion", rel: "noopener", displayWidth: 137.4 },
+  { name: "SaaSearch", href: "https://saasearch.io/product/skaleagents?utm_source=badge&utm_medium=referral&utm_campaign=featured_badge&ref=saasearch", src: "https://saasearch.io/api/badge/skaleagents?theme=light", alt: "Featured on SaaSearch", rel: "noopener", displayWidth: 153.6, imageStyle: { height: "48px", width: "auto" } },
+  { name: "SwipeToLaunch", href: "https://swipetolaunch.com/p/skaleagents?ref=badge", src: "https://swipetolaunch.com/api/badge/skaleagents", width: 220, height: 48, alt: "Featured on SwipeToLaunch", rel: "noopener", displayWidth: 153.6 },
+  { name: "Toolquix", href: "https://toolquix.com", src: "https://toolquix.com/assets/badge-featured.svg", width: 240, height: 54, alt: "Featured on Toolquix", displayWidth: 153.6 },
 ];
 
 export const directoryBadgeEntries: DirectoryBadgeEntry[] = [

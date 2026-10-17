@@ -118,7 +118,19 @@ const oct15Hosts = [
   "smartees.tech", "themicrosaasdir.com", "aitrustlist.com", "hiproducty.com", "bestsky.tools", "outdr.lol", "seektool.ai", "adsly.io", "boostdomainrating.com",
 ];
 
+const oct17Hosts = [
+  "directory.getseoo.com", "indielineup.com", "launchelion.com", "saasearch.io", "swipetolaunch.com", "toolquix.com",
+  "bestaitool.app", "top4ai.com", "wtai.cc", "thetoolpicker.com",
+];
+
 describe("FooterBadges", () => {
+  it("links each of the 10 directories added on 2026-10-17 exactly once", () => {
+    const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
+    const hosts = Array.from(page.querySelectorAll("a[href]")).map((link) => new URL(link.getAttribute("href")!).hostname.replace(/^www\./, ""));
+
+    for (const host of oct17Hosts) expect(hosts.filter((h) => h === host), host).toHaveLength(1);
+  });
+
   it("links each of the 33 directories added on 2026-10-15 exactly once", () => {
     const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
     const hosts = Array.from(page.querySelectorAll("a[href]")).map((link) => new URL(link.getAttribute("href")!).hostname.replace(/^www\./, ""));
