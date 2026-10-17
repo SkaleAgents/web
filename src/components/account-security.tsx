@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
-import { addPasskey, authPost, authenticationError, type PasskeySettings } from "@/lib/email-auth";
+import { addPasskey, authenticationError, type PasskeySettings } from "@/lib/email-auth";
 import { Button, FieldLabel, LinkButton, TextInput } from "./ui";
 import { currentUserOptions } from "@/lib/session";
 
-export function AccountSecurity({ accountId, email }: { accountId: string; email: string | null }) {
+export function AccountSecurity({ accountId }: { accountId: string }) {
   const client = useQueryClient();
   const key = ["account-security", accountId];
   const settings = useQuery({ queryKey: key, queryFn: async ({ signal }) => {
@@ -47,9 +47,6 @@ export function AccountSecurity({ accountId, email }: { accountId: string; email
         <span className="min-w-0 break-words text-sm">{passkey.name}<span className="block text-xs text-ink-muted">{passkey.last_used_at ? `Last used ${new Date(passkey.last_used_at).toLocaleDateString()}` : "Not used yet"}</span></span>
         <Button variant="secondary" disabled={busy} aria-label={`Remove ${passkey.name}`} onClick={() => void run(async () => { await ensureCsrfCookie(); return apiFetch<PasskeySettings>(`/api/account/passkeys/${passkey.id}`, { method: "DELETE", body: JSON.stringify({ accountId }) }); }, "Passkey removed.")}>Remove</Button>
       </li>)}</ul> : <p className="text-sm text-ink-muted">No passkeys added yet.</p>}
-      <div className="border-t border-line pt-4">
-        <Button variant="secondary" disabled={busy || !email} onClick={() => void run(async () => { await authPost("/api/auth/email", { email, purpose: "password" }); }, "Check your email to set or change your password.")}>{settings.data.hasPassword ? "Change password by email" : "Set a password by email"}</Button>
-      </div>
     </>}
     {message && <p role="status" className="text-sm">{message}</p>}
     {error && <p role="alert" className="text-sm text-danger">{error}</p>}

@@ -15,7 +15,7 @@ afterEach(() => { cleanup(); sessionStorage.clear(); vi.unstubAllGlobals(); vi.c
 function renderPrompt(passkeys: unknown[]) {
   vi.mocked(apiFetch).mockImplementation(async (path: string) => (path === "/api/user"
     ? { id: "u1", agreementRequired: false }
-    : { accountId: "u1", hasPassword: false, passkeys }) as never);
+    : { accountId: "u1", passkeys }) as never);
   render(<QueryClientProvider client={new QueryClient()}><PasskeyPrompt /></QueryClientProvider>);
 }
 

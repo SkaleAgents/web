@@ -30,7 +30,7 @@ export default function SettingsPage() {
       ) : user.isPending ? (
         <p className="text-sm text-ink-muted">Loading your account…</p>
       ) : user.data ? (
-        <div key={user.data.id} className="space-y-8"><AccountSecurity accountId={user.data.id} email={user.data.email ?? null} /><EmailSettings accountId={user.data.id} /><RetentionNotice accountId={user.data.id} /></div>
+        <div key={user.data.id} className="space-y-8"><AccountSecurity accountId={user.data.id} /><EmailSettings accountId={user.data.id} /><RetentionNotice accountId={user.data.id} /></div>
       ) : (
         <LinkButton href="/login">Sign in to manage your account</LinkButton>
       )}
