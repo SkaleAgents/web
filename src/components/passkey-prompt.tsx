@@ -32,7 +32,7 @@ export function PasskeyPrompt() {
   if (closed || !settings.data || settings.data.accountId !== user.data?.id) return null;
   if (settings.data.passkeys.length) { sessionStorage.removeItem(KEY); return null; }
 
-  return <section aria-labelledby="passkey-prompt" className="mx-auto mb-6 w-full max-w-3xl space-y-3 rounded-[10px] border border-line bg-canvas-elevated p-5">
+  return <section aria-labelledby="passkey-prompt" className="mb-6 space-y-3 rounded-[10px] border border-line bg-canvas-elevated p-5">
     <h2 id="passkey-prompt" className="text-lg font-semibold">Sign in faster next time</h2>
     <p className="text-sm text-ink-muted">Add a passkey to sign in with Touch ID, Face ID, or your screen lock. Emailed sign-in links still work as a backup.</p>
     <div className="flex flex-wrap gap-3">
