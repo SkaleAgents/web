@@ -86,7 +86,7 @@ export function PricingPlans() {
           : plan.checkoutMode === "self_service" ? (enrollmentOpen
             ? <Link href="/me/billing" className="border border-line px-4 py-3 text-center text-sm font-semibold hover:bg-accent-soft">Choose {plan.name}</Link>
             : <p className="border border-line bg-canvas px-4 py-3 text-center text-sm font-semibold text-ink-muted">Enrollment coming soon</p>)
-          : <Link href="/login" className="border border-line px-4 py-3 text-center text-sm font-semibold hover:bg-accent-soft">Get started free</Link>}
+          : <Link href="/signup" className="border border-line px-4 py-3 text-center text-sm font-semibold hover:bg-accent-soft">Get started free</Link>}
       </article>)}
     </div>}
     {formOpen && <section className="mt-12 border-t border-line pt-10" aria-labelledby="enterprise-inquiry-heading">

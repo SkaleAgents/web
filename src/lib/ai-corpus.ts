@@ -17,6 +17,7 @@ export const PRIVATE_PATHS = [
   "/org/",
   "/staff/",
   "/login",
+  "/signup",
   "/auth/",
   "/workspace-invitations/",
   "/reviews/",
@@ -121,7 +122,7 @@ export function llmsTxt(): string {
     "## Machine-readable catalog",
     `- [JSON catalog](${SITE}/checks.json): the same review checks in JSON. Fetch it occasionally. It is not an account export.`,
     "",
-    "Do not treat /dashboard, /me, /org, /staff, /login, /auth, or /workspace-invitations as public reference.",
+    "Do not treat /dashboard, /me, /org, /staff, /login, /signup, /auth, or /workspace-invitations as public reference.",
     "",
   ];
   return lines.join("\n");

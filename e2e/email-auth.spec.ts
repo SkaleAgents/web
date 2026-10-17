@@ -16,7 +16,7 @@ test("email sign-in sends a magic link, offers a resend, and reports failures", 
   });
   await page.goto("/login/email");
   await expect(page.getByLabel("Password", { exact: true })).toHaveCount(0);
-  await expect(page.getByText("New here? The link creates your account.")).toBeVisible();
+  await expect(page.getByText(/By signing up/)).toHaveCount(0);
   await page.getByLabel("Email", { exact: true }).fill("person@example.com");
   await page.getByRole("button", { name: "Email me a sign-in link" }).click();
   await expect(page.getByRole("main").getByRole("heading", { name: "Check your email" })).toBeVisible();
@@ -37,7 +37,7 @@ test("email tokens are stripped before scripts and require explicit confirmation
   let confirmations = 0;
   const leaked: string[] = [];
   page.on("request", request => { if (request.url().includes(token)) leaked.push(request.url()); });
-  await page.route("**/api/auth/email/inspect", route => route.fulfill({ json: { email: "person@example.com", purpose: "signin" } }));
+  await page.route("**/api/auth/email/inspect", route => route.fulfill({ json: { email: "person@example.com", purpose: "signin", newAccount: false } }));
   await page.route("**/api/auth/email/confirm", route => {
     confirmations++;
     expect(route.request().postDataJSON().token).toBe(token);
@@ -49,7 +49,9 @@ test("email tokens are stripped before scripts and require explicit confirmation
   await expect(page.getByText("person@example.com", { exact: true })).toBeVisible();
   expect(confirmations).toBe(0);
   expect(await page.evaluate(() => JSON.stringify([localStorage, sessionStorage]))).not.toContain(token);
-  await page.getByRole("button", { name: "Confirm and sign in" }).click();
+  await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  await expect(page.getByLabel("Your name")).toHaveCount(0);
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page.getByRole("main").getByRole("alert")).toHaveText("This link is already used.");
   expect(confirmations).toBe(1);
   expect(leaked).toEqual([]);
@@ -72,4 +74,28 @@ test("Google and GitHub come first, then email with passkeys inside it", async (
   await expect(main.getByRole("button", { name: "Sign in with a passkey" })).toBeVisible();
   await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
   expect(authRequests).toEqual([]);
+});
+
+test("sign-up has its own page, states the terms, and a new account's link says so", async ({ page }) => {
+  await page.route("**/api/auth/email", route => route.fulfill({ status: 202, json: {} }));
+  await page.goto("/login");
+  await expect(page.getByText(/By signing up/)).toHaveCount(0);
+  await page.getByRole("link", { name: "Create an account" }).click();
+  await expect(page).toHaveURL(/\/signup$/);
+  await expect(page.getByRole("heading", { name: "Create your SkaleAgents account" })).toBeVisible();
+  await expect(page.getByText(/By signing up, you agree to the/)).toBeVisible();
+  await page.getByRole("link", { name: "Continue with email" }).click();
+  await expect(page).toHaveURL(/\/signup\/email$/);
+  await expect(page.getByRole("button", { name: "Sign in with a passkey" })).toHaveCount(0);
+  await page.getByLabel("Email", { exact: true }).fill("new@example.com");
+  await page.getByRole("button", { name: "Email me a sign-up link" }).click();
+  await expect(page.getByRole("main").getByRole("status")).toContainText("sign-up link");
+
+  const token = "c".repeat(64);
+  await page.route("**/api/auth/email/inspect", route => route.fulfill({ json: { email: "new@example.com", purpose: "signin", newAccount: true } }));
+  await page.goto(`/auth/confirm#token=${token}&purpose=signin`);
+  await expect(page.getByRole("heading", { name: "Create your account" })).toBeVisible();
+  await expect(page.getByLabel("Your name")).toBeVisible();
+  await expect(page.getByText(/By creating an account, you agree to the/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Create account" })).toBeEnabled();
 });

@@ -91,7 +91,7 @@ test("public headers open sign-in, private links lead to the focused form, and h
     if (path.includes("oauth=1")) {
       await expect(google).toHaveAttribute("href", /\/api\/auth\/google\/redirect\?oauth=1$/);
       await expect(page.getByRole("heading", { name: "Connect your editor" })).toBeVisible();
-      await expect(page.getByText("Sign in or create an account, then you return to allow the MCP connection.")).toBeVisible();
+      await expect(page.getByText("Sign in, then you return to allow the MCP connection.")).toBeVisible();
     } else {
       await expect(google).toHaveAttribute("href", /\/api\/auth\/google\/redirect$/);
     }

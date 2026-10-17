@@ -10,18 +10,19 @@ import { API_URL } from "@/lib/api";
 const providerClass = "flex w-full items-center justify-center rounded-[10px] border border-line bg-canvas px-3 py-3 text-sm font-semibold hover:bg-accent-soft";
 const noop = () => () => {};
 
-export function SignInOptions({ oauth = false, emailPath }: { oauth?: boolean; emailPath: string }) {
+export function SignInOptions({ oauth = false, emailPath, signup = false, switchable = true }: { oauth?: boolean; emailPath: string; signup?: boolean; switchable?: boolean }) {
   const search = useSyncExternalStore(noop, () => window.location.search, () => "");
   const query = oauth ? "?oauth=1" : "";
 
   return <div className="space-y-5">
-    <h2 className="text-xl font-semibold text-ink">Welcome</h2>
+    <h2 className="text-xl font-semibold text-ink">{signup ? "Sign up" : "Sign in"}</h2>
     <div className="space-y-3">
       <a className={providerClass} href={`${API_URL}/api/auth/google/redirect${query}`}><GoogleSignInLabel>Continue with Google</GoogleSignInLabel></a>
       <a className={providerClass} href={`${API_URL}/api/auth/github/redirect${query}`}><GitHubSignInLabel>Continue with GitHub</GitHubSignInLabel></a>
     </div>
     <div className="flex items-center gap-3 text-xs text-ink-muted"><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
     <Link className={providerClass} href={`${emailPath}${search}`}><EmailSignInLabel>Continue with email</EmailSignInLabel></Link>
-    <p className="text-center text-xs leading-relaxed text-ink-muted">By continuing, you agree to the <Link className="underline underline-offset-4" href="/terms">Terms of Service</Link> and <Link className="underline underline-offset-4" href="/privacy">Privacy Policy</Link>.</p>
+    {signup && <p className="text-center text-xs leading-relaxed text-ink-muted">By signing up, you agree to the <Link className="underline underline-offset-4" href="/terms">Terms of Service</Link> and <Link className="underline underline-offset-4" href="/privacy">Privacy Policy</Link>.</p>}
+    {switchable && <p className="border-t border-line pt-4 text-center text-sm text-ink-muted">{signup ? "Already have an account? " : "New to SkaleAgents? "}<Link className="font-semibold text-ink underline underline-offset-4" href={`${signup ? "/login" : "/signup"}${search}`}>{signup ? "Sign in" : "Create an account"}</Link></p>}
   </div>;
 }

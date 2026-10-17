@@ -14,8 +14,8 @@ import type { OrganizationMembership } from "@/components/organization-switcher"
 import { hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
 import { Button } from "@/components/ui";
 
-export function LoginScreen({ reauthenticate = false, oauth = false, finishConnect = false, email = false }: { reauthenticate?: boolean; oauth?: boolean; finishConnect?: boolean; email?: boolean }) {
-  const basePath = reauthenticate ? "/auth/reauth" : "/login";
+export function LoginScreen({ reauthenticate = false, oauth = false, finishConnect = false, email = false, signup = false }: { reauthenticate?: boolean; oauth?: boolean; finishConnect?: boolean; email?: boolean; signup?: boolean }) {
+  const basePath = reauthenticate ? "/auth/reauth" : signup ? "/signup" : "/login";
   const user = useQuery(currentUserOptions);
   const memberships = useQuery({
     queryKey: ["workspaces", user.data?.id ?? "guest"],
@@ -57,8 +57,8 @@ export function LoginScreen({ reauthenticate = false, oauth = false, finishConne
     if (current.get("oauth") === "1") next.set("oauth", "1");
     if (current.get("finish") === "1") next.set("finish", "1");
     const query = next.toString();
-    window.history.replaceState({}, "", query ? `/login?${query}` : "/login");
-  }, []);
+    window.history.replaceState({}, "", query ? `${basePath}?${query}` : basePath);
+  }, [basePath]);
 
   if (user.isError) return <main className="mx-auto space-y-4 px-6 py-16" role="alert"><h1 className="text-xl font-semibold">Could not check your session</h1><Button onClick={() => void user.refetch()}>Try again</Button></main>;
   if (user.data && memberships.isError) return <main className="mx-auto space-y-4 px-6 py-16" role="alert"><h1 className="text-xl font-semibold">Could not find your organization</h1><Button onClick={() => void memberships.refetch()}>Try again</Button></main>;
@@ -68,19 +68,19 @@ export function LoginScreen({ reauthenticate = false, oauth = false, finishConne
     <main className="flex flex-1 items-center justify-center py-10 sm:py-16">
       <div className="w-full max-w-md">
         <div className="mb-7">
-          <h1 className="font-display text-3xl font-bold tracking-tight text-ink">{oauth ? "Connect your editor" : "Sign in to your control plane"}</h1>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-ink">{oauth ? "Connect your editor" : signup ? "Create your SkaleAgents account" : "Sign in to your control plane"}</h1>
           <p className="mt-3 text-sm leading-relaxed text-ink-muted">
             {oauth
-              ? "Sign in or create an account, then you return to allow the MCP connection."
-              : "Manage your audits, bots, and account in your dashboard."}
+              ? `${signup ? "Create an account" : "Sign in"}, then you return to allow the MCP connection.`
+              : signup ? "Start free. Run audits, build bots, and connect your editor." : "Manage your audits, bots, and account in your dashboard."}
           </p>
           {finishConnect && <p className="mt-3 text-sm leading-relaxed text-ink-muted">Finish connecting from the sign-in page.</p>}
         </div>
         <div className="space-y-5 rounded-xl border border-line bg-canvas-elevated p-6 sm:p-8">
           {email ? <>
-            <EmailSignIn oauth={oauth} />
-            <Link className="block border-t border-line pt-4 text-center text-sm text-ink-muted hover:text-ink" href={`${basePath}${oauth ? "?oauth=1" : ""}`}>← All sign-in options</Link>
-          </> : <SignInOptions oauth={oauth} emailPath={`${basePath}/email`} />}
+            <EmailSignIn oauth={oauth} signup={signup} />
+            <Link className="block border-t border-line pt-4 text-center text-sm text-ink-muted hover:text-ink" href={`${basePath}${oauth ? "?oauth=1" : ""}`}>{signup ? "← All sign-up options" : "← All sign-in options"}</Link>
+          </> : <SignInOptions oauth={oauth} emailPath={`${basePath}/email`} signup={signup} switchable={!reauthenticate} />}
         </div>
       </div>
     </main>
