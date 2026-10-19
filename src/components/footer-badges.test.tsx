@@ -1,6 +1,7 @@
 import { render } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { FooterBadgesFallback } from "@/components/footer-badges-fallback";
 import { FooterBadges } from "./footer-badges";
 
 const requestedBadges = [
@@ -77,14 +78,9 @@ const addedBadgeImages = [
 ] as const;
 
 const requestedLinks = [
-  ["https://hiproducty.com", "HiProducty", ""],
-  ["https://launchboard.dev", "LaunchBoard", ""],
   ["https://smolsaas.com", "Smol SaaS", ""],
   ["https://newaiforyou.com", "NewAIForYou", "noopener noreferrer"],
-  ["https://www.launch-list.org", "Launch List", "noopener noreferrer"],
   ["https://startupproject.org/", "Startup Project", "noopener noreferrer"],
-  ["https://directoryhunt.org", "Directory Hunt", "noopener"],
-  ["https://newtools.site", "NewTools", "noopener"],
   ["https://www.aitoolgo.com", "AiToolGo", "noopener noreferrer"],
   ["https://toolindex.net/?ref=listed", "Listed on Tool Index", "nofollow noopener"],
   ["https://right-ai.com/", "RightAI Tools Diresctory", null],
@@ -122,6 +118,23 @@ const oct17Hosts = [
   "directory.getseoo.com", "indielineup.com", "launchelion.com", "saasearch.io", "swipetolaunch.com", "toolquix.com",
   "bestaitool.app", "top4ai.com", "wtai.cc", "thetoolpicker.com",
 ];
+
+const oct19Images = ["hiproducty.com", "launchboard.dev", "justsimple.tools", "freeai.run", "thetoolpicker.com", "aicavo.com", "getlaunchpod.com", "launchpadly.co", "vibetoyou.com", "smoltop.com", "aifinderplus.com", "aitrovex.com", "directoryhunt.org", "launch-list.org", "newtools.site"];
+const oct19Links = ["aihuntbase.com", "mozolist.com", "toolsnap.ai", "aiforthat.co"];
+
+describe("FooterBadges 2026-10-19", () => {
+  it("serves every badge image in the initial HTML, before the slider loads", () => {
+    const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadgesFallback />), "text/html");
+    const link = (host: string) => Array.from(page.querySelectorAll("a[href]")).filter((a) => new URL(a.getAttribute("href")!).hostname.replace(/^www\./, "") === host);
+
+    for (const host of oct19Images) {
+      expect(link(host), host).toHaveLength(1);
+      expect(link(host)[0].querySelector("img"), host).not.toBeNull();
+    }
+    for (const host of oct19Links) expect(link(host), host).toHaveLength(1);
+    expect(link("adsly.io")[0].querySelector("img")?.getAttribute("src")).toBe("https://adsly.io/badges/adsly-badge-dark.svg");
+  });
+});
 
 describe("FooterBadges", () => {
   it("links each of the 10 directories added on 2026-10-17 exactly once", () => {
