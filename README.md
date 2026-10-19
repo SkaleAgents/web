@@ -50,3 +50,7 @@ See hub [railway-deploy.md](https://github.com/SkaleAgents/workspace/blob/main/d
 - Browser → `api` Sanctum cookies
 
 Hub: [SkaleAgents/workspace](https://github.com/SkaleAgents/workspace) → `docs/tech-spec/`
+
+## License
+
+MIT, see [LICENSE](LICENSE). The SkaleAgents API is a separate, private repository.
