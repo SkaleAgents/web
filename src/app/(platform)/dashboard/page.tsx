@@ -55,6 +55,6 @@ export default function DashboardPage() {
         <div className="min-w-0"><Link href={href(`jobs/${job.id}`)} className="break-words text-sm font-medium hover:underline">{job.summary || `Audit ${job.id}`}</Link><p className="mt-1 text-xs text-ink-muted">{new Date(job.createdAt).toLocaleString()}</p></div><span className="rounded-full border border-line px-3 py-1 text-xs capitalize">{job.status}</span>
       </li>)}</ul>}
     </section>
-    <section aria-labelledby="manage-account"><h2 id="manage-account" className="mb-4 text-lg font-semibold">Explore your account</h2><div className="grid gap-4 sm:grid-cols-2">{tools.map(tool => <Link key={tool.section} href={tool.section === "settings" ? "/account/security" : href(tool.section)} className="rounded-xl border border-line p-5 transition-colors hover:bg-canvas-elevated"><h3 className="font-semibold">{tool.title}</h3><p className="mt-2 text-sm text-ink-muted">{tool.detail}</p></Link>)}</div></section>
+    <section aria-labelledby="manage-account"><h2 id="manage-account" className="mb-4 text-lg font-semibold">Explore your account</h2><div className="grid gap-4 sm:grid-cols-2">{tools.map(tool => <Link key={tool.section} href={tool.section === "settings" ? "/account/passkeys" : href(tool.section)} className="rounded-xl border border-line p-5 transition-colors hover:bg-canvas-elevated"><h3 className="font-semibold">{tool.title}</h3><p className="mt-2 text-sm text-ink-muted">{tool.detail}</p></Link>)}</div></section>
   </main>;
 }
