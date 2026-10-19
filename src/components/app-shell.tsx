@@ -54,6 +54,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
   if (authentication) return (
     <div className="flex flex-1 flex-col">
       <div key={userQuery.data?.id ?? "guest"} className="flex flex-1 flex-col px-5">
+        <div className="mx-auto w-full max-w-md pt-8"><BrandLogo /></div>
         {children}
       </div>
       <footer aria-label="Account page links" className="mx-auto w-full max-w-md px-5 pb-8 text-center text-sm text-ink-muted">

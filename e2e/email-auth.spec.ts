@@ -57,7 +57,7 @@ test("email tokens are stripped before scripts and require explicit confirmation
   expect(leaked).toEqual([]);
 });
 
-test("sign-in offers Google, GitHub, email, then a passkey", async ({ page }) => {
+test("sign-in leads with a passkey, then Google, GitHub, and email", async ({ page }) => {
   const authRequests: string[] = [];
   page.on("request", request => { if (request.url().includes("/api/auth/")) authRequests.push(request.url()); });
   await page.goto("/login");
@@ -66,6 +66,7 @@ test("sign-in offers Google, GitHub, email, then a passkey", async ({ page }) =>
   await expect(main.getByRole("link", { name: "Continue with GitHub" })).toBeVisible();
   await expect(main.getByRole("link", { name: "Continue with email" })).toBeVisible();
   await expect(main.getByRole("button", { name: "Sign in with a passkey" })).toBeVisible();
+  expect(await main.locator("a, button").evaluateAll(nodes => nodes.slice(0, 4).map(node => node.textContent?.trim()))).toEqual(["Sign in with a passkey", "Continue with Google", "Continue with GitHub", "Continue with email"]);
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
