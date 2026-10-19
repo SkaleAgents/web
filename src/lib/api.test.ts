@@ -70,3 +70,21 @@ describe("buildAssistantPromptUrl", () => {
     expect(buildAssistantPromptUrl("codex", prompt)).toBe("https://chatgpt.com/codex");
   });
 });
+
+describe("apiFetch errors", () => {
+  it("carries API blockers and recognises passkey checks", async () => {
+    const { apiFetch, ApiError, PasskeyRequiredError, setPasskeyConfirmer } = await import("./api");
+    const { vi } = await import("vitest");
+    setPasskeyConfirmer(null);
+    const respond = (status: number, body: unknown) => vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } })));
+    respond(409, { message: "Blocked", blockers: ["You own Acme.", 3] });
+    const blocked = await apiFetch("/api/account", { method: "DELETE" }).catch((error: unknown) => error);
+    expect(blocked).toBeInstanceOf(ApiError);
+    expect((blocked as InstanceType<typeof ApiError>).details).toEqual(["You own Acme."]);
+    respond(403, { message: "Confirm with your passkey to continue.", code: "passkey_required", hasPasskey: true });
+    const passkey = await apiFetch("/api/account", { method: "DELETE" }).catch((error: unknown) => error);
+    expect(passkey).toBeInstanceOf(PasskeyRequiredError);
+    expect((passkey as InstanceType<typeof PasskeyRequiredError>).hasPasskey).toBe(true);
+    vi.unstubAllGlobals();
+  });
+});

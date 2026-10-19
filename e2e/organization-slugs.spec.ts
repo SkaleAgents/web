@@ -153,7 +153,7 @@ test("navigation keeps the dashboard frame while access loads only inside conten
   await expect(page.getByRole("button", { name: "Expand sidebar", exact: true })).toBeVisible();
 });
 
-test("account settings share dashboard chrome and keep personal scope", async ({ page }) => {
+test("account pages share dashboard chrome and keep the organization you came from", async ({ page }) => {
   await page.goto('/org/binary-labs');
   await expect(page.getByRole('heading', { name: 'Binary Labs', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Collapse sidebar' }).click();
@@ -161,7 +161,8 @@ test("account settings share dashboard chrome and keep personal scope", async ({
   await expect(page).toHaveURL('/account/passkeys');
   await expect(page.getByRole('heading', { name: 'Passkeys', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Expand sidebar' })).toBeVisible();
-  await expect(page.locator('.dashboard-toolbar')).toContainText('Personal account');
+  await expect(page.getByRole('button', { name: 'Binary Labs, switch scope' })).toBeVisible();
+  await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Audit retention', exact: true })).toHaveAttribute('href', '/org/binary-labs/settings/retention');
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Passkeys', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Docs (opens in a new tab)' })).toBeVisible();
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Help', exact: true })).toHaveAttribute('href', '/contact');

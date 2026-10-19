@@ -1,3 +1,7 @@
+# Before every PR
+
+Run `pnpm verify` (typecheck, lint, Vitest unit tests, production build, Playwright) and paste the result in the PR. It must pass. Add or update a Vitest unit test for every behaviour change, plus a Playwright test for user flows.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
