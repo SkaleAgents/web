@@ -7,6 +7,7 @@ import { ApiError, setPasskeyConfirmer } from "@/lib/api";
 import { addPasskey, authenticationError, confirmWithPasskey, deviceName } from "@/lib/email-auth";
 import { currentUserOptions } from "@/lib/session";
 import { Button, LinkButton } from "./ui";
+import { PasskeyNameField, passkeyNameFrom } from "./account-setup";
 
 type Pending = { hasPasskey: boolean; resolve: () => void; reject: (error: Error) => void; promise: Promise<void> };
 
@@ -42,11 +43,11 @@ export function PasskeyConfirmation() {
     if (error) current?.reject(error); else current?.resolve();
   }
 
-  async function run() {
+  async function run(form: HTMLFormElement | null) {
     setBusy(true); setError("");
     try {
       if (hasPasskey) await confirmWithPasskey();
-      else await addPasskey(user.data?.id ?? "", deviceName());
+      else await addPasskey(user.data?.id ?? "", passkeyNameFrom(form).trim() || deviceName());
       settle();
     } catch (err) {
       const message = authenticationError(err);
@@ -61,12 +62,15 @@ export function PasskeyConfirmation() {
     <p className="mt-3 text-sm leading-relaxed text-ink-muted">{hasPasskey
       ? "This action deletes data or changes access or billing. Confirm with your passkey. It stays confirmed for 5 minutes."
       : "Deleting data and changing access or billing needs a passkey, so an agent or someone with your session can't do it alone. Add one with Touch ID, Face ID, or your screen lock."}</p>
+    <form onSubmit={(event) => { event.preventDefault(); void run(event.currentTarget); }}>
+    {!hasPasskey && !stale && <div className="mt-4"><PasskeyNameField disabled={busy} /></div>}
     {error && <p role="alert" className="mt-4 text-sm text-danger">{error}</p>}
     <div className="mt-6 flex flex-wrap gap-3">
       {stale
         ? <LinkButton href={`/auth/reauth?next=${encodeURIComponent(pathname)}`}>Sign in again</LinkButton>
-        : <Button type="button" disabled={busy} onClick={() => void run()}>{busy ? "Waiting for your device…" : hasPasskey ? "Use my passkey" : "Add a passkey"}</Button>}
+        : <Button type="submit" disabled={busy}>{busy ? "Waiting for your device…" : hasPasskey ? "Use my passkey" : "Add a passkey"}</Button>}
       <Button type="button" variant="ghost" disabled={busy} onClick={() => settle(new ApiError("Passkey check cancelled.", 403))}>Cancel</Button>
     </div>
+    </form>
   </dialog>;
 }

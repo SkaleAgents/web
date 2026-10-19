@@ -3,7 +3,7 @@
 import { useState, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button, FieldLabel, LinkButton, TextInput } from "@/components/ui";
-import { AccountSetupChoices, finishAccountSetup, usePasskeySupport } from "@/components/account-setup";
+import { AccountSetupChoices, finishAccountSetup, passkeyNameFrom, usePasskeySupport } from "@/components/account-setup";
 import { agreementDestination } from "@/lib/account-agreement";
 import { API_URL, apiFetch } from "@/lib/api";
 import { authPost, authenticationError, completeSignIn, type AuthResult } from "@/lib/email-auth";
@@ -43,7 +43,7 @@ export default function ConfirmEmailPage() {
         id = (await apiFetch<{ id: string }>("/api/user")).id;
         setAccountId(id);
       }
-      await finishAccountSetup(id, withPasskey && supportsPasskeys);
+      await finishAccountSetup(id, withPasskey && supportsPasskeys, passkeyNameFrom(form));
       enterProduct();
     } catch (err) { setError(authenticationError(err)); setBusy(false); }
   }

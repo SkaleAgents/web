@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { agreementDestination, readAgreement, type AgreementStatus } from "@/lib/account-agreement";
-import { AccountSetupChoices, finishAccountSetup } from "@/components/account-setup";
+import { AccountSetupChoices, finishAccountSetup, passkeyNameFrom } from "@/components/account-setup";
 import { authenticationError } from "@/lib/email-auth";
 import { API_URL } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
@@ -43,13 +43,13 @@ export function AccountAgreementScreen({ next, oauth }: { next: string | null; o
     if (status && !status.required && !accepted) continueToProduct();
   }, [status, accepted, continueToProduct]);
 
-  async function submit(withPasskey: boolean) {
+  async function submit(withPasskey: boolean, name = "") {
     if (!status || !checked || busy || !user.data) return;
     setBusy(true);
     setError("");
     setAccepted(true);
     try {
-      await finishAccountSetup(user.data.id, withPasskey);
+      await finishAccountSetup(user.data.id, withPasskey, name);
       client.setQueryData(currentUserOptions.queryKey, current => current ? { ...current, agreementRequired: false } : current);
       continueToProduct();
     } catch (reason) {
@@ -62,7 +62,7 @@ export function AccountAgreementScreen({ next, oauth }: { next: string | null; o
   return <main className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center py-12">
     <h1 className="font-display text-3xl font-bold tracking-tight">Finish setting up your account</h1>
     <p className="mt-3 text-ink-muted">Review the Terms of Service and Privacy Policy, and add a passkey for faster sign-in and safer changes.</p>
-    {(status?.required || accepted) && <form className="mt-7 space-y-5 rounded-xl border border-line bg-canvas-elevated p-6" onSubmit={event => { event.preventDefault(); void submit(passkey); }}>
+    {(status?.required || accepted) && <form className="mt-7 space-y-5 rounded-xl border border-line bg-canvas-elevated p-6" onSubmit={event => { event.preventDefault(); void submit(passkey, passkeyNameFrom(event.currentTarget)); }}>
       <AccountSetupChoices passkey={passkey} onPasskey={setPasskey} agreed={checked} onAgreed={setChecked} />
       <Button className="w-full" type="submit" disabled={!checked || busy}>{busy ? "Saving…" : error && accepted ? "Try again" : "Continue"}</Button>
       {error && accepted && <Button className="w-full" type="button" variant="ghost" disabled={busy} onClick={() => void submit(false)}>Continue without a passkey</Button>}
