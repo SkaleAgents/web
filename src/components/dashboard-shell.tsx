@@ -147,16 +147,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     setMenuOpen(false);
     if (menuOpen) menuToggle.current?.focus();
   }
-  const collapseToggle = (placement: "brand" | "toolbar") => (
+  const collapseToggle = (
     <button
       type="button"
-      className={`dashboard-collapse-toggle dashboard-collapse-toggle--${placement}`}
+      className="dashboard-collapse-toggle"
       aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       onClick={() => setCollapsed(value => !value)}
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
-        <rect x="3" y="4" width="18" height="16" rx="3" />
-        <path d={collapsed ? "M15 4v16M11 12h8" : "M9 4v16M13 12H5"} />
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d={collapsed ? "m9 6 6 6-6 6" : "m15 6-6 6 6 6"} />
       </svg>
     </button>
   );
@@ -176,9 +175,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     {menuOpen ? <button type="button" className="dashboard-menu-scrim" aria-label="Dismiss menu" onClick={closeMenu} /> : null}
     <aside className="dashboard-sidebar">
       <nav ref={navigation} aria-label="Dashboard navigation" className="dashboard-navigation">
+        {collapseToggle}
         <div className="dashboard-brand">
           <span className="dashboard-brand-logo"><BrandLogo href={root} /></span>
-          {!collapsed ? collapseToggle("brand") : null}
         </div>
         <div id="dashboard-sections" className={`dashboard-sections ${menuOpen ? "is-open" : ""}`}>
           <div className="dashboard-section-list">
@@ -205,13 +204,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="dashboard-main">
       <header className="dashboard-toolbar">
         <div className="flex min-w-0 items-center gap-2 text-sm">
-          {collapsed ? collapseToggle("toolbar") : null}
           <button ref={menuToggle} type="button" className="dashboard-menu-toggle"
             aria-expanded={menuOpen} aria-controls="dashboard-sections"
             onClick={() => setMenuOpen(!menuOpen)}>
             <span className="sr-only">{menuOpen ? "Close menu" : "Open menu"}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d={menuOpen ? "m6 6 12 12M6 18 18 6" : "M4 6h16M4 12h16M4 18h16"} /></svg>
           </button>
-          <span className="dashboard-toolbar-divider" aria-hidden="true" />
           {isAccount ? <span className="px-2 font-medium">Personal account</span> : <OrganizationSwitcher scope={scope} pathname={pathname} memberships={memberships.data ?? []} />}
           <span aria-hidden="true" className="text-line">{" / "}</span>
           <span className="truncate font-semibold">{currentSection}</span>

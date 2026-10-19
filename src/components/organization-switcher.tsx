@@ -22,6 +22,7 @@ export function OrganizationSwitcher({ scope, pathname, memberships }: {
   const trigger = useRef<HTMLButtonElement>(null);
   const label = scope.kind === "organization" ? memberships.find(item => item.id === scope.id)?.name ?? "Organization" : "Organization";
   const current = scope.kind === "organization" ? memberships.find(item => item.id === scope.id) : null;
+  const personal = memberships.find(item => item.kind === "personal");
   const section = pathname.match(/^\/org\/[^/]+\/([^/]+)/)?.[1] ?? "";
   const targetPath = (item: OrganizationMembership) => {
     if (!section || (item.kind === "team" && !["jobs", "schedules", "settings"].includes(section))) return organizationHref(item);
@@ -53,6 +54,7 @@ export function OrganizationSwitcher({ scope, pathname, memberships }: {
       {memberships.map(item => <Link key={item.id} href={targetPath(item)}
         aria-current={current?.id === item.id ? "page" : undefined}
         onClick={() => setOpen(false)}>{item.name}</Link>)}
+      {personal && <Link href={`${organizationHref(personal, "organizations")}#create-organization`} className="scope-switcher-create" onClick={() => setOpen(false)}>+ Create organization</Link>}
     </div>}
   </div>;
 }
