@@ -30,6 +30,7 @@ const nextConfig: NextConfig = {
       { source: "/bot-directory/categories", destination: "/bot-directory/specialties", permanent: true },
       { source: "/bot-directory/categories/:slug", destination: "/bot-directory/specialties/:slug", permanent: true },
       { source: "/settings/mcp", destination: "/dashboard/mcp-config", permanent: false },
+      { source: "/account/settings", destination: "/account/security", permanent: false },
       { source: "/dashboard/workspaces/:workspaceId/retention", destination: "/org/:workspaceId/settings/retention", permanent: false },
       { source: "/dashboard/workspaces/:workspaceId/:path*", destination: "/org/:workspaceId/:path*", permanent: false },
       { source: "/dashboard/workspaces/:workspaceId", destination: "/org/:workspaceId", permanent: false },

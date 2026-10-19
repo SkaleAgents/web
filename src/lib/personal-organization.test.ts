@@ -16,7 +16,7 @@ describe("personal organization resolution", () => {
 
   it("maps legacy personal links and preserves valid team links", () => {
     expect(dashboardDestination("/me/jobs", personal, memberships)).toBe(`/org/${personal}/jobs`);
-    expect(dashboardDestination("/me/settings", personal, memberships)).toBe("/account/settings");
+    expect(dashboardDestination("/me/settings", personal, memberships)).toBe("/account/notifications");
     expect(dashboardDestination(`/dashboard/workspaces/${team}/jobs/job-1`, personal, memberships)).toBe(`/org/${team}/jobs/job-1`);
     expect(dashboardDestination(`/org/${team}/billing?checkout=return`, personal, memberships)).toBe(`/org/${team}/billing?checkout=return`);
     expect(dashboardDestination("https://evil.example/me", personal, memberships)).toBe(`/org/${personal}`);

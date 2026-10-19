@@ -78,14 +78,14 @@ export function dashboardDestination(value: string | null, personalId?: string |
       const path = url.pathname;
       let destination: string | null = null;
       if (path === "/me" || path === "/dashboard") destination = fallback;
-      else if (path === "/me/settings" || path === "/dashboard/settings") destination = "/account/settings";
+      else if (path === "/me/settings" || path === "/dashboard/settings") destination = "/account/notifications";
       else if (path === "/me/organizations" || path === "/dashboard/workspaces") destination = organizationPath(personalId, "organizations");
       else if (path.startsWith("/me/")) destination = organizationPath(personalId, path.slice(4));
       else if (path.startsWith("/dashboard/workspaces/")) {
         const match = path.match(/^\/dashboard\/workspaces\/([^/]+)(?:\/(.*))?$/);
         if (match && validReference(match[1])) destination = organizationPath(match[1], match[2] === "retention" ? "settings/retention" : match[2] ?? "");
       } else if (path.startsWith("/dashboard/")) destination = organizationPath(personalId, path.slice(11));
-      else if (path === "/account/settings" || path === "/staff" || path.startsWith("/staff/")) destination = path;
+      else if (path.startsWith("/account/") || path === "/staff" || path.startsWith("/staff/")) destination = path;
       else if (scopeFromPath(path)) destination = path;
       if (destination?.startsWith("/org/")) {
         const scope = scopeFromPath(destination);

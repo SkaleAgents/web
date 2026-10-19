@@ -5,6 +5,6 @@ import { useRouter } from "next/navigation";
 
 export function AccountSettingsRedirect() {
   const router = useRouter();
-  useEffect(() => { router.replace("/account/settings"); }, [router]);
+  useEffect(() => { router.replace("/account/security"); }, [router]);
   return <main role="status">Opening account settings…</main>;
 }
