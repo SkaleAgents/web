@@ -118,8 +118,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const active = (href: string) => href === activeHref;
   const activeGroup = sections.find(section => section.items.some(entry => active(entry.href)))?.label ?? "Your work";
   const currentSection = sections.flatMap(section => section.items).find(entry => active(entry.href))?.label ?? "Dashboard";
-  const groupKey = (label: string) => `${pathname}:${label}`;
-  const groupExpanded = (label: string) => expandedGroups[groupKey(label)] ?? label === activeGroup;
+  // Your work stays open everywhere and the current page's group opens too; a group someone closes stays closed.
+  const groupKey = (label: string) => label;
+  const groupExpanded = (label: string) => expandedGroups[groupKey(label)] ?? (label === "Your work" || label === activeGroup);
 
   if (user.isError) return <main className="mx-auto max-w-lg space-y-4 px-6 py-16" role="alert">
     <h1 className="text-xl font-semibold">Could not check your session</h1>
