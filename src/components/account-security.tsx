@@ -36,14 +36,14 @@ export function AccountSecurity({ accountId }: { accountId: string }) {
   }
 
   return <section className="space-y-4 rounded-[10px] border border-line bg-canvas-elevated p-5">
-    <h2 className="text-lg font-semibold">Passkeys</h2>
+    <h2 className="text-lg font-semibold">Your passkeys</h2>
     <p className="text-sm text-ink-muted">Add a passkey to sign in with Touch ID, Face ID, or your device&apos;s screen lock. Your biometric data stays on your device.</p>
     {settings.isPending ? <p>Loading sign-in methods…</p> : settings.isError ? <div role="alert"><p>{settings.error.message}</p><Button variant="secondary" onClick={() => void settings.refetch()}>Retry</Button></div> : <>
       <form className="flex flex-wrap items-end gap-3" onSubmit={(event) => { event.preventDefault(); void run(async () => { const result = await addPasskey(accountId, name.trim() || deviceName()); setName(""); return result; }, "Passkey added."); }}>
         <label className="min-w-0 flex-1 space-y-1"><FieldLabel>Passkey name</FieldLabel><TextInput value={name} onChange={(event) => setName(event.target.value)} maxLength={80} placeholder="e.g. Work laptop" disabled={busy} /></label>
         <Button type="submit" disabled={busy}>Add a passkey</Button>
       </form>
-      <p className="text-xs text-ink-muted">Your first passkey needs a sign-in within the last 10 minutes; adding or removing more asks you to confirm with a passkey. <a href="/auth/reauth?next=%2Faccount%2Fsecurity" className="underline">Sign in again</a> if prompted.</p>
+      <p className="text-xs text-ink-muted">Your first passkey needs a sign-in within the last 10 minutes; adding or removing more asks you to confirm with a passkey. <a href="/auth/reauth?next=%2Faccount%2Fpasskeys" className="underline">Sign in again</a> if prompted.</p>
       {settings.data.passkeys.length ? <ul className="divide-y divide-line">{settings.data.passkeys.map((passkey) => <li className="flex flex-wrap items-center justify-between gap-3 py-3" key={passkey.id}>
         {renaming === passkey.id ? <form className="flex min-w-0 flex-1 flex-wrap items-end gap-2" onSubmit={(event) => {
           event.preventDefault();
@@ -62,6 +62,6 @@ export function AccountSecurity({ accountId }: { accountId: string }) {
     </>}
     {message && <p role="status" className="text-sm">{message}</p>}
     {error && <p role="alert" className="text-sm text-danger">{error}</p>}
-    <LinkButton href="/auth/reauth?next=%2Faccount%2Fsecurity" variant="ghost">Use another sign-in method</LinkButton>
+    <LinkButton href="/auth/reauth?next=%2Faccount%2Fpasskeys" variant="ghost">Use another sign-in method</LinkButton>
   </section>;
 }

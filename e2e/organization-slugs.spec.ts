@@ -157,12 +157,12 @@ test("account settings share dashboard chrome and keep personal scope", async ({
   await page.goto('/org/binary-labs');
   await expect(page.getByRole('heading', { name: 'Binary Labs', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Collapse sidebar' }).click();
-  await page.locator('.dashboard-sidebar').getByRole('link', { name: 'Sign-in and security', exact: true }).click();
-  await expect(page).toHaveURL('/account/security');
-  await expect(page.getByRole('heading', { name: 'Sign-in and security', exact: true })).toBeVisible();
+  await page.locator('.dashboard-sidebar').getByRole('link', { name: 'Passkeys', exact: true }).click();
+  await expect(page).toHaveURL('/account/passkeys');
+  await expect(page.getByRole('heading', { name: 'Passkeys', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Expand sidebar' })).toBeVisible();
   await expect(page.locator('.dashboard-toolbar')).toContainText('Personal account');
-  await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Sign-in and security', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Passkeys', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Docs (opens in a new tab)' })).toBeVisible();
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Help', exact: true })).toHaveAttribute('href', '/contact');
   await expect(page.locator('.dashboard-footer')).toContainText('Binary Labs LLC');
@@ -181,9 +181,11 @@ test("team settings and personal account settings are separate groups with their
   await expect(nav.getByRole("link", { name: "General", exact: true })).not.toHaveAttribute("aria-current", "page");
   await expect(nav.getByRole("link", { name: "MCP connections", exact: true })).toHaveAttribute("href", "/org/binary-labs/mcp-config");
   await nav.getByRole("button", { name: "Account" }).click();
-  for (const [label, href] of [["Sign-in and security", "/account/security"], ["Notifications", "/account/notifications"], ["Data and privacy", "/account/data"]]) {
+  for (const [label, href] of [["Passkeys", "/account/passkeys"], ["Notifications", "/account/notifications"], ["Data and privacy", "/account/data"]]) {
     await expect(nav.getByRole("link", { name: label, exact: true })).toHaveAttribute("href", href);
   }
   await page.goto("/account/settings");
-  await expect(page).toHaveURL("/account/security");
+  await expect(page).toHaveURL("/account/passkeys");
+  await page.goto("/account/security");
+  await expect(page).toHaveURL("/account/passkeys");
 });
