@@ -164,7 +164,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       aria-label={label} title={collapsed ? label : undefined}
       aria-current={active(href) ? "page" : undefined}
       className={`dashboard-nav-item ${active(href) ? "is-active" : ""}`}>
-      <DashboardIcon href={href} />
+      <DashboardIcon href={href === root ? "/dashboard" : href} />
       <span className="dashboard-nav-text">{label}</span>
     </Link>
   );

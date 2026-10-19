@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { Button, Select, TextInput } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
+import { DeleteOrganization } from "./delete-organization";
 
 type Role = "owner" | "member" | "viewer";
 type Organization = { id: string; name: string; role: Role };
@@ -131,6 +132,7 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
           }, "Invitation revoked.")}>Revoke</Button>
         </li>)}</ul>}
       </section>
+      <DeleteOrganization organization={organization} />
     </>}
     {notice && <p role="status" className="text-sm text-success">{notice}</p>}
     {error && <p role="alert" className="text-sm text-danger">{error}</p>}
