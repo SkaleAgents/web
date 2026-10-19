@@ -57,21 +57,22 @@ test("email tokens are stripped before scripts and require explicit confirmation
   expect(leaked).toEqual([]);
 });
 
-test("Google and GitHub come first, then email with passkeys inside it", async ({ page }) => {
+test("sign-in offers Google, GitHub, email, then a passkey", async ({ page }) => {
   const authRequests: string[] = [];
   page.on("request", request => { if (request.url().includes("/api/auth/")) authRequests.push(request.url()); });
   await page.goto("/login");
   const main = page.getByRole("main");
   await expect(main.getByRole("link", { name: "Continue with Google" })).toBeVisible();
   await expect(main.getByRole("link", { name: "Continue with GitHub" })).toBeVisible();
-  await expect(main.getByRole("button", { name: "Sign in with a passkey" })).toHaveCount(0);
+  await expect(main.getByRole("link", { name: "Continue with email" })).toBeVisible();
+  await expect(main.getByRole("button", { name: "Sign in with a passkey" })).toBeVisible();
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
   await main.getByRole("link", { name: "Continue with email" }).click();
   await expect(page).toHaveURL(/\/login\/email$/);
-  await expect(main.getByRole("button", { name: "Sign in with a passkey" })).toBeVisible();
+  await expect(main.getByRole("button", { name: "Sign in with a passkey" })).toHaveCount(0);
   await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
   expect(authRequests).toEqual([]);
 });
@@ -84,6 +85,7 @@ test("sign-up has its own page, states the terms, and a new account's link says 
   await expect(page).toHaveURL(/\/signup$/);
   await expect(page.getByRole("heading", { name: "Create your SkaleAgents account" })).toBeVisible();
   await expect(page.getByText(/By signing up, you agree to the/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sign in with a passkey" })).toHaveCount(0);
   await page.getByRole("link", { name: "Continue with email" }).click();
   await expect(page).toHaveURL(/\/signup\/email$/);
   await expect(page.getByRole("button", { name: "Sign in with a passkey" })).toHaveCount(0);
