@@ -177,6 +177,8 @@ test("team settings and personal account settings are separate groups with their
   await page.goto("/org/binary-labs/settings/retention");
   const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
   await expect(nav.getByRole("button", { name: "Settings" })).toHaveAttribute("aria-expanded", "true");
+  await expect(nav.getByRole("button", { name: "Your work" })).toHaveAttribute("aria-expanded", "true");
+  await expect(nav.getByRole("button", { name: "Account" })).toHaveAttribute("aria-expanded", "false");
   await expect(nav.getByRole("link", { name: "Audit retention", exact: true })).toHaveAttribute("aria-current", "page");
   await expect(nav.getByRole("link", { name: "General", exact: true })).not.toHaveAttribute("aria-current", "page");
   await expect(nav.getByRole("link", { name: "MCP connections", exact: true })).toHaveAttribute("href", "/org/binary-labs/mcp-config");
