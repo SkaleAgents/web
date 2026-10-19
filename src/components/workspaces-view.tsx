@@ -84,7 +84,7 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
 
   return (
     <div className="space-y-8">
-      <form onSubmit={submit} className="max-w-2xl rounded-[10px] border border-line bg-canvas-elevated p-5">
+      <form id="create-organization" onSubmit={submit} className="max-w-2xl scroll-mt-24 rounded-[10px] border border-line bg-canvas-elevated p-5">
         <h2 className="text-lg font-semibold text-ink">Create an organization</h2>
         <label htmlFor="workspace-name" className="mt-4 block text-sm font-medium text-ink">Organization name</label>
         <TextInput

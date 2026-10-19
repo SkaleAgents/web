@@ -190,6 +190,12 @@ test("team settings and personal account settings are separate groups with their
   for (const [label, href] of [["Passkeys", "/account/passkeys"], ["Notifications", "/account/notifications"], ["Data and privacy", "/account/data"]]) {
     await expect(nav.getByRole("link", { name: label, exact: true })).toHaveAttribute("href", href);
   }
+  await page.getByRole("button", { name: "Binary Labs, switch scope" }).click();
+  await expect(page.getByRole("link", { name: "+ Create organization" })).toHaveAttribute("href", /\/organizations#create-organization$/);
+  await expect(page.locator(".dashboard-toolbar-divider")).toHaveCount(0);
+  await page.getByRole("button", { name: "Collapse sidebar" }).click();
+  await expect(page.getByRole("button", { name: "Expand sidebar" })).toBeVisible();
+  await page.getByRole("button", { name: "Expand sidebar" }).click();
   await page.goto("/account/settings");
   await expect(page).toHaveURL("/account/passkeys");
   await page.goto("/account/security");

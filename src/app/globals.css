@@ -646,11 +646,8 @@ html.dark .finding-severity:is([data-severity="high"], [data-severity="critical"
 
 /* Header controls remain available when the sidebar is collapsed. */
 .dashboard-toolbar { border-bottom: 1px solid var(--line); }
-.dashboard-toolbar-divider { width: 1px; height: 20px; background: var(--line); margin-inline: 4px; flex-shrink: 0; }
 .dashboard-frame.is-collapsed .dashboard-brand-logo { display: inline-flex; }
 .dashboard-frame.is-collapsed .dashboard-brand-logo .brand-wordmark { display: none; }
-.dashboard-brand .dashboard-collapse-toggle--brand { margin-left: auto; }
-.dashboard-toolbar .dashboard-collapse-toggle--toolbar { flex-shrink: 0; }
 .dashboard-menu-scrim { display: none; }
 @media (max-width: 1023px) {
   .dashboard-sidebar { display: none; position: fixed; top: 56px; bottom: 0; left: 0; z-index: 57; width: min(280px, 85vw); border-right: 1px solid var(--line); box-shadow: 12px 0 28px rgb(0 0 0 / 8%); background: var(--canvas-elevated); }
@@ -696,3 +693,9 @@ html.dark .finding-severity:is([data-severity="high"], [data-severity="critical"
 .dashboard-footer a:hover { color: var(--ink); text-decoration: underline; }
 @media (max-width: 1023px) { .dashboard-footer { margin-inline: 24px; } }
 @media (max-width: 640px) { .dashboard-footer { margin-inline: 16px; } }
+
+/* Collapse handle sits on the sidebar edge, vertically centred, in both states. */
+.dashboard-navigation > .dashboard-collapse-toggle { position: absolute; top: 50%; right: -12px; z-index: 60; width: 24px; height: 24px; transform: translateY(-50%); border: 1px solid var(--line); border-radius: 999px; background: var(--canvas-elevated); box-shadow: 0 1px 3px rgb(0 0 0 / 8%); }
+.dashboard-navigation > .dashboard-collapse-toggle:hover { background: var(--canvas); color: var(--ink); }
+.scope-switcher-options a.scope-switcher-create { margin-top: 0.25rem; border-top: 1px solid var(--line); border-radius: 0 0 5px 5px; color: var(--ink-muted); }
+.scope-switcher-options a.scope-switcher-create:hover { color: var(--ink); }
