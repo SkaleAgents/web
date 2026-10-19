@@ -2,7 +2,7 @@ import type { AuditCoverage, CheckCoverage } from "./audit-coverage";
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082";
 
 export class ApiError extends Error {
-  constructor(message: string, public readonly status: number) {
+  constructor(message: string, public readonly status: number, public readonly details: string[] = []) {
     super(message);
     this.name = "ApiError";
   }
@@ -141,14 +141,16 @@ async function apiRequest<T>(url: string, init: RequestInit): Promise<T> {
 
   if (!res.ok) {
     let message = res.statusText;
+    let details: string[] = [];
     try {
-      const data = (await res.json()) as { error?: string; message?: string; code?: string; hasPasskey?: boolean };
+      const data = (await res.json()) as { error?: string; message?: string; code?: string; hasPasskey?: boolean; blockers?: unknown };
       message = data.error ?? data.message ?? message;
+      if (Array.isArray(data.blockers)) details = data.blockers.filter((item): item is string => typeof item === "string");
       if (res.status === 403 && data.code === "passkey_required") throw new PasskeyRequiredError(message, data.hasPasskey === true);
     } catch (error) {
       if (error instanceof PasskeyRequiredError) throw error;
     }
-    throw new ApiError(message, res.status);
+    throw new ApiError(message, res.status, details);
   }
 
   if (res.status === 204) {
