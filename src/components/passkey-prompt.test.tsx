@@ -19,23 +19,26 @@ function renderPrompt(passkeys: unknown[]) {
   render(<QueryClientProvider client={new QueryClient()}><PasskeyPrompt /></QueryClientProvider>);
 }
 
-it("offers a passkey after an emailed sign-in link when the account has none", async () => {
+it("offers a passkey after an emailed sign-in link, and Not now hides it for the session", async () => {
   offerPasskeyAfterSignIn();
   renderPrompt([]);
-  expect(await screen.findByRole("button", { name: "Add a passkey" })).toBeVisible();
+  expect(await screen.findByRole("heading", { name: "Add a passkey (highly recommended)" })).toBeVisible();
+  expect(screen.getByLabelText("Passkey name")).toBeVisible();
   screen.getByRole("button", { name: "Not now" }).click();
   await waitFor(() => expect(screen.queryByRole("button", { name: "Add a passkey" })).toBeNull());
   expect(sessionStorage.getItem("skale:offer-passkey")).toBeNull();
-});
-
-it("stays hidden when the account already has a passkey or no link was used", async () => {
-  offerPasskeyAfterSignIn();
-  renderPrompt([{ id: "p1", name: "Mac", created_at: "", last_used_at: null }]);
-  await waitFor(() => expect(sessionStorage.getItem("skale:offer-passkey")).toBeNull());
-  expect(screen.queryByRole("button", { name: "Add a passkey" })).toBeNull();
   cleanup();
   vi.mocked(apiFetch).mockClear();
   renderPrompt([]);
   await new Promise((resolve) => setTimeout(resolve, 20));
   expect(apiFetch).not.toHaveBeenCalledWith("/api/account/passkeys", expect.anything());
+});
+
+it("recommends a passkey to Google and GitHub accounts too, but not when one exists", async () => {
+  renderPrompt([]);
+  expect(await screen.findByRole("heading", { name: "Protect your account with a passkey" })).toBeVisible();
+  cleanup();
+  renderPrompt([{ id: "p1", name: "Mac", created_at: "", last_used_at: null }]);
+  await waitFor(() => expect(apiFetch).toHaveBeenCalledWith("/api/account/passkeys", expect.anything()));
+  expect(screen.queryByRole("button", { name: "Add a passkey" })).toBeNull();
 });

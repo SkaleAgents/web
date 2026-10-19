@@ -11,7 +11,7 @@ async function virtualAuthenticator(page: Page) {
   await cdp.send("WebAuthn.addVirtualAuthenticator", { options: { protocol: "ctap2", transport: "internal", hasResidentKey: true, hasUserVerification: true, isUserVerified: true } });
 }
 
-async function passkeyCreation(page: Page, saved: () => void) {
+async function passkeyCreation(page: Page, saved: (name: string) => void) {
   await page.route("**/sanctum/csrf-cookie", route => route.fulfill({ status: 204 }));
   await page.route("**/api/account/passkeys/options", route => route.fulfill({ json: { challengeId: "00000000-0000-4000-8000-000000000001", publicKey: {
     rp: { name: "SkaleAgents", id: "localhost" }, user: { id: b64(user.id), name: user.email, displayName: user.displayName },
@@ -21,7 +21,7 @@ async function passkeyCreation(page: Page, saved: () => void) {
   await page.route("**/api/account/passkeys", route => {
     if (route.request().method() !== "POST") return route.fulfill({ json: { accountId: user.id, passkeys: [] } });
     expect(route.request().postDataJSON()).toMatchObject({ accountId: user.id, challengeId: "00000000-0000-4000-8000-000000000001" });
-    saved();
+    saved(route.request().postDataJSON().name);
     return route.fulfill({ json: { accountId: user.id, passkeys: [{ id: "p1", name: "Passkey", created_at: "2026-10-17T00:00:00Z", last_used_at: null }] } });
   });
 }
@@ -48,7 +48,8 @@ test("new accounts accept the terms and create a passkey in one step", async ({ 
 test("a protected action asks for a passkey, then retries", async ({ page }) => {
   await virtualAuthenticator(page);
   let deletes = 0, created = false;
-  await passkeyCreation(page, () => { created = true; });
+  let savedName = "";
+  await passkeyCreation(page, (name) => { created = true; savedName = name; });
   const listed = { accountId: user.id, passkeys: [{ id: "old", name: "Old laptop", created_at: "2026-10-01T00:00:00Z", last_used_at: null }] };
   await page.route("**/api/account/passkeys", route => route.request().method() === "GET" ? route.fulfill({ json: listed }) : route.fallback());
   await page.route("**/api/account/passkeys/old", route => {
@@ -63,10 +64,12 @@ test("a protected action asks for a passkey, then retries", async ({ page }) => 
   await page.getByRole("button", { name: "Remove Old laptop" }).click();
   const dialog = page.getByRole("dialog", { name: "Add a passkey to continue" });
   await expect(dialog).toBeVisible();
+  await dialog.getByLabel("Passkey name").fill("Desk Mac");
   await dialog.getByRole("button", { name: "Add a passkey" }).click();
   await expect(dialog).toBeHidden();
   await expect(page.getByText("Passkey removed.")).toBeVisible();
   expect(created).toBe(true);
+  expect(savedName).toBe("Desk Mac");
   expect(deletes).toBe(2);
 });
 
@@ -85,4 +88,27 @@ test("cancelling the passkey check leaves the action undone", async ({ page }) =
   await dialog.getByRole("button", { name: "Cancel" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Passkey check cancelled." })).toBeVisible();
   expect(deletes).toBe(1);
+});
+
+test("passkeys can be named when added and renamed later", async ({ page }) => {
+  await page.route("**/api/user", route => route.fulfill({ json: user }));
+  let passkeys = [{ id: "00000000-0000-4000-8000-0000000000a1", name: "macOS passkey", created_at: "2026-10-01T00:00:00Z", last_used_at: null }];
+  let renamed: unknown;
+  await page.route("**/sanctum/csrf-cookie", route => route.fulfill({ status: 204 }));
+  await page.route("**/api/account/passkeys", route => route.fulfill({ json: { accountId: user.id, passkeys } }));
+  await page.route("**/api/account/passkeys/*-*", route => {
+    renamed = route.request().postDataJSON();
+    passkeys = [{ ...passkeys[0], name: "Work laptop" }];
+    return route.fulfill({ json: { accountId: user.id, passkeys } });
+  });
+  await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: user.id, enabled: false } }));
+  await page.route("**/api/account/notifications", route => route.fulfill({ json: { accountId: user.id, email: user.email, emailVerified: true, deliveryEnabled: true, preferences: { auditCompleted: true, auditFailed: true } } }));
+  await page.goto("/account/settings");
+  await page.getByRole("button", { name: "Rename macOS passkey" }).click();
+  await page.getByLabel("New name for macOS passkey").fill("Work laptop");
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByText("Passkey renamed.")).toBeVisible();
+  await expect(page.getByText("Work laptop")).toBeVisible();
+  expect(renamed).toEqual({ accountId: user.id, name: "Work laptop" });
+  await expect(page.getByLabel("Passkey name")).toHaveAttribute("placeholder", "e.g. Work laptop");
 });

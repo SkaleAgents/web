@@ -181,16 +181,16 @@ test("mobile dashboard menu closes on Escape and after navigation", async ({ pag
   await expect(nav.getByRole("link", { name: "My bots", exact: true })).toHaveAttribute("aria-current", "page");
 });
 
-test("the organization dashboard offers a passkey once after an emailed sign-in link", async ({ page }) => {
+test("the organization dashboard offers a passkey after an emailed sign-in link until Not now", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: owner }));
   await page.route("**/api/account/passkeys", route => route.fulfill({ json: { accountId: owner.id, passkeys: [] } }));
   await overview(page);
   await page.addInitScript(() => { if (!sessionStorage.getItem("seeded")) { sessionStorage.setItem("seeded", "1"); sessionStorage.setItem("skale:offer-passkey", "1"); } });
   await page.goto(`/org/${personalId}`);
-  await expect(page.getByRole("heading", { name: "Sign in faster next time" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Add a passkey (highly recommended)" })).toBeVisible();
   await page.getByRole("button", { name: "Not now" }).click();
-  await expect(page.getByRole("heading", { name: "Sign in faster next time" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Add a passkey (highly recommended)" })).toHaveCount(0);
   await page.reload();
   await expect(page.getByRole("heading", { name: "Dashboard", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Sign in faster next time" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Add a passkey (highly recommended)" })).toHaveCount(0);
 });
