@@ -77,6 +77,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     { href: "/account/notifications", label: "Notifications" },
     { href: "/account/data", label: "Data and privacy" },
   ] };
+  // Organizations live in Personal, so team scopes link there too.
+  const organizations: NavigationSection = { label: "Organizations", items: [{ href: `${personalRoot}/organizations`, label: "All organizations" }] };
   const sections: NavigationSection[] = !isPersonal ? [
     { label: "Your work", items: [
       { href: root, label: "Dashboard" },
@@ -91,13 +93,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         { href: `${root}/settings/retention`, label: "Audit retention" },
       ] : []),
     ] },
+    organizations,
     account,
   ] : [
     { label: "Your work", items: [
       { href: root, label: "Dashboard" },
       { href: `${root}/jobs`, label: "Audit jobs" },
       { href: `${root}/schedules`, label: "Scheduled audits" },
-      { href: `${root}/organizations`, label: "Organizations" },
     ] },
     { label: "Build", items: [
       { href: `${root}/bots`, label: "My bots" },
@@ -105,6 +107,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       { href: `${root}/prompts`, label: "My prompts" },
     ] },
     { label: "Settings", items: [{ href: `${root}/mcp-config`, label: "MCP connections" }] },
+    organizations,
     account,
   ];
 
