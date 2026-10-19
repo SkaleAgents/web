@@ -5,7 +5,8 @@ import { afterEach, expect, it, vi } from "vitest";
 import { OrganizationSettings } from "@/components/organization-pages";
 import { apiFetch } from "@/lib/api";
 
-vi.mock("@/lib/api", () => ({ apiFetch: vi.fn(), ensureCsrfCookie: vi.fn() }));
+vi.mock("@/lib/api", async (load) => ({ ...(await load<typeof import("@/lib/api")>()), apiFetch: vi.fn(), ensureCsrfCookie: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 function showSettings(role: "owner" | "member" = "owner") {
@@ -33,6 +34,7 @@ it("lets an owner rename an organization and manage members and invitations", as
   const user = userEvent.setup();
   const client = showSettings();
   expect(await screen.findByDisplayValue("Old Name")).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Delete organization" })).toBeVisible();
   await user.clear(screen.getByLabelText("Organization name"));
   await user.type(screen.getByLabelText("Organization name"), "New Name");
   await user.click(screen.getByRole("button", { name: "Save name" }));
@@ -54,6 +56,7 @@ it("lets an owner rename an organization and manage members and invitations", as
 it("shows organization details without owner controls to a member", async () => {
   showSettings("member");
   expect(await screen.findByText("Old Name")).toBeVisible();
+  expect(screen.queryByRole("heading", { name: "Delete organization" })).toBeNull();
   expect(screen.queryByRole("button", { name: "Save name" })).not.toBeInTheDocument();
   expect(screen.queryByLabelText("Invite email")).not.toBeInTheDocument();
   expect(apiFetch).not.toHaveBeenCalledWith("/api/workspaces/org-1/members", expect.anything());

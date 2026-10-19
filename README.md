@@ -54,3 +54,9 @@ Hub: [SkaleAgents/workspace](https://github.com/SkaleAgents/workspace) → `docs
 ## License
 
 MIT, see [LICENSE](LICENSE). The SkaleAgents API is a separate, private repository.
+
+## Verify before a PR
+
+```bash
+pnpm verify   # tsc, lint, unit tests, build, then Playwright against the build
+```

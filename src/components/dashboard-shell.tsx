@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { DashboardPageLoader } from "@/components/dashboard-page-loader";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { currentUserOptions } from "@/lib/session";
 import { Button } from "@/components/ui";
@@ -16,8 +16,9 @@ import { OrganizationSwitcher, type OrganizationMembership } from "@/components/
 
 import { OrganizationScopeContext } from "@/components/organization-scope";
 
-type NavigationItem = { href: string; label: string };
-type NavigationSection = { label: string; items: NavigationItem[] };
+import { activeNavigationHref, groupExpanded, navigationSections, rememberedOrganization, rememberOrganization, type NavigationItem } from "@/lib/dashboard-navigation";
+
+const noop = () => () => {};
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -65,62 +66,22 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   }, [user.data, legacy, memberships.isSuccess, memberships.data, pathname, personalId, router]);
 
   const isAccount = pathname.startsWith("/account/");
-  const isPersonal = isAccount || workspace?.kind === "personal";
-  const root = workspace ? organizationHref(workspace) : personalId ? personalRoot : "/dashboard";
+  useEffect(() => { if (workspace) rememberOrganization(workspace.id); }, [workspace]);
+  const remembered = useSyncExternalStore(noop, rememberedOrganization, () => null);
+  const navWorkspace = workspace ?? (isAccount ? memberships.data?.find(item => item.id === remembered) ?? personalMember : undefined);
+  const root = navWorkspace ? organizationHref(navWorkspace) : personalId ? personalRoot : "/dashboard";
   useEffect(() => {
     if (!workspace || access.isPending || access.isFetching || access.isError || access.data?.id !== workspace.id || access.data?.kind !== workspace.kind || !routeReference) return;
     const oldRoot = `/org/${routeReference}`;
     if (oldRoot !== root) router.replace(root + pathname.slice(oldRoot.length) + window.location.search + window.location.hash);
   }, [workspace, access.isPending, access.isFetching, access.isError, access.data, routeReference, root, pathname, router]);
-  const account: NavigationSection = { label: "Account", items: [
-    { href: "/account/passkeys", label: "Passkeys" },
-    { href: "/account/notifications", label: "Notifications" },
-    { href: "/account/data", label: "Data and privacy" },
-  ] };
-  // Organizations live in Personal, so team scopes link there too.
-  const organizations: NavigationSection = { label: "Organizations", items: [{ href: `${personalRoot}/organizations`, label: "All organizations" }] };
-  const sections: NavigationSection[] = !isPersonal ? [
-    { label: "Your work", items: [
-      { href: root, label: "Dashboard" },
-      { href: `${root}/jobs`, label: "Audit jobs" },
-      { href: `${root}/schedules`, label: "Scheduled audits" },
-    ] },
-    { label: "Settings", items: [
-      { href: `${root}/settings`, label: "General" },
-      { href: `${root}/mcp-config`, label: "MCP connections" },
-      ...(workspace?.role === "owner" ? [
-        { href: `${root}/billing`, label: "Billing" },
-        { href: `${root}/settings/retention`, label: "Audit retention" },
-      ] : []),
-    ] },
-    organizations,
-    account,
-  ] : [
-    { label: "Your work", items: [
-      { href: root, label: "Dashboard" },
-      { href: `${root}/jobs`, label: "Audit jobs" },
-      { href: `${root}/schedules`, label: "Scheduled audits" },
-    ] },
-    { label: "Build", items: [
-      { href: `${root}/bots`, label: "My bots" },
-      { href: `${root}/studio`, label: "Creator Studio" },
-      { href: `${root}/prompts`, label: "My prompts" },
-    ] },
-    { label: "Settings", items: [{ href: `${root}/mcp-config`, label: "MCP connections" }] },
-    organizations,
-    account,
-  ];
-
-  const matches = (href: string) => pathname === href || (href !== root && pathname.startsWith(`${href}/`)) ||
-    (href === `${root}/jobs` && pathname.startsWith(`${root}/watchtower/`));
-  // The most specific match wins, so Audit retention doesn't also light up General.
-  const activeHref = sections.flatMap(section => section.items).map(entry => entry.href).filter(matches).sort((a, b) => b.length - a.length)[0];
+  const sections = navigationSections({ workspace: navWorkspace, root, personalRoot });
+  const activeHref = activeNavigationHref(sections, pathname, root);
   const active = (href: string) => href === activeHref;
   const activeGroup = sections.find(section => section.items.some(entry => active(entry.href)))?.label ?? "Your work";
   const currentSection = sections.flatMap(section => section.items).find(entry => active(entry.href))?.label ?? "Dashboard";
-  // Your work stays open everywhere and the current page's group opens too; a group someone closes stays closed.
   const groupKey = (label: string) => label;
-  const groupExpanded = (label: string) => expandedGroups[groupKey(label)] ?? (label === "Your work" || label === activeGroup);
+  const isExpanded = (label: string) => groupExpanded(label, activeGroup, expandedGroups);
 
   if (user.isError) return <main className="mx-auto max-w-lg space-y-4 px-6 py-16" role="alert">
     <h1 className="text-xl font-semibold">Could not check your session</h1>
@@ -182,11 +143,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div id="dashboard-sections" className={`dashboard-sections ${menuOpen ? "is-open" : ""}`}>
           <div className="dashboard-section-list">
             {sections.map(section => <div key={section.label} className="dashboard-nav-group">
-              <button type="button" className="dashboard-nav-label" aria-expanded={collapsed || groupExpanded(section.label)}
-                onClick={() => { if (collapsed) setCollapsed(false); else setExpandedGroups(current => ({ ...current, [groupKey(section.label)]: !groupExpanded(section.label) })); }}>
+              <button type="button" className="dashboard-nav-label" aria-expanded={collapsed || isExpanded(section.label)}
+                onClick={() => { if (collapsed) setCollapsed(false); else setExpandedGroups(current => ({ ...current, [groupKey(section.label)]: !isExpanded(section.label) })); }}>
                 {section.label}<span aria-hidden="true">⌄</span>
               </button>
-              <div className="dashboard-nav-items" hidden={!collapsed && !groupExpanded(section.label)}>
+              <div className="dashboard-nav-items" hidden={!collapsed && !isExpanded(section.label)}>
                 {section.items.map(item)}
               </div>
             </div>)}
@@ -209,7 +170,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             onClick={() => setMenuOpen(!menuOpen)}>
             <span className="sr-only">{menuOpen ? "Close menu" : "Open menu"}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d={menuOpen ? "m6 6 12 12M6 18 18 6" : "M4 6h16M4 12h16M4 18h16"} /></svg>
           </button>
-          {isAccount ? <span className="px-2 font-medium">Personal account</span> : <OrganizationSwitcher scope={scope} pathname={pathname} memberships={memberships.data ?? []} />}
+          <OrganizationSwitcher scope={navWorkspace ? { kind: "organization", id: navWorkspace.id } : scope} pathname={pathname} memberships={memberships.data ?? []} />
           <span aria-hidden="true" className="text-line">{" / "}</span>
           <span className="truncate font-semibold">{currentSection}</span>
         </div>
