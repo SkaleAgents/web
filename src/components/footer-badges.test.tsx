@@ -80,10 +80,7 @@ const addedBadgeImages = [
 const requestedLinks = [
   ["https://smolsaas.com", "Smol SaaS", ""],
   ["https://newaiforyou.com", "NewAIForYou", "noopener noreferrer"],
-  ["https://www.launch-list.org", "Launch List", "noopener noreferrer"],
   ["https://startupproject.org/", "Startup Project", "noopener noreferrer"],
-  ["https://directoryhunt.org", "Directory Hunt", "noopener"],
-  ["https://newtools.site", "NewTools", "noopener"],
   ["https://www.aitoolgo.com", "AiToolGo", "noopener noreferrer"],
   ["https://toolindex.net/?ref=listed", "Listed on Tool Index", "nofollow noopener"],
   ["https://right-ai.com/", "RightAI Tools Diresctory", null],
@@ -122,7 +119,7 @@ const oct17Hosts = [
   "bestaitool.app", "top4ai.com", "wtai.cc", "thetoolpicker.com",
 ];
 
-const oct19Images = ["hiproducty.com", "launchboard.dev", "justsimple.tools", "freeai.run", "thetoolpicker.com", "aicavo.com", "getlaunchpod.com", "launchpadly.co", "vibetoyou.com", "smoltop.com"];
+const oct19Images = ["hiproducty.com", "launchboard.dev", "justsimple.tools", "freeai.run", "thetoolpicker.com", "aicavo.com", "getlaunchpod.com", "launchpadly.co", "vibetoyou.com", "smoltop.com", "aifinderplus.com", "aitrovex.com", "directoryhunt.org", "launch-list.org", "newtools.site"];
 const oct19Links = ["aihuntbase.com", "mozolist.com", "toolsnap.ai", "aiforthat.co"];
 
 describe("FooterBadges 2026-10-19", () => {

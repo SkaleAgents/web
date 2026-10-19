@@ -50,10 +50,7 @@ export const directoryLinks = [
   ["All in AI Tools", "https://allinai.tools"],
   ["Best AI Tools", "https://bestaitools.me/"],
   ["NewAIForYou", "https://newaiforyou.com"],
-  ["Launch List", "https://www.launch-list.org"],
   ["Startup Project", "https://startupproject.org/"],
-  ["Directory Hunt", "https://directoryhunt.org", "noopener"],
-  ["NewTools", "https://newtools.site", "noopener"],
   ["AiToolGo", "https://www.aitoolgo.com", "noopener noreferrer", "AiToolGo"],
   ["Listed on Tool Index", "https://toolindex.net/?ref=listed", "nofollow noopener"],
   ["RightAI Tools Diresctory", "https://right-ai.com/", "", "RightAI Tools Directory"],
@@ -76,8 +73,6 @@ export const directoryLinks = [
   ["The Elf Directory", "https://elf08.com/", ""],
   ["HoTools", "https://hotools.com/", "", "HoTools - Online Tools Directory"],
   ["Featured on AI Directory", "https://ai-directory.com/", "noopener"],
-  ["Featured on aifinderplus.com", "https://aifinderplus.com/", "noopener"],
-  ["Featured on AITroveX", "https://aitrovex.com/", "noopener"],
   ["Featured on Aiwizard", "https://aiwizard.ai/", "noopener"],
   ["Featured on AllStartups.Info", "https://allstartups.info/", "noopener"],
   ["Featured on Backlink2Web", "https://backlink2web.com/", "noopener"],
@@ -302,6 +297,11 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "trustedlaunches.com", href: "https://trustedlaunches.com/projects/skaleagents?utm_source=badge", src: "https://trustedlaunches.com/trustedlaunches/images/badges/featured-on-light.svg", alt: "Featured on trustedlaunches.com", rel: "noopener noreferrer", displayWidth: 153.6 },
   { name: "verifiedlaunches.com", href: "https://verifiedlaunches.com/projects/skaleagents?utm_source=badge", src: "https://verifiedlaunches.com/verifiedlaunches/images/badges/featured-on-light.svg", alt: "Featured on verifiedlaunches.com", rel: "noopener noreferrer", displayWidth: 153.6 },
   { name: "vibetoyou.com", href: "https://vibetoyou.com", src: "https://vibetoyou.com/images/badge-light.svg", width: 186, height: 56, alt: "Listed on VibeToYou", rel: "noopener", displayWidth: 127.5 },
+  { name: "aifinderplus.com", href: "https://aifinderplus.com/", src: "https://aifinderplus.com/badge.svg", width: 150, height: 54, alt: "Featured on AIFinderPlus", rel: "noopener noreferrer", displayWidth: 106.7 },
+  { name: "AITroveX", href: "https://aitrovex.com/", src: "https://aitrovex.com/badge-listed-light.svg", alt: "Listed on AITroveX", rel: "noopener noreferrer", displayWidth: 153.6 },
+  { name: "DirectoryHunt", href: "https://directoryhunt.org", src: "https://directoryhunt.org/assets/Badges/featured.svg", width: 225, height: 61, alt: "Featured on DirectoryHunt.org", rel: "noopener noreferrer", displayWidth: 141.6 },
+  { name: "Launch List", href: "https://www.launch-list.org", src: "https://launch-list.org/badges/svg/launch_list_badge_live.svg", alt: "Launch List Badge", rel: "noopener noreferrer", displayWidth: 153.6 },
+  { name: "NewTools", href: "https://newtools.site", src: "https://newtools.site/badges/newtool-light.png", width: 220, height: 54, alt: "Featured on NewTools.site", rel: "noopener noreferrer", displayWidth: 153.6 },
 ];
 
 export const directoryBadgeEntries: DirectoryBadgeEntry[] = [
