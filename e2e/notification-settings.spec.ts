@@ -28,7 +28,8 @@ test("email preferences save independently and survive reload", async ({ page })
     return route.fulfill({ json: saved });
   });
   await page.goto("/settings");
-  await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/account\/notifications$/);
+  await expect(page.getByRole("heading", { name: "Notifications", exact: true })).toBeVisible();
   await expect(page.getByText("alice@example.com", { exact: true })).toBeVisible();
   await expect(page.getByRole("checkbox", { name: /^Completed audits/ })).toBeChecked();
   await page.getByRole("checkbox", { name: /^Completed audits/ }).click();

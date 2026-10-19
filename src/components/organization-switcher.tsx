@@ -25,7 +25,7 @@ export function OrganizationSwitcher({ scope, pathname, memberships }: {
   const section = pathname.match(/^\/org\/[^/]+\/([^/]+)/)?.[1] ?? "";
   const targetPath = (item: OrganizationMembership) => {
     if (!section || (item.kind === "team" && !["jobs", "schedules", "settings"].includes(section))) return organizationHref(item);
-    if (section === "settings" && item.kind === "personal") return "/account/settings";
+    if (section === "settings" && item.kind === "personal") return "/account/security";
     return organizationHref(item, section);
   };
 

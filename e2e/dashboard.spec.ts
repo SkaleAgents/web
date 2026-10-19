@@ -33,7 +33,7 @@ test("login waits for the session, then opens the dashboard without showing the 
     const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
     if (width < 1024) await page.getByRole("button", { name: "Open menu" }).click();
     if (await nav.getByRole("button", { name: "Account" }).getAttribute("aria-expanded") === "false") await nav.getByRole("button", { name: "Account" }).click();
-    await expect(nav.getByRole("link", { name: "Account settings", exact: true })).toHaveAttribute("href", "/account/settings");
+    await expect(nav.getByRole("link", { name: "Sign-in and security", exact: true })).toHaveAttribute("href", "/account/security");
     await expect(nav.getByRole("link", { name: "Dashboard", exact: true })).toHaveAttribute("aria-current", "page");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     if (width < 1024) await page.getByRole("button", { name: "Close menu" }).click();

@@ -141,7 +141,7 @@ test("navigation keeps the dashboard frame while access loads only inside conten
   await page.getByRole("link", { name: "Organization settings" }).click();
   await expect(page).toHaveURL("/org/binary-labs/settings");
   await expect(page.getByRole("status", { name: "Loading page" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "General", exact: true })).toBeVisible();
   await page.screenshot({ path: test.info().outputPath("dashboard-loading.png") });
   await expect(page.getByText("Checking organization access", { exact: false })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Dashboard navigation" })).toBeVisible();
@@ -157,12 +157,12 @@ test("account settings share dashboard chrome and keep personal scope", async ({
   await page.goto('/org/binary-labs');
   await expect(page.getByRole('heading', { name: 'Binary Labs', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Collapse sidebar' }).click();
-  await page.locator('.dashboard-sidebar').getByRole('link', { name: 'Account settings', exact: true }).click();
-  await expect(page).toHaveURL('/account/settings');
-  await expect(page.getByRole('heading', { name: 'Settings', exact: true })).toBeVisible();
+  await page.locator('.dashboard-sidebar').getByRole('link', { name: 'Sign-in and security', exact: true }).click();
+  await expect(page).toHaveURL('/account/security');
+  await expect(page.getByRole('heading', { name: 'Sign-in and security', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Expand sidebar' })).toBeVisible();
   await expect(page.locator('.dashboard-toolbar')).toContainText('Personal account');
-  await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Account settings', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Sign-in and security', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Docs (opens in a new tab)' })).toBeVisible();
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Help', exact: true })).toHaveAttribute('href', '/contact');
   await expect(page.locator('.dashboard-footer')).toContainText('Binary Labs LLC');
@@ -171,4 +171,19 @@ test("account settings share dashboard chrome and keep personal scope", async ({
   await page.getByRole('button', { name: 'Open menu', exact: true }).click();
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Help', exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test("team settings and personal account settings are separate groups with their own pages", async ({ page }) => {
+  await page.goto("/org/binary-labs/settings/retention");
+  const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
+  await expect(nav.getByRole("button", { name: "Settings" })).toHaveAttribute("aria-expanded", "true");
+  await expect(nav.getByRole("link", { name: "Audit retention", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: "General", exact: true })).not.toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: "MCP connections", exact: true })).toHaveAttribute("href", "/org/binary-labs/mcp-config");
+  await nav.getByRole("button", { name: "Account" }).click();
+  for (const [label, href] of [["Sign-in and security", "/account/security"], ["Notifications", "/account/notifications"], ["Data and privacy", "/account/data"]]) {
+    await expect(nav.getByRole("link", { name: label, exact: true })).toHaveAttribute("href", href);
+  }
+  await page.goto("/account/settings");
+  await expect(page).toHaveURL("/account/security");
 });

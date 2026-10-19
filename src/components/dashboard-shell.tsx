@@ -72,17 +72,26 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     const oldRoot = `/org/${routeReference}`;
     if (oldRoot !== root) router.replace(root + pathname.slice(oldRoot.length) + window.location.search + window.location.hash);
   }, [workspace, access.isPending, access.isFetching, access.isError, access.data, routeReference, root, pathname, router]);
+  const account: NavigationSection = { label: "Account", items: [
+    { href: "/account/security", label: "Sign-in and security" },
+    { href: "/account/notifications", label: "Notifications" },
+    { href: "/account/data", label: "Data and privacy" },
+  ] };
   const sections: NavigationSection[] = !isPersonal ? [
     { label: "Your work", items: [
       { href: root, label: "Dashboard" },
       { href: `${root}/jobs`, label: "Audit jobs" },
       { href: `${root}/schedules`, label: "Scheduled audits" },
     ] },
-    { label: "Organization", items: [
-      { href: `${root}/settings`, label: "Settings" },
-      ...(workspace?.role === "owner" ? [{ href: `${root}/billing`, label: "Billing" }] : []),
+    { label: "Settings", items: [
+      { href: `${root}/settings`, label: "General" },
+      { href: `${root}/mcp-config`, label: "MCP connections" },
+      ...(workspace?.role === "owner" ? [
+        { href: `${root}/billing`, label: "Billing" },
+        { href: `${root}/settings/retention`, label: "Audit retention" },
+      ] : []),
     ] },
-    { label: "Account", items: [{ href: "/account/settings", label: "Account settings" }] },
+    account,
   ] : [
     { label: "Your work", items: [
       { href: root, label: "Dashboard" },
@@ -95,14 +104,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       { href: `${root}/studio`, label: "Creator Studio" },
       { href: `${root}/prompts`, label: "My prompts" },
     ] },
-    { label: "Account", items: [
-      { href: `${root}/mcp-config`, label: "MCP connections" },
-      { href: "/account/settings", label: "Account settings" },
-    ] },
+    { label: "Settings", items: [{ href: `${root}/mcp-config`, label: "MCP connections" }] },
+    account,
   ];
 
-  const active = (href: string) => pathname === href || (href !== root && pathname.startsWith(`${href}/`)) ||
+  const matches = (href: string) => pathname === href || (href !== root && pathname.startsWith(`${href}/`)) ||
     (href === `${root}/jobs` && pathname.startsWith(`${root}/watchtower/`));
+  // The most specific match wins, so Audit retention doesn't also light up General.
+  const activeHref = sections.flatMap(section => section.items).map(entry => entry.href).filter(matches).sort((a, b) => b.length - a.length)[0];
+  const active = (href: string) => href === activeHref;
   const activeGroup = sections.find(section => section.items.some(entry => active(entry.href)))?.label ?? "Your work";
   const currentSection = sections.flatMap(section => section.items).find(entry => active(entry.href))?.label ?? "Dashboard";
   const groupKey = (label: string) => `${pathname}:${label}`;
@@ -226,6 +236,10 @@ function DashboardIcon({ href }: { href: string }) {
     studio: <><path d="m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-5-5L4 14v6ZM4 20h16" /></>,
     prompts: <><path d="M4 4h16v13H9l-5 4V4Z" /><path d="M8 8h8M8 12h5" /></>,
     "mcp-config": <><path d="M8 2v5m8-5v5M6 7h12v3a6 6 0 0 1-12 0V7Zm6 9v6" /></>,
+    retention: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+    security: <><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>,
+    notifications: <><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2Zm4 4h4" /></>,
+    data: <><ellipse cx="12" cy="6" rx="8" ry="3" /><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" /></>,
     settings: <><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2" fill="var(--canvas-elevated)" /><circle cx="15" cy="17" r="2" fill="var(--canvas-elevated)" /></>,
   };
   return <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
