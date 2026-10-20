@@ -4,7 +4,7 @@ type NavigationWorkspace = { kind: "personal" | "team"; role: "owner" | "member"
 
 const LAST_ORGANIZATION = "skale:last-organization";
 
-// Account pages have no organization in the URL, so they reuse the one the person came from.
+// Account and Organizations pages have no organization in the URL, so they reuse the one the person came from.
 export function rememberOrganization(id: string) {
   sessionStorage.setItem(LAST_ORGANIZATION, id);
 }
@@ -13,14 +13,13 @@ export function rememberedOrganization(): string | null {
   return sessionStorage.getItem(LAST_ORGANIZATION);
 }
 
-export function navigationSections({ workspace, root, personalRoot }: { workspace?: NavigationWorkspace; root: string; personalRoot: string }): NavigationSection[] {
+export function navigationSections({ workspace, root }: { workspace?: NavigationWorkspace; root: string }): NavigationSection[] {
   const yourWork = { label: "Your work", items: [
     { href: root, label: "Dashboard" },
     { href: `${root}/jobs`, label: "Audit jobs" },
     { href: `${root}/schedules`, label: "Scheduled audits" },
   ] };
-  // Organizations live in Personal, so team scopes link there too.
-  const organizations = { label: "Organizations", items: [{ href: `${personalRoot}/organizations`, label: "All organizations" }] };
+  const organizations = { label: "Organizations", items: [{ href: "/organizations", label: "All organizations" }] };
   const account = { label: "Account", items: [
     { href: "/account/passkeys", label: "Passkeys" },
     { href: "/account/notifications", label: "Notifications" },

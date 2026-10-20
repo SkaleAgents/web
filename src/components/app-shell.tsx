@@ -27,7 +27,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
 
   useEffect(() => {
     if (userQuery.data?.agreementRequired && pathname !== "/auth/agreements" &&
-      (pathname === "/me" || pathname.startsWith("/me/") || pathname === "/dashboard" || pathname.startsWith("/dashboard/") || pathname.startsWith("/org/") || pathname.startsWith("/staff/") || pathname.startsWith("/account/"))) {
+      (pathname === "/me" || pathname.startsWith("/me/") || pathname === "/dashboard" || pathname.startsWith("/dashboard/") || pathname.startsWith("/org/") || pathname.startsWith("/staff/") || pathname.startsWith("/account/") || pathname === "/organizations")) {
       router.replace(`/auth/agreements?next=${encodeURIComponent(pathname)}`);
       return;
     }
@@ -42,7 +42,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
   }, [pathname, router, userQuery.data]);
 
   const dashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/") ||
-    pathname === "/me" || pathname.startsWith("/me/") || pathname.startsWith("/org/") || pathname.startsWith("/account/") ||
+    pathname === "/me" || pathname.startsWith("/me/") || pathname.startsWith("/org/") || pathname.startsWith("/account/") || pathname === "/organizations" ||
     pathname === "/staff" || pathname.startsWith("/staff/");
   const invitation = pathname === WORKSPACE_INVITATION_PATH;
   const authentication = ["/login", "/signup"].some((path) => pathname === path || pathname.startsWith(`${path}/`)) || pathname.startsWith("/auth/");

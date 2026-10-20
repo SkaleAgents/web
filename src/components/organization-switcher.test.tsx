@@ -14,7 +14,7 @@ it("switches organizations and offers to create one", () => {
   fireEvent.click(screen.getByRole("button", { name: "Acme, switch scope" }));
   expect(screen.getByRole("link", { name: "Personal" })).toHaveAttribute("href", "/org/my-space/jobs");
   expect(screen.getByRole("link", { name: "Acme" })).toHaveAttribute("aria-current", "page");
-  expect(screen.getByRole("link", { name: "+ Create organization" })).toHaveAttribute("href", "/org/my-space/organizations#create-organization");
+  expect(screen.getByRole("link", { name: "+ Create organization" })).toHaveAttribute("href", "/organizations#create-organization");
 });
 
 it("sends Personal settings to Account passkeys", () => {

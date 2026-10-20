@@ -65,7 +65,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     router.replace(dashboardDestination(next ?? pathname + window.location.search + window.location.hash, personalId, memberships.data));
   }, [user.data, legacy, memberships.isSuccess, memberships.data, pathname, personalId, router]);
 
-  const isAccount = pathname.startsWith("/account/");
+  const isOrganizations = pathname === "/organizations";
+  const isAccount = pathname.startsWith("/account/") || isOrganizations;
   useEffect(() => { if (workspace) rememberOrganization(workspace.id); }, [workspace]);
   const remembered = useSyncExternalStore(noop, rememberedOrganization, () => null);
   const navWorkspace = workspace ?? (isAccount ? memberships.data?.find(item => item.id === remembered) ?? personalMember : undefined);
@@ -75,7 +76,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     const oldRoot = `/org/${routeReference}`;
     if (oldRoot !== root) router.replace(root + pathname.slice(oldRoot.length) + window.location.search + window.location.hash);
   }, [workspace, access.isPending, access.isFetching, access.isError, access.data, routeReference, root, pathname, router]);
-  const sections = navigationSections({ workspace: navWorkspace, root, personalRoot });
+  const sections = navigationSections({ workspace: navWorkspace, root });
   const activeHref = activeNavigationHref(sections, pathname, root);
   const active = (href: string) => href === activeHref;
   const activeGroup = sections.find(section => section.items.some(entry => active(entry.href)))?.label ?? "Your work";
@@ -136,7 +137,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     {menuOpen ? <button type="button" className="dashboard-menu-scrim" aria-label="Dismiss menu" onClick={closeMenu} /> : null}
     <aside className="dashboard-sidebar">
       <nav ref={navigation} aria-label="Dashboard navigation" className="dashboard-navigation">
-        {collapseToggle}
         <div className="dashboard-brand">
           <span className="dashboard-brand-logo"><BrandLogo href={root} /></span>
         </div>
@@ -170,9 +170,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             onClick={() => setMenuOpen(!menuOpen)}>
             <span className="sr-only">{menuOpen ? "Close menu" : "Open menu"}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d={menuOpen ? "m6 6 12 12M6 18 18 6" : "M4 6h16M4 12h16M4 18h16"} /></svg>
           </button>
-          <OrganizationSwitcher scope={navWorkspace ? { kind: "organization", id: navWorkspace.id } : scope} pathname={pathname} memberships={memberships.data ?? []} />
-          <span aria-hidden="true" className="text-line">{" / "}</span>
-          <span className="truncate font-semibold">{currentSection}</span>
+          {collapseToggle}
+          {isOrganizations ? <span className="truncate font-semibold">Organizations</span> : <>
+            <OrganizationSwitcher scope={navWorkspace ? { kind: "organization", id: navWorkspace.id } : scope} pathname={pathname} memberships={memberships.data ?? []} />
+            <span aria-hidden="true" className="text-line">{" / "}</span>
+            <span className="truncate font-semibold">{currentSection}</span>
+          </>}
         </div>
         <div className="flex items-center gap-2"><ThemeSwitcher /><AccountMenu key={user.data.id} user={user.data} /></div>
       </header>
