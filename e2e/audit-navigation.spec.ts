@@ -43,6 +43,12 @@ test("signed-in navigation shows the theme control beside an avatar-only account
   await expect(page.locator("html")).toHaveAttribute("class", /dark/);
   await account.click();
   await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+  // The avatar is the whole trigger, so opening the menu draws no ring or pill around it.
+  await expect(account).toHaveCSS("padding", "0px");
+  await expect(account).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await page.getByRole("link", { name: "Profile", exact: true }).click();
+  await expect(page).toHaveURL("/account/profile");
+  await expect(page.getByLabel("Full name")).toHaveValue("Test Owner");
 });
 
 test("public navigation shows Dashboard only after sign-in", async ({ page }) => {

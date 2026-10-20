@@ -11,7 +11,7 @@ describe("navigationSections", () => {
       ["Your work", ["Dashboard", "Audit jobs", "Scheduled audits"]],
       ["Settings", ["General", "MCP connections", "Billing", "Audit retention"]],
       ["Organizations", ["All organizations"]],
-      ["Account", ["Passkeys", "Notifications", "Data and privacy"]],
+      ["Account", ["Profile", "Passkeys", "Notifications", "Data and privacy"]],
     ]);
   });
 
