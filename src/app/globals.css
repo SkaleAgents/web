@@ -698,3 +698,9 @@ html.dark .finding-severity:is([data-severity="high"], [data-severity="critical"
 /* Collapse handle sits on the sidebar edge, vertically centred, in both states. */
 .scope-switcher-options a.scope-switcher-create { margin-top: 0.25rem; border-top: 1px solid var(--line); border-radius: 0 0 5px 5px; color: var(--ink-muted); }
 .scope-switcher-options a.scope-switcher-create:hover { color: var(--ink); }
+
+/* Sidebar toggle straddles the sidebar edge, level with the top bar. */
+@media (min-width: 1024px) {
+  .dashboard-toolbar .dashboard-collapse-toggle { position: absolute; top: 50%; left: 0; z-index: 61; width: 24px; height: 24px; transform: translate(-50%, -50%); border: 1px solid var(--line); border-radius: 999px; background: var(--canvas-elevated); box-shadow: 0 1px 3px rgb(0 0 0 / 8%); }
+  .dashboard-toolbar .dashboard-collapse-toggle:hover { background: var(--canvas); color: var(--ink); }
+}

@@ -196,6 +196,10 @@ test("team settings and personal account settings are separate groups with their
   await expect(page.locator(".dashboard-toolbar-divider")).toHaveCount(0);
   // The collapse toggle sits in the top bar, right before the organization name.
   await expect(page.locator(".dashboard-toolbar .dashboard-collapse-toggle + .scope-switcher")).toHaveCount(1);
+  // Its centre sits on the sidebar's right edge.
+  const toggleBox = (await page.locator(".dashboard-collapse-toggle").boundingBox())!;
+  const sidebarBox = (await page.locator(".dashboard-sidebar").boundingBox())!;
+  expect(Math.abs(toggleBox.x + toggleBox.width / 2 - (sidebarBox.x + sidebarBox.width))).toBeLessThan(1.5);
   await page.getByRole("button", { name: "Collapse sidebar" }).click();
   await expect(page.getByRole("button", { name: "Expand sidebar" })).toBeVisible();
   await page.getByRole("button", { name: "Expand sidebar" }).click();
