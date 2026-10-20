@@ -9,6 +9,7 @@ import { authPost, authenticationError } from "@/lib/email-auth";
 // Emails a one-time link: it signs in an existing account or creates a new one. Passkey sign-in lives on the sign-in options page.
 export function EmailSignIn({ oauth = false, signup = false }: { oauth?: boolean; signup?: boolean }) {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
@@ -20,7 +21,7 @@ export function EmailSignIn({ oauth = false, signup = false }: { oauth?: boolean
     if (busy || verifying) return;
     setBusy(true); setError("");
     try {
-      await authPost("/api/auth/email", { email: email.trim(), purpose: "signin", ...(oauth ? { oauth: true } : {}), ...(turnstileToken ? { turnstileToken } : {}) });
+      await authPost("/api/auth/email", { email: email.trim(), purpose: "signin", ...(signup ? { name: name.trim() } : {}), ...(oauth ? { oauth: true } : {}), ...(turnstileToken ? { turnstileToken } : {}) });
       setSent(true);
     } catch (err) { setError(authenticationError(err)); }
     finally { setBusy(false); setTurnstileToken(""); setChallenge((value) => value + 1); }
@@ -36,6 +37,7 @@ export function EmailSignIn({ oauth = false, signup = false }: { oauth?: boolean
     </> : <>
       <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void sendLink(); }}>
         <fieldset disabled={busy} className="space-y-4">
+          {signup && <label className="block space-y-1"><FieldLabel>Full name</FieldLabel><TextInput name="name" autoComplete="name" required maxLength={100} value={name} onChange={(event) => setName(event.target.value)} /></label>}
           <label className="block space-y-1"><FieldLabel>Email</FieldLabel><TextInput type="email" name="email" autoComplete="email" required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} /></label>
           <Turnstile key={challenge} onToken={setTurnstileToken} />
           <Button className="w-full" type="submit" disabled={verifying}>{busy ? "Sending…" : signup ? "Email me a sign-up link" : "Email me a sign-in link"}</Button>
