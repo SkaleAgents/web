@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { planBlurbs } from "@/lib/plan-blurbs";
+import { Turnstile, turnstileEnabled } from "./turnstile";
 
 type Plan = {
   key: string;
@@ -26,6 +27,9 @@ export function PricingPlans() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [challenge, setChallenge] = useState(0);
+  const verifying = turnstileEnabled && !turnstileToken;
 
   useEffect(() => {
     let active = true;
@@ -37,7 +41,7 @@ export function PricingPlans() {
 
   async function sendInquiry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submitting) return;
+    if (submitting || verifying) return;
     setSubmitting(true);
     setSubmitError(false);
     const form = new FormData(event.currentTarget);
@@ -51,6 +55,7 @@ export function PricingPlans() {
           contactName: form.get("contactName"),
           email: form.get("email"),
           requirements: form.get("requirements") || null,
+          ...(turnstileToken ? { turnstileToken } : {}),
         }),
       });
       if (response.status !== "received" || !response.id) throw new Error("Unexpected inquiry response");
@@ -59,6 +64,8 @@ export function PricingPlans() {
       setSubmitError(true);
     } finally {
       setSubmitting(false);
+      setTurnstileToken("");
+      setChallenge((value) => value + 1);
     }
   }
 
@@ -97,8 +104,9 @@ export function PricingPlans() {
           <label className="grid gap-1 text-sm font-semibold">Contact name<input name="contactName" required maxLength={120} className="w-full border border-line bg-canvas p-3 font-normal" /></label>
           <label className="grid gap-1 text-sm font-semibold">Email<input name="email" type="email" required maxLength={254} className="w-full border border-line bg-canvas p-3 font-normal" /></label>
           <label className="grid gap-1 text-sm font-semibold">Requirements (optional)<textarea name="requirements" maxLength={2000} rows={4} className="w-full border border-line bg-canvas p-3 font-normal" /></label>
+          <Turnstile key={challenge} onToken={setTurnstileToken} />
           {submitError && <p role="alert" className="text-sm text-red-700">Could not send your inquiry. Please try again.</p>}
-          <button type="submit" disabled={submitting} className="bg-accent px-4 py-3 text-sm font-semibold text-accent-fg disabled:opacity-60">{submitting ? "Sending…" : "Send inquiry"}</button>
+          <button type="submit" disabled={submitting || verifying} className="bg-accent px-4 py-3 text-sm font-semibold text-accent-fg disabled:opacity-60">{submitting ? "Sending…" : "Send inquiry"}</button>
         </form>}
       </div>
     </section>}
