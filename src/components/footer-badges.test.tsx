@@ -12,7 +12,7 @@ const requestedBadges = [
   ["https://www.aixuanfeng.com", null],
   ["https://startuptrusted.com?ref=skaleagents.com", "SkaleAgents on StartupTrusted"],
   ["https://neeed.directory", "Featured on neeed.directory"],
-  ["https://findly.tools/skaleagents?utm_source=skaleagents", "Featured on Findly.tools"],
+  ["https://findly.tools/", "Featured on Findly.tools"],
   ["https://tools.launchllama.co?utm_source=badge&utm_medium=referral", "Featured on Launch Llama Tools"],
   ["https://www.agenthunter.io", "AgentHunter Badge"],
   ["https://twelve.tools", "Featured on Twelve Tools"],
@@ -22,13 +22,12 @@ const requestedBadges = [
   ["https://sumodir.com", "Featured on SumoDir"],
   ["https://postmake.io", "Featured on the Postmake directory"],
   ["https://ainexfinder.com", "AInexfinder AI Tools Directory"],
-  ["https://nicklaunches.com/products/skaleagents/?utm_source=skaleagents.com&utm_medium=badge&utm_campaign=featured", "Featured on Nick Launches"],
+  ["https://nicklaunches.com/", "Featured on Nick Launches"],
   ["https://bowora.com/", null],
   ["https://navfolders.com/", "Featured on NavFolders"],
   ["https://www.aitoolfinder.com/", "#1 Product on www.aitoolfinder.com"],
   ["https://www.direct2app.com", "Featured On Direct2App"],
   ["https://firstlook.tools", "Featured on First Look"],
-  ["https://indieshowcase.io", "Featured"],
   ["https://fazier.com/launches/skaleagents.com", "Fazier badge"],
   ["https://submito.net", "Listed on Submito"],
   ["https://toolfame.com/item/skaleagents", "Featured on toolfame.com"],
@@ -41,8 +40,8 @@ const requestedBadges = [
   ["https://easylaunch.dev/dev-tools/skaleagents", "Featured on EasyLaunch"],
   ["https://shipgrowth.dev", "Featured on ShipGrowth"],
   ["https://aitooldiscovery.com", "Featured on AI Tool Discovery"],
-  ["https://launchkiwi.com/p/skaleagents", "Featured on LaunchKiwi"],
-  ["https://www.toolverified.com/tool/skaleagents?ref=badge", "SkaleAgents on ToolVerified"],
+  ["https://launchkiwi.com/", "Featured on LaunchKiwi"],
+  ["https://toolverified.com/", "SkaleAgents on ToolVerified"],
   ["https://www.promptfrenzy.com/directory", "Featured on PromptFrenzy AI Directory"],
   ["https://mediapronet.com/?utm_source=partner-site&utm_medium=badge", "Listed on MEDIAPRONET"],
   ["https://toolnav.ai/", "ToolNav AI"],
@@ -57,7 +56,6 @@ const addedBadgeImages = [
   ["https://www.aitoolfinder.com/", "https://www.aitoolfinder.com//function/badge-generator.php?type=0&theme=light&domain=www.aitoolfinder.com", "84", null],
   ["https://www.direct2app.com", "https://www.direct2app.com/featured-light.svg", null, "noopener"],
   ["https://firstlook.tools", "https://firstlook.tools/badge/badge_dark.svg", "54", "noopener noreferrer"],
-  ["https://indieshowcase.io", "https://indieshowcase.io/badge/featured-light.svg", null, null],
   ["https://submito.net", "https://submito.net/badge/listed-light.svg", null, null],
   ["https://toolfame.com/item/skaleagents", "https://toolfame.com/badge-light.svg", null, "noopener noreferrer"],
   ["https://toolhunter.ai/ai-tool/skaleagents?ref=badge", "https://toolhunter.ai/badge/skaleagents.svg?theme=light", "50", "noopener"],
@@ -69,8 +67,8 @@ const addedBadgeImages = [
   ["https://easylaunch.dev/dev-tools/skaleagents", "https://easylaunch.dev/badge/easylaunch-badge-light.svg", "56", "noopener"],
   ["https://shipgrowth.dev", "https://storage.shipgrowth.dev/badge-light.png", null, "noopener noreferrer"],
   ["https://aitooldiscovery.com", "https://aitooldiscovery.com/badges/featured-1.svg", "54", null],
-  ["https://launchkiwi.com/p/skaleagents", "https://launchkiwi.com/badge-light.svg", "62", "noopener"],
-  ["https://www.toolverified.com/tool/skaleagents?ref=badge", "https://www.toolverified.com/badge/35703d0a1bdf0158f31b3af7-light.svg", "54", "noopener"],
+  ["https://launchkiwi.com/", "https://launchkiwi.com/badge-light.svg", "62", "noopener"],
+  ["https://toolverified.com/", "https://www.toolverified.com/badge/35703d0a1bdf0158f31b3af7-light.svg", "54", "noopener"],
   ["https://www.promptfrenzy.com/directory", "https://www.promptfrenzy.com/badges/directory.svg", "44", "noopener"],
   ["https://mediapronet.com/?utm_source=partner-site&utm_medium=badge", "https://mediapronet.com/api/badge?style=classic", "54", "nofollow noopener noreferrer"],
   ["https://toolnav.ai/", "https://toolnav.ai/badges/toolnav-dark.svg", "60", "noopener noreferrer"],
@@ -100,7 +98,7 @@ const oct12Hosts = [
 const oct13Hosts = [
   "aiblog.tools", "aihunt.one", "aiindex.tools", "buildway.cc", "describepicture.cc", "easydofollow.dev", "elf08.com", "hotools.com", "saasdb.net",
   "saastool.site", "shareyourstartup.com", "useneedle.net", "agentwork.tools", "ai-directory.com", "aiboom.tools", "aifinderplus.com", "aitrovex.com",
-  "aiwizard.ai", "allstartups.info", "backlink2web.com", "bestofweb.site", "dynamite-ai.com", "freeai.run", "intelligenttools.co", "justsimple.tools",
+  "aiwizard.ai", "backlink2web.com", "dynamite-ai.com", "freeai.run", "intelligenttools.co", "justsimple.tools",
   "launchit.fast", "letslaunch.today", "meoai.net", "microsaasexamples.com", "oranyx.ai", "productdirs.com", "saascubes.com", "sellwithboost.com",
   "stork.ai", "submitforbacklinks.com", "submitstartup.io", "submityouraitool.com", "thankjohn.com", "thedevtoolsdir.com", "toolbit.ai", "toolsapp.cc",
   "toplistly.com", "tulimoa.com", "ufind.best", "youraihunt.com",
@@ -111,15 +109,15 @@ const oct15Hosts = [
   "saaslineup.com", "domainrank.app", "noonlaunch.com", "lemonlaunch.dev", "indiestore.co", "launchai.tools", "bunny.directory", "alltoolsdirectory.com",
   "tooluck.org", "aitoolslist.tools", "in-sla.org", "newwebdirectory.com", "nextlaunch.io", "launchbuck.com", "debutpin.com", "launchfinds.com",
   "startupfinds.com", "startupscrolls.com", "whatai.cc", "deepdhai.com", "navdh.com", "steeldirectory.net", "finetools.ai", "ontoplist.com",
-  "smartees.tech", "themicrosaasdir.com", "aitrustlist.com", "hiproducty.com", "bestsky.tools", "outdr.lol", "seektool.ai", "adsly.io", "boostdomainrating.com",
+  "smartees.tech", "themicrosaasdir.com", "aitrustlist.com", "bestsky.tools", "outdr.lol", "seektool.ai", "adsly.io", "boostdomainrating.com",
 ];
 
 const oct17Hosts = [
   "directory.getseoo.com", "indielineup.com", "launchelion.com", "saasearch.io", "swipetolaunch.com", "toolquix.com",
-  "bestaitool.app", "top4ai.com", "wtai.cc", "thetoolpicker.com",
+  "bestaitool.app", "wtai.cc", "thetoolpicker.com",
 ];
 
-const oct19Images = ["hiproducty.com", "launchboard.dev", "justsimple.tools", "freeai.run", "thetoolpicker.com", "aicavo.com", "getlaunchpod.com", "launchpadly.co", "vibetoyou.com", "smoltop.com", "aifinderplus.com", "aitrovex.com", "directoryhunt.org", "launch-list.org", "newtools.site"];
+const oct19Images = ["launchboard.dev", "justsimple.tools", "freeai.run", "thetoolpicker.com", "aicavo.com", "getlaunchpod.com", "launchpadly.co", "vibetoyou.com", "smoltop.com", "aifinderplus.com", "aitrovex.com", "directoryhunt.org", "launch-list.org", "newtools.site"];
 const oct19Links = ["aihuntbase.com", "mozolist.com", "toolsnap.ai", "aiforthat.co"];
 
 describe("FooterBadges 2026-10-19", () => {
@@ -275,8 +273,8 @@ describe("FooterBadges", () => {
     expect(links.find((link) => link.getAttribute("href") === "https://shipgrowth.dev")?.querySelector("img")).toHaveAttribute("style", "height: 64px; width: auto;");
     expect(links.find((link) => link.getAttribute("href") === "https://aitooldiscovery.com")?.querySelector("img")).toHaveAttribute("width", "200");
     expect(container.innerHTML).not.toContain("https://tools.cafe/b/light.svg");
-    expect(links.find((link) => link.getAttribute("href") === "https://launchkiwi.com/p/skaleagents")?.querySelector("img")).toHaveAttribute("width", "198");
-    const toolVerified = links.find((link) => link.getAttribute("href") === "https://www.toolverified.com/tool/skaleagents?ref=badge")?.querySelector("img");
+    expect(links.find((link) => link.getAttribute("href") === "https://launchkiwi.com/")?.querySelector("img")).toHaveAttribute("width", "198");
+    const toolVerified = links.find((link) => link.getAttribute("href") === "https://toolverified.com/")?.querySelector("img");
     expect(toolVerified).toHaveAttribute("width", "220");
     expect(toolVerified?.getAttribute("style")).toContain("width: 220px");
     expect(toolVerified?.getAttribute("style")).toContain("height: 54px");
@@ -309,5 +307,21 @@ describe("FooterBadges", () => {
     expect(allLinks.find((link) => link.getAttribute("href") === "https://www.aiheron.com/")).toHaveAttribute("title", "AiHeron AI nav");
     expect(allLinks.find((link) => link.getAttribute("href") === "https://okeiai.com/")).toHaveAttribute("title", "Okei AI Tools Directory");
     expect(allLinks.find((link) => link.getAttribute("href") === "https://t0ai.com")).toHaveAttribute("title", "T0 AI Tools Directory");
+  });
+});
+
+describe("FooterBadges 2026-10-20 audit", () => {
+  const added = [
+    "ai-webcatalog.space", "aisuperhub.io", "aitoolist.com", "aitoolsprime.com", "aiwebsite.run", "bestekitools.com", "comparateur-ia.com", "huntstartup.com",
+    "launchfederation.com", "legit.show", "megalaun.ch", "outclimbed.com", "scrappystartups.com", "superlaun.ch", "thedevtoolsindex.com", "websitelaunches.com",
+  ];
+  const removed = ["allstartups.info", "bestofweb.site", "hiproducty.com", "indieshowcase.io", "top4ai.com"];
+
+  it("links the 16 added directories once and drops the 5 dead ones", () => {
+    const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
+    const hosts = Array.from(page.querySelectorAll("a[href]")).map((link) => new URL(link.getAttribute("href")!).hostname.replace(/^www\./, ""));
+
+    for (const host of added) expect(hosts.filter((h) => h === host), host).toHaveLength(1);
+    for (const host of removed) expect(hosts, host).not.toContain(host);
   });
 });
