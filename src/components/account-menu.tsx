@@ -34,7 +34,7 @@ export function AccountMenu({ user }: { user: ApiUser }) {
   return <AccountNavigation
     key={`${user.id}:${pathname}`}
     user={user}
-    settingsActive={pathname.startsWith("/account/")}
+    pathname={pathname}
     inquiriesActive={pathname === "/staff/enterprise-inquiries"}
     signingOut={signingOut}
     onSignOut={() => void logout()}

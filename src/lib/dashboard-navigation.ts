@@ -13,6 +13,14 @@ export function rememberedOrganization(): string | null {
   return sessionStorage.getItem(LAST_ORGANIZATION);
 }
 
+// Personal settings, shown in the sidebar Account group and the profile menu.
+export const accountLinks: NavigationItem[] = [
+  { href: "/account/profile", label: "Profile" },
+  { href: "/account/passkeys", label: "Passkeys" },
+  { href: "/account/notifications", label: "Notifications" },
+  { href: "/account/data", label: "Data and privacy" },
+];
+
 export function navigationSections({ workspace, root }: { workspace?: NavigationWorkspace; root: string }): NavigationSection[] {
   const yourWork = { label: "Your work", items: [
     { href: root, label: "Dashboard" },
@@ -20,11 +28,7 @@ export function navigationSections({ workspace, root }: { workspace?: Navigation
     { href: `${root}/schedules`, label: "Scheduled audits" },
   ] };
   const organizations = { label: "Organizations", items: [{ href: "/organizations", label: "All organizations" }] };
-  const account = { label: "Account", items: [
-    { href: "/account/passkeys", label: "Passkeys" },
-    { href: "/account/notifications", label: "Notifications" },
-    { href: "/account/data", label: "Data and privacy" },
-  ] };
+  const account = { label: "Account", items: accountLinks };
   if (workspace?.kind === "team") return [
     yourWork,
     { label: "Settings", items: [

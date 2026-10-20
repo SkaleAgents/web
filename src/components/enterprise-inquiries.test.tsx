@@ -75,13 +75,13 @@ it("saves a replacement inquiry address", async () => {
 });
 
 it("links staff to the inquiries page from the account menu", () => {
-  render(<AccountNavigation user={operator} settingsActive={false} signingOut={false} onSignOut={() => undefined} />);
+  render(<AccountNavigation user={operator} pathname="/staff/enterprise-inquiries" signingOut={false} onSignOut={() => undefined} />);
   fireEvent.click(screen.getByRole("button", { name: "Owner, account menu" }));
   expect(screen.getByRole("link", { name: "Enterprise inquiries" })).toHaveAttribute("href", "/staff/enterprise-inquiries");
 });
 
 it("hides the inquiries link for a customer account", () => {
-  render(<AccountNavigation user={{ ...operator, staffRole: null }} settingsActive={false} signingOut={false} onSignOut={() => undefined} />);
+  render(<AccountNavigation user={{ ...operator, staffRole: null }} pathname="/staff/enterprise-inquiries" signingOut={false} onSignOut={() => undefined} />);
   fireEvent.click(screen.getByRole("button", { name: "Owner, account menu" }));
   expect(screen.queryByRole("link", { name: "Enterprise inquiries" })).not.toBeInTheDocument();
 });
