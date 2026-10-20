@@ -23,7 +23,7 @@ export default function ConfirmEmailPage() {
   const [accountId, setAccountId] = useState("");
   const supportsPasskeys = usePasskeySupport();
   const details = useQuery({ queryKey: ["email-link-preview"], enabled: !!link, retry: false, gcTime: 0, staleTime: 0,
-    queryFn: () => authPost<{ email: string; purpose: string; newAccount: boolean }>("/api/auth/email/inspect", { token: link?.token }),
+    queryFn: () => authPost<{ email: string; purpose: string; name?: string | null; newAccount: boolean }>("/api/auth/email/inspect", { token: link?.token }),
   });
 
   function enterProduct() {
@@ -57,7 +57,7 @@ export default function ConfirmEmailPage() {
       <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void submit(event.currentTarget, passkey); }}>
         <fieldset disabled={busy || !details.data || details.isError} className="space-y-4">
           {created && <>
-            {!accountId && <label className="block space-y-1"><FieldLabel>Your name</FieldLabel><TextInput name="name" autoComplete="name" maxLength={100} /></label>}
+            {!accountId && <label className="block space-y-1"><FieldLabel>Your name</FieldLabel><TextInput name="name" autoComplete="name" maxLength={100} defaultValue={details.data?.name ?? ""} /></label>}
             <AccountSetupChoices passkey={passkey} onPasskey={setPasskey} agreed={agreed} onAgreed={setAgreed} />
           </>}
           <Button className="w-full" type="submit" disabled={created && !agreed}>{busy ? (created && passkey && supportsPasskeys ? "Waiting for your passkey…" : "Working…") : accountId ? "Try again" : created ? "Create account" : "Sign in"}</Button>

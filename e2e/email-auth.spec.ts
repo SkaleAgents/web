@@ -79,7 +79,8 @@ test("sign-in leads with a passkey, then Google, GitHub, and email", async ({ pa
 });
 
 test("sign-up has its own page, states the terms, and a new account's link says so", async ({ page }) => {
-  await page.route("**/api/auth/email", route => route.fulfill({ status: 202, json: {} }));
+  let sent: Record<string, string> = {};
+  await page.route("**/api/auth/email", route => { sent = route.request().postDataJSON(); return route.fulfill({ status: 202, json: {} }); });
   await page.goto("/login");
   await expect(page.getByText(/By signing up/)).toHaveCount(0);
   await page.getByRole("link", { name: "Create an account" }).click();
@@ -92,13 +93,17 @@ test("sign-up has its own page, states the terms, and a new account's link says 
   await expect(page.getByRole("button", { name: "Sign in with a passkey" })).toHaveCount(0);
   await page.getByLabel("Email", { exact: true }).fill("new@example.com");
   await page.getByRole("button", { name: "Email me a sign-up link" }).click();
+  await expect(page.getByRole("main").getByRole("status")).toHaveCount(0);
+  await page.getByLabel("Full name").fill(" Ada Lovelace ");
+  await page.getByRole("button", { name: "Email me a sign-up link" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("sign-up link");
+  expect(sent).toMatchObject({ email: "new@example.com", name: "Ada Lovelace" });
 
   const token = "c".repeat(64);
-  await page.route("**/api/auth/email/inspect", route => route.fulfill({ json: { email: "new@example.com", purpose: "signin", newAccount: true } }));
+  await page.route("**/api/auth/email/inspect", route => route.fulfill({ json: { email: "new@example.com", purpose: "signin", name: "Ada Lovelace", newAccount: true } }));
   await page.goto(`/auth/confirm#token=${token}&purpose=signin`);
   await expect(page.getByRole("heading", { name: "Create your account" })).toBeVisible();
-  await expect(page.getByLabel("Your name")).toBeVisible();
+  await expect(page.getByLabel("Your name")).toHaveValue("Ada Lovelace");
   await expect(page.getByRole("checkbox", { name: /Set up a passkey/ })).toBeChecked();
   await expect(page.getByRole("button", { name: "Create account" })).toBeDisabled();
   await page.getByRole("checkbox", { name: /Terms of Service/ }).check();
