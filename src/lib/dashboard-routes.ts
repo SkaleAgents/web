@@ -55,13 +55,13 @@ export function legacyDashboardPath(pathname: string): string | null {
   if (pathname === "/dashboard") return "/me";
   if (!pathname.startsWith("/dashboard/")) return null;
   const suffix = pathname.slice("/dashboard/".length);
-  if (suffix === "workspaces") return "/me/organizations";
+  if (suffix === "workspaces") return "/organizations";
   const organization = suffix.match(/^workspaces\/([^/]+)(?:\/(.*))?$/);
   if (organization?.[1] && uuidPattern.test(organization[1])) {
     const section = organization[2] === "retention" ? "settings/retention" : organization[2] ?? "";
     return organizationPath(organization[1], section);
   }
-  if (suffix === "billing") return "/me/organizations";
+  if (suffix === "billing") return "/organizations";
   if (suffix === "staff" || suffix.startsWith("staff/")) return `/${suffix}`;
   return personalPath(suffix);
 }
@@ -79,7 +79,7 @@ export function dashboardDestination(value: string | null, personalId?: string |
       let destination: string | null = null;
       if (path === "/me" || path === "/dashboard") destination = fallback;
       else if (path === "/me/settings" || path === "/dashboard/settings") destination = "/account/notifications";
-      else if (path === "/me/organizations" || path === "/dashboard/workspaces") destination = organizationPath(personalId, "organizations");
+      else if (path === "/me/organizations" || path === "/dashboard/workspaces") destination = "/organizations";
       else if (path.startsWith("/me/")) destination = organizationPath(personalId, path.slice(4));
       else if (path.startsWith("/dashboard/workspaces/")) {
         const match = path.match(/^\/dashboard\/workspaces\/([^/]+)(?:\/(.*))?$/);

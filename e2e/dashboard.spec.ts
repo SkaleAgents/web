@@ -44,7 +44,7 @@ test("guests cannot mount management pages or request private data", async ({ pa
   let privateRequests = 0;
   await page.route("http://localhost:8082/api/**", route => { privateRequests++; return route.fulfill({ status: 401, json: {} }); });
   await page.route("**/api/user", route => route.fulfill({ status: 401, json: {} }));
-  for (const path of ["/me", "/me/jobs", "/me/studio", "/me/prompts", "/me/bots", "/me/settings", "/me/mcp-config", "/me/organizations"]) {
+  for (const path of ["/me", "/me/jobs", "/me/studio", "/me/prompts", "/me/bots", "/me/settings", "/me/mcp-config", "/organizations"]) {
     await page.goto(path);
     await expect(page).toHaveURL(new RegExp(`/login\\?next=${encodeURIComponent(path)}$`));
     await expect(page.getByRole("navigation", { name: "Dashboard navigation" })).toHaveCount(0);

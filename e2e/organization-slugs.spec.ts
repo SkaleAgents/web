@@ -186,17 +186,24 @@ test("team settings and personal account settings are separate groups with their
   const groups = await nav.locator(".dashboard-nav-label").allTextContents();
   expect(groups.map(label => label.replace("⌄", "").trim())).toEqual(["Your work", "Settings", "Organizations", "Account"]);
   await nav.getByRole("button", { name: "Organizations" }).click();
-  await expect(nav.getByRole("link", { name: "All organizations", exact: true })).toHaveAttribute("href", /\/org\/[^/]+\/organizations$/);
+  await expect(nav.getByRole("link", { name: "All organizations", exact: true })).toHaveAttribute("href", "/organizations");
   await nav.getByRole("button", { name: "Account" }).click();
   for (const [label, href] of [["Passkeys", "/account/passkeys"], ["Notifications", "/account/notifications"], ["Data and privacy", "/account/data"]]) {
     await expect(nav.getByRole("link", { name: label, exact: true })).toHaveAttribute("href", href);
   }
   await page.getByRole("button", { name: "Binary Labs, switch scope" }).click();
-  await expect(page.getByRole("link", { name: "+ Create organization" })).toHaveAttribute("href", /\/organizations#create-organization$/);
+  await expect(page.getByRole("link", { name: "+ Create organization" })).toHaveAttribute("href", "/organizations#create-organization");
   await expect(page.locator(".dashboard-toolbar-divider")).toHaveCount(0);
+  // The collapse toggle sits in the top bar, right before the organization name.
+  await expect(page.locator(".dashboard-toolbar .dashboard-collapse-toggle + .scope-switcher")).toHaveCount(1);
   await page.getByRole("button", { name: "Collapse sidebar" }).click();
   await expect(page.getByRole("button", { name: "Expand sidebar" })).toBeVisible();
   await page.getByRole("button", { name: "Expand sidebar" }).click();
+  await page.getByRole("button", { name: "Binary Labs, switch scope" }).click();
+  await page.getByRole("link", { name: "+ Create organization" }).click();
+  await expect(page).toHaveURL("/organizations#create-organization");
+  await expect(page.locator(".dashboard-toolbar").getByRole("button", { name: /switch scope/ })).toHaveCount(0);
+  await expect(nav.getByRole("link", { name: "Dashboard", exact: true })).toHaveAttribute("href", "/org/binary-labs");
   await page.goto("/account/settings");
   await expect(page).toHaveURL("/account/passkeys");
   await page.goto("/account/security");

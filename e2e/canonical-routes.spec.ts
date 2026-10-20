@@ -41,8 +41,8 @@ test("switcher names the organization and sidebar groups can collapse", async ({
   await expect(group).toHaveAttribute("aria-expanded", "true");
   await group.click();
   await expect(group).toHaveAttribute("aria-expanded", "false");
-  await page.getByRole("navigation", { name: "Dashboard navigation" }).getByRole("button", { name: "Collapse sidebar" }).click();
-  await expect(page.getByRole("navigation", { name: "Dashboard navigation" }).getByRole("button", { name: "Expand sidebar" })).toBeVisible();
+  await page.getByRole("button", { name: "Collapse sidebar" }).click();
+  await expect(page.getByRole("button", { name: "Expand sidebar" })).toBeVisible();
 });
 
 test("legacy dashboard links redirect to the right scope", async ({ request }) => {
@@ -71,11 +71,16 @@ test("organization overview and settings keep their scope", async ({ page }) => 
   await expect(page.getByRole("link", { name: "Audit retention notice" })).toHaveAttribute("href", `/org/${org}/settings/retention`);
 });
 
-test("personal organizations page stays under personal scope", async ({ page }) => {
+test("organizations is its own page, outside any organization", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: owner }));
   await page.route("**/api/workspaces", route => route.fulfill({ json: { data: [personalOrganization, team] } }));
   await page.goto("/me/organizations");
+  await expect(page).toHaveURL("/organizations");
   await expect(page.getByRole("heading", { name: "Organizations" })).toBeVisible();
+  const toolbar = page.locator(".dashboard-toolbar");
+  await expect(toolbar.getByText("Organizations", { exact: true })).toBeVisible();
+  await expect(toolbar.getByRole("button", { name: /switch scope/ })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "All organizations", exact: true })).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("link", { name: "Platform Team" })).toHaveAttribute("href", `/org/${org}`);
 });
 

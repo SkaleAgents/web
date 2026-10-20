@@ -7,7 +7,7 @@ afterEach(() => sessionStorage.clear());
 
 describe("navigationSections", () => {
   it("gives team owners organization settings, then Organizations, then personal Account", () => {
-    expect(labels(navigationSections({ workspace: { kind: "team", role: "owner" }, root: "/org/acme", personalRoot: "/org/me" }))).toEqual([
+    expect(labels(navigationSections({ workspace: { kind: "team", role: "owner" }, root: "/org/acme" }))).toEqual([
       ["Your work", ["Dashboard", "Audit jobs", "Scheduled audits"]],
       ["Settings", ["General", "MCP connections", "Billing", "Audit retention"]],
       ["Organizations", ["All organizations"]],
@@ -16,21 +16,21 @@ describe("navigationSections", () => {
   });
 
   it("hides owner-only settings from team members", () => {
-    const settings = navigationSections({ workspace: { kind: "team", role: "member" }, root: "/org/acme", personalRoot: "/org/me" })[1];
+    const settings = navigationSections({ workspace: { kind: "team", role: "member" }, root: "/org/acme" })[1];
     expect(settings.items.map(item => item.label)).toEqual(["General", "MCP connections"]);
   });
 
-  it("gives Personal its build tools and links Organizations to Personal from any scope", () => {
-    const personal = navigationSections({ workspace: { kind: "personal", role: "owner" }, root: "/org/me", personalRoot: "/org/me" });
+  it("gives Personal its build tools and links Organizations to its own page from any scope", () => {
+    const personal = navigationSections({ workspace: { kind: "personal", role: "owner" }, root: "/org/me" });
     expect(personal.map(section => section.label)).toEqual(["Your work", "Build", "Settings", "Organizations", "Account"]);
-    const team = navigationSections({ workspace: { kind: "team", role: "owner" }, root: "/org/acme", personalRoot: "/org/me" });
-    expect(team[2].items[0].href).toBe("/org/me/organizations");
+    const team = navigationSections({ workspace: { kind: "team", role: "owner" }, root: "/org/acme" });
+    expect(team[2].items[0].href).toBe("/organizations");
     expect(team.flatMap(section => section.items).find(item => item.label === "Passkeys")?.href).toBe("/account/passkeys");
   });
 });
 
 describe("activeNavigationHref", () => {
-  const sections = navigationSections({ workspace: { kind: "team", role: "owner" }, root: "/org/acme", personalRoot: "/org/me" });
+  const sections = navigationSections({ workspace: { kind: "team", role: "owner" }, root: "/org/acme" });
 
   it("picks the most specific item", () => {
     expect(activeNavigationHref(sections, "/org/acme/settings/retention", "/org/acme")).toBe("/org/acme/settings/retention");
