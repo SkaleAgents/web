@@ -64,6 +64,7 @@ describe("organization pricing", () => {
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "alex@example.com" } });
     fireEvent.click(screen.getByRole("button", { name: "Send inquiry" }));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Could not send your inquiry"));
-    expect(screen.getByRole("button", { name: "Send inquiry" })).toBeEnabled();
+    // A fresh Turnstile token arrives after the failed attempt, then the button re-enables.
+    await waitFor(() => expect(screen.getByRole("button", { name: "Send inquiry" })).toBeEnabled());
   });
 });
