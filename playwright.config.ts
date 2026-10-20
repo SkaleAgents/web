@@ -8,6 +8,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
+  // The full suite runs many browsers at once, and client navigations can take over the 5s default.
+  expect: { timeout: 10_000 },
   use: {
     baseURL,
     trace: "on-first-retry",

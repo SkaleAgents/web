@@ -31,3 +31,23 @@ it("shows the server error and keeps the typed name", async () => {
   expect(await screen.findByRole("alert")).toHaveTextContent("Your account changed.");
   expect(screen.getByLabelText("Full name")).toHaveValue("New");
 });
+
+it("sends a confirmation link to the new email without changing it yet", async () => {
+  vi.mocked(apiFetch).mockResolvedValueOnce({ email: "new@example.com" });
+  render(<QueryClientProvider client={new QueryClient()}><ProfileSettings user={user} /></QueryClientProvider>);
+  fireEvent.click(screen.getByRole("button", { name: "Change email" }));
+  fireEvent.change(screen.getByLabelText("New email"), { target: { value: " new@example.com " } });
+  fireEvent.click(screen.getByRole("button", { name: "Send confirmation link" }));
+  expect(await screen.findByRole("status")).toHaveTextContent("We sent a link to new@example.com");
+  expect(apiFetch).toHaveBeenCalledWith("/api/account/email", expect.objectContaining({ method: "POST", body: JSON.stringify({ accountId: "u1", email: "new@example.com" }) }));
+  expect(screen.getByText("ada@example.com")).toBeVisible();
+});
+
+it("shows why an email change was refused", async () => {
+  vi.mocked(apiFetch).mockRejectedValueOnce(new Error("That email is already used by another account."));
+  render(<QueryClientProvider client={new QueryClient()}><ProfileSettings user={user} /></QueryClientProvider>);
+  fireEvent.click(screen.getByRole("button", { name: "Change email" }));
+  fireEvent.change(screen.getByLabelText("New email"), { target: { value: "taken@example.com" } });
+  fireEvent.click(screen.getByRole("button", { name: "Send confirmation link" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("already used by another account");
+});
