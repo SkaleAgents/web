@@ -4,6 +4,11 @@ import { PricingPlans } from "@/components/pricing-plans";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 
 vi.mock("@/lib/api", () => ({ apiFetch: vi.fn(), ensureCsrfCookie: vi.fn() }));
+// Turnstile is on and hands over one token per mount, like the real widget.
+vi.mock("./turnstile", async () => {
+  const { useEffect } = await import("react");
+  return { turnstileEnabled: true, Turnstile: ({ onToken }: { onToken: (token: string) => void }) => { useEffect(() => onToken("turnstile-token"), [onToken]); return null; } };
+});
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 const catalog = { data: [
@@ -47,6 +52,7 @@ describe("organization pricing", () => {
     await screen.findByText("Inquiry received");
     expect(ensureCsrfCookie).toHaveBeenCalledOnce();
     expect(apiFetch).toHaveBeenCalledWith("/api/enterprise-inquiries", expect.objectContaining({ method: "POST", credentials: "include" }));
+    expect(JSON.parse(vi.mocked(apiFetch).mock.calls[1][1]!.body as string)).toMatchObject({ email: "alex@example.com", turnstileToken: "turnstile-token" });
   });
 
   it("keeps the form open after an API failure", async () => {
