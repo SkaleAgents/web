@@ -5,6 +5,7 @@ import { organizationHref } from "@/lib/dashboard-routes";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Button, TextInput } from "@/components/ui";
+import { Avatar } from "@/components/avatar";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { workspaceAuditsEnabled } from "@/lib/workspace-audits";
@@ -117,10 +118,15 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
           <ul className="grid gap-3">
             {workspaces.data.filter(workspace => workspace.kind === "team").map((workspace) => (
               <li key={workspace.id} className="rounded-[10px] border border-line bg-canvas-elevated p-4">
-                <h3 className="font-semibold text-ink"><Link href={organizationHref(workspace)} className="hover:underline">{workspace.name}</Link></h3>
-                <p className="mt-1 text-sm text-ink-muted">
-                  {workspace.role} · Created {new Date(workspace.createdAt).toLocaleDateString()}
-                </p>
+                <div className="flex items-center gap-3">
+                  <Avatar name={workspace.name} kind="team" />
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-ink"><Link href={organizationHref(workspace)} className="hover:underline">{workspace.name}</Link></h3>
+                    <p className="text-sm text-ink-muted">
+                      <span className="capitalize">{workspace.role}</span>{workspace.createdAt && ` · Created ${new Date(workspace.createdAt).toLocaleDateString()}`}
+                    </p>
+                  </div>
+                </div>
                 {(workspace.role === "owner" || workspaceAuditsEnabled()) && (
                   <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
                     {workspace.role === "owner" && (

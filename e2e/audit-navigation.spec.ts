@@ -28,24 +28,29 @@ test("audit creation and job management use separate pages", async ({ page }) =>
   await expect(page.getByText("Audit in progress", { exact: true })).toBeVisible();
 });
 
-test("signed-in navigation shows the theme control beside an avatar-only account menu", async ({ page }) => {
+test("signed-in navigation keeps the theme control and the profile menu at the foot of the sidebar", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Test Owner", email: "owner@skaleagents.com" } }));
   await page.goto("/me/jobs");
   const toolbar = page.locator(".dashboard-toolbar");
-  await expect(toolbar.getByRole("button", { name: "Color theme" })).toBeVisible();
-  const account = toolbar.getByRole("button", { name: "Test Owner, account menu" });
+  await expect(toolbar.getByRole("button", { name: "Color theme" })).toHaveCount(0);
+  await expect(toolbar.getByRole("button", { name: /account menu/ })).toHaveCount(0);
+  const foot = page.locator(".dashboard-sidebar-account");
+  await expect(foot.getByRole("button", { name: "Color theme" })).toBeVisible();
+  const account = foot.getByRole("button", { name: "Test Owner, account menu" });
   await expect(account).toBeVisible();
-  await expect(account).not.toContainText("Test Owner");
-  await toolbar.getByRole("button", { name: "Color theme" }).click();
+  await expect(account).toContainText("Test Owner");
+  await expect(account).toContainText("owner@skaleagents.com");
+  // The sidebar foot stays pinned when the page scrolls.
+  const before = await account.boundingBox();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  expect((await account.boundingBox())!.y).toBe(before!.y);
+  await foot.getByRole("button", { name: "Color theme" }).click();
   const menu = page.getByRole("menu", { name: "Color theme" });
   for (const choice of ["Light", "Dark", "System"]) await expect(menu.getByRole("menuitemradio", { name: choice })).toBeVisible();
   await menu.getByRole("menuitemradio", { name: "Dark" }).click();
   await expect(page.locator("html")).toHaveAttribute("class", /dark/);
   await account.click();
   await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
-  // The avatar is the whole trigger, so opening the menu draws no ring or pill around it.
-  await expect(account).toHaveCSS("padding", "0px");
-  await expect(account).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await page.getByRole("link", { name: "Profile", exact: true }).click();
   await expect(page).toHaveURL("/account/profile");
   await expect(page.getByLabel("Full name")).toHaveValue("Test Owner");

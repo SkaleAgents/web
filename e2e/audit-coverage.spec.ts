@@ -100,8 +100,11 @@ test("audit findings and report action stay clear across dashboard layouts", asy
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: testInfo.outputPath(`dashboard-${width}.png`), fullPage: true });
   }
+  // The theme switcher lives at the foot of the sidebar, which is a drawer at this width.
+  await page.getByRole("button", { name: "Open menu" }).click();
   await page.getByRole("button", { name: "Color theme" }).click();
   await page.getByRole("menuitemradio", { name: "Dark", exact: true }).click();
+  await page.getByRole("button", { name: "Close menu" }).click();
   await expect(page.locator("html")).toHaveClass(/dark/);
   await expect(page.getByRole("button", { name: "Download report", exact: true })).toHaveCSS("background-color", "rgb(237, 237, 237)");
   await page.setViewportSize({ width: 1440, height: 1100 });

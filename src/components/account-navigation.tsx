@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import type { ApiUser } from "@/lib/api";
 import { accountLinks } from "@/lib/dashboard-navigation";
+import { Avatar } from "@/components/avatar";
 
-export function AccountNavigation({ user, pathname, inquiriesActive = false, signingOut, onSignOut }: {
+export function AccountNavigation({ user, pathname, inquiriesActive = false, showName = false, signingOut, onSignOut }: {
   user: ApiUser;
   pathname: string;
   inquiriesActive?: boolean;
+  showName?: boolean;
   signingOut: boolean;
   onSignOut: () => void;
 }) {
@@ -17,9 +19,6 @@ export function AccountNavigation({ user, pathname, inquiriesActive = false, sig
   const trigger = useRef<HTMLButtonElement>(null);
   const panelId = useId();
   const name = user.displayName.trim() || "Account";
-  const parts = name.split(/\s+/);
-  const initials = [parts[0], ...(parts.length > 1 ? [parts.at(-1)!] : [])]
-    .map((part) => Array.from(part)[0]).join("").toLocaleUpperCase();
 
   useEffect(() => {
     function dismiss(event: PointerEvent) {
@@ -43,7 +42,8 @@ export function AccountNavigation({ user, pathname, inquiriesActive = false, sig
         aria-expanded={open} aria-controls={panelId}
         className="account-nav-trigger"
         onClick={() => setOpen(!open)}>
-        <span aria-hidden="true" className="account-nav-avatar">{initials}</span>
+        <Avatar name={name} kind="person" className="account-nav-avatar" />
+        {showName && <span aria-hidden="true" className="account-nav-identity"><span className="truncate font-medium">{name}</span>{user.email && <span className="truncate text-xs text-ink-muted">{user.email}</span>}</span>}
       </button>
       <div id={panelId} hidden={!open} className="account-nav-panel">
         <div className="mb-1 border-b border-line px-3 pb-3 pt-2">

@@ -110,5 +110,7 @@ test("passkeys can be named when added and renamed later", async ({ page }) => {
   await expect(page.getByText("Passkey renamed.")).toBeVisible();
   await expect(page.getByText("Work laptop")).toBeVisible();
   expect(renamed).toEqual({ accountId: user.id, name: "Work laptop" });
-  await expect(page.getByLabel("Passkey name")).toHaveAttribute("placeholder", "e.g. Work laptop");
+  // Adding asks for no name up front: the passkey is saved under the device name, then the new row opens for renaming.
+  await expect(page.getByLabel("Passkey name")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Add a passkey" })).toBeVisible();
 });
