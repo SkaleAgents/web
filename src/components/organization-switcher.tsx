@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { organizationHref, type DashboardScope } from "@/lib/dashboard-routes";
+import { Avatar } from "@/components/avatar";
 
 export type OrganizationMembership = {
   id: string;
@@ -12,16 +13,21 @@ export type OrganizationMembership = {
   kind: "personal" | "team";
 };
 
-export function OrganizationSwitcher({ scope, pathname, memberships }: {
+export function OrganizationSwitcher({ scope, pathname, memberships, personName = "" }: {
   scope: DashboardScope;
   pathname: string;
   memberships: OrganizationMembership[];
+  personName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const wrapper = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const label = scope.kind === "organization" ? memberships.find(item => item.id === scope.id)?.name ?? "Organization" : "Organization";
   const current = scope.kind === "organization" ? memberships.find(item => item.id === scope.id) : null;
+  // Personal shows the person's own initials in a circle; teams show their initials in a rounded square.
+  const avatar = (item: OrganizationMembership) => item.kind === "personal"
+    ? <Avatar name={personName || item.name} kind="person" className="scope-avatar" />
+    : <Avatar name={item.name} kind="team" className="scope-avatar" />;
   const section = pathname.match(/^\/org\/[^/]+\/([^/]+)/)?.[1] ?? "";
   const targetPath = (item: OrganizationMembership) => {
     if (!section || (item.kind === "team" && !["jobs", "schedules", "settings"].includes(section))) return organizationHref(item);
@@ -47,12 +53,12 @@ export function OrganizationSwitcher({ scope, pathname, memberships }: {
     <button ref={trigger} type="button" className="scope-switcher-trigger"
       aria-label={`${label}, switch scope`} aria-expanded={open} aria-controls="scope-switcher-options"
       onClick={() => setOpen(value => !value)}>
-      <span className="truncate">{label}</span>
+      {current && avatar(current)}<span className="truncate">{label}</span>
     </button>
     {open && <div id="scope-switcher-options" className="scope-switcher-options" aria-label="Choose scope">
       {memberships.map(item => <Link key={item.id} href={targetPath(item)}
         aria-current={current?.id === item.id ? "page" : undefined}
-        onClick={() => setOpen(false)}>{item.name}</Link>)}
+        onClick={() => setOpen(false)}>{avatar(item)}<span className="truncate">{item.name}</span></Link>)}
       <Link href="/organizations#create-organization" className="scope-switcher-create" onClick={() => setOpen(false)}>+ Create organization</Link>
     </div>}
   </div>;

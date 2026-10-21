@@ -117,7 +117,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       onClick={() => setCollapsed(value => !value)}
     >
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d={collapsed ? "m9 6 6 6-6 6" : "m15 6-6 6 6 6"} />
+        <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /><path d={collapsed ? "m14 9 3 3-3 3" : "m16 9-3 3 3 3"} />
       </svg>
     </button>
   );
@@ -145,7 +145,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             {sections.map(section => <div key={section.label} className="dashboard-nav-group">
               <button type="button" className="dashboard-nav-label" aria-expanded={collapsed || isExpanded(section.label)}
                 onClick={() => { if (collapsed) setCollapsed(false); else setExpandedGroups(current => ({ ...current, [groupKey(section.label)]: !isExpanded(section.label) })); }}>
-                {section.label}<span aria-hidden="true">⌄</span>
+                {section.label}<span aria-hidden="true" className="dashboard-nav-chevron"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg></span>
               </button>
               <div className="dashboard-nav-items" hidden={!collapsed && !isExpanded(section.label)}>
                 {section.items.map(item)}
@@ -160,6 +160,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <a href="/" target="_blank" rel="noopener noreferrer" onClick={closeMenu} className="dashboard-nav-item" aria-label="Visit public site (opens in a new tab)" title="Visit public site (opens in a new tab)"><DashboardIcon href="/site" /><span className="dashboard-nav-text">Visit public site <span aria-hidden="true">↗</span></span></a>
           </div>
         </div>
+        <div className="dashboard-sidebar-account">
+          <AccountMenu key={user.data.id} user={user.data} showName />
+          <ThemeSwitcher align="start" side="top" />
+        </div>
       </nav>
     </aside>
     <div className="dashboard-main">
@@ -172,12 +176,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </button>
           {collapseToggle}
           {isOrganizations ? <span className="truncate font-semibold">Organizations</span> : <>
-            <OrganizationSwitcher scope={navWorkspace ? { kind: "organization", id: navWorkspace.id } : scope} pathname={pathname} memberships={memberships.data ?? []} />
+            <OrganizationSwitcher scope={navWorkspace ? { kind: "organization", id: navWorkspace.id } : scope} pathname={pathname} memberships={memberships.data ?? []} personName={user.data.displayName} />
             <span aria-hidden="true" className="text-line">{" / "}</span>
             <span className="truncate font-semibold">{currentSection}</span>
           </>}
         </div>
-        <div className="flex items-center gap-2"><ThemeSwitcher /><AccountMenu key={user.data.id} user={user.data} /></div>
       </header>
       <div className="dashboard-content" key={`${user.data.id}:${root}`}>{workspace ? <OrganizationScopeContext.Provider value={{ organization: workspace, root }}>{content}</OrganizationScopeContext.Provider> : content}</div>
       <footer className="dashboard-footer"><span>© {new Date().getFullYear()} Binary Labs LLC</span><nav aria-label="Legal"><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></nav></footer>

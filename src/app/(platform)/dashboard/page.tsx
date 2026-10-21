@@ -45,7 +45,7 @@ export default function DashboardPage() {
     <section aria-label="Account overview" className="grid gap-4 sm:grid-cols-3">
       {stats.map(stat => <Link key={stat.href} href={stat.href} className="rounded-xl border border-line bg-canvas-elevated p-5 transition-colors hover:border-accent">
         <p className="text-sm text-ink-muted">{stat.label}</p>
-        <p className="mt-3 font-display text-3xl font-bold">{stat.error ? <span className="text-sm font-normal text-danger">Unavailable</span> : stat.value ?? "…"}</p>
+        <p className="mt-3 text-3xl font-semibold tracking-tight">{stat.error ? <span className="text-sm font-normal text-danger">Unavailable</span> : stat.value ?? "…"}</p>
         <p className="mt-3 text-xs text-ink-muted">Open {stat.label.toLowerCase()}</p>
       </Link>)}
     </section>

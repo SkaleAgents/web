@@ -179,7 +179,7 @@ test("team settings and personal account settings are separate groups with their
   const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
   await expect(nav.getByRole("button", { name: "Settings" })).toHaveAttribute("aria-expanded", "true");
   await expect(nav.getByRole("button", { name: "Your work" })).toHaveAttribute("aria-expanded", "true");
-  await expect(nav.getByRole("button", { name: "Account" })).toHaveAttribute("aria-expanded", "false");
+  await expect(nav.getByRole("button", { name: "Account", exact: true })).toHaveAttribute("aria-expanded", "false");
   await expect(nav.getByRole("link", { name: "Audit retention", exact: true })).toHaveAttribute("aria-current", "page");
   await expect(nav.getByRole("link", { name: "General", exact: true })).not.toHaveAttribute("aria-current", "page");
   await expect(nav.getByRole("link", { name: "MCP connections", exact: true })).toHaveAttribute("href", "/org/binary-labs/mcp-config");
@@ -187,7 +187,7 @@ test("team settings and personal account settings are separate groups with their
   expect(groups.map(label => label.replace("⌄", "").trim())).toEqual(["Your work", "Settings", "Organizations", "Account"]);
   await nav.getByRole("button", { name: "Organizations" }).click();
   await expect(nav.getByRole("link", { name: "All organizations", exact: true })).toHaveAttribute("href", "/organizations");
-  await nav.getByRole("button", { name: "Account" }).click();
+  await nav.getByRole("button", { name: "Account", exact: true }).click();
   for (const [label, href] of [["Passkeys", "/account/passkeys"], ["Notifications", "/account/notifications"], ["Data and privacy", "/account/data"]]) {
     await expect(nav.getByRole("link", { name: label, exact: true })).toHaveAttribute("href", href);
   }

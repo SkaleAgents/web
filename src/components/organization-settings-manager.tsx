@@ -81,7 +81,7 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
   return <>
     <section className="rounded-lg border border-line bg-canvas-elevated p-5" aria-label="Organization details">
       <h2 className="font-semibold">{organization.name}</h2>
-      <p className="mt-1 text-sm text-ink-muted">Your role: {organization.role}</p>
+      <p className="mt-1 text-sm text-ink-muted">Your role: <span className="capitalize">{organization.role}</span></p>
       <p className="mt-3 break-all text-xs text-ink-muted">Organization ID: {workspaceId}</p>
       {owner && <form onSubmit={saveName} className="mt-5 max-w-lg">
         <label htmlFor="organization-name" className="block text-sm font-medium">Organization name</label>

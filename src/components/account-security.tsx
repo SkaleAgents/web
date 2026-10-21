@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { addPasskey, authenticationError, deviceName, type PasskeySettings } from "@/lib/email-auth";
-import { Button, FieldLabel, LinkButton, TextInput } from "./ui";
+import { Button, LinkButton, TextInput } from "./ui";
 import { currentUserOptions } from "@/lib/session";
 
 export function AccountSecurity({ accountId }: { accountId: string }) {
@@ -15,7 +15,6 @@ export function AccountSecurity({ accountId }: { accountId: string }) {
     if (result.accountId !== accountId) throw new Error("Your account changed. Reload Settings.");
     return result;
   } });
-  const [name, setName] = useState("");
   const [renaming, setRenaming] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -39,10 +38,13 @@ export function AccountSecurity({ accountId }: { accountId: string }) {
     <h2 className="text-lg font-semibold">Your passkeys</h2>
     <p className="text-sm text-ink-muted">Add a passkey to sign in with Touch ID, Face ID, or your device&apos;s screen lock. Your biometric data stays on your device.</p>
     {settings.isPending ? <p>Loading sign-in methods…</p> : settings.isError ? <div role="alert"><p>{settings.error.message}</p><Button variant="secondary" onClick={() => void settings.refetch()}>Retry</Button></div> : <>
-      <form className="flex flex-wrap items-end gap-3" onSubmit={(event) => { event.preventDefault(); void run(async () => { const result = await addPasskey(accountId, name.trim() || deviceName()); setName(""); return result; }, "Passkey added."); }}>
-        <label className="min-w-0 flex-1 space-y-1"><FieldLabel>Passkey name</FieldLabel><TextInput value={name} onChange={(event) => setName(event.target.value)} maxLength={80} placeholder="e.g. Work laptop" disabled={busy} /></label>
-        <Button type="submit" disabled={busy}>Add a passkey</Button>
-      </form>
+      <Button type="button" disabled={busy} onClick={() => void run(async () => {
+        // Saved under the device name first; the new row then opens for renaming.
+        const known = new Set(settings.data?.passkeys.map((passkey) => passkey.id));
+        const result = await addPasskey(accountId, deviceName());
+        setRenaming(result.passkeys.find((passkey) => !known.has(passkey.id))?.id ?? "");
+        return result;
+      }, "Passkey added. Rename it if you'd like.")}>{busy ? "Waiting for your device…" : "Add a passkey"}</Button>
       <p className="text-xs text-ink-muted">Your first passkey needs a sign-in within the last 10 minutes; adding or removing more asks you to confirm with a passkey. <a href="/auth/reauth?next=%2Faccount%2Fpasskeys" className="underline">Sign in again</a> if prompted.</p>
       {settings.data.passkeys.length ? <ul className="divide-y divide-line">{settings.data.passkeys.map((passkey) => <li className="flex flex-wrap items-center justify-between gap-3 py-3" key={passkey.id}>
         {renaming === passkey.id ? <form className="flex min-w-0 flex-1 flex-wrap items-end gap-2" onSubmit={(event) => {
