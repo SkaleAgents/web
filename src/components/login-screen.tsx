@@ -14,7 +14,8 @@ import type { OrganizationMembership } from "@/components/organization-switcher"
 import { hasWorkspaceInvitation, WORKSPACE_INVITATION_PATH } from "@/lib/workspace-invitations";
 import { Button } from "@/components/ui";
 
-export function LoginScreen({ reauthenticate = false, oauth = false, finishConnect = false, email = false, signup = false }: { reauthenticate?: boolean; oauth?: boolean; finishConnect?: boolean; email?: boolean; signup?: boolean }) {
+export function LoginScreen({ reauthenticate = false, oauth = false, finishConnect = false, email = false, signup = false, error }: { reauthenticate?: boolean; oauth?: boolean; finishConnect?: boolean; email?: boolean; signup?: boolean; error?: string }) {
+  const linkSent = error?.endsWith("link_sent") ? (error.startsWith("github") ? "GitHub" : "Google") : null;
   const basePath = reauthenticate ? "/auth/reauth" : signup ? "/signup" : "/login";
   const user = useQuery(currentUserOptions);
   const memberships = useQuery({
@@ -46,7 +47,8 @@ export function LoginScreen({ reauthenticate = false, oauth = false, finishConne
     if (!error) return;
 
     const provider = error.startsWith("github") ? "GitHub" : "Google";
-    toast.error(
+    // The link-sent notice renders inline instead: it must stay until the person checks their inbox.
+    if (!error.endsWith("link_sent")) toast.error(
       error === "invalid_state"
         ? "Your sign-in expired. Please try again."
         : error.endsWith("not_configured")
@@ -76,6 +78,7 @@ export function LoginScreen({ reauthenticate = false, oauth = false, finishConne
           </p>
           {finishConnect && <p className="mt-3 text-sm leading-relaxed text-ink-muted">Finish connecting from the sign-in page.</p>}
         </div>
+        {linkSent && <p role="status" className="mb-5 rounded-lg border border-line bg-canvas-elevated p-4 text-sm leading-relaxed text-ink">This email already has a SkaleAgents account. Check your inbox for a link to connect {linkSent} and sign in.</p>}
         <div className="space-y-5 rounded-xl border border-line bg-canvas-elevated p-6 sm:p-8">
           {email ? <>
             <EmailSignIn oauth={oauth} signup={signup} />

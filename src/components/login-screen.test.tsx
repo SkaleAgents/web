@@ -15,7 +15,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function renderLogin(props: { oauth?: boolean; finishConnect?: boolean; email?: boolean; signup?: boolean } = {}) {
+function renderLogin(props: { oauth?: boolean; finishConnect?: boolean; email?: boolean; signup?: boolean; error?: string } = {}) {
   vi.mocked(apiFetch).mockRejectedValue(new ApiError("Unauthorized", 401));
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(<QueryClientProvider client={client}><LoginScreen {...props} /></QueryClientProvider>);
@@ -80,4 +80,12 @@ it("tells a lost MCP confirmation to finish from the sign-in page", async () => 
     "href",
     expect.stringMatching(/\/api\/auth\/google\/redirect\?oauth=1$/),
   );
+});
+
+it("keeps the check-your-email notice on screen when a provider needs the account email to confirm", async () => {
+  window.history.replaceState({}, "", "/login?error=github_link_sent");
+  renderLogin({ error: "github_link_sent" });
+
+  expect(await screen.findByText(/Check your inbox for a link to connect GitHub and sign in\./)).toBeVisible();
+  expect(window.location.search).toBe("");
 });
