@@ -362,6 +362,8 @@ describe("FooterBadges 2026-10-21 audit", () => {
     expect(srcs).not.toContain("https://cdn.topaitoolsreview.com/defaults/featured-on_light.svg");
     expect(srcs).not.toContain("https://shareyourstartup.com/badge/466.svg");
     expect(srcs).toContain("https://viberank.dev/badge?app=SkaleAgents&theme=dark");
-    expect(srcs).toContain("https://dailypings.com/badge.svg");
+    // dailypings.com/badge.svg answers 403 (Cloudflare challenge) to browsers, so keep the shields.io badge.
+    expect(srcs).toContain("https://img.shields.io/badge/Featured%20on-Daily%20Pings-2563eb?style=for-the-badge");
+    expect(srcs).not.toContain("https://dailypings.com/badge.svg");
   });
 });

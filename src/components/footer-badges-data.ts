@@ -16,7 +16,7 @@ export const directoryBadges = [
   ["LaunchBoosts", "https://launchboosts.com/project/skaleagents", "https://launchboosts.com/badges/featured-dark.svg", 180, 54],
   ["SaaSBison", "https://saasbison.com", "https://saasbison.com/badge.png", 834, 226],
   ["SaaSGrow", "https://saasgrow.app?ref=skaleagents.com", "https://saasgrow.app/api/badge?type=featured&style=light", 240, 54],
-  ["DailyPings", "https://dailypings.com/p/skaleagents", "https://dailypings.com/badge.svg", 179, 32],
+  ["DailyPings", "https://dailypings.com/p/skaleagents", "https://img.shields.io/badge/Featured%20on-Daily%20Pings-2563eb?style=for-the-badge", 179, 32],
   ["Smol Launch", "https://smollaunch.com/products/skaleagents", "https://smollaunch.com/badges/featured.svg", 250, 60],
   ["AI Agents Directory", "https://aiagentsdirectory.com/agent/skaleagents", "https://aiagentsdirectory.com/featured-badge.svg?v=2024", 200, 50],
   ["ShowMeBestAI", "https://showmebest.ai", "https://showmebest.ai/badge/feature-badge-white.webp", 2400, 600],
