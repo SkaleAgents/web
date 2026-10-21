@@ -11,19 +11,19 @@ const requestedBadges = [
   ["https://startupfa.me/s/skaleagents?utm_source=skaleagents.com", "SkaleAgents - Featured on Startup Fame"],
   ["https://www.aixuanfeng.com", null],
   ["https://startuptrusted.com?ref=skaleagents.com", "SkaleAgents on StartupTrusted"],
-  ["https://neeed.directory", "Featured on neeed.directory"],
+  ["https://neeed.directory/products/skaleagents", "Featured on neeed.directory"],
   ["https://findly.tools/", "Featured on Findly.tools"],
-  ["https://tools.launchllama.co?utm_source=badge&utm_medium=referral", "Featured on Launch Llama Tools"],
+  ["https://tools.launchllama.co/products/skaleagents", "Featured on Launch Llama Tools"],
   ["https://www.agenthunter.io", "AgentHunter Badge"],
-  ["https://twelve.tools", "Featured on Twelve Tools"],
+  ["https://twelve.tools/skaleagents", "Featured on Twelve Tools"],
   ["https://huzzler.so/products/8hF0LarShp/skaleagents-1?utm_source=huzzler_product_website&utm_medium=badge&utm_campaign=free_listing", "Huzzler Embed Badge"],
   ["https://codehype.ai/product/skaleagents?utm_source=codehype_badge", "Featured on CodeHype"],
   ["https://turbo0.com/item/skaleagents", "Listed on Turbo0"],
-  ["https://sumodir.com", "Featured on SumoDir"],
+  ["https://sumodir.com/item/skaleagents-skaleagentscom", "Featured on SumoDir"],
   ["https://postmake.io", "Featured on the Postmake directory"],
   ["https://ainexfinder.com", "AInexfinder AI Tools Directory"],
   ["https://nicklaunches.com/", "Featured on Nick Launches"],
-  ["https://bowora.com/", null],
+  ["https://bowora.com/skaleagents.com", null],
   ["https://navfolders.com/", "Featured on NavFolders"],
   ["https://www.aitoolfinder.com/", "#1 Product on www.aitoolfinder.com"],
   ["https://www.direct2app.com", "Featured On Direct2App"],
@@ -80,7 +80,6 @@ const requestedLinks = [
   ["https://newaiforyou.com", "NewAIForYou", "noopener noreferrer"],
   ["https://startupproject.org/", "Startup Project", "noopener noreferrer"],
   ["https://www.aitoolgo.com", "AiToolGo", "noopener noreferrer"],
-  ["https://toolindex.net/?ref=listed", "Listed on Tool Index", "nofollow noopener"],
   ["https://right-ai.com/", "RightAI Tools Diresctory", null],
   ["https://www.aiheron.com/", "AiHeron", null],
   ["https://okeiai.com/", "Okei AI Tools", null],
@@ -204,7 +203,7 @@ describe("FooterBadges", () => {
 
       if (alt) {
         expect(matchingLinks[0].querySelector("img"), href).toHaveAttribute("alt", alt);
-      } else if (href === "https://bowora.com/") {
+      } else if (href === "https://bowora.com/skaleagents.com") {
         expect(matchingLinks[0]).toHaveTextContent(/Featured on\s*Bowora/);
         expect(matchingLinks[0].querySelector("svg")).not.toBeNull();
       } else if (href === "https://agentwise.org/agent/skaleagents") {
@@ -323,5 +322,46 @@ describe("FooterBadges 2026-10-20 audit", () => {
 
     for (const host of added) expect(hosts.filter((h) => h === host), host).toHaveLength(1);
     for (const host of removed) expect(hosts, host).not.toContain(host);
+  });
+});
+
+describe("FooterBadges 2026-10-21 audit", () => {
+  const imageHosts = [
+    "infrabase.ai", "indiehunt.io", "buildvoyage.com", "peerpush.com", "tinylaunch.com", "llmrelevance.com", "techtrendin.com", "nxgntools.com",
+    "sideprojects.net", "liftoapp.com", "makerhunt.io", "meshkore.com", "nextbigproduct.com", "inuidea.com", "inventlist.com", "viberank.dev",
+    "saashammer.net", "hicyou.com", "worthtotry.com", "aistart.ai", "domainrating.lol", "nowfound.app", "launchranked.com", "doitlaunch.com",
+    "rankcert.com", "productperch.com", "saatlas.com", "launchaijam.com", "falcoscan.com", "curlship.com", "toolindex.net",
+  ];
+  const linkHosts = [
+    "startup.sx", "strategic-flow-audit.replit.app", "thetoolsverse.com", "spotlitely.com", "vibecodinglist.com", "verifieddr.com", "aipicks.jp",
+    "allmcps.com", "ki-tool24.de", "truetier.app", "olud.ai",
+  ];
+  const listingHrefs = [
+    "https://www.superlaun.ch/products/3509", "https://prolaunch.net/projects/skaleagents", "https://smollaunch.com/products/skaleagents",
+    "https://twelve.tools/skaleagents", "https://wired.business/skaleagents", "https://neeed.directory/products/skaleagents",
+    "https://www.launch-list.org/product/skaleagents", "https://aifinderplus.com/item/skaleagents", "https://productfame.com/products/skaleagents",
+    "https://bowora.com/skaleagents.com", "https://curlship.com/l/3742", "https://toolindex.net/tools/skaleagents",
+  ];
+
+  it("links each added directory once and each fixed listing once, with no leftover root links", () => {
+    const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
+    const hrefs = Array.from(page.querySelectorAll("a[href]")).map((link) => link.getAttribute("href")!);
+    const hosts = hrefs.map((href) => new URL(href).hostname.replace(/^www\./, ""));
+
+    for (const host of [...imageHosts, ...linkHosts]) expect(hosts.filter((h) => h === host), host).toHaveLength(1);
+    for (const href of listingHrefs) expect(hrefs.filter((h) => h === href), href).toHaveLength(1);
+    for (const root of ["https://www.superlaun.ch", "https://prolaunch.net", "https://toolindex.net/?ref=listed", "https://curlship.com/"]) expect(hrefs, root).not.toContain(root);
+  });
+
+  it("serves the two blocked badges from our own origin and uses the right Viberank app", () => {
+    const { container } = render(<FooterBadges />);
+    const srcs = Array.from(container.querySelectorAll("img")).map((img) => img.getAttribute("src")!);
+
+    expect(srcs).toContain("/badges/topaitoolsreview.svg");
+    expect(srcs).toContain("/badges/shareyourstartup.svg");
+    expect(srcs).not.toContain("https://cdn.topaitoolsreview.com/defaults/featured-on_light.svg");
+    expect(srcs).not.toContain("https://shareyourstartup.com/badge/466.svg");
+    expect(srcs).toContain("https://viberank.dev/badge?app=SkaleAgents&theme=dark");
+    expect(srcs).toContain("https://dailypings.com/badge.svg");
   });
 });

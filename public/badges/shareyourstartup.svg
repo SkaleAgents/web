@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="250" height="54" viewBox="0 0 250 54" role="img" aria-label="Featured on Share Your Startup">
+  <rect x="0.5" y="0.5" width="249" height="53" rx="8" fill="#131826" stroke="#232a3d"/>
+  <rect x="10" y="10" width="34" height="34" rx="8" fill="#0b0e14"/>
+  <path d="M27 18 L36 30 H30.5 V40 H23.5 V30 H18 Z" fill="#f5a623"/>
+  <text x="54" y="24" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" fill="#8b93a7">Featured on</text>
+  <text x="54" y="41" font-family="Georgia, 'Times New Roman', serif" font-size="16" font-weight="700" fill="#e8ecf1">share<tspan fill="#f5a623">your</tspan>startup</text>
+</svg>

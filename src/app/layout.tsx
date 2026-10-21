@@ -63,6 +63,12 @@ export const metadata: Metadata = {
     description: "Run AI DevOps audits and review remediation with your team.",
   },
   robots: { index: true, follow: true },
+  verification: {
+    other: {
+      "legit-verify": "legit-2MrtiFvxovstJ9r1H4tYdEM01NGL",
+      "websitelaunches-verification": "366e7873e47a4dbe81506cc32827066a",
+    },
+  },
 };
 
 const showDevelopmentWarning =
