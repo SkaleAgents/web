@@ -41,6 +41,7 @@ it("lets an owner rename an organization and manage members and invitations", as
   await waitFor(() => expect(client.getQueryData<{ name: string }>(["organization", "owner-1", "org-1"])?.name).toBe("New Name"));
 
   expect(await screen.findByText("member@example.test")).toBeVisible();
+  expect(screen.getByText("member@example.test").closest("li")?.querySelector(".avatar-person")).toHaveTextContent("M");
   await user.selectOptions(screen.getByLabelText("Role for member@example.test"), "viewer");
   await waitFor(() => expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1/members/member-1", expect.objectContaining({ method: "PATCH" })));
   await user.type(screen.getByLabelText("Invite email"), "new@example.test");

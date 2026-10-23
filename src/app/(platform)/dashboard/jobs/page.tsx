@@ -63,7 +63,7 @@ export default function JobsPage() {
                 <AuditHistoryResult job={job} />
                 {job.summary && <p className="mt-1 line-clamp-2 text-xs text-ink-muted">{job.summary}</p>}
                 {job.sourceRevision && <p className="mt-1 break-all text-xs text-ink-muted">Source revision: {job.sourceRevision}</p>}
-                <p className="mt-1 text-xs text-ink-muted">{job.specialists.join(" · ")} · {new Date(job.createdAt).toLocaleString()}</p>
+                <p className="mt-1 text-xs text-ink-muted">{(job.specialists ?? []).join(" · ")} · {new Date(job.createdAt).toLocaleString()}</p>
               </div>
               <LinkButton href={href(`jobs/${job.id}`)} variant="secondary">View audit</LinkButton>
             </li>
