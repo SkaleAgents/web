@@ -2,6 +2,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
+import { Avatar } from "@/components/avatar";
 import { Button, Select, TextInput } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { DeleteOrganization } from "./delete-organization";
@@ -96,7 +97,9 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
         <h2 id="organization-members-heading" className="font-semibold">Members</h2>
         {members.isPending && <p role="status">Loading members…</p>}
         {members.isError && <p role="alert">Could not load members. <Button type="button" variant="secondary" onClick={() => void members.refetch()}>Retry</Button></p>}
+        {members.data?.length === 0 && <p className="text-sm text-ink-muted">No members yet. Invite someone below.</p>}
         {members.data && <ul className="divide-y divide-line">{members.data.map(member => <li key={member.userId} className="flex flex-wrap items-center gap-3 py-3">
+          <Avatar name={member.name || member.email} kind="person" className="scope-avatar" />
           <div className="min-w-0 flex-1"><p className="font-medium">{member.name}</p><p className="break-all text-sm text-ink-muted">{member.email}</p></div>
           {member.role === "owner" ? <span className="text-sm text-ink-muted">Owner</span> : <>
             <label className="sr-only" htmlFor={`member-role-${member.userId}`}>Role for {member.email}</label>
