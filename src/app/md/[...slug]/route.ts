@@ -84,6 +84,8 @@ export async function GET(_request: Request, context: { params: Promise<{ slug: 
       "content-type": "text/markdown; charset=utf-8",
       "cache-control": scheduled ? "public, max-age=60" : "public, max-age=3600",
       "x-robots-tag": "index, follow",
+      // Point Google at the HTML page so the .md copy doesn't compete with it in the index.
+      link: `<${process.env.NEXT_PUBLIC_APP_URL ?? "https://skaleagents.com"}${path}>; rel="canonical"`,
     },
   });
 }
