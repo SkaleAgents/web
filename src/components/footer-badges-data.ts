@@ -35,6 +35,7 @@ export const directoryBadges = [
   ["Mydentify", "https://mydentify.com/", "https://mydentify.com/badges/listed-on-mydentify.svg", 176, 32],
   ["Webspot", "https://webspot.app", "https://webspot.app/featured-light.svg", 200, 54],
   ["ToolDirs", "https://tooldirs.com", "https://tooldirs.com/badge/badge_dark.svg", 139, 44],
+  ["LaunchKiwi", "https://launchkiwi.com/p/skaleagents", "https://launchkiwi.com/badge-light.svg", 198, 62],
 ] as const;
 
 export const directoryLinks = [
