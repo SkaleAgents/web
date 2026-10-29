@@ -366,4 +366,12 @@ describe("FooterBadges 2026-10-21 audit", () => {
     expect(srcs).toContain("https://img.shields.io/badge/Featured%20on-Daily%20Pings-2563eb?style=for-the-badge");
     expect(srcs).not.toContain("https://dailypings.com/badge.svg");
   });
+
+  it("links the LaunchKiwi badge to the listing page once", () => {
+    const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadgesFallback />), "text/html");
+    const links = Array.from(page.querySelectorAll('a[href="https://launchkiwi.com/p/skaleagents"]'));
+
+    expect(links).toHaveLength(1);
+    expect(links[0].querySelector("img")?.getAttribute("src")).toBe("https://launchkiwi.com/badge-light.svg");
+  });
 });
