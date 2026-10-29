@@ -40,7 +40,7 @@ const requestedBadges = [
   ["https://easylaunch.dev/dev-tools/skaleagents", "Featured on EasyLaunch"],
   ["https://shipgrowth.dev", "Featured on ShipGrowth"],
   ["https://aitooldiscovery.com", "Featured on AI Tool Discovery"],
-  ["https://launchkiwi.com/", "Featured on LaunchKiwi"],
+  ["https://launchkiwi.com/p/skaleagents", "Featured on LaunchKiwi"],
   ["https://toolverified.com/", "SkaleAgents on ToolVerified"],
   ["https://www.promptfrenzy.com/directory", "Featured on PromptFrenzy AI Directory"],
   ["https://mediapronet.com/?utm_source=partner-site&utm_medium=badge", "Listed on MEDIAPRONET"],
@@ -67,7 +67,7 @@ const addedBadgeImages = [
   ["https://easylaunch.dev/dev-tools/skaleagents", "https://easylaunch.dev/badge/easylaunch-badge-light.svg", "56", "noopener"],
   ["https://shipgrowth.dev", "https://storage.shipgrowth.dev/badge-light.png", null, "noopener noreferrer"],
   ["https://aitooldiscovery.com", "https://aitooldiscovery.com/badges/featured-1.svg", "54", null],
-  ["https://launchkiwi.com/", "https://launchkiwi.com/badge-light.svg", "62", "noopener"],
+  ["https://launchkiwi.com/p/skaleagents", "https://launchkiwi.com/badge-light.svg", "62", "noopener"],
   ["https://toolverified.com/", "https://www.toolverified.com/badge/35703d0a1bdf0158f31b3af7-light.svg", "54", "noopener"],
   ["https://www.promptfrenzy.com/directory", "https://www.promptfrenzy.com/badges/directory.svg", "44", "noopener"],
   ["https://mediapronet.com/?utm_source=partner-site&utm_medium=badge", "https://mediapronet.com/api/badge?style=classic", "54", "nofollow noopener noreferrer"],
@@ -272,7 +272,7 @@ describe("FooterBadges", () => {
     expect(links.find((link) => link.getAttribute("href") === "https://shipgrowth.dev")?.querySelector("img")).toHaveAttribute("style", "height: 64px; width: auto;");
     expect(links.find((link) => link.getAttribute("href") === "https://aitooldiscovery.com")?.querySelector("img")).toHaveAttribute("width", "200");
     expect(container.innerHTML).not.toContain("https://tools.cafe/b/light.svg");
-    expect(links.find((link) => link.getAttribute("href") === "https://launchkiwi.com/")?.querySelector("img")).toHaveAttribute("width", "198");
+    expect(links.find((link) => link.getAttribute("href") === "https://launchkiwi.com/p/skaleagents")?.querySelector("img")).toHaveAttribute("width", "198");
     const toolVerified = links.find((link) => link.getAttribute("href") === "https://toolverified.com/")?.querySelector("img");
     expect(toolVerified).toHaveAttribute("width", "220");
     expect(toolVerified?.getAttribute("style")).toContain("width: 220px");

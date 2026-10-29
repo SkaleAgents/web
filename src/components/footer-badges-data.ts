@@ -35,7 +35,6 @@ export const directoryBadges = [
   ["Mydentify", "https://mydentify.com/", "https://mydentify.com/badges/listed-on-mydentify.svg", 176, 32],
   ["Webspot", "https://webspot.app", "https://webspot.app/featured-light.svg", 200, 54],
   ["ToolDirs", "https://tooldirs.com", "https://tooldirs.com/badge/badge_dark.svg", 139, 44],
-  ["LaunchKiwi", "https://launchkiwi.com/p/skaleagents", "https://launchkiwi.com/badge-light.svg", 198, 62],
 ] as const;
 
 export const directoryLinks = [
@@ -206,7 +205,7 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "EasyLaunch", href: "https://easylaunch.dev/dev-tools/skaleagents", src: "https://easylaunch.dev/badge/easylaunch-badge-light.svg", width: 188, height: 56, alt: "Featured on EasyLaunch", rel: "noopener", displayWidth: 128.9 },
   { name: "ShipGrowth", href: "https://shipgrowth.dev", src: "https://storage.shipgrowth.dev/badge-light.png", alt: "Featured on ShipGrowth", rel: "noopener noreferrer", displayWidth: 153.6, imageStyle: { height: "64px", width: "auto" } },
   { name: "AI Tool Discovery", href: "https://aitooldiscovery.com", src: "https://aitooldiscovery.com/badges/featured-1.svg", width: 200, height: 54, alt: "Featured on AI Tool Discovery", displayWidth: 142.2 },
-  { name: "LaunchKiwi", href: "https://launchkiwi.com/", src: "https://launchkiwi.com/badge-light.svg", width: 198, height: 62, alt: "Featured on LaunchKiwi", rel: "noopener", displayWidth: 122.6 },
+  { name: "LaunchKiwi", href: "https://launchkiwi.com/p/skaleagents", src: "https://launchkiwi.com/badge-light.svg", width: 198, height: 62, alt: "Featured on LaunchKiwi", rel: "noopener", displayWidth: 122.6 },
   { name: "ToolVerified", href: "https://toolverified.com/", src: "https://www.toolverified.com/badge/35703d0a1bdf0158f31b3af7-light.svg", width: 220, height: 54, alt: "SkaleAgents on ToolVerified", rel: "noopener", displayWidth: 153.6, imageStyle: { width: "220px", height: "54px" } },
   { name: "PromptFrenzy", href: "https://www.promptfrenzy.com/directory", src: "https://www.promptfrenzy.com/badges/directory.svg", width: 220, height: 44, alt: "Featured on PromptFrenzy AI Directory", title: "Featured on PromptFrenzy AI Directory", rel: "noopener", displayWidth: 153.6, loading: "lazy" },
   { name: "MediaProNet", href: "https://mediapronet.com/?utm_source=partner-site&utm_medium=badge", src: "https://mediapronet.com/api/badge?style=classic", height: 54, alt: "Listed on MEDIAPRONET", rel: "nofollow noopener noreferrer", displayWidth: 153.6 },
