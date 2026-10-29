@@ -130,6 +130,8 @@ describe("FooterBadges 2026-10-19", () => {
     }
     for (const host of oct19Links) expect(link(host), host).toHaveLength(1);
     expect(link("adsly.io")[0].querySelector("img")?.getAttribute("src")).toBe("https://adsly.io/badges/adsly-badge-dark.svg");
+    // Browsers with JS must not fetch these; they stall the first client navigation.
+    for (const image of page.querySelectorAll("img")) expect(image.closest("noscript"), image.getAttribute("src")!).not.toBeNull();
   });
 });
 

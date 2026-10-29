@@ -19,13 +19,21 @@ export function DeferredFooterBadges({ fallback }: { fallback: ReactNode }) {
 
     const observer = new IntersectionObserver(([entry]) => {
       if (entry?.isIntersecting) {
-        setReady(true);
         observer.disconnect();
+        // Badge images compete with route chunks; wait for idle so early link clicks still navigate.
+        if (typeof requestIdleCallback === "undefined") idle = window.setTimeout(() => setReady(true), 2000);
+        else idle = requestIdleCallback(() => setReady(true), { timeout: 4000 });
       }
     }, { rootMargin: "400px 0px" });
 
+    let idle: number | undefined;
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (idle === undefined) return;
+      if (typeof cancelIdleCallback === "undefined") window.clearTimeout(idle);
+      else cancelIdleCallback(idle);
+    };
   }, []);
 
   return (
