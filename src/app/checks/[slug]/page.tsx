@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
+import { articleJsonLd, jsonLd } from "@/lib/json-ld";
 import { notFound } from "next/navigation";
 import { publicCheckBySlug, publicCheckPath, publicCheckProposedChange, publicChecks } from "@/lib/public-checks";
 
@@ -24,17 +25,10 @@ export default async function PublicCheckPage({ params }: { params: Promise<{ sl
   const check = publicCheckBySlug((await params).slug);
   if (!check) notFound();
   const proposedChange = publicCheckProposedChange(check);
-  const article = {
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    headline: check.title,
-    description: check.looksFor,
-    url: `https://skaleagents.com${publicCheckPath(check)}`,
-    about: check.area,
-  };
+  const article = { ...articleJsonLd({ title: check.title, description: check.looksFor, path: publicCheckPath(check) }), about: check.area };
 
   return <main className="max-w-3xl">
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(article).replaceAll("<", "\\u003c") }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(article) }} />
     <p className="marketing-eyebrow">{check.area} / Public reference</p>
     <h1 className="mt-4 font-display text-[clamp(2.25rem,5vw,3.5rem)] font-semibold leading-tight tracking-tight">{check.title}</h1>
     <p className="mt-5 text-lg leading-relaxed text-ink-muted">{check.looksFor}</p>

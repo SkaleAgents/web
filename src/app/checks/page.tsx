@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
+import { articleJsonLd, jsonLd } from "@/lib/json-ld";
 import { publicCheckAreas, publicCheckPath, publicCheckProposedChange, publicChecks, type PublicCheck } from "@/lib/public-checks";
 
-export const metadata: Metadata = pageMetadata({ path: "/checks", title: "Infrastructure review checks | SkaleAgents", description: "Read the built-in SkaleAgents review checks, the input each one needs, and what a result does not prove. No account required." });
+const metadataDescription = "Read the built-in SkaleAgents review checks, the input each one needs, and what a result does not prove. No account required.";
+
+export const metadata: Metadata = pageMetadata({ path: "/checks", title: "Infrastructure review checks | SkaleAgents", description: metadataDescription });
 
 const PAGE_SIZE = 10;
 
@@ -53,7 +56,6 @@ export default async function PublicChecksPage({ searchParams }: { searchParams:
   const rangeStart = filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(page * PAGE_SIZE, filtered.length);
   const itemList = {
-    "@context": "https://schema.org",
     "@type": "ItemList",
     name: "SkaleAgents infrastructure review checks",
     itemListElement: publicChecks.map((check, index) => ({
@@ -65,7 +67,7 @@ export default async function PublicChecksPage({ searchParams }: { searchParams:
   };
 
   return <main>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList).replaceAll("<", "\\u003c") }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd([articleJsonLd({ title: "Infrastructure review checks", description: metadataDescription, path: "/checks" }), itemList]) }} />
     <div className="mb-11 border-b border-line pb-10">
       <p className="marketing-eyebrow">Public reference / No account required</p>
       <h1 className="mt-4 max-w-3xl font-display text-[clamp(2.5rem,6vw,4.5rem)] font-semibold leading-tight tracking-tight">What a review actually checks.</h1>
