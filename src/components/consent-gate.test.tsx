@@ -1,0 +1,42 @@
+import { afterEach, expect, it, vi } from "vitest";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { ConsentGate } from "./consent-gate";
+import { GET } from "@/app/consent-region/route";
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
+
+it("reports consent as required only for European countries, uncached", async () => {
+  const de = GET(new Request("https://skaleagents.com/consent-region", { headers: { "cf-ipcountry": "DE" } }));
+  expect(await de.json()).toEqual({ required: true });
+  expect(de.headers.get("Cache-Control")).toBe("private, no-store");
+  expect(await GET(new Request("https://skaleagents.com/consent-region", { headers: { "cf-ipcountry": "US" } })).json()).toEqual({ required: false });
+});
+
+it("shows the notice after the region says consent is required", async () => {
+  vi.stubGlobal("fetch", vi.fn(async () => Response.json({ required: true })));
+  render(<ConsentGate />);
+  expect(screen.queryByRole("region", { name: "Cookie consent" })).toBeNull();
+  await waitFor(() => expect(screen.getByRole("region", { name: "Cookie consent" })).toBeInTheDocument());
+});
+
+it("asks for consent when the region lookup fails or is malformed", async () => {
+  vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("offline"); }));
+  render(<ConsentGate />);
+  await waitFor(() => expect(screen.getByRole("region", { name: "Cookie consent" })).toBeInTheDocument());
+  cleanup();
+  vi.stubGlobal("fetch", vi.fn(async () => Response.json({})));
+  render(<ConsentGate />);
+  await waitFor(() => expect(screen.getByRole("region", { name: "Cookie consent" })).toBeInTheDocument());
+});
+
+it("shows no notice only when the region explicitly says it is not required", async () => {
+  const fetch = vi.fn(async () => Response.json({ required: false }));
+  vi.stubGlobal("fetch", fetch);
+  render(<ConsentGate />);
+  await waitFor(() => expect(fetch).toHaveBeenCalled());
+  await new Promise(resolve => setTimeout(resolve, 0));
+  expect(screen.queryByRole("region", { name: "Cookie consent" })).toBeNull();
+});
