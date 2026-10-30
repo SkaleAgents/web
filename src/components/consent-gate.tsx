@@ -10,9 +10,10 @@ export function ConsentGate() {
   useEffect(() => {
     let active = true;
     fetch("/consent-region", { cache: "no-store" })
-      .then(response => response.ok ? response.json() as Promise<{ required?: unknown }> : { required: false })
-      .then(body => { if (active) setRequired(body.required === true); })
-      .catch(() => { if (active) setRequired(false); });
+      .then(response => response.ok ? response.json() as Promise<{ required?: unknown }> : { required: true })
+      // Fail closed: only an explicit false skips the notice and enables analytics.
+      .then(body => { if (active) setRequired(body.required !== false); })
+      .catch(() => { if (active) setRequired(true); });
     return () => { active = false; };
   }, []);
   if (required === null) return null;

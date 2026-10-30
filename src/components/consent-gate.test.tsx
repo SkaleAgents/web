@@ -22,10 +22,21 @@ it("shows the notice after the region says consent is required", async () => {
   await waitFor(() => expect(screen.getByRole("region", { name: "Cookie consent" })).toBeInTheDocument());
 });
 
-it("shows no notice when the region lookup fails", async () => {
-  const fetch = vi.fn(async () => { throw new Error("offline"); });
+it("asks for consent when the region lookup fails or is malformed", async () => {
+  vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("offline"); }));
+  render(<ConsentGate />);
+  await waitFor(() => expect(screen.getByRole("region", { name: "Cookie consent" })).toBeInTheDocument());
+  cleanup();
+  vi.stubGlobal("fetch", vi.fn(async () => Response.json({})));
+  render(<ConsentGate />);
+  await waitFor(() => expect(screen.getByRole("region", { name: "Cookie consent" })).toBeInTheDocument());
+});
+
+it("shows no notice only when the region explicitly says it is not required", async () => {
+  const fetch = vi.fn(async () => Response.json({ required: false }));
   vi.stubGlobal("fetch", fetch);
   render(<ConsentGate />);
   await waitFor(() => expect(fetch).toHaveBeenCalled());
+  await new Promise(resolve => setTimeout(resolve, 0));
   expect(screen.queryByRole("region", { name: "Cookie consent" })).toBeNull();
 });
