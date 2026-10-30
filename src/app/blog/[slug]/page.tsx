@@ -2,6 +2,7 @@ import { io } from "next/cache";
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
+import { articleJsonLd, jsonLd } from "@/lib/json-ld";
 import { notFound } from "next/navigation";
 import { publicPostBySlug, publicPostPath, publishedPosts } from "@/lib/public-posts";
 
@@ -33,19 +34,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const posts = publishedPosts();
   const index = posts.findIndex((item) => item.slug === post.slug);
   const related = [posts[(index + 1) % posts.length], posts[(index + posts.length - 1) % posts.length]].filter((other, i, all) => other.slug !== post.slug && all.findIndex((x) => x.slug === other.slug) === i);
-  const article = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: post.title,
-    description: post.description,
-    datePublished: post.date,
-    url: `https://skaleagents.com${publicPostPath(post)}`,
-    author: { "@type": "Organization", name: "SkaleAgents" },
-  };
+  const article = articleJsonLd({ title: post.title, description: post.description, path: publicPostPath(post), datePublished: post.date });
 
   return (
     <main className="max-w-3xl">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(article).replaceAll("<", "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(article) }} />
       <p className="text-sm text-ink-muted">
         <Link href="/blog" className="hover:text-ink hover:underline">Blog</Link>
         <span aria-hidden="true"> / </span>

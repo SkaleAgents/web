@@ -53,11 +53,11 @@ it("lists the first page of checks and every category filter", async () => {
   expect(screen.getByText("A value is resolved only when the literal is in the files you submit.")).toBeInTheDocument();
   expect(screen.getByText("No findings does not prove the system is secure.")).toBeInTheDocument();
 
-  const data = JSON.parse(container.querySelector('script[type="application/ld+json"]')?.textContent ?? "{}") as {
-    "@type": string;
-    itemListElement: { name: string; url: string }[];
+  const graph = JSON.parse(container.querySelector('script[type="application/ld+json"]')?.textContent ?? "{}") as {
+    "@graph": { "@type": string; itemListElement: { name: string; url: string }[] }[];
   };
-  expect(data["@type"]).toBe("ItemList");
+  expect(graph["@graph"].map((node) => node["@type"])).toEqual(["Article", "ItemList"]);
+  const data = graph["@graph"][1];
   expect(data.itemListElement.map((item) => item.name)).toEqual(publicChecks.map((check) => check.title));
   expect(data.itemListElement).toHaveLength(publicChecks.length);
   expect(data.itemListElement[0]?.url).toBe(`https://skaleagents.com${publicCheckPath(publicChecks[0])}`);

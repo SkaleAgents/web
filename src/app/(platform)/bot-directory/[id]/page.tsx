@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/page-metadata";
+import { jsonLd, productJsonLd } from "@/lib/json-ld";
 import { notFound } from "next/navigation";
 import { BotDetail } from "@/components/bot-detail";
 import { loadPublicBot, loadPublicBots } from "@/lib/public-catalog";
@@ -23,5 +24,9 @@ export default async function BotPage({ params }: { params: Promise<{ id: string
   const { id } = await params;
   if (RESERVED_IDS.has(id)) notFound();
   const [initialBot, initialBots] = await Promise.all([loadPublicBot(id), loadPublicBots()]);
-  return <BotDetail initialBot={initialBot} initialBots={initialBots} />;
+  const product = initialBot ? productJsonLd({ title: initialBot.name, description: initialBot.description || "Specialist instructions you can read without an account.", path: `/bot-directory/${initialBot.id}` }) : null;
+  return <>
+    {product ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(product) }} /> : null}
+    <BotDetail initialBot={initialBot} initialBots={initialBots} />
+  </>;
 }

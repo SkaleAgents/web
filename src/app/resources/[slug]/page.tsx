@@ -3,6 +3,7 @@ import { absoluteMarkdown } from "@/lib/site-url";
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
+import { articleJsonLd, jsonLd } from "@/lib/json-ld";
 import { notFound } from "next/navigation";
 import { publicResourceBySlug, publicResourcePath, publicResources } from "@/lib/public-resources";
 
@@ -26,7 +27,6 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
   const resource = publicResourceBySlug((await params).slug);
   if (!resource) notFound();
   const howTo = {
-    "@context": "https://schema.org",
     "@type": "HowTo",
     name: resource.title,
     description: resource.summary,
@@ -40,7 +40,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
 
   return (
     <main className="max-w-3xl">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howTo).replaceAll("<", "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd([articleJsonLd({ title: resource.title, description: resource.summary, path: publicResourcePath(resource) }), howTo]) }} />
       <p className="marketing-eyebrow">Free resource / No account required</p>
       <h1 className="mt-4 font-display text-[clamp(2.25rem,5vw,3.5rem)] font-semibold leading-tight tracking-tight">{resource.title}</h1>
       <p className="mt-5 text-lg leading-relaxed text-ink-muted">{resource.summary}</p>

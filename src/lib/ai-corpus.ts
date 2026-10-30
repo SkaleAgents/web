@@ -136,6 +136,10 @@ export function siteJsonLd(): string {
         "@type": "Organization",
         name: "SkaleAgents",
         url: SITE,
+        logo: `${SITE}/icon.svg`,
+        description: "Specialist DevOps bots, infrastructure review checks, and an MCP connection for AI editors.",
+        email: "info@skaleagents.com",
+        sameAs: ["https://github.com/SkaleAgents"],
         contactPoint: { "@type": "ContactPoint", contactType: "customer support", url: `${SITE}/contact` },
         parentOrganization: {
           "@type": "Organization",
