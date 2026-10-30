@@ -1,16 +1,13 @@
 import { siteJsonLd } from "@/lib/ai-corpus";
 import { CONSULTANCY_BOOKING_URL } from "@/lib/consultancy-link";
-import { cookieConsentRequired } from "@/lib/cookie-consent-region";
+import { ConsentGate } from "@/components/consent-gate";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { headers } from "next/headers";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 import { AppShell } from "@/components/app-shell";
-import { CookieConsent } from "@/components/cookie-consent";
-import { SiteAnalytics } from "@/components/site-analytics";
 import { DeferredFooterBadges } from "@/components/deferred-footer-badges";
 import { FooterBadgesFallback } from "@/components/footer-badges-fallback";
 import { InvitationPublisherScript, PreferredSourceControl } from "@/components/preferred-source-control";
@@ -74,13 +71,11 @@ export const metadata: Metadata = {
 const showDevelopmentWarning =
   process.env.NEXT_PUBLIC_SHOW_DEV_WARNING === "true";
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const country = (await headers()).get("cf-ipcountry");
-  const consentRequired = cookieConsentRequired(country);
   return (
     <html
       lang="en"
@@ -125,8 +120,7 @@ export default async function RootLayout({
             }>
               {children}
             </AppShell>
-            <CookieConsent required={consentRequired} />
-            <SiteAnalytics consentRequired={consentRequired} />
+            <ConsentGate />
           </Providers>
         </div>
       </body>
