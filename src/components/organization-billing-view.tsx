@@ -214,9 +214,11 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
             const isCurrent = plan.key === billing.data.plan;
             const isUpgrade = (plan.monthlyUsd ?? 0) > currentPrice;
             const label = billing.data.plan === "free" ? `Start ${plan.name}` : isUpgrade ? `Upgrade to ${plan.name}` : `Schedule ${plan.name} at renewal`;
+            // An upgrade replaces a scheduled downgrade; every other pending change blocks new ones.
+            const blockedByPending = Boolean(billing.data.pendingChange) && !(isUpgrade && billing.data.pendingChange?.kind === "downgrade" && billing.data.pendingChange.status === "pending_cycle");
             return <div key={plan.key} className="flex flex-wrap items-center justify-between gap-4 py-4">
               <div><h3 className="font-semibold text-ink">{plan.name}</h3><p className="text-sm text-ink-muted">${plan.monthlyUsd} per month · {plan.auditLimit?.toLocaleString()} audits</p></div>
-              {isCurrent ? <span className="text-sm text-ink-muted">Current plan</span> : <Button type="button" variant="secondary" disabled={!checkoutOpen || change.isPending || Boolean(billing.data.pendingChange) || Boolean(billing.data.renewalPayment)} onClick={() => change.mutate({ plan: plan.key, organizationId, fromPlan: billing.data.plan })}>{label}</Button>}
+              {isCurrent ? <span className="text-sm text-ink-muted">Current plan</span> : <Button type="button" variant="secondary" disabled={!checkoutOpen || change.isPending || blockedByPending || Boolean(billing.data.renewalPayment)} onClick={() => change.mutate({ plan: plan.key, organizationId, fromPlan: billing.data.plan })}>{label}</Button>}
             </div>;
           })}
         </div>
