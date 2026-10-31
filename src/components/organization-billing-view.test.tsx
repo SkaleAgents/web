@@ -152,6 +152,20 @@ it("lets an owner replace a scheduled downgrade with cycle-end cancellation", as
   expect(ensureCsrfCookie).toHaveBeenCalledOnce();
 });
 
+it("lets an upgrade replace a scheduled downgrade but blocks other plan changes", async () => {
+  showBilling("pro", true, null, null, "starter");
+  const max = await screen.findByRole("button", { name: "Upgrade to Max" });
+  expect(max).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Schedule Starter at renewal" })).toBeDisabled();
+  fireEvent.click(max);
+  await waitFor(() => expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1/billing/change-plan", expect.objectContaining({ method: "POST", body: JSON.stringify({ plan: "max" }) })));
+});
+
+it("keeps upgrades closed while a cancellation is scheduled", async () => {
+  showBilling("pro", true, null, null, "free");
+  expect(await screen.findByRole("button", { name: "Upgrade to Max" })).toBeDisabled();
+});
+
 it("shows scheduled cancellation without offering another cancellation request", async () => {
   showBilling("pro", true, null, null, "free");
   expect(await screen.findByText(/Free starts at your next renewal/)).toBeVisible();
