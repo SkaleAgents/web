@@ -1,4 +1,3 @@
-import { io } from "next/cache";
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
@@ -7,13 +6,13 @@ import { notFound } from "next/navigation";
 import { publicPostBySlug, publicPostPath, publishedPosts } from "@/lib/public-posts";
 
 export const dynamicParams = true;
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return publishedPosts().map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  await io();
   const post = publicPostBySlug((await params).slug);
   if (!post) return {};
   const path = publicPostPath(post);
@@ -28,7 +27,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  await io();
   const post = publicPostBySlug((await params).slug);
   if (!post) notFound();
   const posts = publishedPosts();

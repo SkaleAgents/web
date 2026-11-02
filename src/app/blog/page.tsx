@@ -1,4 +1,3 @@
-import { io } from "next/cache";
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
@@ -6,8 +5,10 @@ import { publicPostPath, publishedPosts } from "@/lib/public-posts";
 
 export const metadata: Metadata = pageMetadata({ path: "/blog", title: "Blog | SkaleAgents", description: "Notes on reviewing Terraform, what a cloud review can see, and how to hand a prompt to Claude or ChatGPT before you merge a change." });
 
+// Static pages refresh so a post appears in the list once its publishAt passes.
+export const revalidate = 300;
+
 export default async function BlogPage() {
-  await io();
   const posts = publishedPosts();
   const itemList = {
     "@context": "https://schema.org",
