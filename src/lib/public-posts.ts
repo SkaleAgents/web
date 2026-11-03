@@ -18,6 +18,35 @@ export type PublicPost = {
 
 export const publicPosts: readonly PublicPost[] = [
   {
+    slug: "replace-permissions-write-all",
+    title: "Replace permissions: write-all in GitHub Actions",
+    description: "permissions: write-all hands the workflow token write access to every scope. Start from contents: read and add only the write a job needs.",
+    date: "2026-12-07",
+    publishAt: "2026-12-07T10:23:00+06:00",
+    summary: "permissions: write-all gives the workflow's GITHUB_TOKEN write access to every scope. The check reads the workflow. It does not change it.",
+    sections: [
+      {
+        heading: "write-all is the finding",
+        paragraphs: [
+          "The line is `permissions: write-all`. The workflow-permissions-are-broad check looks for that value. It also flags a `pull_request_target` workflow that sets `contents: write`. It reads the workflow YAML. It does not change the workflow.",
+          "Spreading it over a multi-line block doesn't help. A block that grants write-all, or `contents: write` on `pull_request_target`, is still this finding. The safe edit only replaces an exact `permissions: write-all` line, so a block is yours to rewrite.",
+        ],
+      },
+      {
+        heading: "Start from contents: read",
+        paragraphs: [
+          "Put `permissions:` with `contents: read` at the top of the workflow. Once you name one scope, GitHub sets every scope you didn't name to none. Then give the one write a job needs, like `pull-requests: write` for a job that comments, on that job only. A job's own `permissions` replaces the workflow's for that job.",
+          "On `pull_request_target`, keep contents read-only. That trigger runs with the base repository's token and secrets while the change can come from a fork. Checking out the pull request's code there is a separate check.",
+        ],
+      },
+    ],
+    links: [
+      { href: "/checks/workflow-permissions-are-broad", label: "Workflow permissions are broad" },
+      { href: "/checks/pull-request-target-checkout", label: "Pull request target checkout of PR code" },
+      { href: "/blog/pull-request-target-checks-out-the-pr", label: "pull_request_target should not check out the pull request" },
+    ],
+  },
+  {
     slug: "dont-echo-a-secret-in-the-workflow",
     title: "Don't echo a secret in a GitHub Actions run",
     description: "A run script that echoes a secrets expression is the finding. The check reads the workflow and does not run the job.",
