@@ -370,6 +370,7 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "Same Product", href: "https://sameproduct.com", src: "https://sameproduct.com/badages-awards.svg", height: 54, alt: "Featured", rel: "noopener noreferrer", displayWidth: 153.6 },
   { name: "ShipNLaunch", href: "https://www.shipnlaunch.com/", src: "https://www.shipnlaunch.com/badges/featured-light.svg", width: 240, height: 56, alt: "Featured on ShipNLaunch", rel: "noopener noreferrer", displayWidth: 153.6 },
   { name: "StartupOG", href: "https://startupog.com", src: "https://startupog.com/startupog-badge-wide.webp", width: 250, height: 54, alt: "Featured on StartupOG", rel: "noopener", displayWidth: 153.6 },
+  { name: "LaunchBuff", href: "https://launchbuff.com/products/skaleagents", src: "https://launchbuff.com/badge-featured-light.svg", width: 256, height: 80, alt: "Featured on LaunchBuff", title: "Featured on LaunchBuff", rel: "noopener noreferrer", displayWidth: 122.9 },
 ];
 
 export const directoryBadgeEntries: DirectoryBadgeEntry[] = [
