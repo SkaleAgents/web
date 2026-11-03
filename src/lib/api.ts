@@ -122,6 +122,21 @@ export async function apiFetch<T>(
   }
 }
 
+export type JobPage<T> = { jobs: T[]; nextCursor: string | null };
+
+/** Loads the newest `pages` pages of a job list (the API returns 50 per page), stopping at the last one. */
+export async function fetchJobPages<T>(path: string, pages: number, signal?: AbortSignal): Promise<JobPage<T>> {
+  const jobs: T[] = [];
+  let cursor: string | null = null;
+  for (let page = 0; page < pages; page += 1) {
+    const response: { jobs: T[]; nextCursor?: string | null } = await apiFetch(cursor ? `${path}?before=${encodeURIComponent(cursor)}` : path, { signal });
+    jobs.push(...response.jobs);
+    cursor = response.nextCursor ?? null;
+    if (!cursor) break;
+  }
+  return { jobs, nextCursor: cursor };
+}
+
 async function apiRequest<T>(url: string, init: RequestInit): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");

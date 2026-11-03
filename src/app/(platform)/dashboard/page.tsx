@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, type Bot, type SwarmJob } from "@/lib/api";
+import { apiFetch, fetchJobPages, type Bot, type SwarmJob } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { RetentionNotice } from "@/components/retention-notice";
 import { LinkButton } from "@/components/ui";
@@ -22,18 +22,18 @@ export default function DashboardPage() {
   const href = (section: string) => personalDestinationFromPath(pathname, section);
   const user = useQuery(currentUserOptions);
   const accountId = user.data?.id;
-  const jobs = useQuery({ queryKey: ["swarm-jobs", accountId ?? "guest"], enabled: Boolean(accountId),
-    queryFn: async ({ signal }) => (await apiFetch<{ jobs: SwarmJob[] }>("/api/jobs", { signal })).jobs });
+  const jobs = useQuery({ queryKey: ["swarm-jobs", accountId ?? "guest", "recent"], enabled: Boolean(accountId),
+    queryFn: ({ signal }) => fetchJobPages<SwarmJob>("/api/jobs", 1, signal) });
   const schedules = useQuery({ queryKey: ["dashboard-schedules", accountId], enabled: Boolean(accountId),
     queryFn: async ({ signal }) => (await apiFetch<{ schedules: { id: string }[] }>("/api/schedules", { signal })).schedules });
   const bots = useQuery({ queryKey: ["bots", accountId ?? "guest"], enabled: Boolean(accountId),
     queryFn: async ({ signal }) => (await apiFetch<{ bots: Bot[] }>("/api/bots", { signal })).bots });
   const stats = [
-    { label: "Audit jobs", href: href("jobs"), value: jobs.data?.length, error: jobs.isError },
+    { label: "Audit jobs", href: href("jobs"), value: jobs.data && `${jobs.data.jobs.length}${jobs.data.nextCursor ? "+" : ""}`, error: jobs.isError },
     { label: "Scheduled audits", href: href("schedules"), value: schedules.data?.length, error: schedules.isError },
     { label: "My bots", href: href("bots"), value: bots.data?.filter(bot => bot.ownerUserId === accountId).length, error: bots.isError },
   ];
-  const recent = [...(jobs.data ?? [])].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)).slice(0, 3);
+  const recent = [...(jobs.data?.jobs ?? [])].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)).slice(0, 3);
 
   return <main className="space-y-8">
     {accountId ? <RetentionNotice key={accountId} accountId={accountId} presentation="dialog" /> : null}
