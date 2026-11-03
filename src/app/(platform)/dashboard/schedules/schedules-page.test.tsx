@@ -27,3 +27,20 @@ it("lists schedules by name, cadence, and status, and sends add to its own page"
   expect(screen.queryByRole("button", { name: "Create schedule" })).not.toBeInTheDocument();
   expect(screen.queryByRole("region", { name: "Retention policy" })).not.toBeInTheDocument();
 });
+
+it("tells a Free account that schedules need an upgrade instead of offering the form", async () => {
+  vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+    const path = new URL(String(input)).pathname;
+    if (path === "/api/schedules") return Response.json({ schedules: [] });
+    if (path === "/api/account/plan-usage") return Response.json({ enforced: true, plan: "free",
+      audits: { used: 0, limit: 2, remaining: 2, periodEnd: "2026-12-01T00:00:00Z" }, schedules: { active: 0, limit: 0, minimumIntervalHours: null } });
+    throw new Error(`Unexpected request: ${path}`);
+  }));
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  client.setQueryData(["user"], { id: "account-a", email: "a@example.test", displayName: "Account A" });
+  render(<QueryClientProvider client={client}><SchedulesPage /></QueryClientProvider>);
+
+  expect(await screen.findByText(/Your plan doesn.t include scheduled audits/)).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Upgrade your plan" })).toHaveAttribute("href", "/org/personal-cfgnns/billing");
+  expect(screen.queryByRole("link", { name: "Add schedule" })).toBeNull();
+});

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { PersonalPlanNote } from "@/components/personal-plan-note";
 import { usePathname, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ensureCsrfCookie, type SwarmSchedule } from "@/lib/api";
@@ -70,6 +71,7 @@ export default function NewSchedulePage() {
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">Choose when the review runs, then save infrastructure text or a public GitHub file.</p>
       </div>
       <LinkButton href={href("schedules")} variant="secondary">Back to schedules</LinkButton>
+      <PersonalPlanNote kind="schedules" />
 
       <section className="rounded-[10px] border border-line bg-canvas-elevated p-5">
         <fieldset><legend className="text-sm font-medium">Choose a cadence</legend><div className="mt-2 flex flex-wrap gap-2">{scheduleCadencePresets.map((item) => <button key={item.label} type="button" className="filter-chip" aria-pressed={cronExpression === item.cron} onClick={() => setCronExpression(item.cron)}>{item.label}</button>)}</div></fieldset>
