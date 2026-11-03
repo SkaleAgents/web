@@ -71,6 +71,7 @@ export function PasskeyConfirmation() {
         : <Button type="submit" disabled={busy}>{busy ? "Waiting for your device…" : hasPasskey ? "Use my passkey" : "Add a passkey"}</Button>}
       <Button type="button" variant="ghost" disabled={busy} onClick={() => settle(new ApiError("Passkey check cancelled.", 403))}>Cancel</Button>
     </div>
+    {hasPasskey && <p className="mt-4 text-xs text-ink-muted">Lost your passkey? <a href="/account/passkeys" className="underline">Reset it in Settings</a>.</p>}
     </form>
   </dialog>;
 }

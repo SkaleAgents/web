@@ -24,3 +24,21 @@ it("adds a passkey under the device name and opens the new row for renaming", as
   expect(screen.getByLabelText("New name for Mac passkey")).toHaveValue("Mac passkey");
   expect(screen.queryByLabelText("New name for Old laptop")).toBeNull();
 });
+
+it("emails a reset link, then shows a pending reset that can be cancelled", async () => {
+  const key = { id: "k1", name: "Lost key", created_at: "2026-10-01T00:00:00Z", last_used_at: null };
+  vi.mocked(apiFetch).mockResolvedValueOnce({ accountId: "u1", resetAt: null, passkeys: [key] } as never).mockResolvedValueOnce(undefined as never);
+  const client = new QueryClient();
+  client.setQueryData(["user"], { id: "u1" });
+  render(<QueryClientProvider client={client}><AccountSecurity accountId="u1" /></QueryClientProvider>);
+  fireEvent.click(await screen.findByRole("button", { name: "Email me a reset link" }));
+  expect(await screen.findByRole("status")).toHaveTextContent("Check your email for a reset link.");
+  expect(apiFetch).toHaveBeenLastCalledWith("/api/account/passkey-reset", expect.objectContaining({ method: "POST", body: JSON.stringify({ accountId: "u1" }) }));
+
+  client.setQueryData(["account-security", "u1"], { accountId: "u1", resetAt: "2026-11-04T03:00:00Z", passkeys: [key] });
+  vi.mocked(apiFetch).mockResolvedValueOnce({ accountId: "u1", resetAt: null, passkeys: [key] } as never);
+  fireEvent.click(await screen.findByRole("button", { name: "Cancel reset" }));
+  expect(await screen.findByText("Passkey reset cancelled.")).toBeInTheDocument();
+  expect(apiFetch).toHaveBeenLastCalledWith("/api/account/passkey-reset", { method: "DELETE" });
+  expect(screen.queryByRole("button", { name: "Cancel reset" })).toBeNull();
+});
