@@ -13,7 +13,7 @@ function Counter() {
   return <button type="button" onClick={() => setCount(count + 1)}>clicked {count}</button>;
 }
 
-it("keeps page state through the first session load but resets it when the account changes or signs out", async () => {
+it("keeps page state through the first session result but resets it on every later identity change", async () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, enabled: false } } });
   render(<QueryClientProvider client={client}><AppShell publicFooter={null}><Counter /></AppShell></QueryClientProvider>);
   const press = () => act(() => screen.getByRole("button", { name: /clicked/ }).click());
@@ -31,7 +31,10 @@ it("keeps page state through the first session load but resets it when the accou
   await signIn({ id: "account-b", displayName: "B" });
   expect(screen.getByRole("button", { name: /clicked/ }).textContent).toBe("clicked 0");
 
-  press();
-  await signIn(null);
-  expect(screen.getByRole("button", { name: /clicked/ }).textContent).toBe("clicked 0");
+  // A -> B -> signed out -> C -> signed out: each step starts clean, including repeated sign-outs.
+  for (const next of [null, { id: "account-c", displayName: "C" }, null]) {
+    press();
+    await signIn(next);
+    expect(screen.getByRole("button", { name: /clicked/ }).textContent).toBe("clicked 0");
+  }
 });

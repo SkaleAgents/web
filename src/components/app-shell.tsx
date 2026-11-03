@@ -24,12 +24,12 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
   const router = useRouter();
 
   const userQuery = useQuery(currentUserOptions);
-  // Remount page state when the account changes or signs out, so nothing from the previous account survives.
-  // The first session load (no account yet -> an account) keeps the rendered page instead of rebuilding it.
-  const [session, setSession] = useState<{ account: string | null; key: string }>({ account: null, key: "session" });
+  // Remount page state on every sign-in, sign-out or account switch, so nothing from the previous identity survives.
+  // Only the very first session result keeps the rendered page instead of rebuilding it.
+  const [session, setSession] = useState<{ resolved: boolean; account: string | null; key: number }>({ resolved: false, account: null, key: 0 });
   const account = userQuery.data?.id ?? null;
-  if (userQuery.isSuccess && account !== session.account) {
-    setSession({ account, key: session.account === null ? session.key : account ?? "guest" });
+  if (userQuery.isSuccess && (!session.resolved || account !== session.account)) {
+    setSession({ resolved: true, account, key: session.resolved ? session.key + 1 : session.key });
   }
 
   useEffect(() => {
