@@ -62,6 +62,10 @@ export function AccountSecurity({ accountId }: { accountId: string }) {
         </>}
       </li>)}</ul> : <p className="text-sm text-ink-muted">No passkeys added yet.</p>}
     </>}
+    {settings.data?.resetAt ? <div className="space-y-2 rounded-md border border-line p-3 text-sm">
+      <p>Every passkey will be removed on {new Date(settings.data.resetAt).toLocaleString()}. After that, sign in with email and add a new passkey.</p>
+      <Button type="button" variant="secondary" disabled={busy} onClick={() => void run(async () => { await ensureCsrfCookie(); return apiFetch<PasskeySettings>("/api/account/passkey-reset", { method: "DELETE" }); }, "Passkey reset cancelled.")}>Cancel reset</Button>
+    </div> : settings.data?.passkeys.length ? <p className="text-sm text-ink-muted">Lost your passkey? <button type="button" className="underline" disabled={busy} onClick={() => void run(async () => { await ensureCsrfCookie(); await apiFetch("/api/account/passkey-reset", { method: "POST", body: JSON.stringify({ accountId }) }); }, "Check your email for a reset link.")}>Email me a reset link</button>. Your passkeys are removed 24 hours after you confirm.</p> : null}
     {message && <p role="status" className="text-sm">{message}</p>}
     {error && <p role="alert" className="text-sm text-danger">{error}</p>}
     <LinkButton href="/auth/reauth?next=%2Faccount%2Fpasskeys" variant="ghost">Use another sign-in method</LinkButton>
