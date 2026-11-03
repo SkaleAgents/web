@@ -137,11 +137,11 @@ describe("FooterBadges 2026-10-19", () => {
 
 const nov3Hosts = [
   "francesaas.fr", "hiproducty.com", "abizdirectory.com", "aidreamhub.com", "bricklaun.ch", "dirpilot.com", "effecthub.net", "indieshowcase.io",
-  "launchbison.com", "launchstag.com", "norohunt.com", "producthot.com", "productwill.com", "sameproduct.com", "shipnlaunch.com", "startupog.com", "top4ai.com",
+  "launchbison.com", "launchstag.com", "norohunt.com", "producthot.com", "productwill.com", "sameproduct.com", "shipnlaunch.com", "startupog.com", "top4ai.com", "launchbuff.com",
 ];
 
 describe("FooterBadges 2026-11-03", () => {
-  it("links each of the 17 directories added on 2026-11-03 exactly once", () => {
+  it("links each of the 18 directories added on 2026-11-03 exactly once", () => {
     const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
     const hosts = Array.from(page.querySelectorAll("a[href]")).map((link) => new URL(link.getAttribute("href")!).hostname.replace(/^www\./, ""));
 
