@@ -54,6 +54,7 @@ it("leads a scheduled run with the first fixes and the exact line", async () => 
   expect(screen.getByRole("button", { name: "Copy findings" })).toBeInTheDocument();
   const text = document.body.textContent ?? "";
   expect(text.indexOf("Fix these first")).toBeLessThan(text.indexOf("Style note"));
+  expect(screen.getByRole("heading", { name: "Other findings" })).toBeInTheDocument();
   expect(screen.queryByText(/Audit retention policy/)).not.toBeInTheDocument();
 });
 

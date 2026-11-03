@@ -14,7 +14,7 @@ import { scheduleCadenceLabel } from "@/lib/schedule-cadence";
 export function findingsChangeLabel(value: boolean | null | undefined): string {
   if (value === true) return "Findings changed";
   if (value === false) return "Findings unchanged";
-  return "No previous run";
+  return "No earlier run to compare";
 }
 
 export function PersonalScheduleDetail({ id }: { id: string }) {
