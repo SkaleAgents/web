@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { currentUserOptions } from "@/lib/session";
@@ -24,6 +24,13 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
   const router = useRouter();
 
   const userQuery = useQuery(currentUserOptions);
+  // Remount page state when the account changes or signs out, so nothing from the previous account survives.
+  // The first session load (no account yet -> an account) keeps the rendered page instead of rebuilding it.
+  const [session, setSession] = useState<{ account: string | null; key: string }>({ account: null, key: "session" });
+  const account = userQuery.data?.id ?? null;
+  if (userQuery.isSuccess && account !== session.account) {
+    setSession({ account, key: session.account === null ? session.key : account ?? "guest" });
+  }
 
   useEffect(() => {
     if (userQuery.data?.agreementRequired && pathname !== "/auth/agreements" &&
@@ -49,11 +56,11 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
 
   if (dashboard && userQuery.data?.agreementRequired) return <main className="px-6 py-16 text-center text-sm text-ink-muted" role="status">Opening account agreement…</main>;
 
-  if (dashboard) return <div key={userQuery.data?.id ?? "guest"} className="flex min-h-0 flex-1 flex-col">{children}</div>;
+  if (dashboard) return <div key={session.key} className="flex min-h-0 flex-1 flex-col">{children}</div>;
 
   if (authentication) return (
     <div className="flex flex-1 flex-col">
-      <div key={userQuery.data?.id ?? "guest"} className="flex flex-1 flex-col px-5">
+      <div key={session.key} className="flex flex-1 flex-col px-5">
         <div className="mx-auto w-full max-w-md pt-8"><BrandLogo /></div>
         {children}
       </div>
@@ -82,7 +89,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
           </div>
         </div>
       </header>
-      <div key={userQuery.data?.id ?? "guest"} className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">{children}</div>
+      <div key={session.key} className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">{children}</div>
     </div>
   );
 
@@ -101,7 +108,7 @@ export function AppShell({ children, publicFooter }: { children: React.ReactNode
           </div>
         </div>
       </header>
-      <div key={userQuery.data?.id ?? "guest"} className={
+      <div key={session.key} className={
         pathname === "/"
           ? "flex flex-1 flex-col"
           : "motion-enter mx-auto w-full max-w-5xl flex-1 px-6 py-8"
