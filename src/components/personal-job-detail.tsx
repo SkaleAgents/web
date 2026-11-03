@@ -132,7 +132,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
           {findings && <CopyReviewButton findings={findings} content={content} />}
           {findings && findings.length > 0 && job.data.error && <p role="alert" className="text-sm text-danger">{job.data.error}</p>}
           {findings && ranked && (findings.length === 0 || ranked.remaining.length > 0) && <section className="audit-findings" aria-label="Findings">
-            <div className="audit-section-heading"><h2>Findings</h2><span>{(findings.length === 0 ? findings : ranked.remaining).length} {(findings.length === 0 ? findings : ranked.remaining).length === 1 ? "finding" : "findings"}</span></div>
+            <div className="audit-section-heading"><h2>{ranked.remaining.length < findings.length ? "Other findings" : "Findings"}</h2><span>{(findings.length === 0 ? findings : ranked.remaining).length} {(findings.length === 0 ? findings : ranked.remaining).length === 1 ? "finding" : "findings"}</span></div>
             {findings.length === 0 ? <p className="text-sm text-ink-muted">No findings were recorded.</p> : ranked.remaining.map((finding, index) => <article key={index} className="audit-finding">
               <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
               <div>

@@ -177,7 +177,7 @@ test("schedule detail shows a recorded revision and each webhook result", async 
   await page.goto(`/schedules/${id}`, { waitUntil: "domcontentloaded" });
   await expect(page.getByText("Scanned revision: No revision has been recorded")).toBeVisible();
   await expect(page.getByText("Webhook result: None")).toBeVisible();
-  await expect(page.getByText("No previous run")).toBeVisible();
+  await expect(page.getByText("No earlier run to compare")).toBeVisible();
   await expect(page.getByRole("region", { name: "Retention policy" })).toHaveCount(0);
   result = "delivered";
   revision = "abc123";
