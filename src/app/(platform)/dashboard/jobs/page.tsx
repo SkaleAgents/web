@@ -23,7 +23,7 @@ export default function JobsPage() {
     queryKey: jobsKey,
     enabled: Boolean(user.data),
     queryFn: async ({ signal }) => (await apiFetch<{ jobs: SwarmJob[] }>("/api/jobs", { signal })).jobs,
-    refetchInterval: (query) => query.state.data?.some((job) => job.status === "queued" || job.status === "running" || job.retention?.inputPurgeStatus === "pending" || job.retention?.inputPurgeStatus === "failed") ? 5000 : false,
+    refetchInterval: (query) => query.state.data?.some((job) => job.status === "queued" || job.status === "running" || job.retention?.inputPurgeStatus === "pending") ? 5000 : false,
   });
   const matchesFilter = (job: SwarmJob, filter: string) => filter === "all" || (filter === "issues" ? (job.findingSummary?.total ?? 0) > 0 : job.status === filter);
   const filteredJobs = jobs.data?.filter((job) => matchesFilter(job, status)) ?? [];

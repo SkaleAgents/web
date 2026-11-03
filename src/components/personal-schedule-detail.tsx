@@ -27,7 +27,7 @@ export function PersonalScheduleDetail({ id }: { id: string }) {
     queryKey: ["swarm-schedules", accountId ?? "guest"],
     enabled: Boolean(accountId) && !deletion,
     queryFn: async ({ signal }) => (await apiFetch<{ schedules: SwarmSchedule[] }>("/api/schedules", { signal })).schedules,
-    refetchInterval: (query) => query.state.data?.some((schedule) => schedule.id === id && ["pending", "failed"].includes(schedule.retention?.inputPurgeStatus ?? "")) ? 5000 : false,
+    refetchInterval: (query) => query.state.data?.some((schedule) => schedule.id === id && schedule.retention?.inputPurgeStatus === "pending") ? 5000 : false,
   });
   const schedule = schedules.data?.find((item) => item.id === id);
   const source = schedule?.scope?.kind === "repo_ref" && typeof schedule.scope.ref === "string" ? schedule.scope.ref : "Saved text";
