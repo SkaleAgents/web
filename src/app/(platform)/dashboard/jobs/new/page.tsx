@@ -10,6 +10,7 @@ import { currentUserOptions } from "@/lib/session";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
 import { buildSourceMetadata } from "@/lib/source-metadata";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
+import { PersonalPlanNote } from "@/components/personal-plan-note";
 import { PUBLIC_DATABASE_SAMPLE, changePhrase, exactLineEdit } from "@/lib/review-edits";
 
 const sampleEdit = exactLineEdit(PUBLIC_DATABASE_SAMPLE, "Database publicly accessible");
@@ -68,6 +69,7 @@ export default function NewJobPage() {
     },
     onSuccess: (job) => {
       void queryClient.invalidateQueries({ queryKey: ["swarm-jobs", user.data?.id ?? "guest"] });
+      void queryClient.invalidateQueries({ queryKey: ["plan-usage", user.data?.id ?? "guest"] });
       router.push(`${jobsPath}/${job.id}`);
     },
   });
@@ -77,6 +79,7 @@ export default function NewJobPage() {
       <LinkButton href={jobsPath} variant="ghost">Back to audit jobs</LinkButton>
       <h1 className="workspace-heading mt-3">New audit</h1>
       <p className="mt-2 text-sm text-ink-muted">Review the infrastructure files in your codebase, or paste one definition file here.</p>
+      {user.data && <div className="mt-3"><PersonalPlanNote kind="audits" /></div>}
     </div>
     <section className="rounded-xl border border-line bg-canvas-elevated p-5" aria-labelledby="codebase-heading">
       <h2 id="codebase-heading" className="text-base font-semibold text-ink">Review the codebase</h2>

@@ -8,6 +8,7 @@ import { Button, LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 import { scheduleCadenceLabel } from "@/lib/schedule-cadence";
+import { PersonalPlanNote, schedulesAllowed, usePersonalPlanUsage } from "@/components/personal-plan-note";
 
 export default function SchedulesPage() {
   const pathname = usePathname();
@@ -18,6 +19,8 @@ export default function SchedulesPage() {
     enabled: Boolean(user.data),
     queryFn: async ({ signal }) => (await apiFetch<{ schedules: SwarmSchedule[] }>("/api/schedules", { signal })).schedules,
   });
+  const plan = usePersonalPlanUsage();
+  const canAdd = schedulesAllowed(plan.data);
 
   return (
     <main className="space-y-8">
@@ -27,8 +30,9 @@ export default function SchedulesPage() {
           <h1 className="workspace-heading">Scheduled audits</h1>
           <p className="mt-1 max-w-2xl text-sm text-ink-muted">Recurring reviews of saved infrastructure text or a public GitHub file.</p>
         </div>
-        <LinkButton href={href("schedules/new")}>Add schedule</LinkButton>
+        {canAdd && <LinkButton href={href("schedules/new")}>Add schedule</LinkButton>}
       </div>
+      {user.data && <PersonalPlanNote kind="schedules" />}
 
       {(user.isPending || user.data && schedules.isPending) && <p className="text-sm text-ink-muted">Loading schedules…</p>}
       {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Sign in in the header to manage your schedules.</p>}
@@ -39,7 +43,7 @@ export default function SchedulesPage() {
           <Button type="button" variant="secondary" className="mt-3" onClick={() => void schedules.refetch()}>Try again</Button>
         </div>
       )}
-      {schedules.data?.length === 0 && <div className="rounded-xl border border-dashed border-line p-6 text-sm text-ink-muted"><p>No schedules yet. Add one when you want a review to repeat.</p><LinkButton href={href("schedules/new")} className="mt-4">Add schedule</LinkButton></div>}
+      {schedules.data?.length === 0 && <div className="rounded-xl border border-dashed border-line p-6 text-sm text-ink-muted"><p>No schedules yet.{canAdd && " Add one when you want a review to repeat."}</p>{canAdd && <LinkButton href={href("schedules/new")} className="mt-4">Add schedule</LinkButton>}</div>}
       {schedules.data && schedules.data.length > 0 && (
         <div className="overflow-x-auto rounded-xl border border-line">
           <table className="w-full text-left text-sm">
