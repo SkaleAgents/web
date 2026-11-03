@@ -39,6 +39,8 @@ export const directoryBadges = [
 
 export const directoryLinks = [
   ["Smol SaaS", "https://smolsaas.com", ""],
+  ["Abiz Web Directory", "http://www.abizdirectory.com/", ""],
+  ["Top AI Tools", "https://top4ai.com", "", "Top AI Tools"],
   ["AI Tool Trek", "https://aitooltrek.com"],
   ["AI Toolz Dir", "https://www.aitoolzdir.com"],
   ["AiTop10 Tools", "https://aitop10.tools/"],
@@ -353,6 +355,21 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "falcoscan.com", href: "https://falcoscan.com/", src: "https://falcoscan.com/badges/falcoscan-listed-light.svg", height: 54, alt: "Featured on falcoscan.com", rel: "noopener", displayWidth: 153.6 },
   { name: "CurlShip", href: "https://curlship.com/l/3742", src: "https://curlship.com/badge.svg", height: 54, alt: "Featured on CurlShip", rel: "noopener", displayWidth: 153.6 },
   { name: "Tool Index", href: "https://toolindex.net/tools/skaleagents", src: "https://toolindex.net/badge/skaleagents/medium.svg", height: 54, alt: "Featured on Tool Index", rel: "noopener", displayWidth: 153.6 },
+  { name: "FranceSaaS", href: "https://francesaas.fr/saas/skaleagents", src: "https://francesaas.fr/badge-francesaas.svg", width: 200, height: 44, alt: "Badge FranceSaaS", rel: "noopener", displayWidth: 153.6 },
+  { name: "Hiproducty", href: "https://hiproducty.com", src: "https://hiproducty.com/badge.svg", height: 54, alt: "Featured on Hiproducty", rel: "noopener noreferrer", displayWidth: 153.6 },
+  { name: "AI Dream Hub", href: "https://aidreamhub.com", src: "https://aidreamhub.com/api/badge", width: 200, height: 54, alt: "Featured on AI Dreamhub", rel: "noopener", displayWidth: 153.6 },
+  { name: "Brick Launch", href: "https://bricklaun.ch/", src: "https://bricklaun.ch/badge/brick-launch-badge-a-light.svg", width: 140, height: 54, alt: "Featured on Brick Launch", rel: "noopener", displayWidth: 99.6 },
+  { name: "DirPilot", href: "https://dirpilot.com/tools?ref=badge-hangar", src: "https://dirpilot.com/badges/hangar-light.svg", width: 250, height: 54, alt: "Live on DirPilot", rel: "noopener", displayWidth: 153.6 },
+  { name: "EffectHub", href: "https://effecthub.net/ai/skaleagents", src: "https://effecthub.net/badge/skaleagents", width: 150, height: 48, alt: "SkaleAgents - Featured on EffectHub", rel: "noopener", displayWidth: 120 },
+  { name: "IndieShowcase", href: "https://indieshowcase.io", src: "https://indieshowcase.io/badge/featured-light.svg", height: 54, alt: "Featured", rel: "noopener", displayWidth: 153.6 },
+  { name: "Launchbison", href: "https://launchbison.com//", src: "https://launchbison.com///badge-light.png", width: 198, height: 62, alt: "Featured on Launchbison", rel: "noopener", displayWidth: 122.6 },
+  { name: "Launchstag", href: "https://launchstag.com", src: "https://launchstag.com/badge-light.svg", width: 198, height: 62, alt: "Featured on Launchstag", rel: "noopener", displayWidth: 122.6 },
+  { name: "NoroHunt", href: "https://www.norohunt.com", src: "https://www.norohunt.com/images/norohunt-light.svg", width: 185, height: 48, alt: "Featured on NoroHunt", rel: "noopener", displayWidth: 148 },
+  { name: "Product Hot", href: "https://producthot.com", src: "https://producthot.com/badages-awards.svg", height: 54, alt: "Featured", rel: "noopener noreferrer", displayWidth: 153.6 },
+  { name: "ProductWill", href: "https://productwill.com", src: "https://productwill.com/badages-awards.svg", height: 54, alt: "Featured on Product Will", rel: "noopener noreferrer", displayWidth: 153.6 },
+  { name: "Same Product", href: "https://sameproduct.com", src: "https://sameproduct.com/badages-awards.svg", height: 54, alt: "Featured", rel: "noopener noreferrer", displayWidth: 153.6 },
+  { name: "ShipNLaunch", href: "https://www.shipnlaunch.com/", src: "https://www.shipnlaunch.com/badges/featured-light.svg", width: 240, height: 56, alt: "Featured on ShipNLaunch", rel: "noopener noreferrer", displayWidth: 153.6 },
+  { name: "StartupOG", href: "https://startupog.com", src: "https://startupog.com/startupog-badge-wide.webp", width: 250, height: 54, alt: "Featured on StartupOG", rel: "noopener", displayWidth: 153.6 },
 ];
 
 export const directoryBadgeEntries: DirectoryBadgeEntry[] = [

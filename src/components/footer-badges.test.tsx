@@ -135,6 +135,20 @@ describe("FooterBadges 2026-10-19", () => {
   });
 });
 
+const nov3Hosts = [
+  "francesaas.fr", "hiproducty.com", "abizdirectory.com", "aidreamhub.com", "bricklaun.ch", "dirpilot.com", "effecthub.net", "indieshowcase.io",
+  "launchbison.com", "launchstag.com", "norohunt.com", "producthot.com", "productwill.com", "sameproduct.com", "shipnlaunch.com", "startupog.com", "top4ai.com",
+];
+
+describe("FooterBadges 2026-11-03", () => {
+  it("links each of the 17 directories added on 2026-11-03 exactly once", () => {
+    const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
+    const hosts = Array.from(page.querySelectorAll("a[href]")).map((link) => new URL(link.getAttribute("href")!).hostname.replace(/^www\./, ""));
+
+    for (const host of nov3Hosts) expect(hosts.filter((h) => h === host), host).toHaveLength(1);
+  });
+});
+
 describe("FooterBadges", () => {
   it("links each of the 10 directories added on 2026-10-17 exactly once", () => {
     const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
@@ -316,9 +330,9 @@ describe("FooterBadges 2026-10-20 audit", () => {
     "ai-webcatalog.space", "aisuperhub.io", "aitoolist.com", "aitoolsprime.com", "aiwebsite.run", "bestekitools.com", "comparateur-ia.com", "huntstartup.com",
     "launchfederation.com", "legit.show", "megalaun.ch", "outclimbed.com", "scrappystartups.com", "superlaun.ch", "thedevtoolsindex.com", "websitelaunches.com",
   ];
-  const removed = ["allstartups.info", "bestofweb.site", "hiproducty.com", "indieshowcase.io", "top4ai.com"];
+  const removed = ["allstartups.info", "bestofweb.site"];
 
-  it("links the 16 added directories once and drops the 5 dead ones", () => {
+  it("links the 16 added directories once and drops the 2 dead ones", () => {
     const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadges />), "text/html");
     const hosts = Array.from(page.querySelectorAll("a[href]")).map((link) => new URL(link.getAttribute("href")!).hostname.replace(/^www\./, ""));
 
