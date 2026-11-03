@@ -111,23 +111,23 @@ it("lets viewers read details and never offers write actions", async () => {
 it("does not request audits for a removed membership and keeps cache account/workspace scoped", async () => {
   const fetcher = routeFetch({ workspaceIds: ["workspace-b"] });
   const { client, renderPage } = setup(fetcher);
-  client.setQueryData(["workspace-audits", "account-a", "workspace-a"], [audit]);
+  client.setQueryData(["workspace-audits", "account-a", "workspace-a"], { jobs: [audit], nextCursor: null });
   client.setQueryData(["workspace-audit-detail", "account-a", "workspace-a", "audit-a"], audit);
-  client.setQueryData(["workspace-audits", "account-a", "workspace-b"], [{ ...audit, id: "audit-b", workspaceId: "workspace-b" }]);
+  client.setQueryData(["workspace-audits", "account-a", "workspace-b"], { jobs: [{ ...audit, id: "audit-b", workspaceId: "workspace-b" }], nextCursor: null });
   renderPage();
 
   expect(await screen.findByRole("heading", { name: "Organization unavailable" })).toBeInTheDocument();
   await waitFor(() => expect(fetcher).not.toHaveBeenCalledWith(expect.stringContaining("/api/workspaces/workspace-a/jobs"), expect.anything()));
   await waitFor(() => expect(client.getQueryData(["workspace-audits", "account-a", "workspace-a"])).toBeUndefined());
   expect(client.getQueryData(["workspace-audit-detail", "account-a", "workspace-a", "audit-a"])).toBeUndefined();
-  expect(client.getQueryData(["workspace-audits", "account-a", "workspace-b"])).toEqual([{ ...audit, id: "audit-b", workspaceId: "workspace-b" }]);
+  expect(client.getQueryData(["workspace-audits", "account-a", "workspace-b"])).toEqual({ jobs: [{ ...audit, id: "audit-b", workspaceId: "workspace-b" }], nextCursor: null });
   expect(client.getQueryData(["workspace-audits", "account-b", "workspace-a"])).toBeUndefined();
 });
 
 it("clears shared audit list, detail, and rollout cache on sign-out", async () => {
   const client = new QueryClient();
   client.setQueryData(["user"], { id: "account-a" });
-  client.setQueryData(["workspace-audits", "account-a", "workspace-a"], [audit]);
+  client.setQueryData(["workspace-audits", "account-a", "workspace-a"], { jobs: [audit], nextCursor: null });
   client.setQueryData(["workspace-audit-detail", "account-a", "workspace-a", "audit-a"], audit);
   client.setQueryData(["workspace-audit-deletion-status", "account-a", "workspace-a", "audit-a"], { status: "pending" });
   client.setQueryData(["workspace-audits-unavailable", "account-a", "workspace-a"], true);
@@ -140,7 +140,7 @@ it("clears shared audit list, detail, and rollout cache on sign-out", async () =
 it("fails closed and clears cached audits when the server rollout endpoint is unavailable", async () => {
   const fetcher = routeFetch({ workspaceAuditsUnavailable: true });
   const { client, renderPage } = setup(fetcher);
-  client.setQueryData(["workspace-audits", "account-a", "workspace-a"], [audit]);
+  client.setQueryData(["workspace-audits", "account-a", "workspace-a"], { jobs: [audit], nextCursor: null });
   renderPage();
 
   expect(await screen.findByText(/Shared audits are unavailable/)).toBeInTheDocument();

@@ -88,3 +88,26 @@ describe("apiFetch errors", () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe("fetchJobPages", () => {
+  it("follows nextCursor for the requested pages and keeps the last cursor", async () => {
+    const { fetchJobPages } = await import("./api");
+    const urls: string[] = [];
+    const pages: Record<string, { jobs: { id: string }[]; nextCursor: string | null }> = {
+      "/api/jobs": { jobs: [{ id: "a" }], nextCursor: "a" },
+      "/api/jobs?before=a": { jobs: [{ id: "b" }], nextCursor: "b" },
+    };
+    const original = globalThis.fetch;
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const url = String(input);
+      urls.push(url);
+      return Response.json(pages[url.slice(url.indexOf("/api/"))]);
+    }) as typeof fetch;
+    try {
+      expect(await fetchJobPages("/api/jobs", 2)).toEqual({ jobs: [{ id: "a" }, { id: "b" }], nextCursor: "b" });
+      expect(urls.map((url) => url.slice(url.indexOf("/api/")))).toEqual(["/api/jobs", "/api/jobs?before=a"]);
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+});

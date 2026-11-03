@@ -1,10 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { scheduledRunLabel } from "@/lib/audit-dispatch";
-import { apiFetch, type SwarmJob } from "@/lib/api";
+import { fetchJobPages, type SwarmJob } from "@/lib/api";
 import { Button, LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { AuditHistoryResult } from "@/components/audit-history-result";
@@ -19,14 +19,16 @@ export default function JobsPage() {
   const jobsKey = ["swarm-jobs", accountId ?? "guest"];
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
+  // Read inside queryFn so "Show older" refetches more pages under the same cache key.
+  const loadedPages = useRef(1);
   const jobs = useQuery({
     queryKey: jobsKey,
     enabled: Boolean(user.data),
-    queryFn: async ({ signal }) => (await apiFetch<{ jobs: SwarmJob[] }>("/api/jobs", { signal })).jobs,
-    refetchInterval: (query) => query.state.data?.some((job) => job.status === "queued" || job.status === "running" || job.retention?.inputPurgeStatus === "pending") ? 5000 : false,
+    queryFn: ({ signal }) => fetchJobPages<SwarmJob>("/api/jobs", loadedPages.current, signal),
+    refetchInterval: (query) => query.state.data?.jobs.some((job) => job.status === "queued" || job.status === "running" || job.retention?.inputPurgeStatus === "pending") ? 5000 : false,
   });
   const matchesFilter = (job: SwarmJob, filter: string) => filter === "all" || (filter === "issues" ? (job.findingSummary?.total ?? 0) > 0 : job.status === filter);
-  const filteredJobs = jobs.data?.filter((job) => matchesFilter(job, status)) ?? [];
+  const filteredJobs = jobs.data?.jobs.filter((job) => matchesFilter(job, status)) ?? [];
   const pageCount = Math.max(1, Math.ceil(filteredJobs.length / 10));
   const currentPage = Math.min(page, pageCount);
   const visibleJobs = filteredJobs.slice((currentPage - 1) * 10, currentPage * 10);
@@ -43,7 +45,7 @@ export default function JobsPage() {
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">Your jobs</h2><LinkButton href={href("schedules")} variant="secondary">Set up recurring reviews</LinkButton></div>
-        <div className="flex flex-wrap gap-2">{["all", "issues", "queued", "running", "completed", "failed"].map((item) => <button key={item} type="button" className="filter-chip capitalize" aria-pressed={status === item} onClick={() => { setStatus(item); setPage(1); }}>{item === "all" ? "All jobs" : item === "issues" ? "Issues found" : item} {jobs.data ? `(${jobs.data.filter((job) => matchesFilter(job, item)).length})` : ""}</button>)}</div>
+        <div className="flex flex-wrap gap-2">{["all", "issues", "queued", "running", "completed", "failed"].map((item) => <button key={item} type="button" className="filter-chip capitalize" aria-pressed={status === item} onClick={() => { setStatus(item); setPage(1); }}>{item === "all" ? "All jobs" : item === "issues" ? "Issues found" : item} {jobs.data ? `(${jobs.data.jobs.filter((job) => matchesFilter(job, item)).length})` : ""}</button>)}</div>
         {(user.isPending || user.data && jobs.isPending) && <p className="text-sm text-ink-muted">Loading jobs…</p>}
         {!user.isPending && !user.data && <p className="text-sm text-ink-muted">Use Sign in in the header to access your audit jobs.</p>}
         {user.data && jobs.isError && (
@@ -53,8 +55,8 @@ export default function JobsPage() {
             <Button type="button" variant="secondary" className="mt-3" onClick={() => void jobs.refetch()}>Try again</Button>
           </div>
         )}
-        {jobs.data?.length === 0 && <div className="rounded-xl border border-dashed border-line p-6 text-sm text-ink-muted"><p>No audits yet. Create one to review your infrastructure.</p><LinkButton href={href("jobs/new")} className="mt-4">New audit</LinkButton></div>}
-        {Boolean(jobs.data?.length) && filteredJobs.length === 0 && <p className="text-sm text-ink-muted">{status === "issues" ? "No audits with recorded findings. Audits with unavailable results may still need review." : `No ${status} jobs. Choose another status to see your reviews.`}</p>}
+        {jobs.data?.jobs.length === 0 && <div className="rounded-xl border border-dashed border-line p-6 text-sm text-ink-muted"><p>No audits yet. Create one to review your infrastructure.</p><LinkButton href={href("jobs/new")} className="mt-4">New audit</LinkButton></div>}
+        {Boolean(jobs.data?.jobs.length) && filteredJobs.length === 0 && <p className="text-sm text-ink-muted">{status === "issues" ? "No audits with recorded findings. Audits with unavailable results may still need review." : `No ${status} jobs. Choose another status to see your reviews.`}</p>}
         <ul className="divide-y divide-line">
           {visibleJobs.map((job) => (
             <li key={job.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
@@ -74,6 +76,7 @@ export default function JobsPage() {
           <span>Page {currentPage} of {pageCount}</span>
           <Button type="button" variant="secondary" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next</Button>
         </nav>}
+        {jobs.data?.nextCursor && <Button type="button" variant="secondary" disabled={jobs.isFetching} onClick={() => { loadedPages.current += 1; void jobs.refetch(); }}>{jobs.isFetching ? "Loading older audits…" : "Show older audits"}</Button>}
       </section>
     </main>
   );

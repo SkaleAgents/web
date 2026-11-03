@@ -88,6 +88,22 @@ test("audit jobs stay paged as the list grows", async ({ page }) => {
   await expect(page.getByText("Audit 1", { exact: true })).toHaveCount(0);
 });
 
+test("older audits load from the next API page on request", async ({ page }) => {
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Test Owner" } }));
+  await page.route("**/api/account/retention", route => route.fulfill({ json: { accountId: "owner", enabled: false } }));
+  const job = (id: string) => ({ id, status: "completed", summary: `Audit ${id}`, specialists: ["sre"], createdAt: new Date().toISOString() });
+  await page.route(url => url.pathname === "/api/jobs", route => {
+    const before = new URL(route.request().url()).searchParams.get("before");
+    return route.fulfill({ json: before === "newest" ? { jobs: [job("oldest")], nextCursor: null } : { jobs: [job("newest")], nextCursor: "newest" } });
+  });
+  await page.goto("/me/jobs");
+  await expect(page.getByText("Audit newest", { exact: true })).toBeVisible();
+  await expect(page.getByText("Audit oldest", { exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Show older audits" }).click();
+  await expect(page.getByText("Audit oldest", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Show older audits" })).toHaveCount(0);
+});
+
 test("audit history opens one job at a time for review and management", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const id = "00000000-0000-4000-8000-000000000001";

@@ -1,4 +1,4 @@
-import { ApiError, apiFetch, ensureCsrfCookie, type SwarmJob } from "@/lib/api";
+import { ApiError, apiFetch, ensureCsrfCookie, fetchJobPages, type JobPage, type SwarmJob } from "@/lib/api";
 
 export type WorkspaceRole = "owner" | "member" | "viewer";
 
@@ -32,12 +32,12 @@ export function workspaceAuditPath(workspaceId: string, auditId?: string): strin
   return `/api/workspaces/${encodeURIComponent(workspaceId)}/jobs${auditId ? `/${encodeURIComponent(auditId)}` : ""}`;
 }
 
-export async function listWorkspaceAudits(workspaceId: string, signal?: AbortSignal): Promise<WorkspaceAudit[]> {
-  const response = await apiFetch<{ jobs: WorkspaceAudit[] }>(workspaceAuditPath(workspaceId), { signal });
+export async function listWorkspaceAudits(workspaceId: string, signal?: AbortSignal, pages = 1): Promise<JobPage<WorkspaceAudit>> {
+  const response = await fetchJobPages<WorkspaceAudit>(workspaceAuditPath(workspaceId), pages, signal);
   if (response.jobs.some((audit) => audit.workspaceId !== workspaceId)) {
     throw new ApiError("The audit list did not match this organization.", 404);
   }
-  return response.jobs;
+  return response;
 }
 
 export async function createWorkspaceAudit(workspaceId: string, content: string): Promise<WorkspaceAudit> {

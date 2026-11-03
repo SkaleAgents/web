@@ -8,7 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useOrganizationScope, useOrganizationRoot } from "./organization-scope";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Button, TextArea } from "@/components/ui";
 import { scheduledRunLabel } from "@/lib/audit-dispatch";
 import { apiFetch } from "@/lib/api";
@@ -102,6 +102,8 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
   const [selectedAuditId, setSelectedAuditId] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<{ kind: "purge" | "delete"; auditId: string } | null>(null);
   const [page, setPage] = useState(1);
+  // Read inside queryFn so "Show older" refetches more pages under the same cache key.
+  const loadedPages = useRef(1);
   const [deleteStates, setDeleteStates] = useState<Record<string, "pending" | "failed">>({});
   const unavailableKey = useMemo(() => ["workspace-audits-unavailable", accountId ?? "guest", workspaceId] as const, [accountId, workspaceId]);
   const unavailableQuery = useQuery({ queryKey: unavailableKey, queryFn: async () => false, enabled: false, initialData: false });
@@ -123,11 +125,11 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
     queryKey: auditKey,
     enabled: Boolean(accountId && workspace && !unavailableQuery.data),
     queryFn: async ({ signal }) => {
-      const data = await listWorkspaceAudits(workspaceId, signal);
+      const data = await listWorkspaceAudits(workspaceId, signal, loadedPages.current);
       if (client.getQueryData(currentUserOptions.queryKey)?.id !== accountId) throw new Error("Your account changed. Reload workspace access before continuing.");
       return data;
     },
-    refetchInterval: (query) => query.state.data?.some((audit) => audit.status === "queued" || audit.status === "running" || audit.retention?.inputPurgeStatus === "pending") ? 5000 : false,
+    refetchInterval: (query) => query.state.data?.jobs.some((audit) => audit.status === "queued" || audit.status === "running" || audit.retention?.inputPurgeStatus === "pending") ? 5000 : false,
   });
   const selectedKey = ["workspace-audit-detail", accountId ?? "guest", workspaceId, selectedAuditId] as const;
   const detail = useQuery({
@@ -167,9 +169,9 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
       void client.removeQueries({ queryKey: ["workspace-audit-deletion-status", accountId, workspaceId, auditId] });
     },
   });
-  const pageCount = Math.max(1, Math.ceil((audits.data?.length ?? 0) / 10));
+  const pageCount = Math.max(1, Math.ceil((audits.data?.jobs.length ?? 0) / 10));
   const currentPage = Math.min(page, pageCount);
-  const visibleAudits = audits.data?.slice((currentPage - 1) * 10, currentPage * 10);
+  const visibleAudits = audits.data?.jobs.slice((currentPage - 1) * 10, currentPage * 10);
   const unavailable = unavailableQuery.data || [audits.error, detail.error, purge.error, remove.error].some(isWorkspaceAuditUnavailable);
 
   useEffect(() => {
@@ -216,7 +218,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
           <h2 className="text-lg font-semibold text-ink">Shared audit history</h2>
           {audits.isPending && <p role="status" className="text-sm text-ink-muted">Loading shared audits…</p>}
           {audits.isError && !unavailable && <div role="alert" className="space-y-2 text-sm text-danger"><p>{audits.error.message}</p><Button variant="secondary" onClick={() => void audits.refetch()}>Retry</Button></div>}
-          {audits.data?.length === 0 && <p className="text-sm text-ink-muted">No shared audits are available yet.</p>}
+          {audits.data?.jobs.length === 0 && <p className="text-sm text-ink-muted">No shared audits are available yet.</p>}
           <ul className="divide-y divide-line">
             {visibleAudits?.map((audit) => <li key={audit.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
               <div><p className="font-mono text-xs uppercase tracking-wide text-ink-muted">{audit.status}</p><p className="mt-1 text-sm text-ink">{audit.summary ?? "Waiting for specialist results"}</p><p className="mt-1 text-xs text-ink-muted">{audit.specialists.join(" · ")}{audit.partial ? " · Partial results" : ""}{scheduledRunLabel(audit) ? ` · ${scheduledRunLabel(audit)}` : ""} · {new Date(audit.createdAt).toLocaleString()}</p></div>
@@ -228,6 +230,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
             <span>Page {currentPage} of {pageCount}</span>
             <Button variant="secondary" disabled={currentPage === pageCount} onClick={() => { setSelectedAuditId(null); setPage(currentPage + 1); }}>Next</Button>
           </nav>}
+          {audits.data?.nextCursor && <Button variant="secondary" disabled={audits.isFetching} onClick={() => { loadedPages.current += 1; void audits.refetch(); }}>{audits.isFetching ? "Loading older audits…" : "Show older audits"}</Button>}
           {Object.entries(deleteStates).map(([auditId, state]) => <WorkspaceAuditDeletionStatus key={auditId} accountId={accountId} workspaceId={workspaceId} auditId={auditId} initialStatus={state} />)}
           {confirmation && <div className="space-y-2 rounded-[10px] border border-line p-3 text-sm">
             <p>{confirmation.kind === "delete" ? "Delete this shared audit and its history? This cannot be undone." : "Purge this shared audit's source input? You will need fresh input to run it again."}</p>
