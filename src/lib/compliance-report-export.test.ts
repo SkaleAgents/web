@@ -41,6 +41,8 @@ it("quotes CSV cells that contain commas and neutralizes spreadsheet formulas", 
   expect(csv).toContain('"Open, public"');
   expect(csv).toContain('"line\nbreak"');
   expect(csv).toContain("'=cmd|' /C calc'!A0");
+  expect(reportToCsv({ controls: [{ theme: "access", findingCount: 1, findings: [{ title: "\t=1+1", detail: "x", remediation: "y" }] }] }))
+    .toContain("'\t=1+1");
 });
 
 it("includes the first fixes and the exact public database line", () => {

@@ -11,7 +11,13 @@ const nextConfig: NextConfig = {
   },
   headers() {
     const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8082").origin;
-    return [{ source: "/reviews/s/:token", headers: [
+    return [{ source: "/:path*", headers: [
+      // Product pages run account actions on click, so no other site may frame them.
+      { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+      { key: "X-Frame-Options", value: "DENY" },
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Strict-Transport-Security", value: "max-age=31536000" },
+    ] }, { source: "/reviews/s/:token", headers: [
       { key: "Referrer-Policy", value: "no-referrer" },
       { key: "Cache-Control", value: "no-store, private" },
     ] }, { source: "/auth/confirm", headers: [

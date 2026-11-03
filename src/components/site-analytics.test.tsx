@@ -46,3 +46,11 @@ it("waits for the new consent cookie in Europe", () => {
   render(<SiteAnalytics consentRequired />);
   expect(gtagScript()).not.toBeNull();
 });
+
+it("never loads Google Analytics on a saved-review share link", () => {
+  vi.stubEnv("NEXT_PUBLIC_GA_MEASUREMENT_ID", MEASUREMENT_ID);
+  window.history.replaceState(null, "", "/reviews/s/secret-share-token");
+  render(<SiteAnalytics consentRequired={false} />);
+  expect(gtagScript()).toBeNull();
+  window.history.replaceState(null, "", "/");
+});

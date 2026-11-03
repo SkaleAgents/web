@@ -119,7 +119,7 @@ export function reportToJson(report: unknown, source?: ReportSource): string {
 }
 
 function csvCell(value: string): string {
-  const safe = /^[=+\-@]/.test(value) ? `'${value}` : value;
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
   if (/[",\n\r]/.test(safe)) return `"${safe.replaceAll('"', '""')}"`;
   return safe;
 }
