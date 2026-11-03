@@ -15,6 +15,7 @@ export default async function SharedReviewPage({ params }: { params: Promise<{ t
   if (!/^[A-Za-z0-9_-]{43}$/.test(token)) notFound();
   const response = await fetch(`${API_URL}/api/mcp/reviews/share/${token}`, {
     cache: "no-store",
+    signal: AbortSignal.timeout(5000),
     headers: { Accept: "application/json" },
   });
   if (!response.ok) notFound();

@@ -28,7 +28,7 @@ export function communityPrompts(prompts: Prompt[]): Prompt[] {
 
 async function readJson<T>(path: string): Promise<T | undefined> {
   try {
-    const response = await fetch(`${API_URL}${path}`, { next: { revalidate: 300 } });
+    const response = await fetch(`${API_URL}${path}`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(5000) });
     if (!response.ok) return undefined;
     return await response.json() as T;
   } catch {
