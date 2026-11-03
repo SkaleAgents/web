@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["hcl2-parser", "typescript"],
+  serverExternalPackages: ["hcl2-parser", "typescript", "@skaleagents/swarm"],
   rewrites() {
     return [
       { source: "/me", destination: "/dashboard" },
