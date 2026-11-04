@@ -11,6 +11,7 @@ import { currentUserOptions } from "@/lib/session";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
 import { buildSourceMetadata } from "@/lib/source-metadata";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
+import { GithubScanButton } from "@/components/github-scan-button";
 import { PersonalPlanNote } from "@/components/personal-plan-note";
 import { PUBLIC_DATABASE_SAMPLE, changePhrase, exactLineEdit } from "@/lib/review-edits";
 
@@ -144,6 +145,7 @@ export default function NewJobPage() {
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
           <Button type="button" variant="secondary" onClick={() => fileInput.current?.click()}>Upload files</Button>
           <Button type="button" variant="secondary" onClick={() => { setContent(PUBLIC_DATABASE_SAMPLE); setSampleLoaded(true); }}>Try a sample</Button>
+          <GithubScanButton />
         </div>
         {sampleLoaded && <p className="mt-2 text-sm text-ink-muted">This sample should report a database that is publicly accessible. <span className="font-semibold text-ink">Database publicly accessible</span> {sampleExpectation}</p>}
       </section>

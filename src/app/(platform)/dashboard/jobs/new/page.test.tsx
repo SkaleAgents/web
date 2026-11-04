@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NewJobPage from "./page";
@@ -83,4 +83,17 @@ it("shows the first-audit guide only when there are no audits yet", async () => 
   renderPage();
   await waitFor(() => expect(vi.mocked(fetch)).toHaveBeenCalled());
   expect(screen.queryByRole("heading", { name: "Run your first audit" })).not.toBeInTheDocument();
+});
+
+it("opens an upgrade prompt from Connect GitHub for a free plan", async () => {
+  HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) { this.open = true; };
+  vi.stubGlobal("fetch", vi.fn(async (url: string) => String(url).includes("plan-usage")
+    ? Response.json({ enforced: true, plan: "free", audits: { used: 0, limit: 2, remaining: 2, periodEnd: "2026-12-01T00:00:00Z" }, schedules: { active: 0, limit: 0, minimumIntervalHours: null } })
+    : Response.json({ jobs: [], nextCursor: null })));
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  client.setQueryData(["user"], { id: "account-a", email: "a@example.test", displayName: "A" });
+  render(<QueryClientProvider client={client}><NewJobPage /></QueryClientProvider>);
+  await userEvent.click(screen.getByRole("button", { name: /Connect GitHub/ }));
+  expect(await screen.findByRole("heading", { name: "Scan a GitHub repository", hidden: true })).toBeInTheDocument();
+  expect(within(screen.getByRole("dialog")).getByRole("link", { name: "Upgrade" })).toHaveAttribute("href", "/org/personal-cfgnns/billing");
 });
