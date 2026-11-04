@@ -5,7 +5,7 @@ import { blogIndexMarkdown, isPostPublished, postMarkdown, publicPosts, publishe
 import { publicResources } from "./public-resources";
 
 it("publishes free resources and blog posts in the sitemap, llms.txt, and markdown", async () => {
-  expect(new Set(publicResources.map((resource) => resource.slug)).size).toBe(3);
+  expect(new Set(publicResources.map((resource) => resource.slug)).size).toBe(4);
   expect(new Set(publicPosts.map((post) => post.slug)).size).toBe(11);
   expect(publishedPosts(new Date("2026-10-07T12:00:00+06:00"))).toHaveLength(4);
   expect(publishedPosts(new Date("2026-11-09T09:00:00+06:00")).some((post) => post.slug === "pull-request-target-checks-out-the-pr")).toBe(false);
@@ -70,6 +70,7 @@ it("publishes free resources and blog posts in the sitemap, llms.txt, and markdo
   expect(resource).toContain("Review the container spec");
   const post = markdownDocument("/blog/what-a-cloud-review-actually-checks");
   expect(post).toContain("do not log into the account");
+  expect(markdownDocument("/resources/dependency-cve-scan")).toContain("scan_dependencies");
   expect(markdownDocument("/resources/missing")).toBeNull();
   expect(markdownDocument("/blog/missing")).toBeNull();
 });
