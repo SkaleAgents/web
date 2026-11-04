@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { apiFetch, ensureCsrfCookie, type SwarmJob } from "@/lib/api";
+import { apiFetch, ensureCsrfCookie, fetchJobPages, type SwarmJob } from "@/lib/api";
 import { auditFileBasename, auditFileError, joinAuditFiles, type AuditFilePart } from "@/lib/audit-files";
 import { Button, LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
 import { buildSourceMetadata } from "@/lib/source-metadata";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
+import { GithubScanButton } from "@/components/github-scan-button";
 import { PersonalPlanNote } from "@/components/personal-plan-note";
 import { PUBLIC_DATABASE_SAMPLE, changePhrase, exactLineEdit } from "@/lib/review-edits";
 
@@ -32,6 +33,12 @@ export default function NewJobPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const user = useQuery(currentUserOptions);
+  const firstAudit = useQuery({
+    queryKey: ["swarm-jobs", user.data?.id ?? "guest", "recent"],
+    enabled: Boolean(user.data),
+    queryFn: ({ signal }) => fetchJobPages<SwarmJob>("/api/jobs", 1, signal),
+  });
+  const showGuide = firstAudit.data?.jobs.length === 0;
   const [content, setContent] = useState("");
   const [files, setFiles] = useState<AuditFilePart[]>([]);
   const [fileError, setFileError] = useState("");
@@ -76,13 +83,21 @@ export default function NewJobPage() {
     },
   });
 
-  return <main className="mx-auto max-w-3xl space-y-6">
+  return <main className="max-w-4xl space-y-6">
     <div className="workspace-intro">
-      <LinkButton href={jobsPath} variant="ghost">Back to audit jobs</LinkButton>
+      <LinkButton href={jobsPath} variant="ghost" className="gap-1.5"><svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5" /><path d="m12 19-7-7 7-7" /></svg>Back to audit jobs</LinkButton>
       <h1 className="workspace-heading mt-3">New audit</h1>
       <p className="mt-2 text-sm text-ink-muted">Paste or upload an infrastructure file to review.</p>
       {user.data && <div className="mt-3"><PersonalPlanNote kind="audits" /></div>}
     </div>
+    {showGuide && <section aria-labelledby="first-audit-heading" className="rounded-xl border border-line bg-canvas-elevated p-5">
+      <h2 id="first-audit-heading" className="text-base font-semibold text-ink">Run your first audit</h2>
+      <ol className="mt-3 grid gap-3 text-sm text-ink-muted sm:grid-cols-3">
+        <li><strong className="block text-ink">1. Add a file</strong>Paste one, upload several, or press Try a sample.</li>
+        <li><strong className="block text-ink">2. Pick what to review</strong>Security and Reliability are on by default.</li>
+        <li><strong className="block text-ink">3. Start audit</strong>Your results open on their own page, usually within a minute.</li>
+      </ol>
+    </section>}
     <form className="overflow-hidden rounded-xl border border-line bg-canvas-elevated" onSubmit={(event) => { event.preventDefault(); if (user.data && submission.trim() && !fileError && specialists.length && !create.isPending) create.mutate(); }}>
       <fieldset disabled={create.isPending} className="min-w-0">
       <section className="p-5 sm:p-6">
@@ -128,8 +143,9 @@ export default function NewJobPage() {
         )}
         {fileError && <p role="alert" className="mt-2 text-sm text-danger">{fileError}</p>}
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-          <Button type="button" variant="ghost" onClick={() => fileInput.current?.click()}>Upload files</Button>
-          <Button type="button" variant="ghost" onClick={() => { setContent(PUBLIC_DATABASE_SAMPLE); setSampleLoaded(true); }}>Try a sample</Button>
+          <Button type="button" variant="secondary" onClick={() => fileInput.current?.click()}>Upload files</Button>
+          <Button type="button" variant="secondary" onClick={() => { setContent(PUBLIC_DATABASE_SAMPLE); setSampleLoaded(true); }}>Try a sample</Button>
+          <GithubScanButton />
         </div>
         {sampleLoaded && <p className="mt-2 text-sm text-ink-muted">This sample should report a database that is publicly accessible. <span className="font-semibold text-ink">Database publicly accessible</span> {sampleExpectation}</p>}
       </section>
