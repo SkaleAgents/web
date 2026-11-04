@@ -16,6 +16,8 @@ function renderNote(audits: { used: number; limit: number; remaining: number }, 
 it("shows how many audits are left", async () => {
   renderNote({ used: 1, limit: 2, remaining: 1 }, { active: 1, limit: 10, minimumIntervalHours: 24 });
   expect(await screen.findByText(/1 of 2 audits left this period/)).toBeInTheDocument();
+  expect(screen.getByRole("progressbar", { name: "Audits used this period" })).toHaveAttribute("aria-valuenow", "1");
+  expect(screen.getByRole("link", { name: "Upgrade" })).toHaveAttribute("href", "/org/personal-cfgnns/billing");
   expect(screen.getByText("1 of 10 active schedules. Each runs at most every 24 hours.")).toBeInTheDocument();
 });
 

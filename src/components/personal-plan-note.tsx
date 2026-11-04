@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
+import { LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 
@@ -36,8 +37,17 @@ export function PersonalPlanNote({ kind }: { kind: "audits" | "schedules" }) {
   const upgrade = <Link href={personalDestinationFromPath(pathname, "billing")} className="underline">Upgrade your plan</Link>;
   if (kind === "audits") {
     const resets = new Date(data.audits.periodEnd).toLocaleDateString();
-    return data.audits.remaining > 0
-      ? <p className="text-sm text-ink-muted" role="status">{data.audits.remaining} of {data.audits.limit} audits left this period. Resets {resets}.</p>
+    const { used, limit, remaining } = data.audits;
+    return remaining > 0
+      ? <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="min-w-48 max-w-xs flex-1">
+            <p className="text-sm text-ink-muted" role="status">{remaining} of {limit} audits left this period. Resets {resets}.</p>
+            <div role="progressbar" aria-label="Audits used this period" aria-valuemin={0} aria-valuemax={limit} aria-valuenow={used} className="mt-2 h-1.5 overflow-hidden rounded-full bg-line">
+              <div className="h-full rounded-full bg-accent" style={{ width: `${limit > 0 ? Math.min(100, (used / limit) * 100) : 100}%` }} />
+            </div>
+          </div>
+          <LinkButton href={personalDestinationFromPath(pathname, "billing")} variant="secondary">Upgrade</LinkButton>
+        </div>
       : <p className="rounded-[10px] border border-line p-4 text-sm" role="alert">You&apos;ve used all {data.audits.limit} audits this period. They reset {resets}. {upgrade} for more.</p>;
   }
   if (!schedulesAllowed(data)) {

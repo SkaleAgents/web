@@ -76,9 +76,9 @@ export default function NewJobPage() {
     },
   });
 
-  return <main className="mx-auto max-w-3xl space-y-6">
+  return <main className="max-w-4xl space-y-6">
     <div className="workspace-intro">
-      <LinkButton href={jobsPath} variant="ghost">Back to audit jobs</LinkButton>
+      <LinkButton href={jobsPath} variant="ghost" className="gap-1.5"><svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5" /><path d="m12 19-7-7 7-7" /></svg>Back to audit jobs</LinkButton>
       <h1 className="workspace-heading mt-3">New audit</h1>
       <p className="mt-2 text-sm text-ink-muted">Paste or upload an infrastructure file to review.</p>
       {user.data && <div className="mt-3"><PersonalPlanNote kind="audits" /></div>}
@@ -128,8 +128,8 @@ export default function NewJobPage() {
         )}
         {fileError && <p role="alert" className="mt-2 text-sm text-danger">{fileError}</p>}
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-          <Button type="button" variant="ghost" onClick={() => fileInput.current?.click()}>Upload files</Button>
-          <Button type="button" variant="ghost" onClick={() => { setContent(PUBLIC_DATABASE_SAMPLE); setSampleLoaded(true); }}>Try a sample</Button>
+          <Button type="button" variant="secondary" onClick={() => fileInput.current?.click()}>Upload files</Button>
+          <Button type="button" variant="secondary" onClick={() => { setContent(PUBLIC_DATABASE_SAMPLE); setSampleLoaded(true); }}>Try a sample</Button>
         </div>
         {sampleLoaded && <p className="mt-2 text-sm text-ink-muted">This sample should report a database that is publicly accessible. <span className="font-semibold text-ink">Database publicly accessible</span> {sampleExpectation}</p>}
       </section>
