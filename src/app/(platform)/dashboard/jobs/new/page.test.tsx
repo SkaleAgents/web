@@ -66,3 +66,21 @@ it("fills the audit submission with both file markers after two files are chosen
   expect(screen.getByText("Dockerfile, main.tf")).toBeInTheDocument();
   expect(screen.queryByRole("textbox", { name: "IaC content" })).not.toBeInTheDocument();
 });
+
+it("shows the first-audit guide only when there are no audits yet", async () => {
+  const stubJobs = (jobs: unknown[]) => vi.stubGlobal("fetch", vi.fn(async (url: string) =>
+    String(url).includes("/api/jobs") ? Response.json({ jobs, nextCursor: null }) : Response.json({ id: "account-a", email: "a@example.test", displayName: "A" })));
+  const renderPage = () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    client.setQueryData(["user"], { id: "account-a", email: "a@example.test", displayName: "A" });
+    render(<QueryClientProvider client={client}><NewJobPage /></QueryClientProvider>);
+  };
+  stubJobs([]);
+  renderPage();
+  expect(await screen.findByRole("heading", { name: "Run your first audit" })).toBeInTheDocument();
+  cleanup();
+  stubJobs([{ id: "job-1" }]);
+  renderPage();
+  await waitFor(() => expect(vi.mocked(fetch)).toHaveBeenCalled());
+  expect(screen.queryByRole("heading", { name: "Run your first audit" })).not.toBeInTheDocument();
+});

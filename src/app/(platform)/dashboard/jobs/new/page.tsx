@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { apiFetch, ensureCsrfCookie, type SwarmJob } from "@/lib/api";
+import { apiFetch, ensureCsrfCookie, fetchJobPages, type SwarmJob } from "@/lib/api";
 import { auditFileBasename, auditFileError, joinAuditFiles, type AuditFilePart } from "@/lib/audit-files";
 import { Button, LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
@@ -32,6 +32,12 @@ export default function NewJobPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const user = useQuery(currentUserOptions);
+  const firstAudit = useQuery({
+    queryKey: ["swarm-jobs", user.data?.id ?? "guest", "recent"],
+    enabled: Boolean(user.data),
+    queryFn: ({ signal }) => fetchJobPages<SwarmJob>("/api/jobs", 1, signal),
+  });
+  const showGuide = firstAudit.data?.jobs.length === 0;
   const [content, setContent] = useState("");
   const [files, setFiles] = useState<AuditFilePart[]>([]);
   const [fileError, setFileError] = useState("");
@@ -83,6 +89,14 @@ export default function NewJobPage() {
       <p className="mt-2 text-sm text-ink-muted">Paste or upload an infrastructure file to review.</p>
       {user.data && <div className="mt-3"><PersonalPlanNote kind="audits" /></div>}
     </div>
+    {showGuide && <section aria-labelledby="first-audit-heading" className="rounded-xl border border-line bg-canvas-elevated p-5">
+      <h2 id="first-audit-heading" className="text-base font-semibold text-ink">Run your first audit</h2>
+      <ol className="mt-3 grid gap-3 text-sm text-ink-muted sm:grid-cols-3">
+        <li><strong className="block text-ink">1. Add a file</strong>Paste one, upload several, or press Try a sample.</li>
+        <li><strong className="block text-ink">2. Pick what to review</strong>Security and Reliability are on by default.</li>
+        <li><strong className="block text-ink">3. Start audit</strong>Your results open on their own page, usually within a minute.</li>
+      </ol>
+    </section>}
     <form className="overflow-hidden rounded-xl border border-line bg-canvas-elevated" onSubmit={(event) => { event.preventDefault(); if (user.data && submission.trim() && !fileError && specialists.length && !create.isPending) create.mutate(); }}>
       <fieldset disabled={create.isPending} className="min-w-0">
       <section className="p-5 sm:p-6">
