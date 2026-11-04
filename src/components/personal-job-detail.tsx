@@ -12,6 +12,7 @@ import { leadFinding, plainRisk, priorityReview } from "@/lib/audit-risk";
 import { ExactLineChange } from "@/components/exact-line-change";
 import { proposedChangeText, reviewCopyText, submittedAuditText } from "@/lib/review-edits";
 import { SourceMetadata } from "@/components/source-metadata";
+import { SourceFiles } from "@/components/source-files";
 import { Button, LinkButton } from "@/components/ui";
 import { scheduledRunLabel } from "@/lib/audit-dispatch";
 import { apiFetch, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
@@ -143,6 +144,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
             </article>)}
           </section>}
           <PlainCheckList coverage={job.data.coverage} tasks={job.data.tasks} status={job.data.status} />
+          {job.data.sourceFiles && job.data.sourceFiles.length > 0 && <SourceFiles files={job.data.sourceFiles} />}
         </div>
         <div role="tabpanel" id="audit-advanced-panel" aria-labelledby="audit-advanced-tab" hidden={view !== "advanced"} className="space-y-6">
           <section className="audit-overview" aria-label="Audit record">

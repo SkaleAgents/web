@@ -12,6 +12,8 @@ import { SourceMetadataFields } from "@/components/source-metadata-fields";
 import { buildSourceMetadata } from "@/lib/source-metadata";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 import { GithubScanButton } from "@/components/github-scan-button";
+import { GithubPanel } from "@/components/github-panel";
+import { githubErrorMessage, needsUpgrade } from "@/lib/github";
 import { PersonalPlanNote } from "@/components/personal-plan-note";
 import { PUBLIC_DATABASE_SAMPLE, changePhrase, exactLineEdit } from "@/lib/review-edits";
 
@@ -45,6 +47,9 @@ export default function NewJobPage() {
   const [sampleLoaded, setSampleLoaded] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const submission = files.length > 0 ? joinAuditFiles(files) : content;
+  const [githubOpen, setGithubOpen] = useState(false);
+  const [githubSelection, setGithubSelection] = useState<string | null>(null);
+  const githubRef = githubOpen ? githubSelection : null;
   const [telemetry, setTelemetry] = useState("");
   const [sourceRevision, setSourceRevision] = useState("");
   const [sourceObservedAt, setSourceObservedAt] = useState("");
@@ -64,12 +69,13 @@ export default function NewJobPage() {
         }
         parsedTelemetry = parsed as Record<string, unknown>;
       }
-      const sourceMetadata = buildSourceMetadata(sourceRevision, sourceObservedAt);
+      // GitHub references take their revision from the fetch, so the caller cannot report one.
+      const sourceMetadata = githubRef ? {} : buildSourceMetadata(sourceRevision, sourceObservedAt);
       await ensureCsrfCookie();
       return apiFetch<SwarmJob>("/api/jobs", {
         method: "POST",
         body: JSON.stringify({
-          scope: { kind: "iac_text", format: "auto", content: submission },
+          scope: githubRef ? { kind: "repo_ref", format: "auto", ref: githubRef } : { kind: "iac_text", format: "auto", content: submission },
           specialists,
           ...sourceMetadata,
           ...(parsedTelemetry ? { telemetry: parsedTelemetry } : {}),
@@ -82,6 +88,8 @@ export default function NewJobPage() {
       router.push(`${jobsPath}/${job.id}`);
     },
   });
+
+  const canSubmit = Boolean(user.data) && (githubOpen ? Boolean(githubRef) : Boolean(submission.trim()) && !fileError) && specialists.length > 0 && !create.isPending;
 
   return <main className="max-w-4xl space-y-6">
     <div className="workspace-intro">
@@ -98,9 +106,11 @@ export default function NewJobPage() {
         <li><strong className="block text-ink">3. Start audit</strong>Your results open on their own page, usually within a minute.</li>
       </ol>
     </section>}
-    <form className="overflow-hidden rounded-xl border border-line bg-canvas-elevated" onSubmit={(event) => { event.preventDefault(); if (user.data && submission.trim() && !fileError && specialists.length && !create.isPending) create.mutate(); }}>
+    <form className="overflow-hidden rounded-xl border border-line bg-canvas-elevated" onSubmit={(event) => { event.preventDefault(); if (canSubmit) create.mutate(); }}>
       <fieldset disabled={create.isPending} className="min-w-0">
       <section className="p-5 sm:p-6">
+        {githubOpen && <GithubPanel onRef={setGithubSelection} onClose={() => setGithubOpen(false)} />}
+        <div hidden={githubOpen}>
         <input
           ref={fileInput}
           type="file"
@@ -145,9 +155,10 @@ export default function NewJobPage() {
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
           <Button type="button" variant="secondary" onClick={() => fileInput.current?.click()}>Upload files</Button>
           <Button type="button" variant="secondary" onClick={() => { setContent(PUBLIC_DATABASE_SAMPLE); setSampleLoaded(true); }}>Try a sample</Button>
-          <GithubScanButton />
+          <GithubScanButton onOpen={() => setGithubOpen(true)} />
         </div>
         {sampleLoaded && <p className="mt-2 text-sm text-ink-muted">This sample should report a database that is publicly accessible. <span className="font-semibold text-ink">Database publicly accessible</span> {sampleExpectation}</p>}
+        </div>
       </section>
       <fieldset className="flex flex-wrap items-center gap-2 border-t border-line px-5 py-4 sm:px-6">
         <legend className="sr-only">Review areas</legend>
@@ -189,12 +200,12 @@ export default function NewJobPage() {
       </details>
       <section className="border-t border-line bg-canvas p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" disabled={!user.data || !submission.trim() || Boolean(fileError) || specialists.length === 0 || create.isPending}>
-            {create.isPending ? "Starting audit…" : "Start audit"}
+          <Button type="submit" disabled={!canSubmit}>
+            {create.isPending ? "Starting audit…" : githubOpen ? "Scan this branch" : "Start audit"}
           </Button>
           <span className="text-xs text-ink-muted">{specialists.length === 0 ? "Select at least one review area." : "Reviews only what you provide. No findings does not mean secure."}</span>
         </div>
-        {create.isError && <p role="alert" className="mt-3 text-sm text-danger">{create.error.message}</p>}
+        {create.isError && <p role="alert" className="mt-3 text-sm text-danger">{githubErrorMessage(create.error)} {needsUpgrade(create.error) && <Link href={personalDestinationFromPath(pathname, "billing")} className="underline">Upgrade</Link>}</p>}
       </section>
       </fieldset>
     </form>

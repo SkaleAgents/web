@@ -89,3 +89,33 @@ it("does not render a before/after block when no exact rule matches", async () =
   expect(screen.queryByRole("button", { name: "Copy change" })).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Copy findings" })).toBeInTheDocument();
 });
+
+it("lists the files a GitHub scan read and why others were skipped", async () => {
+  const jobId = "00000000-0000-4000-8000-000000000001";
+  const job = {
+    id: jobId, status: "completed", requestedBy: "owner", sourcePurged: false, specialists: ["devsecops"], partial: false,
+    scope: { kind: "repo_ref", ref: "github:acme/infra@main" }, createdAt: "2026-11-04T12:00:00Z", updatedAt: "2026-11-04T12:00:00Z", findings: [],
+    sourceFiles: [
+      { path: "main.tf", status: "scanned" },
+      { path: "k8s/app.yaml", status: "scanned" },
+      { path: "big.tf", status: "skipped", reason: "too_large" },
+      { path: "extra.tf", status: "skipped", reason: "over_file_limit" },
+      { path: "more.tf", status: "skipped", reason: "over_total_limit" },
+      { path: "notes.txt", status: "skipped", reason: "unsupported" },
+      { path: "gone.tf", status: "skipped", reason: "fetch_failed" },
+    ],
+  } satisfies SwarmJob;
+  vi.stubGlobal("fetch", vi.fn(async () => Response.json(job)));
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  await setSessionUser(client, { id: "owner", displayName: "Owner", email: null, grokSubject: null });
+  render(<QueryClientProvider client={client}><PersonalJobDetail id={jobId} /></QueryClientProvider>);
+
+  const section = await screen.findByRole("region", { name: "Files reviewed" });
+  expect(section).toHaveTextContent("2 scanned, 5 skipped.");
+  expect(section).toHaveTextContent("main.tf");
+  expect(section).toHaveTextContent("big.tf: over 256 KiB");
+  expect(section).toHaveTextContent("extra.tf: over the 50-file limit");
+  expect(section).toHaveTextContent("more.tf: over the 2 MiB total");
+  expect(section).toHaveTextContent("notes.txt: not a supported format");
+  expect(section).toHaveTextContent("gone.tf: could not be read");
+});
