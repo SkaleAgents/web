@@ -91,6 +91,32 @@ For each finding:
 
 Skip formatting. Skip findings you cannot point at in the text.`,
   },
+  {
+    slug: "dependency-cve-scan",
+    title: "Dependency CVE scan",
+    summary: "A checklist and prompt for finding known CVEs in the exact package versions your lockfiles pin.",
+    audience: "You ship an app with npm, pnpm, yarn, Composer, pip, or Go dependencies and want to know which pinned versions have a published advisory.",
+    outcome: "Each vulnerable package with its CVE, severity, and the fixed version, plus a daily check that catches advisories published after you merge.",
+    checklist: [
+      "A lockfile (package-lock.json, pnpm-lock.yaml, yarn.lock, composer.lock, requirements.txt with == pins, or go.sum) is committed.",
+      "Run npx -y @skaleagents/swarm scan --cves --fail-on high on the lockfile, or paste it into the scan_dependencies tool.",
+      "Only package names and versions go to api.osv.dev. Your source and the lockfile text are not sent.",
+      "A critical or high CVE has a fixed version you can reach inside your current major version.",
+      "A scheduled GitHub workflow re-runs the scan daily, because a pull request check cannot see an advisory published later.",
+      "A CVE you accept is recorded in .skaleagents-baseline.json with a reason in the pull request, not ignored in the log.",
+    ],
+    promptTitle: "Dependency CVE scan",
+    prompt: `Check my dependencies for known CVEs with the SkaleAgents tools.
+
+Use only the lockfile I give you. If the lockfile is not in the chat, ask for it. Do not guess versions from package.json.
+
+1. Call scan_dependencies with the lockfile text and its file name. If the tool is not connected, run: npx -y @skaleagents/swarm scan --cves --fail-on high <lockfile>
+2. Report each vulnerable package once: package and version, the CVE, severity, and the fixed versions.
+3. For each critical or high finding, name the smallest upgrade that stays in my current major version, and say what else in the lockfile that upgrade pulls in.
+4. Say plainly if the lookup failed. A failed lookup is not a clean result.
+
+Skip medium and low findings unless I ask. Skip packages the tool did not check.`,
+  },
 ];
 
 export function publicResourcePath(resource: Pick<PublicResource, "slug">): string {
