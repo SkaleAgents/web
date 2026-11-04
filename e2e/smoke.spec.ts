@@ -59,7 +59,7 @@ test.describe("Phase 1 page smokes", () => {
     await page.goto("/jobs");
     await expect(page.getByRole("heading", { name: /Audit jobs/i })).toBeVisible();
     await page.getByRole("link", { name: "New audit" }).first().click();
-    await expect(page.getByRole("heading", { name: "1. Configuration" })).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "IaC content" })).toBeVisible();
     await page.getByText("Advanced options", { exact: true }).click();
     await expect(page.getByRole("textbox", { name: "Telemetry JSON" })).toBeVisible();
     await expect(page.getByRole("group", { name: "Review areas" })).toBeVisible();

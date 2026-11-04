@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
@@ -34,6 +35,7 @@ export default function NewJobPage() {
   const [content, setContent] = useState("");
   const [files, setFiles] = useState<AuditFilePart[]>([]);
   const [fileError, setFileError] = useState("");
+  const [sampleLoaded, setSampleLoaded] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const submission = files.length > 0 ? joinAuditFiles(files) : content;
   const [telemetry, setTelemetry] = useState("");
@@ -78,25 +80,18 @@ export default function NewJobPage() {
     <div className="workspace-intro">
       <LinkButton href={jobsPath} variant="ghost">Back to audit jobs</LinkButton>
       <h1 className="workspace-heading mt-3">New audit</h1>
-      <p className="mt-2 text-sm text-ink-muted">Review the infrastructure files in your codebase, or paste one definition file here.</p>
+      <p className="mt-2 text-sm text-ink-muted">Paste or upload an infrastructure file to review.</p>
       {user.data && <div className="mt-3"><PersonalPlanNote kind="audits" /></div>}
     </div>
-    <section className="rounded-xl border border-line bg-canvas-elevated p-5" aria-labelledby="codebase-heading">
-      <h2 id="codebase-heading" className="text-base font-semibold text-ink">Review the codebase</h2>
-      <p className="mt-2 text-sm text-ink-muted">Add SkaleAgents in your editor, then ask it to scan Terraform, CloudFormation, Kubernetes, Pulumi YAML, a Pulumi program, or Docker Compose in the open project. For the rest of the codebase, ask it to review application source for a disabled timeout, a one-connection pool, an unbounded retry limit, an unlimited database pool, or a root container user. The same scan reports a public database, wildcard permissions, the Docker socket, and a missing memory limit. This does not connect to a live cloud account.</p>
-      <LinkButton href="/mcp-config" className="mt-4">Set up MCP</LinkButton>
-    </section>
-      <form className="overflow-hidden rounded-xl border border-line bg-canvas-elevated" onSubmit={(event) => { event.preventDefault(); if (user.data && submission.trim() && !fileError && specialists.length && !create.isPending) create.mutate(); }}>
+    <form className="overflow-hidden rounded-xl border border-line bg-canvas-elevated" onSubmit={(event) => { event.preventDefault(); if (user.data && submission.trim() && !fileError && specialists.length && !create.isPending) create.mutate(); }}>
       <fieldset disabled={create.isPending} className="min-w-0">
-      <section className="p-5 sm:p-6" aria-labelledby="configuration-heading">
-        <h2 id="configuration-heading" className="text-base font-semibold text-ink">1. Configuration</h2>
-        <p className="mt-2 text-sm text-ink-muted">Paste your Terraform, CloudFormation, Kubernetes, or Pulumi YAML file, or a Dockerfile or GitHub Actions workflow. A review can notice a container that runs as root, a workflow that checks out pull request code from pull_request_target, and an action pinned to @main. Include the resources a reviewer needs to understand the scope.</p>
-        <p className="mt-2 text-sm text-ink-muted">Several text files can be added and each file is scanned on its own, while the paste box remains for a single snippet.</p>
+      <section className="p-5 sm:p-6">
         <input
           ref={fileInput}
           type="file"
           multiple
-          className="mt-3 block w-full text-sm text-ink file:mr-3 file:rounded-[10px] file:border file:border-line file:bg-canvas file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink"
+          className="sr-only"
+          tabIndex={-1}
           aria-label="Audit text files"
           onChange={(event) => {
             const selected = [...(event.target.files ?? [])];
@@ -107,16 +102,6 @@ export default function NewJobPage() {
             });
           }}
         />
-        {files.length > 0 && <p className="mt-2 text-xs text-ink-muted">{files.map((file) => auditFileBasename(file.name)).join(", ")}</p>}
-        {files.length > 0 && <Button type="button" variant="ghost" className="mt-2" onClick={() => { setFiles([]); setFileError(""); if (fileInput.current) fileInput.current.value = ""; }}>Remove selected files</Button>}
-        {fileError && <p role="alert" className="mt-2 text-sm text-danger">{fileError}</p>}
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Button type="button" variant="secondary" onClick={() => setContent(PUBLIC_DATABASE_SAMPLE)}>Try a sample</Button>
-          <div className="text-sm text-ink-muted">
-            <p>This sample should report a database that is publicly accessible.</p>
-            {sampleExpectation && <p className="mt-1"><span className="font-semibold text-ink">Database publicly accessible</span> {sampleExpectation}</p>}
-          </div>
-        </div>
         <textarea
           aria-hidden="true"
           readOnly
@@ -125,37 +110,47 @@ export default function NewJobPage() {
           aria-label="Audit submission content"
           value={submission}
         />
-        <textarea
-          value={content}
-          onChange={(event) => setContent(event.target.value)}
-          className="mt-4 min-h-56 w-full rounded-[10px] border border-line bg-canvas px-3 py-2 font-mono text-sm text-ink outline-none focus:border-accent"
-          placeholder={'resource "aws_security_group" "web" {}'}
-          aria-label="IaC content"
-          spellCheck={false}
-        />
-        <p className="mt-2 text-xs text-ink-muted">Checks review only the input you provide. A result with no findings does not confirm your infrastructure is secure.</p>
-      </section>
-      <section className="border-t border-line p-5 sm:p-6" aria-labelledby="checks-heading">
-        <h2 id="checks-heading" className="text-base font-semibold text-ink">2. Review checks</h2>
-        <p className="mt-2 text-sm text-ink-muted">Choose at least one area to review.</p>
-        <fieldset className="mt-4">
-          <legend className="sr-only">Review areas</legend>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            {AUDIT_SPECIALISTS.map((specialist) => (
-              <label key={specialist} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 text-sm ${specialists.includes(specialist) ? "border-accent bg-accent-soft" : "border-line"}`}>
-                <input
-                  type="checkbox"
-                  checked={specialists.includes(specialist)}
-                  onChange={(event) => setSpecialists((current) => event.target.checked
-                    ? [...current, specialist]
-                    : current.filter((item) => item !== specialist))}
-                />
-                <span><strong className="block text-ink">{specialistDetails[specialist].title}</strong><span className="mt-1 block text-ink-muted">{specialistDetails[specialist].detail}</span></span>
-              </label>
-            ))}
+        {files.length > 0 ? (
+          <div className="rounded-[10px] border border-line bg-canvas px-3 py-3 text-sm text-ink">
+            <p className="font-medium">{files.length} {files.length === 1 ? "file" : "files"} selected</p>
+            <p className="mt-1 break-words font-mono text-xs text-ink-muted">{files.map((file) => auditFileBasename(file.name)).join(", ")}</p>
+            <Button type="button" variant="ghost" className="mt-2" onClick={() => { setFiles([]); setFileError(""); if (fileInput.current) fileInput.current.value = ""; }}>Remove selected files</Button>
           </div>
-        </fieldset>
+        ) : (
+          <textarea
+            value={content}
+            onChange={(event) => { setContent(event.target.value); setSampleLoaded(false); }}
+            className="min-h-56 w-full rounded-[10px] border border-line bg-canvas px-3 py-2 font-mono text-sm text-ink outline-none focus:border-accent"
+            placeholder={'Paste Terraform, CloudFormation, Kubernetes or Pulumi YAML, a Dockerfile, or a GitHub Actions workflow'}
+            aria-label="IaC content"
+            spellCheck={false}
+          />
+        )}
+        {fileError && <p role="alert" className="mt-2 text-sm text-danger">{fileError}</p>}
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <Button type="button" variant="ghost" onClick={() => fileInput.current?.click()}>Upload files</Button>
+          <Button type="button" variant="ghost" onClick={() => { setContent(PUBLIC_DATABASE_SAMPLE); setSampleLoaded(true); }}>Try a sample</Button>
+        </div>
+        {sampleLoaded && <p className="mt-2 text-sm text-ink-muted">This sample should report a database that is publicly accessible. <span className="font-semibold text-ink">Database publicly accessible</span> {sampleExpectation}</p>}
       </section>
+      <fieldset className="flex flex-wrap items-center gap-2 border-t border-line px-5 py-4 sm:px-6">
+        <legend className="sr-only">Review areas</legend>
+        <span className="mr-1 text-sm text-ink-muted" aria-hidden="true">Review for</span>
+        {AUDIT_SPECIALISTS.map((specialist) => (
+          <label key={specialist} title={specialistDetails[specialist].detail} className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm ${specialists.includes(specialist) ? "border-accent bg-accent-soft text-ink" : "border-line text-ink-muted"}`}>
+            <input
+              type="checkbox"
+              checked={specialists.includes(specialist)}
+              aria-describedby={`audit-area-${specialist}`}
+              onChange={(event) => setSpecialists((current) => event.target.checked
+                ? [...current, specialist]
+                : current.filter((item) => item !== specialist))}
+            />
+            {specialistDetails[specialist].title}
+            <span id={`audit-area-${specialist}`} className="sr-only">{specialistDetails[specialist].detail}</span>
+          </label>
+        ))}
+      </fieldset>
       <details className="group border-t border-line px-5 py-4 sm:px-6">
         <summary className="cursor-pointer text-sm font-medium text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">Advanced options</summary>
         <p className="mt-2 text-sm text-ink-muted">Optionally add telemetry or identify the source revision for this audit.</p>
@@ -176,18 +171,17 @@ export default function NewJobPage() {
           onObservedAtChange={setSourceObservedAt}
         />
       </details>
-      <section className="border-t border-line bg-canvas p-5 sm:p-6" aria-labelledby="start-heading">
-        <h2 id="start-heading" className="text-base font-semibold text-ink">3. Start audit</h2>
-        <p className="mt-2 text-sm text-ink-muted">{specialists.length === 0 ? "Select at least one review area to continue." : `${specialists.length} review ${specialists.length === 1 ? "area" : "areas"} selected. Your audit will open with its status and results.`}</p>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+      <section className="border-t border-line bg-canvas p-5 sm:p-6">
+        <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={!user.data || !submission.trim() || Boolean(fileError) || specialists.length === 0 || create.isPending}>
             {create.isPending ? "Starting audit…" : "Start audit"}
           </Button>
-          {!submission.trim() && <span className="text-sm text-ink-muted">Add configuration to start.</span>}
+          <span className="text-xs text-ink-muted">{specialists.length === 0 ? "Select at least one review area." : "Reviews only what you provide. No findings does not mean secure."}</span>
         </div>
         {create.isError && <p role="alert" className="mt-3 text-sm text-danger">{create.error.message}</p>}
       </section>
       </fieldset>
-      </form>
+    </form>
+    <p className="text-sm text-ink-muted">Auditing a whole repo? Run it from your editor. <Link href="/mcp-config" className="font-medium text-accent underline">Set up MCP</Link></p>
   </main>;
 }

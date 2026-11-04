@@ -12,20 +12,15 @@ vi.mock("next/navigation", () => ({
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
-it("asks for a codebase review before a pasted infrastructure file", async () => {
+it("leads with the paste box and keeps the MCP route as a footer link", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => Response.json({})));
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(<QueryClientProvider client={client}><NewJobPage /></QueryClientProvider>);
 
-  expect(screen.getByRole("heading", { name: "Review the codebase" })).toBeInTheDocument();
-  expect(screen.getByText(/Pulumi program, or Docker Compose/)).toBeInTheDocument();
-  expect(screen.getByText(/unlimited database pool, or a root container user/)).toBeInTheDocument();
-  expect(screen.getByText(/public database, wildcard permissions, the Docker socket/)).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "Set up MCP" })).toHaveAttribute("href", "/mcp-config");
   expect(screen.getByRole("textbox", { name: "IaC content" })).toBeInTheDocument();
-  expect(screen.getByText(/Paste your Terraform, CloudFormation, Kubernetes, or Pulumi YAML file, or a Dockerfile or GitHub Actions workflow/)).toBeInTheDocument();
-  expect(screen.getByText("Several text files can be added and each file is scanned on its own, while the paste box remains for a single snippet.")).toBeInTheDocument();
-  expect(screen.getByText(/a container that runs as root/)).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Set up MCP" })).toHaveAttribute("href", "/mcp-config");
+  expect(screen.getByRole("group", { name: "Review areas" })).toBeInTheDocument();
+  expect(screen.queryByRole("heading", { name: "Review the codebase" })).not.toBeInTheDocument();
 });
 
 it("fills the paste box from Try a sample without submitting", async () => {
@@ -33,10 +28,11 @@ it("fills the paste box from Try a sample without submitting", async () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(<QueryClientProvider client={client}><NewJobPage /></QueryClientProvider>);
   expect(screen.getByLabelText("Audit text files")).toBeInTheDocument();
-  expect(screen.getByText("This sample should report a database that is publicly accessible.")).toBeInTheDocument();
-  expect(screen.getByText("Database publicly accessible")).toBeInTheDocument();
-  expect(screen.getByText("publicly_accessible = true becomes publicly_accessible = false")).toBeInTheDocument();
+  expect(screen.queryByText("Database publicly accessible")).not.toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: "Try a sample" }));
+  expect(screen.getByText(/This sample should report a database that is publicly accessible/)).toBeInTheDocument();
+  expect(screen.getByText("Database publicly accessible")).toBeInTheDocument();
+  expect(screen.getByText(/publicly_accessible = true becomes publicly_accessible = false/)).toBeInTheDocument();
   expect(screen.getByRole("textbox", { name: "IaC content" })).toHaveValue([
     'resource "aws_db_instance" "app" {',
     "  publicly_accessible = true",
@@ -66,5 +62,7 @@ it("fills the audit submission with both file markers after two files are chosen
       "",
     ].join("\n"));
   });
-  expect(screen.getByRole("textbox", { name: "IaC content" })).toHaveValue("");
+  expect(screen.getByText("2 files selected")).toBeInTheDocument();
+  expect(screen.getByText("Dockerfile, main.tf")).toBeInTheDocument();
+  expect(screen.queryByRole("textbox", { name: "IaC content" })).not.toBeInTheDocument();
 });
