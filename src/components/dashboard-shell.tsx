@@ -12,6 +12,7 @@ import { AccountMenu } from "@/components/account-menu";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { apiFetch } from "@/lib/api";
 import { dashboardDestination, organizationHref, resolveOrganization, personalOrganizationId, scopeFromPath } from "@/lib/dashboard-routes";
+import { StagingBanner } from "@/components/staging-banner";
 import { OrganizationSwitcher, type OrganizationMembership } from "@/components/organization-switcher";
 
 import { OrganizationScopeContext } from "@/components/organization-scope";
@@ -167,6 +168,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </nav>
     </aside>
     <div className="dashboard-main">
+      <StagingBanner />
       <header className="dashboard-toolbar">
         <div className="flex min-w-0 items-center gap-2 text-sm">
           <button ref={menuToggle} type="button" className="dashboard-menu-toggle"
