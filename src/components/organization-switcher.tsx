@@ -14,6 +14,9 @@ export type OrganizationMembership = {
   plan?: string;
 };
 
+// Max and custom plans have nothing higher to buy, and only owners can change a plan.
+const upgradablePlans = ["free", "starter", "pro"];
+
 export function planLabel(plan?: string): string {
   return plan ? `${plan.charAt(0).toUpperCase()}${plan.slice(1)} plan` : "";
 }
@@ -60,6 +63,8 @@ export function OrganizationSwitcher({ scope, pathname, memberships, personName 
       onClick={() => setOpen(value => !value)}>
       {current && avatar(current)}<span className="scope-switcher-text"><span className="truncate">{label}</span>{current?.plan && <span className="scope-plan">{planLabel(current.plan)}</span>}</span>
     </button>
+    {current?.role === "owner" && current.plan && upgradablePlans.includes(current.plan) &&
+      <Link href={organizationHref(current, "billing")} className="scope-upgrade">Upgrade</Link>}
     {open && <div id="scope-switcher-options" className="scope-switcher-options" aria-label="Choose scope">
       {memberships.map(item => <Link key={item.id} href={targetPath(item)}
         aria-current={current?.id === item.id ? "page" : undefined}

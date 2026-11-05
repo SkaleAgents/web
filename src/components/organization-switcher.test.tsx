@@ -36,3 +36,19 @@ it("shows no plan line when the API sends none", () => {
   render(<OrganizationSwitcher scope={{ kind: "organization", id: memberships[1].id }} pathname="/org/acme/jobs" memberships={memberships} />);
   expect(screen.getByRole("button", { name: "Acme, switch scope" })).not.toHaveTextContent("plan");
 });
+
+it("offers a small Upgrade link to owners on a plan that can be upgraded", () => {
+  const withPlans = [{ ...memberships[0], plan: "free" }, { ...memberships[1], plan: "pro" }];
+  render(<OrganizationSwitcher scope={{ kind: "organization", id: memberships[1].id }} pathname="/org/acme/jobs" memberships={withPlans} />);
+  expect(screen.getByRole("link", { name: "Upgrade" })).toHaveAttribute("href", "/org/acme/billing");
+});
+
+it("hides Upgrade on the top plan, for non-owners and when the plan is unknown", () => {
+  const scope = { kind: "organization" as const, id: memberships[1].id };
+  const { rerender } = render(<OrganizationSwitcher scope={scope} pathname="/org/acme/jobs" memberships={[memberships[0], { ...memberships[1], plan: "max" }]} />);
+  expect(screen.queryByRole("link", { name: "Upgrade" })).toBeNull();
+  rerender(<OrganizationSwitcher scope={scope} pathname="/org/acme/jobs" memberships={[memberships[0], { ...memberships[1], plan: "free", role: "member" }]} />);
+  expect(screen.queryByRole("link", { name: "Upgrade" })).toBeNull();
+  rerender(<OrganizationSwitcher scope={scope} pathname="/org/acme/jobs" memberships={memberships} />);
+  expect(screen.queryByRole("link", { name: "Upgrade" })).toBeNull();
+});
