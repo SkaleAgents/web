@@ -32,7 +32,7 @@ test("owners delete an organization after typing its name; blockers are listed",
   await expect(page.getByRole("alert").filter({ hasText: "can't be deleted yet" })).toContainText("Delete the organization's 3 audits first.");
   await button.click();
   await expect(page.getByText("Binary Labs was deleted.")).toBeVisible();
-  await expect(page).toHaveURL(/\/org\/personal$/);
+  await expect(page).toHaveURL(new RegExp(`/org/${pid}$`));
   await page.getByRole("button", { name: "Collapse sidebar" }).click();
   await expect(page.getByRole("link", { name: "Dashboard", exact: true }).locator("svg rect")).toHaveCount(4);
 });

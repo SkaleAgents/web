@@ -12,7 +12,8 @@ export function resolveOrganization<T extends { id: string; slug?: string | null
 }
 
 export function organizationHref(organization: { id: string; slug?: string | null }, section = ""): string {
-  return organizationPath(organization.slug && slugPattern.test(organization.slug) ? organization.slug : organization.id, section);
+  // Links use the id; an older slug link still resolves and is replaced with the id link.
+  return organizationPath(organization.id, section);
 }
 
 export function personalOrganizationId(memberships: OrganizationIdentity[]): string | null {

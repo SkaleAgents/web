@@ -21,28 +21,28 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/bots", route => route.fulfill({ json: { bots: [] } }));
 });
 
-test("slug dashboard uses UUID API identity and emits canonical links", async ({ page }) => {
+test("a slug link opens the dashboard with the UUID API identity and emits id links", async ({ page }) => {
   const wrong: string[] = [];
   page.on("request", request => { if (request.url().includes("/api/workspaces/binary-labs")) wrong.push(request.url()); });
   await page.goto("/org/binary-labs");
   await expect(page.getByRole("heading", { name: "Binary Labs", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Organization settings" })).toHaveAttribute("href", "/org/binary-labs/settings");
+  await expect(page.getByRole("link", { name: "Organization settings" })).toHaveAttribute("href", `/org/${id}/settings`);
   await page.getByRole("link", { name: "Organization settings" }).click();
   await expect(page.getByRole("heading", { name: "Organization settings" })).toBeVisible();
   expect(wrong).toEqual([]);
 });
 
-test("old UUID bookmark preserves suffix query and fragment", async ({ page }) => {
-  await page.goto(`/org/${id}/settings?tab=members#details`);
-  await expect(page).toHaveURL("/org/binary-labs/settings?tab=members#details");
+test("an older slug link is replaced by the id link, keeping suffix, query and fragment", async ({ page }) => {
+  await page.goto("/org/binary-labs/settings?tab=members#details");
+  await expect(page).toHaveURL(`/org/${id}/settings?tab=members#details`);
   await expect(page.getByRole("heading", { name: "Organization settings" })).toBeVisible();
 });
 
-test("personal login and organization switcher use slugs", async ({ page }) => {
+test("personal login and organization switcher use ids", async ({ page }) => {
   await page.goto("/login?next=%2Fdashboard%2Fjobs");
-  await expect(page).toHaveURL("/org/personal-owner/jobs");
+  await expect(page).toHaveURL(`/org/${personalOrganizationId}/jobs`);
   await page.getByRole("button", { name: "Personal, switch scope" }).click();
-  await expect(page.getByRole("link", { name: "Binary Labs", exact: true })).toHaveAttribute("href", "/org/binary-labs/jobs");
+  await expect(page.getByRole("link", { name: "Binary Labs", exact: true })).toHaveAttribute("href", `/org/${id}/jobs`);
 });
 
 test("unknown and revoked slugs do not mount organization data", async ({ page }) => {
@@ -94,13 +94,13 @@ test("switching slugs clears the previous organization before access resolves", 
   await expect(page.getByRole("heading", { name: "Binary Labs", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Binary Labs, switch scope" }).click();
   await page.getByRole("link", { name: "Other Team", exact: true }).click();
-  await expect(page).toHaveURL("/org/other-team");
+  await expect(page).toHaveURL(`/org/${second.id}`);
   await expect(page.getByRole("status", { name: "Loading page" })).toBeVisible();
   await expect(page.getByText("Checking organization access", { exact: false })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Binary Labs", exact: true })).toHaveCount(0);
   release();
   await expect(page.getByRole("heading", { name: "Other Team", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Organization settings" })).toHaveAttribute("href", "/org/other-team/settings");
+  await expect(page.getByRole("link", { name: "Organization settings" })).toHaveAttribute("href", `/org/${second.id}/settings`);
 });
 
 test("warm settings cache stays hidden after same-organization access is revoked", async ({ page }) => {
@@ -116,11 +116,11 @@ test("warm settings cache stays hidden after same-organization access is revoked
   await page.goto("/org/binary-labs/settings");
   await expect(page.getByText("sensitive@example.test", { exact: true })).toBeVisible();
   await page.locator('.dashboard-brand a').click();
-  await expect(page).toHaveURL("/org/binary-labs");
+  await expect(page).toHaveURL(`/org/${id}`);
   await expect(page.getByRole("heading", { name: "Binary Labs", exact: true })).toBeVisible();
   revoked = true;
   await page.getByRole("link", { name: "Organization settings" }).click();
-  await expect(page).toHaveURL("/org/binary-labs/settings");
+  await expect(page).toHaveURL(`/org/${id}/settings`);
   await expect(page.locator("main[role=alert]")).toContainText("Organization unavailable");
   await expect(page.getByText("sensitive@example.test", { exact: true })).toHaveCount(0);
   expect(checksAfterRevocation).toBeGreaterThan(0);
@@ -139,7 +139,7 @@ test("navigation keeps the dashboard frame while access loads only inside conten
   await page.getByRole("button", { name: "Collapse sidebar", exact: true }).click();
   hold = true;
   await page.getByRole("link", { name: "Organization settings" }).click();
-  await expect(page).toHaveURL("/org/binary-labs/settings");
+  await expect(page).toHaveURL(`/org/${id}/settings`);
   await expect(page.getByRole("status", { name: "Loading page" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "General", exact: true })).toBeVisible();
   await page.screenshot({ path: test.info().outputPath("dashboard-loading.png") });
@@ -162,7 +162,7 @@ test("account pages share dashboard chrome and keep the organization you came fr
   await expect(page.getByRole('heading', { name: 'Passkeys', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Expand sidebar' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Binary Labs, switch scope' })).toBeVisible();
-  await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Audit retention', exact: true })).toHaveAttribute('href', '/org/binary-labs/settings/retention');
+  await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Audit retention', exact: true })).toHaveAttribute('href', `/org/${id}/settings/retention`);
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Passkeys', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Docs (opens in a new tab)' })).toBeVisible();
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Help', exact: true })).toHaveAttribute('href', '/contact');
@@ -182,7 +182,7 @@ test("team settings and personal account settings are separate groups with their
   await expect(nav.getByRole("button", { name: "Account", exact: true })).toHaveAttribute("aria-expanded", "false");
   await expect(nav.getByRole("link", { name: "Audit retention", exact: true })).toHaveAttribute("aria-current", "page");
   await expect(nav.getByRole("link", { name: "General", exact: true })).not.toHaveAttribute("aria-current", "page");
-  await expect(nav.getByRole("link", { name: "MCP connections", exact: true })).toHaveAttribute("href", "/org/binary-labs/mcp-config");
+  await expect(nav.getByRole("link", { name: "MCP connections", exact: true })).toHaveAttribute("href", `/org/${id}/mcp-config`);
   const groups = await nav.locator(".dashboard-nav-label").allTextContents();
   expect(groups.map(label => label.replace("⌄", "").trim())).toEqual(["Your work", "Settings", "Organizations", "Account"]);
   await nav.getByRole("button", { name: "Organizations" }).click();
@@ -207,7 +207,7 @@ test("team settings and personal account settings are separate groups with their
   await page.getByRole("link", { name: "+ Create organization" }).click();
   await expect(page).toHaveURL("/organizations#create-organization");
   await expect(page.locator(".dashboard-toolbar").getByRole("button", { name: /switch scope/ })).toHaveCount(0);
-  await expect(nav.getByRole("link", { name: "Dashboard", exact: true })).toHaveAttribute("href", "/org/binary-labs");
+  await expect(nav.getByRole("link", { name: "Dashboard", exact: true })).toHaveAttribute("href", `/org/${id}`);
   await page.goto("/account/settings");
   await expect(page).toHaveURL("/account/passkeys");
   await page.goto("/account/security");

@@ -12,7 +12,7 @@ const memberships: OrganizationMembership[] = [
 it("switches organizations and offers to create one", () => {
   render(<OrganizationSwitcher scope={{ kind: "organization", id: "0198f0b0-0000-7000-8000-000000000002" }} pathname="/org/acme/jobs" memberships={memberships} />);
   fireEvent.click(screen.getByRole("button", { name: "Acme, switch scope" }));
-  expect(screen.getByRole("link", { name: "Personal" })).toHaveAttribute("href", "/org/my-space/jobs");
+  expect(screen.getByRole("link", { name: "Personal" })).toHaveAttribute("href", `/org/${memberships[0].id}/jobs`);
   expect(screen.getByRole("link", { name: "Acme" })).toHaveAttribute("aria-current", "page");
   expect(screen.getByRole("link", { name: "+ Create organization" })).toHaveAttribute("href", "/organizations#create-organization");
 });
@@ -40,7 +40,7 @@ it("shows no plan line when the API sends none", () => {
 it("offers a small Upgrade link to owners on a plan that can be upgraded", () => {
   const withPlans = [{ ...memberships[0], plan: "free" }, { ...memberships[1], plan: "pro" }];
   render(<OrganizationSwitcher scope={{ kind: "organization", id: memberships[1].id }} pathname="/org/acme/jobs" memberships={withPlans} />);
-  expect(screen.getByRole("link", { name: "Upgrade" })).toHaveAttribute("href", "/org/acme/billing");
+  expect(screen.getByRole("link", { name: "Upgrade" })).toHaveAttribute("href", `/org/${memberships[1].id}/billing`);
 });
 
 it("hides Upgrade on the top plan, for non-owners and when the plan is unknown", () => {

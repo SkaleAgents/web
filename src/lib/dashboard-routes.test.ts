@@ -32,18 +32,18 @@ describe("dashboard routes", () => {
 });
 
 
-it("resolves member slugs without changing internal identity", () => {
+it("resolves an older slug link but always links by id", () => {
   const member = { id: org, kind: "personal" as const, slug: "binary-labs" };
-  expect(organizationHref(member, "settings")).toBe("/org/binary-labs/settings");
+  expect(organizationHref(member, "settings")).toBe(`/org/${org}/settings`);
   expect(resolveOrganization("binary-labs", [member])?.id).toBe(org);
   expect(resolveOrganization(org, [member])?.id).toBe(org);
   expect(resolveOrganization("unknown", [member])).toBeUndefined();
   expect(organizationHref({ id: org })).toBe(`/org/${org}`);
   expect(dashboardDestination(`/org/${org}/jobs/job-a?view=details#result`, org, [member]))
-    .toBe("/org/binary-labs/jobs/job-a?view=details#result");
-  expect(dashboardDestination("/org/binary-labs/settings", org, [member])).toBe("/org/binary-labs/settings");
-  expect(dashboardDestination("/org/other-team/jobs", org, [member])).toBe("/org/binary-labs");
-  expect(dashboardDestination("/dashboard/jobs", org, [member])).toBe("/org/binary-labs/jobs");
+    .toBe(`/org/${org}/jobs/job-a?view=details#result`);
+  expect(dashboardDestination("/org/binary-labs/settings", org, [member])).toBe(`/org/${org}/settings`);
+  expect(dashboardDestination("/org/other-team/jobs", org, [member])).toBe(`/org/${org}`);
+  expect(dashboardDestination("/dashboard/jobs", org, [member])).toBe(`/org/${org}/jobs`);
 });
 
 
@@ -57,6 +57,6 @@ it("rejects malformed slugs and external encoded destinations", () => {
   }
   const member = { id: org, kind: "personal" as const, slug: "my-org" };
   for (const destination of ["%2F%2Fevil.example", "/%2Fevil.example", "https://evil.example/org/my-org"]) {
-    expect(dashboardDestination(destination, org, [member])).toBe("/org/my-org");
+    expect(dashboardDestination(destination, org, [member])).toBe(`/org/${org}`);
   }
 });
