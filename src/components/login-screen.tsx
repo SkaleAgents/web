@@ -51,9 +51,11 @@ export function LoginScreen({ reauthenticate = false, oauth = false, finishConne
     if (!error.endsWith("link_sent")) toast.error(
       error === "invalid_state"
         ? "Your sign-in expired. Please try again."
-        : error.endsWith("not_configured")
-          ? `${provider} sign-in isn't available yet. Try another option.`
-          : `${provider} sign-in failed. If this email already has an account, sign in the way you did before.`,
+        : error === "signup_restricted"
+          ? "Sign-ups are limited to approved email domains right now."
+          : error.endsWith("not_configured")
+            ? `${provider} sign-in isn't available yet. Try another option.`
+            : `${provider} sign-in failed. If this email already has an account, sign in the way you did before.`,
     );
     const next = new URLSearchParams();
     if (current.get("oauth") === "1") next.set("oauth", "1");

@@ -1,6 +1,7 @@
 import { siteJsonLd } from "@/lib/ai-corpus";
 import { CONSULTANCY_BOOKING_URL } from "@/lib/consultancy-link";
 import { ConsentGate } from "@/components/consent-gate";
+import { StagingBanner } from "@/components/staging-banner";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
@@ -94,6 +95,7 @@ export default function RootLayout({
         />
       </head>
       <body className="flex min-h-screen flex-col bg-canvas text-ink">
+        <StagingBanner />
         {showDevelopmentWarning ? (
           <div
             role="status"
