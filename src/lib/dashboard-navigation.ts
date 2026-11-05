@@ -49,7 +49,8 @@ export function navigationSections({ workspace, root }: { workspace?: Navigation
       { href: `${root}/studio`, label: "Creator Studio" },
       { href: `${root}/prompts`, label: "My prompts" },
     ] },
-    { label: "Settings", items: [{ href: `${root}/mcp-config`, label: "MCP connections" }] },
+    // Plans belong to organizations; this page lists the ones you own and explains how to start one.
+    { label: "Settings", items: [{ href: `${root}/mcp-config`, label: "MCP connections" }, { href: `${root}/billing`, label: "Billing" }] },
     organizations,
     account,
   ];

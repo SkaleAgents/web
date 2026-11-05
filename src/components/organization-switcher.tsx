@@ -11,7 +11,12 @@ export type OrganizationMembership = {
   name: string;
   role: "owner" | "member" | "viewer";
   kind: "personal" | "team";
+  plan?: string;
 };
+
+export function planLabel(plan?: string): string {
+  return plan ? `${plan.charAt(0).toUpperCase()}${plan.slice(1)} plan` : "";
+}
 
 export function OrganizationSwitcher({ scope, pathname, memberships, personName = "" }: {
   scope: DashboardScope;
@@ -53,12 +58,12 @@ export function OrganizationSwitcher({ scope, pathname, memberships, personName 
     <button ref={trigger} type="button" className="scope-switcher-trigger"
       aria-label={`${label}, switch scope`} aria-expanded={open} aria-controls="scope-switcher-options"
       onClick={() => setOpen(value => !value)}>
-      {current && avatar(current)}<span className="truncate">{label}</span>
+      {current && avatar(current)}<span className="scope-switcher-text"><span className="truncate">{label}</span>{current?.plan && <span className="scope-plan">{planLabel(current.plan)}</span>}</span>
     </button>
     {open && <div id="scope-switcher-options" className="scope-switcher-options" aria-label="Choose scope">
       {memberships.map(item => <Link key={item.id} href={targetPath(item)}
         aria-current={current?.id === item.id ? "page" : undefined}
-        onClick={() => setOpen(false)}>{avatar(item)}<span className="truncate">{item.name}</span></Link>)}
+        onClick={() => setOpen(false)}>{avatar(item)}<span className="scope-switcher-text"><span className="truncate">{item.name}</span>{item.plan && <span className="scope-plan">{planLabel(item.plan)}</span>}</span></Link>)}
       <Link href="/organizations#create-organization" className="scope-switcher-create" onClick={() => setOpen(false)}>+ Create organization</Link>
     </div>}
   </div>;

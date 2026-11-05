@@ -285,3 +285,16 @@ it("does not substitute another owner's billing when the URL names an unavailabl
   expect(await screen.findByRole("alert")).toHaveTextContent("Billing unavailable");
   expect(apiFetch).not.toHaveBeenCalledWith("/api/workspaces/org-1/billing", expect.anything());
 });
+
+it("explains that plans belong to organizations when the person owns none", async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
+  vi.mocked(apiFetch).mockImplementation(async (path) => {
+    if (path === "/api/workspaces") return { data: [{ id: "me", name: "Personal", kind: "personal", role: "owner" }] } as never;
+    if (path === "/api/organization-plans") return plans as never;
+    throw new Error(`Unexpected request: ${path}`);
+  });
+  render(<QueryClientProvider client={client}><OrganizationBillingView /></QueryClientProvider>);
+  expect(await screen.findByText(/Plans belong to organizations/)).toBeVisible();
+  expect(screen.getByRole("link", { name: "Create an organization" })).toHaveAttribute("href", "/organizations#create-organization");
+});

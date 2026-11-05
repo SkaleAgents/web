@@ -22,3 +22,17 @@ it("sends Personal settings to Account passkeys", () => {
   fireEvent.click(screen.getByRole("button", { name: "Acme, switch scope" }));
   expect(screen.getByRole("link", { name: "Personal" })).toHaveAttribute("href", "/account/passkeys");
 });
+
+it("shows the plan under each organization name", () => {
+  const withPlans = [{ ...memberships[0], plan: "free" }, { ...memberships[1], plan: "pro" }];
+  render(<OrganizationSwitcher scope={{ kind: "organization", id: memberships[1].id }} pathname="/org/acme/jobs" memberships={withPlans} />);
+  const trigger = screen.getByRole("button", { name: "Acme, switch scope" });
+  expect(trigger).toHaveTextContent("Pro plan");
+  fireEvent.click(trigger);
+  expect(screen.getByRole("link", { name: /^Personal\s*Free plan$/ })).toBeVisible();
+});
+
+it("shows no plan line when the API sends none", () => {
+  render(<OrganizationSwitcher scope={{ kind: "organization", id: memberships[1].id }} pathname="/org/acme/jobs" memberships={memberships} />);
+  expect(screen.getByRole("button", { name: "Acme, switch scope" })).not.toHaveTextContent("plan");
+});

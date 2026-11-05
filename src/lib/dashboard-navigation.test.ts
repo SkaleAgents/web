@@ -23,6 +23,7 @@ describe("navigationSections", () => {
   it("gives Personal its build tools and links Organizations to its own page from any scope", () => {
     const personal = navigationSections({ workspace: { kind: "personal", role: "owner" }, root: "/org/me" });
     expect(personal.map(section => section.label)).toEqual(["Your work", "Build", "Settings", "Organizations", "Account"]);
+    expect(personal[2].items).toEqual([{ href: "/org/me/mcp-config", label: "MCP connections" }, { href: "/org/me/billing", label: "Billing" }]);
     const team = navigationSections({ workspace: { kind: "team", role: "owner" }, root: "/org/acme" });
     expect(team[2].items[0].href).toBe("/organizations");
     expect(team.flatMap(section => section.items).find(item => item.label === "Passkeys")?.href).toBe("/account/passkeys");
