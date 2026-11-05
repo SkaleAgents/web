@@ -133,18 +133,9 @@ test("dashboard has its own navigation and keeps the public shell on public page
   const before = await sidebar.boundingBox();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   expect((await sidebar.boundingBox())!.y).toBe(before!.y);
-  const publicLink = sidebar.getByRole("link", { name: "Visit public site (opens in a new tab)", exact: true });
-  await expect(publicLink).toHaveAttribute("target", "_blank");
-  await expect(publicLink).toContainText("↗");
-  const popupPromise = page.waitForEvent("popup");
-  await publicLink.click();
-  const publicPage = await popupPromise;
-  await expect(publicPage).toHaveURL(/\/$/);
-  await expect(publicPage.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
-  await expect(publicPage.getByRole("contentinfo")).toBeVisible();
-  await expect(page).toHaveURL(/\/org\/[^/]+$/);
-  await expect(sidebar).toBeVisible();
-  await publicPage.close();
+  await expect(sidebar.getByRole("link", { name: /Visit public site/ })).toHaveCount(0);
+  await expect(sidebar.getByRole("link", { name: "Help", exact: true })).toBeVisible();
+  await expect(sidebar.getByRole("link", { name: /^Docs/ })).toBeVisible();
 });
 
 test("sign-in is a focused entry point with a way back to the public site", async ({ page }) => {

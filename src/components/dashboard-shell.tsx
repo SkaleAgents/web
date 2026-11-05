@@ -139,6 +139,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <nav ref={navigation} aria-label="Dashboard navigation" className="dashboard-navigation">
         <div className="dashboard-brand">
           <span className="dashboard-brand-logo"><BrandLogo href={root} /></span>
+          <ThemeSwitcher align="start" side="bottom" />
         </div>
         <div id="dashboard-sections" className={`dashboard-sections ${menuOpen ? "is-open" : ""}`}>
           <div className="dashboard-section-list">
@@ -157,12 +158,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <DashboardIcon href="/docs" /><span className="dashboard-nav-text">Docs</span>
             </a>
             <Link href="/contact" onClick={closeMenu} className="dashboard-nav-item" aria-label="Help" title="Help"><DashboardIcon href="/help" /><span className="dashboard-nav-text">Help</span></Link>
-            <a href="/" target="_blank" rel="noopener noreferrer" onClick={closeMenu} className="dashboard-nav-item" aria-label="Visit public site (opens in a new tab)" title="Visit public site (opens in a new tab)"><DashboardIcon href="/site" /><span className="dashboard-nav-text">Visit public site <span aria-hidden="true">↗</span></span></a>
           </div>
         </div>
         <div className="dashboard-sidebar-account">
           <AccountMenu key={user.data.id} user={user.data} showName />
-          <ThemeSwitcher align="start" side="top" />
         </div>
       </nav>
     </aside>
@@ -193,7 +192,6 @@ function DashboardIcon({ href }: { href: string }) {
   const paths: Record<string, React.ReactNode> = {
     docs: <><path d="M12 5C8 2 4 3 3 4v15c3-2 6-1 9 1 3-2 6-3 9-1V4c-1-1-5-2-9 1Zm0 0v15" /></>,
     help: <><circle cx="12" cy="12" r="9" /><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 4m0 3h.01" /></>,
-    site: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a18 18 0 0 1 0 18 18 18 0 0 1 0-18Z" /></>,
     dashboard: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>,
     jobs: <><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V2h6v2m-7 8 3 3 5-6" /></>,
     schedules: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 2v6m10-6v6M3 10h18m-13 5h2m4 0h2" /></>,
