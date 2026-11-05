@@ -17,7 +17,7 @@ import { OrganizationSwitcher, type OrganizationMembership } from "@/components/
 
 import { OrganizationScopeContext } from "@/components/organization-scope";
 
-import { activeNavigationHref, groupExpanded, navigationSections, rememberedOrganization, rememberOrganization, type NavigationItem } from "@/lib/dashboard-navigation";
+import { activeNavigationHref, groupExpanded, homeOrganization, navigationSections, rememberedOrganization, rememberOrganization, type NavigationItem } from "@/lib/dashboard-navigation";
 
 const noop = () => () => {};
 
@@ -63,7 +63,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user.data || !legacy || !memberships.isSuccess || !personalId) return;
     const next = new URLSearchParams(window.location.search).get("next");
-    router.replace(dashboardDestination(next ?? pathname + window.location.search + window.location.hash, personalId, memberships.data));
+    // A bare /dashboard is the sign-in landing: reopen the organization opened last in this browser, if the person still belongs to it.
+    const last = !next && pathname === "/dashboard" ? memberships.data?.find(item => item.id === homeOrganization()) : undefined;
+    router.replace(last ? organizationHref(last) : dashboardDestination(next ?? pathname + window.location.search + window.location.hash, personalId, memberships.data));
   }, [user.data, legacy, memberships.isSuccess, memberships.data, pathname, personalId, router]);
 
   const isOrganizations = pathname === "/organizations";

@@ -3,10 +3,17 @@ export type NavigationSection = { label: string; items: NavigationItem[] };
 type NavigationWorkspace = { kind: "personal" | "team"; role: "owner" | "member" | "viewer" };
 
 const LAST_ORGANIZATION = "skale:last-organization";
+const HOME_ORGANIZATION = "skale:home-organization";
 
 // Account and Organizations pages have no organization in the URL, so they reuse the one the person came from.
 export function rememberOrganization(id: string) {
   sessionStorage.setItem(LAST_ORGANIZATION, id);
+  try { localStorage.setItem(HOME_ORGANIZATION, id); } catch { /* Without storage the next sign-in opens Personal. */ }
+}
+
+// shortcut: the organization last opened in this browser, not an account setting; move it to the API if people ask for one that follows them across devices.
+export function homeOrganization(): string | null {
+  try { return localStorage.getItem(HOME_ORGANIZATION); } catch { return null; }
 }
 
 export function rememberedOrganization(): string | null {
