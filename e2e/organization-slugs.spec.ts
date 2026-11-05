@@ -45,6 +45,15 @@ test("personal login and organization switcher use ids", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Binary Labs", exact: true })).toHaveAttribute("href", `/org/${id}/jobs`);
 });
 
+test("a bare dashboard visit reopens the organization used last, and Personal when none", async ({ page }) => {
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(`/org/${personalOrganizationId}`);
+  await page.goto(`/org/${id}`);
+  await expect(page.getByRole("heading", { name: "Binary Labs", exact: true })).toBeVisible();
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(`/org/${id}`);
+});
+
 test("unknown and revoked slugs do not mount organization data", async ({ page }) => {
   const requests: string[] = [];
   page.on("request", request => { if (request.url().includes("/api/workspaces/")) requests.push(request.url()); });
