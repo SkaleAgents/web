@@ -128,7 +128,9 @@ body:has(.passkey-prompt-dialog[open]) {
 .scope-avatar { flex-basis: 1.5rem; width: 1.5rem; height: 1.5rem; font-size: 0.6rem; background: var(--accent-soft); color: var(--ink); }
 .scope-switcher-options a { display: flex; align-items: center; gap: 0.6rem; }
 .scope-switcher-text { display: flex; min-width: 0; flex-direction: column; text-align: left; line-height: 1.2; }
-.scope-plan { overflow: hidden; color: var(--ink-muted); font-size: 0.7rem; font-weight: 500; text-overflow: ellipsis; }
+.scope-plan { overflow: hidden; color: var(--ink-muted); font-size: 0.625rem; font-weight: 500; text-overflow: ellipsis; }
+.scope-upgrade { flex-shrink: 0; border: 1px solid var(--line); border-radius: 999px; padding: 0.1rem 0.5rem; color: var(--ink); font-size: 0.6875rem; font-weight: 600; line-height: 1.3; white-space: nowrap; }
+.scope-upgrade:hover { background: var(--accent-soft); }
 .account-nav-identity { display: flex; min-width: 0; flex-direction: column; text-align: left; line-height: 1.25; font-size: 0.8125rem; }
 .account-nav-panel { position: absolute; top: calc(100% + 0.75rem); right: 0; width: min(16rem, calc(100vw - 3rem)); padding: 0.4rem; border: 1px solid var(--line); border-radius: 12px; background: var(--canvas-elevated); box-shadow: 0 16px 40px rgb(0 0 0 / 12%); }
 .account-nav-item { display: flex; align-items: center; gap: 0.65rem; width: 100%; padding: 0.75rem; border-radius: 8px; color: var(--ink); text-align: left; cursor: pointer; }
@@ -495,7 +497,7 @@ a.directory-pill:hover { color: var(--ink); text-decoration: underline; }
 .dashboard-frame.is-collapsed .dashboard-nav-group + .dashboard-nav-group { margin-top: 0.5rem; border-top: 1px solid var(--line); padding-top: 0.5rem; }
 .dashboard-frame.is-collapsed .dashboard-nav-item { justify-content: center; padding-inline: 0; }
 .dashboard-toolbar { position: sticky; top: 0; z-index: 40; display: flex; min-height: 76px; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--line); background: var(--canvas-elevated); padding: 0.75rem 2rem; }
-.scope-switcher { position: relative; min-width: 0; }
+.scope-switcher { position: relative; display: flex; min-width: 0; align-items: center; gap: 0.25rem; }
 .scope-switcher-trigger { display: flex; max-width: min(42vw, 18rem); align-items: center; gap: 0.5rem; border-radius: 6px; padding: 0.45rem 0.6rem; color: var(--ink); font-weight: 600; cursor: pointer; }
 .scope-switcher-trigger::after { width: 6px; height: 6px; flex-shrink: 0; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; content: ""; transform: rotate(45deg) translateY(-2px); }
 .scope-switcher-trigger:hover, .scope-switcher-trigger[aria-expanded="true"] { background: var(--canvas); }
