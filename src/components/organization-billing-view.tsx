@@ -2,11 +2,9 @@
 
 import { useOrganizationRoot } from "./organization-scope";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Button, TextInput } from "@/components/ui";
-import { organizationHref } from "@/lib/dashboard-routes";
+import { Button } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 
@@ -70,7 +68,8 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
     queryKey: ["organization-plans"],
     queryFn: async ({ signal }) => (await apiFetch<{ data: Plan[] }>("/api/organization-plans", { signal })).data,
   });
-  const owned = organizations.data?.filter((organization) => organization.kind === "team" && organization.role === "owner") ?? [];
+  // Personal is an organization too: its owner can pick a plan for it like any other.
+  const owned = organizations.data?.filter((organization) => organization.role === "owner") ?? [];
   const fixedOrganizationUnavailable = Boolean(fixedOrganizationId && organizations.isSuccess && !owned.some((organization) => organization.id === fixedOrganizationId));
   const organizationId = fixedOrganizationId
     ? owned.find((organization) => organization.id === fixedOrganizationId)?.id
@@ -146,7 +145,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
     {user.isError || organizations.isError || catalog.isError ? <p role="alert" className="text-sm text-danger">Billing details could not be loaded. Refresh the page and try again.</p> : null}
     {organizations.isPending || catalog.isPending || user.isPending ? <p role="status" className="text-sm text-ink-muted">Loading billing details…</p> : null}
     {fixedOrganizationUnavailable ? <p role="alert" className="text-sm text-danger">Billing unavailable for this organization.</p> : null}
-    {organizations.isSuccess && owned.length === 0 && !fixedOrganizationId ? <CreateOrganizationForPlan /> : null}
+    {organizations.isSuccess && owned.length === 0 && !fixedOrganizationId ? <p className="text-sm text-ink-muted">You do not own an organization yet. <Link href="/organizations#create-organization" className="underline">Create one</Link>.</p> : null}
     {owned.length > 0 && !fixedOrganizationId ? <div className="space-y-2">
       <label className="block max-w-sm text-sm font-medium text-ink" htmlFor="billing-organization">Organization</label>
       <select id="billing-organization" className="w-full max-w-sm rounded-md border border-line bg-canvas-elevated px-3 py-2 text-ink" value={organizationId} onChange={(event) => { setSelectedId(event.target.value); setCheckoutLink(null); change.reset(); cancel.reset(); }}>
@@ -231,32 +230,4 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
       </section>
     </> : null}
   </main>;
-}
-
-// Plans belong to organizations, so someone with only Personal starts by creating one, then lands on its Billing page.
-function CreateOrganizationForPlan() {
-  const router = useRouter();
-  const client = useQueryClient();
-  const [name, setName] = useState("");
-  const create = useMutation({
-    mutationFn: async () => {
-      const organizationName = name.trim();
-      if (!organizationName) throw new Error("Enter an organization name.");
-      await ensureCsrfCookie();
-      return (await apiFetch<{ data: { id: string; slug?: string | null } }>("/api/workspaces", { method: "POST", body: JSON.stringify({ name: organizationName }) })).data;
-    },
-    onSuccess: async (organization) => {
-      await client.invalidateQueries({ queryKey: ["workspaces"] });
-      await client.invalidateQueries({ queryKey: ["billing-organizations"] });
-      router.push(organizationHref(organization, "billing"));
-    },
-  });
-  return <form className="max-w-md space-y-3 rounded-[10px] border border-line bg-canvas-elevated p-5" onSubmit={(event) => { event.preventDefault(); create.mutate(); }}>
-    <h2 className="text-lg font-semibold text-ink">Start a paid plan</h2>
-    <p className="text-sm text-ink-muted">Plans belong to organizations, and Personal stays on the Free allowance. Create an organization, then choose its plan.</p>
-    <label htmlFor="billing-new-organization" className="block text-sm font-medium text-ink">Organization name</label>
-    <TextInput id="billing-new-organization" value={name} onChange={(event) => setName(event.target.value)} maxLength={120} autoComplete="organization" required />
-    <Button type="submit" disabled={create.isPending || !name.trim()}>{create.isPending ? "Creating…" : "Create organization"}</Button>
-    {create.isError ? <p role="alert" className="text-sm text-danger">{create.error.message}</p> : null}
-  </form>;
 }
