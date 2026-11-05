@@ -4,6 +4,8 @@ import { afterEach, expect, it, vi } from "vitest";
 import { OrganizationBillingView } from "@/components/organization-billing-view";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("@/lib/api", () => ({ apiFetch: vi.fn(), ensureCsrfCookie: vi.fn() }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
@@ -286,15 +288,19 @@ it("does not substitute another owner's billing when the URL names an unavailabl
   expect(apiFetch).not.toHaveBeenCalledWith("/api/workspaces/org-1/billing", expect.anything());
 });
 
-it("explains that plans belong to organizations when the person owns none", async () => {
+it("lets someone with only Personal create an organization and go to its billing page", async () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
-  vi.mocked(apiFetch).mockImplementation(async (path) => {
+  vi.mocked(apiFetch).mockImplementation(async (path, init) => {
+    if (path === "/api/workspaces" && init?.method === "POST") return { data: { id: "org-9", slug: "acme", name: "Acme" } } as never;
     if (path === "/api/workspaces") return { data: [{ id: "me", name: "Personal", kind: "personal", role: "owner" }] } as never;
     if (path === "/api/organization-plans") return plans as never;
     throw new Error(`Unexpected request: ${path}`);
   });
   render(<QueryClientProvider client={client}><OrganizationBillingView /></QueryClientProvider>);
   expect(await screen.findByText(/Plans belong to organizations/)).toBeVisible();
-  expect(screen.getByRole("link", { name: "Create an organization" })).toHaveAttribute("href", "/organizations#create-organization");
+  fireEvent.change(screen.getByLabelText("Organization name"), { target: { value: "Acme" } });
+  fireEvent.click(screen.getByRole("button", { name: "Create organization" }));
+  await waitFor(() => expect(push).toHaveBeenCalledWith("/org/acme/billing"));
+  expect(apiFetch).toHaveBeenCalledWith("/api/workspaces", expect.objectContaining({ method: "POST", body: JSON.stringify({ name: "Acme" }) }));
 });

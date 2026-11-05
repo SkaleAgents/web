@@ -12,7 +12,7 @@ import { AccountMenu } from "@/components/account-menu";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { apiFetch } from "@/lib/api";
 import { dashboardDestination, organizationHref, resolveOrganization, personalOrganizationId, scopeFromPath } from "@/lib/dashboard-routes";
-import { StagingBanner } from "@/components/staging-banner";
+import { isStaging, StagingBanner } from "@/components/staging-banner";
 import { OrganizationSwitcher, type OrganizationMembership } from "@/components/organization-switcher";
 
 import { OrganizationScopeContext } from "@/components/organization-scope";
@@ -132,7 +132,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     </Link>
   );
 
-  return <div className={`dashboard-frame ${collapsed ? "is-collapsed" : ""} ${menuOpen ? "is-menu-open" : ""}`} onKeyDown={event => {
+  return <div className="dashboard-root" style={isStaging() ? { "--banner-h": "2rem" } as React.CSSProperties : undefined}>
+    <StagingBanner />
+    <div className={`dashboard-frame ${collapsed ? "is-collapsed" : ""} ${menuOpen ? "is-menu-open" : ""}`} onKeyDown={event => {
     if (event.key === "Escape" && menuOpen) { event.preventDefault(); closeMenu(); }
   }}>
     {menuOpen ? <button type="button" className="dashboard-menu-scrim" aria-label="Dismiss menu" onClick={closeMenu} /> : null}
@@ -167,7 +169,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </nav>
     </aside>
     <div className="dashboard-main">
-      <StagingBanner />
       <header className="dashboard-toolbar">
         <div className="flex min-w-0 items-center gap-2 text-sm">
           <button ref={menuToggle} type="button" className="dashboard-menu-toggle"
@@ -186,6 +187,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div className="dashboard-content" key={`${user.data.id}:${root}`}>{workspace ? <OrganizationScopeContext.Provider value={{ organization: workspace, root }}>{content}</OrganizationScopeContext.Provider> : content}</div>
       <footer className="dashboard-footer"><span>© {new Date().getFullYear()} Binary Labs LLC</span><nav aria-label="Legal"><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></nav></footer>
     </div>
+  </div>
   </div>;
 }
 
