@@ -95,7 +95,7 @@ it("opens an upgrade prompt from Connect GitHub for a free plan", async () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   client.setQueryData(["user"], { id: "account-a", email: "a@example.test", displayName: "A" });
   render(<QueryClientProvider client={client}><NewJobPage /></QueryClientProvider>);
-  await userEvent.click(screen.getByRole("button", { name: /Connect GitHub/ }));
+  await userEvent.click(await screen.findByRole("button", { name: /Connect GitHub/ }));
   expect(await screen.findByRole("heading", { name: "Scan a GitHub repository", hidden: true })).toBeInTheDocument();
   expect(within(screen.getByRole("dialog")).getByRole("link", { name: "Upgrade" })).toHaveAttribute("href", "/org/personal-cfgnns/billing");
 });
@@ -126,13 +126,21 @@ function renderPaid(installation: unknown, jobs?: (init: RequestInit) => Respons
 
 it("starts the GitHub install for a paid plan that is not connected", async () => {
   const calls = renderPaid({ connected: false });
-  const button = screen.getByRole("button", { name: /Connect GitHub/ });
-  await waitFor(() => expect(vi.mocked(fetch)).toHaveBeenCalledWith(expect.stringContaining("/api/github/installation"), expect.anything()));
-  await waitFor(() => expect(button).toBeEnabled());
+  const button = await screen.findByRole("button", { name: /Connect GitHub/ });
+  expect(button).toBeEnabled();
   await userEvent.click(button);
   await waitFor(() => expect(goTo).toHaveBeenCalledWith("https://github.com/apps/skale/installations/new?state=abc"));
   expect(calls.some((call) => call.url.endsWith("/api/github/install-url"))).toBe(true);
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+
+it("shows a disabled checking state, not Connect GitHub, until the plan and connection are known", async () => {
+  renderPaid({ connected: true, accountLogin: "acme", suspended: false });
+  const checking = screen.getByRole("button", { name: /Checking GitHub/ });
+  expect(checking).toBeDisabled();
+  expect(screen.queryByRole("button", { name: /Connect GitHub/ })).not.toBeInTheDocument();
+  expect(await screen.findByRole("button", { name: /Scan a repository/ })).toBeEnabled();
+  expect(screen.queryByRole("button", { name: /Checking GitHub/ })).not.toBeInTheDocument();
 });
 
 it("scans the chosen repository branch with a repo_ref and opens the audit", async () => {
