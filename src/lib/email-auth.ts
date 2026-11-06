@@ -1,4 +1,4 @@
-import { apiFetch, ensureCsrfCookie } from "./api";
+import { API_URL, apiFetch, ensureCsrfCookie } from "./api";
 
 export type AuthResult = { ok: boolean; redirect: string };
 export type EmailLink = { token: string; purpose: "signin"; oauth?: true };
@@ -43,7 +43,9 @@ export function completeSignIn(result: AuthResult) {
     const next = new URLSearchParams(window.location.search).get("next");
     window.location.assign(next ? `/dashboard?next=${encodeURIComponent(next)}` : "/dashboard");
   } else {
-    window.location.assign(result.redirect);
+    // The API sends MCP OAuth sign-ins on to its own authorize URL. Anything else falls back to the dashboard.
+    const trusted = [window.location.origin, new URL(API_URL).origin].includes(destination.origin);
+    window.location.assign(trusted ? destination.toString() : "/dashboard");
   }
 }
 
