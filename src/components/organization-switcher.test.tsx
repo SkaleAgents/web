@@ -27,20 +27,21 @@ it("shows the plan under each organization name", () => {
   const withPlans = [{ ...memberships[0], plan: "free" }, { ...memberships[1], plan: "pro" }];
   render(<OrganizationSwitcher scope={{ kind: "organization", id: memberships[1].id }} pathname="/org/acme/jobs" memberships={withPlans} />);
   const trigger = screen.getByRole("button", { name: "Acme, switch scope" });
-  expect(trigger).toHaveTextContent("Pro plan");
+  expect(screen.getByText("Pro plan", { selector: ".scope-plan-row .scope-plan" })).toBeVisible();
   fireEvent.click(trigger);
   expect(screen.getByRole("link", { name: /^Personal\s*Free plan$/ })).toBeVisible();
 });
 
 it("shows no plan line when the API sends none", () => {
   render(<OrganizationSwitcher scope={{ kind: "organization", id: memberships[1].id }} pathname="/org/acme/jobs" memberships={memberships} />);
-  expect(screen.getByRole("button", { name: "Acme, switch scope" })).not.toHaveTextContent("plan");
+  expect(document.querySelector(".scope-plan-row")).toBeNull();
 });
 
 it("offers a small Upgrade link to owners on a plan that can be upgraded", () => {
   const withPlans = [{ ...memberships[0], plan: "free" }, { ...memberships[1], plan: "pro" }];
   render(<OrganizationSwitcher scope={{ kind: "organization", id: memberships[1].id }} pathname="/org/acme/jobs" memberships={withPlans} />);
   expect(screen.getByRole("link", { name: "Upgrade" })).toHaveAttribute("href", `/org/${memberships[1].id}/billing`);
+  expect(screen.getByRole("link", { name: "Upgrade" }).closest(".scope-plan-row")).toHaveTextContent("Pro plan");
 });
 
 it("hides Upgrade on the top plan, for non-owners and when the plan is unknown", () => {

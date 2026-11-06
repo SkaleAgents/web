@@ -58,13 +58,19 @@ export function OrganizationSwitcher({ scope, pathname, memberships, personName 
       trigger.current?.focus();
     }
   }}>
-    <button ref={trigger} type="button" className="scope-switcher-trigger"
-      aria-label={`${label}, switch scope`} aria-expanded={open} aria-controls="scope-switcher-options"
-      onClick={() => setOpen(value => !value)}>
-      {current && avatar(current)}<span className="scope-switcher-text"><span className="truncate">{label}</span>{current?.plan && <span className="scope-plan">{planLabel(current.plan)}</span>}</span>
-    </button>
-    {current?.role === "owner" && current.plan && upgradablePlans.includes(current.plan) &&
-      <Link href={organizationHref(current, "billing")} className="scope-upgrade">Upgrade</Link>}
+    {current && avatar(current)}
+    <div className="scope-switcher-main">
+      <button ref={trigger} type="button" className="scope-switcher-trigger"
+        aria-label={`${label}, switch scope`} aria-expanded={open} aria-controls="scope-switcher-options"
+        onClick={() => setOpen(value => !value)}>
+        <span className="truncate">{label}</span>
+      </button>
+      {current?.plan && <div className="scope-plan-row">
+        <span className="scope-plan">{planLabel(current.plan)}</span>
+        {current.role === "owner" && upgradablePlans.includes(current.plan) &&
+          <Link href={organizationHref(current, "billing")} className="scope-upgrade">Upgrade</Link>}
+      </div>}
+    </div>
     {open && <div id="scope-switcher-options" className="scope-switcher-options" aria-label="Choose scope">
       {memberships.map(item => <Link key={item.id} href={targetPath(item)}
         aria-current={current?.id === item.id ? "page" : undefined}
