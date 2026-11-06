@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PersonalPlanNote } from "./personal-plan-note";
 
@@ -15,9 +15,15 @@ function renderNote(audits: { used: number; limit: number; remaining: number }, 
 
 it("shows how many audits are left", async () => {
   renderNote({ used: 1, limit: 2, remaining: 1 }, { active: 1, limit: 10, minimumIntervalHours: 24 });
-  expect(await screen.findByText(/1 of 2 audits left this period/)).toBeInTheDocument();
+  expect(await screen.findByText("1 of 2 audits left")).toBeInTheDocument();
   expect(screen.getByRole("progressbar", { name: "Audits used this period" })).toHaveAttribute("aria-valuenow", "1");
+  expect(screen.queryByRole("link", { name: "Upgrade" })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Usage details" }));
+  expect(screen.getByText(/1 of 2 audits used this period. Resets/)).toBeInTheDocument();
+  expect(screen.getByText("Free plan")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Upgrade" })).toHaveAttribute("href", "/org/personal-cfgnns/billing");
+  fireEvent.keyDown(screen.getByRole("button", { name: "Usage details" }), { key: "Escape" });
+  expect(screen.queryByRole("link", { name: "Upgrade" })).toBeNull();
   expect(screen.getByText("1 of 10 active schedules. Each runs at most every 24 hours.")).toBeInTheDocument();
 });
 
