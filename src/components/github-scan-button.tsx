@@ -25,10 +25,13 @@ export function useGithubInstallation(enabled: boolean) {
 export function GithubScanButton({ onOpen }: { onOpen: () => void }) {
   const pathname = usePathname();
   const billing = personalDestinationFromPath(pathname, "billing");
-  const usage = usePersonalPlanUsage().data;
+  const usageQuery = usePersonalPlanUsage();
+  const usage = usageQuery.data;
   const paid = Boolean(usage && (!usage.enforced || usage.plan !== "free"));
   const installation = useGithubInstallation(paid);
   const connected = Boolean(installation.data?.connected);
+  // Until the plan and the connection are known, "Connect GitHub" would be wrong (and a Pro click would open the upgrade prompt).
+  const checking = usageQuery.isPending || (paid && installation.isPending);
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const close = () => dialog.current?.close();
@@ -43,10 +46,10 @@ export function GithubScanButton({ onOpen }: { onOpen: () => void }) {
         type="button"
         variant="secondary"
         aria-haspopup={paid ? undefined : "dialog"}
-        disabled={paid && (installation.isPending || start.isPending)}
+        disabled={checking || (paid && start.isPending)}
         onClick={() => { if (!paid) dialog.current?.showModal(); else if (connected) onOpen(); else if (installation.data) start.mutate(); }}
       >
-        <GitHubSignInLabel>{connected ? "Scan a repository" : "Connect GitHub"}</GitHubSignInLabel>
+        <GitHubSignInLabel>{checking ? "Checking GitHub…" : connected ? "Scan a repository" : "Connect GitHub"}</GitHubSignInLabel>
         <span className="ml-2 rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-ink">Premium</span>
       </Button>
       {error && <p role="alert" className="basis-full text-sm text-danger">{githubErrorMessage(error)} {needsUpgrade(error) && <Link href={billing} className="underline">Upgrade</Link>}</p>}
