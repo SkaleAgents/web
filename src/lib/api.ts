@@ -190,6 +190,15 @@ export async function watchtowerFetch<T>(
   });
 }
 
+export type FindingDecisionKind = "false_positive" | "accepted_risk";
+
+export type AuditComparison = {
+  previousJobId: string;
+  new: number;
+  stillOpen: number;
+  fixed: Array<{ title: string; severity: string; resource: string | null }>;
+};
+
 export type SwarmFinding = {
   id?: string;
   classification?: "unclassified" | "builtin-v1";
@@ -201,6 +210,9 @@ export type SwarmFinding = {
   remediation: string;
   specialist: "devsecops" | "sre" | "mlops" | "scaling";
   location?: { path: string; line: number; column: number } | null;
+  fingerprint?: string;
+  decision?: { kind: FindingDecisionKind; reason: string } | null;
+  change?: "new" | "still_open" | null;
 };
 
 export type SourceFile = { path: string; status: "scanned" | "skipped"; reason?: "too_large" | "over_file_limit" | "over_total_limit" | "unsupported" | "fetch_failed" | null };
@@ -232,6 +244,7 @@ export type SwarmJob = {
   updatedAt: string;
   findingSummary?: { total: number; highestSeverity: SwarmFinding["severity"] | null };
   findings?: SwarmFinding[];
+  comparison?: AuditComparison | null;
   coverage?: AuditCoverage;
   sourceFiles?: SourceFile[];
   tasks?: Array<{ specialist: string; status: string; skipReason?: string; checkCoverage?: CheckCoverage | null }>;

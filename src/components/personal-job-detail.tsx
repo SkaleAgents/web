@@ -2,7 +2,8 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState, type KeyboardEvent } from "react";
+import { useState, type KeyboardEvent, type ReactNode } from "react";
+import Link from "next/link";
 import { ConsultancyBookingLink } from "@/components/consultancy-booking-link";
 import { JobDeletionStatus, JobRetentionControls } from "@/components/job-retention-controls";
 import { AuditResultSummary } from "@/components/audit-result-summary";
@@ -15,10 +16,18 @@ import { SourceMetadata } from "@/components/source-metadata";
 import { SourceFiles } from "@/components/source-files";
 import { Button, LinkButton } from "@/components/ui";
 import { scheduledRunLabel } from "@/lib/audit-dispatch";
-import { apiFetch, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
+import { apiFetch, type AuditComparison, type SwarmFinding, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { organizationPath, scopeFromPath } from "@/lib/dashboard-routes";
 import { formatDateTime } from "@/lib/format-date";
+import { DismissedFindings, DismissFinding } from "@/components/finding-decision";
+
+function AuditChanges({ comparison, href }: { comparison: AuditComparison; href: string }) {
+  return <section className="audit-changes" aria-label="Since the last audit">
+    <p><strong>Since the <Link href={href}>last audit</Link>:</strong> {comparison.new} new, {comparison.stillOpen} still open, {comparison.fixed.length} fixed</p>
+    {comparison.fixed.length > 0 && <ul>{comparison.fixed.map((finding) => <li key={`${finding.title}-${finding.resource}`}>Fixed: {finding.title}</li>)}</ul>}
+  </section>;
+}
 
 function RiskLead({ findings, partial }: { findings: Array<{ title: string; severity: string }>; partial?: boolean }) {
   const lead = leadFinding(findings);
@@ -31,7 +40,11 @@ function RiskLead({ findings, partial }: { findings: Array<{ title: string; seve
   </section>;
 }
 
-function FixTheseFirst({ findings, content }: { findings: Array<{ title: string; severity: string; detail: string; remediation: string }>; content: string | null }) {
+function NewBadge({ finding }: { finding: SwarmFinding }) {
+  return finding.change === "new" ? <span className="finding-new">New</span> : null;
+}
+
+function FixTheseFirst({ findings, content, decide }: { findings: SwarmFinding[]; content: string | null; decide: (finding: SwarmFinding) => ReactNode }) {
   const { priority } = priorityReview(findings);
   if (priority.length === 0) return null;
   return <section className="audit-findings" aria-label="Fix these first">
@@ -39,11 +52,12 @@ function FixTheseFirst({ findings, content }: { findings: Array<{ title: string;
     {priority.map((finding, index) => <article key={`${finding.severity}-${finding.title}-${index}`} className="audit-finding">
       <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
       <div>
-        <h3>{finding.title}</h3>
+        <h3>{finding.title}<NewBadge finding={finding} /></h3>
         <p className="finding-detail">{finding.detail}</p>
         <p className="finding-action"><span>Proposed change</span>{proposedChangeText(content, finding.title)}</p>
         <ExactLineChange content={content} title={finding.title} />
         <p className="finding-action"><span>Recommended action</span>{finding.remediation || "No specific fix was recorded. Ask the person responsible for this resource to review the issue before changing it."}</p>
+        {decide(finding)}
       </div>
     </article>)}
   </section>;
@@ -101,7 +115,10 @@ export function PersonalJobDetail({ id }: { id: string }) {
     document.getElementById(next === "general" ? "audit-general-tab" : "audit-advanced-tab")?.focus();
   }
   const loadedJob = !deletion && accountId ? job.data : undefined;
-  const findings = loadedJob?.findings;
+  const findings = loadedJob?.findings?.filter((finding) => !finding.decision);
+  const dismissed = loadedJob?.findings?.filter((finding) => finding.decision) ?? [];
+  const jobQueryKey = ["swarm-job", id, accountId ?? "guest"];
+  const decide = (finding: SwarmFinding) => <DismissFinding key={finding.fingerprint} jobId={id} finding={finding} queryKey={jobQueryKey} />;
   const ranked = findings ? priorityReview(findings) : null;
   const content = loadedJob ? submittedAuditText(loadedJob) : null;
 
@@ -130,20 +147,23 @@ export function PersonalJobDetail({ id }: { id: string }) {
             {job.data.summary && <p className="mt-2 text-sm text-ink-muted">{job.data.summary}</p>}
             {job.data.error && <p role="alert" className="mt-3 text-sm text-danger">{job.data.error}</p>}
           </section>}
-          {findings && findings.length > 0 && ranked && <FixTheseFirst findings={findings} content={content} />}
+          {job.data.comparison && <AuditChanges comparison={job.data.comparison} href={`${root}/jobs/${job.data.comparison.previousJobId}`} />}
+          {findings && findings.length > 0 && ranked && <FixTheseFirst findings={findings} content={content} decide={decide} />}
           {findings && <CopyReviewButton findings={findings} content={content} />}
           {findings && findings.length > 0 && job.data.error && <p role="alert" className="text-sm text-danger">{job.data.error}</p>}
           {findings && ranked && (findings.length === 0 || ranked.remaining.length > 0) && <section className="audit-findings" aria-label="Findings">
             <div className="audit-section-heading"><h2>{ranked.remaining.length < findings.length ? "Other findings" : "Findings"}</h2><span>{(findings.length === 0 ? findings : ranked.remaining).length} {(findings.length === 0 ? findings : ranked.remaining).length === 1 ? "finding" : "findings"}</span></div>
-            {findings.length === 0 ? <p className="text-sm text-ink-muted">No findings were recorded.</p> : ranked.remaining.map((finding, index) => <article key={index} className="audit-finding">
+            {findings.length === 0 ? <p className="text-sm text-ink-muted">{dismissed.length > 0 ? "Every finding in this audit is dismissed." : "No findings were recorded."}</p> : ranked.remaining.map((finding, index) => <article key={index} className="audit-finding">
               <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
               <div>
-                <h3>{finding.title}</h3>
+                <h3>{finding.title}<NewBadge finding={finding} /></h3>
                 <p className="finding-detail">{finding.detail}</p>
                 <p className="finding-action"><span>Recommended action</span>{finding.remediation || "No specific fix was recorded. Ask the person responsible for this resource to review the issue before changing it."}</p>
+                {decide(finding)}
               </div>
             </article>)}
           </section>}
+          {loadedJob && <DismissedFindings jobId={id} findings={dismissed} queryKey={jobQueryKey} />}
           <PlainCheckList coverage={job.data.coverage} tasks={job.data.tasks} status={job.data.status} />
           {job.data.sourceFiles && job.data.sourceFiles.length > 0 && <SourceFiles files={job.data.sourceFiles} />}
         </div>
