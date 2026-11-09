@@ -8,6 +8,7 @@ import { currentUserOptions } from "@/lib/session";
 import { RetentionNotice } from "@/components/retention-notice";
 import { LinkButton } from "@/components/ui";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
+import { formatDateTime } from "@/lib/format-date";
 
 const tools = [
   { section: "organizations", title: "Organizations", detail: "Manage memberships and invitations." },
@@ -52,7 +53,7 @@ export default function DashboardPage() {
     <section aria-labelledby="recent-audits" className="rounded-xl border border-line bg-canvas-elevated p-5">
       <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="recent-audits" className="text-lg font-semibold">Recent audits</h2><Link href={href("jobs")} className="text-sm font-semibold text-accent">View all audits</Link></div>
       {jobs.isPending ? <p className="mt-4 text-sm text-ink-muted">Loading audits…</p> : jobs.isError ? <p role="alert" className="mt-4 text-sm text-danger">Could not load audits. Open Audit jobs to retry.</p> : recent.length === 0 ? <div className="py-8"><p className="font-medium">Your first review starts here.</p><p className="mt-2 text-sm text-ink-muted">Paste infrastructure text and choose specialists to review it.</p><LinkButton href={href("jobs/new")} variant="secondary" className="mt-4">Create your first audit</LinkButton></div> : <ul className="mt-4 divide-y divide-line">{recent.map(job => <li key={job.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
-        <div className="min-w-0"><Link href={href(`jobs/${job.id}`)} className="break-words text-sm font-medium hover:underline">{job.summary || `Audit ${job.id}`}</Link><p className="mt-1 text-xs text-ink-muted">{new Date(job.createdAt).toLocaleString()}</p></div><span className="rounded-full border border-line px-3 py-1 text-xs capitalize">{job.status}</span>
+        <div className="min-w-0"><Link href={href(`jobs/${job.id}`)} className="break-words text-sm font-medium hover:underline">{job.summary || `Audit ${job.id}`}</Link><p className="mt-1 text-xs text-ink-muted">{formatDateTime(job.createdAt)}</p></div><span className="rounded-full border border-line px-3 py-1 text-xs capitalize">{job.status}</span>
       </li>)}</ul>}
     </section>
     <section aria-labelledby="manage-account"><h2 id="manage-account" className="mb-4 text-lg font-semibold">Explore your account</h2><div className="grid gap-4 sm:grid-cols-2">{tools.map(tool => <Link key={tool.section} href={tool.section === "settings" ? "/account/passkeys" : href(tool.section)} className="rounded-xl border border-line p-5 transition-colors hover:bg-canvas-elevated"><h3 className="font-semibold">{tool.title}</h3><p className="mt-2 text-sm text-ink-muted">{tool.detail}</p></Link>)}</div></section>

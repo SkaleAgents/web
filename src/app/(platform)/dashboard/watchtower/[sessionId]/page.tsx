@@ -14,6 +14,7 @@ import { watchtowerSessionTitle } from "@/lib/watchtower-session";
 import { priorityReview } from "@/lib/audit-risk";
 import { ExactLineChange } from "@/components/exact-line-change";
 import { proposedChangeText, submittedAuditText } from "@/lib/review-edits";
+import { formatDateTime } from "@/lib/format-date";
 
 export default function WatchtowerPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -123,8 +124,8 @@ function SessionReview({ sessionId }: { sessionId: string }) {
           <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink">{watchtowerSessionTitle(session.data.status)}</h1>
           <p className="mt-1 text-sm text-ink-muted">{job.data?.summary ?? "Specialists are working"}</p>
           <p className="mt-2 break-all font-mono text-xs text-ink-muted">Job {job.data?.id}</p>
-          {job.data?.createdAt && <p className="mt-1 text-xs text-ink-muted">Created {new Date(job.data.createdAt).toLocaleString()}</p>}
-          {job.data?.updatedAt && <p className="text-xs text-ink-muted">Updated {new Date(job.data.updatedAt).toLocaleString()}</p>}
+          {job.data?.createdAt && <p className="mt-1 text-xs text-ink-muted">Created {formatDateTime(job.data.createdAt)}</p>}
+          {job.data?.updatedAt && <p className="text-xs text-ink-muted">Updated {formatDateTime(job.data.updatedAt)}</p>}
           <p className="mt-2 text-xs text-ink-muted">Participants: {session.data?.participants.length ?? 0}</p>
           {session.data?.status === "open" && (
             <div className="mt-2 flex items-center gap-3 text-sm">

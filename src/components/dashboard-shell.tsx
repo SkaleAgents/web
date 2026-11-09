@@ -17,7 +17,7 @@ import { OrganizationSwitcher, type OrganizationMembership } from "@/components/
 
 import { OrganizationScopeContext } from "@/components/organization-scope";
 
-import { accountLinks, activeNavigationHref, groupExpanded, homeOrganization, navigationSections, rememberedOrganization, rememberOrganization, type NavigationItem } from "@/lib/dashboard-navigation";
+import { accountLinks, activeNavigationHref, groupExpanded, homeOrganization, navigationSections, rememberedOrganization, rememberOrganization, type NavigationItem, type NavigationSection } from "@/lib/dashboard-navigation";
 
 const noop = () => () => {};
 
@@ -49,6 +49,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     queryFn: async ({ signal }) => (await apiFetch<{ data: OrganizationMembership }>(`/api/workspaces/${scope.kind === "organization" ? scope.id : ""}`, { signal })).data,
     staleTime: 0,
     refetchOnMount: "always",
+    // A refetch swaps the page for the loader, so returning to the tab must not trigger one. The 60s membership poll still catches revocation.
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
   useEffect(() => {
     if (user.isSuccess && !user.data) {
@@ -86,7 +89,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const currentSection = sections.flatMap(section => section.items).find(entry => active(entry.href))?.label ??
     accountLinks.find(link => pathname === link.href || pathname.startsWith(`${link.href}/`))?.label ?? "Dashboard";
   const groupKey = (label: string) => label;
-  const isExpanded = (label: string) => groupExpanded(label, activeGroup, expandedGroups);
+  const isExpanded = ({ label, items }: NavigationSection) => groupExpanded(label, activeGroup, expandedGroups, items.length === 1);
 
   if (user.isError) return <main className="mx-auto max-w-lg space-y-4 px-6 py-16" role="alert">
     <h1 className="text-xl font-semibold">Could not check your session</h1>
@@ -149,11 +152,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div id="dashboard-sections" className={`dashboard-sections ${menuOpen ? "is-open" : ""}`}>
           <div className="dashboard-section-list">
             {sections.map(section => <div key={section.label} className="dashboard-nav-group">
-              <button type="button" className="dashboard-nav-label" aria-expanded={collapsed || isExpanded(section.label)}
-                onClick={() => { if (collapsed) setCollapsed(false); else setExpandedGroups(current => ({ ...current, [groupKey(section.label)]: !isExpanded(section.label) })); }}>
+              <button type="button" className="dashboard-nav-label" aria-expanded={collapsed || isExpanded(section)}
+                onClick={() => { if (collapsed) setCollapsed(false); else setExpandedGroups(current => ({ ...current, [groupKey(section.label)]: !isExpanded(section) })); }}>
                 {section.label}<span aria-hidden="true" className="dashboard-nav-chevron"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg></span>
               </button>
-              <div className="dashboard-nav-items" hidden={!collapsed && !isExpanded(section.label)}>
+              <div className="dashboard-nav-items" hidden={!collapsed && !isExpanded(section)}>
                 {section.items.map(item)}
               </div>
             </div>)}

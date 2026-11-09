@@ -66,7 +66,7 @@ export function activeNavigationHref(sections: NavigationSection[], pathname: st
   return sections.flatMap(section => section.items).map(entry => entry.href).filter(matches).sort((a, b) => b.length - a.length)[0];
 }
 
-// Your work stays open everywhere and the current page's group opens too; a group someone toggles keeps that choice.
-export function groupExpanded(label: string, activeGroup: string, choices: Record<string, boolean>): boolean {
-  return choices[label] ?? (label === "Your work" || label === activeGroup);
+// Your work, the current page's group and one-link groups start open; a group someone toggles keeps that choice.
+export function groupExpanded(label: string, activeGroup: string, choices: Record<string, boolean>, singleItem = false): boolean {
+  return choices[label] ?? (label === "Your work" || label === activeGroup || singleItem);
 }

@@ -68,7 +68,7 @@ test("organization overview and settings keep their scope", async ({ page }) => 
   await page.getByRole("link", { name: "Organization settings" }).click();
   await expect(page).toHaveURL(new RegExp(`/org/${org}/settings$`));
   await expect(page.getByRole("heading", { name: "Organization settings" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Audit retention notice" })).toHaveAttribute("href", `/org/${org}/settings/retention`);
+  await expect(page.getByRole("link", { name: "Audit retention", exact: true })).toHaveAttribute("href", `/org/${org}/settings/retention`);
 });
 
 test("organizations is its own page, outside any organization", async ({ page }) => {

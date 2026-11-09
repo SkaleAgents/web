@@ -43,7 +43,7 @@ function approvedInvoiceUrl(value: string): boolean {
 }
 
 function utcDate(value: string): string {
-  return `${new Date(value).toLocaleDateString("en-US", { timeZone: "UTC" })} UTC`;
+  return `${new Date(value).toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "UTC" })} UTC`;
 }
 
 function checkoutEnvironmentOf(billing: Billing): "test" | "live" | "closed" {
@@ -58,6 +58,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
   const client = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(checkoutReturnOrganizationId);
   const [checkoutLink, setCheckoutLink] = useState<Checkout | null>(null);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
   const redirectedCheckout = useRef<string | null>(null);
   const organizations = useQuery({
     queryKey: ["billing-organizations", user.data?.id],
@@ -130,11 +131,12 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
   const pendingPlanName = catalog.data?.find((plan) => plan.key === billing.data?.pendingChange?.toPlan)?.name ?? billing.data?.pendingChange?.toPlan;
   const paidPlans = catalog.data?.filter((plan) => plan.checkoutMode === "self_service") ?? [];
   const currentPrice = currentPlan?.monthlyUsd ?? 0;
+  const cancelBlocked = !billing.data?.cancellationEnabled || cancel.isPending || billing.data?.pendingChange?.status === "pending_payment" || billing.data?.pendingChange?.status === "creating";
   const showingCheckoutReturn = Boolean(organizationId && (checkoutReturnOrganizationId === organizationId));
 
   return <main className="mx-auto max-w-4xl space-y-8">
     <div>
-      <h1 className="font-display text-3xl font-bold tracking-tight text-ink">Organization billing</h1>
+      <h1 className="workspace-heading">Organization billing</h1>
       <p className="mt-2 text-sm text-ink-muted">Check your audit allowance and manage the plan for an organization you own.</p>
       {organizationId && owned.find((organization) => organization.id === organizationId)?.cutoverNoticeAvailable ? (
         <Link className="mt-3 inline-block text-sm font-medium text-accent underline underline-offset-4" href={`${root}/settings/cutover-notice`}>
@@ -203,11 +205,6 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
           : `Your ${pendingPlanName} change is waiting for payment confirmation. Your current plan remains active.`}
       </p> : null}
       {checkoutOpen && billing.data.pendingChange?.paymentUrl && approvedInvoiceUrl(billing.data.pendingChange.paymentUrl) ? <a className="inline-flex rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:opacity-90" href={billing.data.pendingChange.paymentUrl}>Pay prorated invoice</a> : null}
-      {billing.data.plan !== "free" && billing.data.pendingChange?.kind !== "cancellation" ? <div className="space-y-2">
-        <Button type="button" variant="secondary" disabled={!billing.data.cancellationEnabled || cancel.isPending || billing.data.pendingChange?.status === "pending_payment" || billing.data.pendingChange?.status === "creating"} onClick={() => cancel.mutate(organizationId)}>Cancel at renewal</Button>
-        <p className="text-sm text-ink-muted">Your paid plan stays active through the current billing cycle. A scheduled downgrade will be replaced.</p>
-        {cancel.isError ? <p role="alert" className="text-sm text-danger">{cancel.error.message}</p> : null}
-      </div> : null}
       <section className="space-y-4" aria-labelledby="billing-change-heading">
         <h2 id="billing-change-heading" className="text-xl font-semibold text-ink">Change plan</h2>
         {environment === "closed" ? <p className="text-sm text-ink-muted">Plan changes are not available yet.</p> : environment === "test" ? <p className="text-sm text-ink-muted">Stripe test mode is active. No real payment will be collected here.</p> : null}
@@ -228,6 +225,14 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
         {change.isError ? <p role="alert" className="text-sm text-danger">{change.error.message}</p> : null}
         {checkoutOpen && billing.data.plan === "free" && checkoutLink?.organizationId === organizationId ? <p role="status" className="text-sm text-ink-muted">Opening the secure Stripe payment page. <a className="underline" href={checkoutLink.url}>Continue to Stripe</a></p> : null}
       </section>
+      {billing.data.plan !== "free" && billing.data.pendingChange?.kind !== "cancellation" ? <div className="space-y-2">
+        {confirmingCancel ? <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="secondary" disabled={cancelBlocked} onClick={() => { setConfirmingCancel(false); cancel.mutate(organizationId); }}>Yes, cancel at renewal</Button>
+          <Button type="button" variant="ghost" onClick={() => setConfirmingCancel(false)}>Keep my plan</Button>
+        </div> : <Button type="button" variant="secondary" disabled={cancelBlocked} onClick={() => setConfirmingCancel(true)}>Cancel at renewal</Button>}
+        <p className="text-sm text-ink-muted">Your paid plan stays active through the current billing cycle. A scheduled downgrade will be replaced.</p>
+        {cancel.isError ? <p role="alert" className="text-sm text-danger">{cancel.error.message}</p> : null}
+      </div> : null}
     </> : null}
   </main>;
 }

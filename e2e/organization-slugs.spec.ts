@@ -112,6 +112,15 @@ test("switching slugs clears the previous organization before access resolves", 
   await expect(page.getByRole("link", { name: "Organization settings" })).toHaveAttribute("href", `/org/${second.id}/settings`);
 });
 
+test("returning to the tab keeps text someone has typed", async ({ page }) => {
+  await page.goto("/org/binary-labs/settings");
+  const name = page.getByLabel("Organization name");
+  await name.fill("Half typed draft");
+  await page.evaluate(() => window.dispatchEvent(new Event("visibilitychange")));
+  await page.waitForTimeout(500);
+  await expect(name).toHaveValue("Half typed draft");
+});
+
 test("warm settings cache stays hidden after same-organization access is revoked", async ({ page }) => {
   let revoked = false;
   let checksAfterRevocation = 0;
@@ -196,7 +205,6 @@ test("team settings and personal account settings are separate groups with their
   await expect(nav.getByRole("link", { name: "MCP connections", exact: true })).toHaveAttribute("href", `/org/${id}/mcp-config`);
   const groups = await nav.locator(".dashboard-nav-label").allTextContents();
   expect(groups.map(label => label.replace("⌄", "").trim())).toEqual(["Your work", "Settings", "Organizations"]);
-  await nav.getByRole("button", { name: "Organizations" }).click();
   await expect(nav.getByRole("link", { name: "All organizations", exact: true })).toHaveAttribute("href", "/organizations");
   await nav.getByRole("button", { name: /account menu/ }).click();
   for (const [label, href] of [["Passkeys", "/account/passkeys"], ["Notifications", "/account/notifications"], ["Data and privacy", "/account/data"]]) {

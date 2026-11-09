@@ -52,6 +52,8 @@ describe("groupExpanded", () => {
     expect(groupExpanded("Account", "Settings", {})).toBe(false);
     expect(groupExpanded("Your work", "Settings", { "Your work": false })).toBe(false);
     expect(groupExpanded("Account", "Settings", { Account: true })).toBe(true);
+    expect(groupExpanded("Organizations", "Settings", {}, true)).toBe(true);
+    expect(groupExpanded("Organizations", "Settings", { Organizations: false }, true)).toBe(false);
   });
 });
 

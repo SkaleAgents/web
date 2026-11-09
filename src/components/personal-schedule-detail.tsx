@@ -10,6 +10,7 @@ import { ScheduleDeletionStatus, ScheduleRetentionControls } from "@/components/
 import { SourceMetadata } from "@/components/source-metadata";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 import { scheduleCadenceLabel } from "@/lib/schedule-cadence";
+import { formatDateTime } from "@/lib/format-date";
 
 export function findingsChangeLabel(value: boolean | null | undefined): string {
   if (value === true) return "Findings changed";
@@ -49,8 +50,8 @@ export function PersonalScheduleDetail({ id }: { id: string }) {
             <p className="mt-2 text-sm text-ink-muted">{schedule.enabled ? "Active" : "Paused"} · {scheduleCadenceLabel(schedule.cronExpression)} · {schedule.timezone}</p>
           </div>
           <section className="space-y-3 rounded-[10px] border border-line bg-canvas-elevated p-5" aria-label="Schedule details">
-            <p className="text-sm text-ink-muted">Next run: {schedule.enabled && schedule.nextRunAt ? new Date(schedule.nextRunAt).toLocaleString() : "Not scheduled"}</p>
-            <p className="text-sm text-ink-muted">Last run: {schedule.lastRunAt ? new Date(schedule.lastRunAt).toLocaleString() : "None yet"}</p>
+            <p className="text-sm text-ink-muted">Next run: {schedule.enabled && schedule.nextRunAt ? formatDateTime(schedule.nextRunAt) : "Not scheduled"}</p>
+            <p className="text-sm text-ink-muted">Last run: {schedule.lastRunAt ? formatDateTime(schedule.lastRunAt) : "None yet"}</p>
             <p className="text-sm text-ink-muted">Webhook: {schedule.webhookConfigured ? "Configured" : "Not configured"}</p>
             <p className="text-sm text-ink-muted">Scanned revision: {schedule.retention?.inputAvailable === false || !schedule.sourceRevision?.trim() ? "No revision has been recorded" : schedule.sourceRevision}</p>
             <p className="text-sm text-ink-muted">Webhook result: {schedule.webhookResult === "delivered" ? "Delivered" : schedule.webhookResult === "failed" ? "Failed" : "None"}</p>

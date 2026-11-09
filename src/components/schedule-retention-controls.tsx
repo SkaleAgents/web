@@ -8,6 +8,7 @@ import { Button, Select, TextArea, TextInput } from "@/components/ui";
 import { SourceMetadataFields } from "@/components/source-metadata-fields";
 import { buildSourceMetadata } from "@/lib/source-metadata";
 import { buildGithubScheduleScope, type GithubScheduleFormat } from "@/lib/github-schedule-source";
+import { formatDateTime } from "@/lib/format-date";
 
 export function ScheduleRetentionControls({ schedule, accountId, onDeletion }: {
   schedule: SwarmSchedule;
@@ -52,7 +53,7 @@ export function ScheduleRetentionControls({ schedule, accountId, onDeletion }: {
         : state === "pending" || state === "failed" ? `Saved input cleanup ${state === "failed" ? "incomplete; retry scheduled" : "pending"}. The schedule is paused.`
           : !available ? "Saved input has expired. Fresh input is required to resume."
             : schedule.enabled ? "This enabled schedule retains a separate saved input copy." : "This paused schedule still retains its saved input."}</p>
-      {schedule.retention?.inputExpiresAt && <p className="text-xs text-ink-muted">Saved input deadline: {new Date(schedule.retention.inputExpiresAt).toLocaleString()}</p>}
+      {schedule.retention?.inputExpiresAt && <p className="text-xs text-ink-muted">Saved input deadline: {formatDateTime(schedule.retention.inputExpiresAt)}</p>}
       <p className="text-xs text-ink-muted">Already dispatched audits keep their own input and deadlines. Schedule cleanup does not delete those audits.</p>
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" disabled={change.isPending || !schedule.enabled && !available} onClick={() => change.mutate(schedule.enabled ? "pause" : "resume")}>{schedule.enabled ? "Pause" : "Resume"}</Button>

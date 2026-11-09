@@ -513,7 +513,12 @@ a.directory-pill:hover { color: var(--ink); text-decoration: underline; }
 .dashboard-content { width: 100%; max-width: 1440px; margin-inline: auto; padding: 2rem; }
 .dashboard-content .workspace-heading { font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; line-height: 36px; }
 .dashboard-content .workspace-intro { padding-bottom: 1.25rem; }
-.dashboard-content .workspace-kicker { margin-bottom: 0.4rem; font-family: inherit; font-size: 0.8rem; text-transform: none; letter-spacing: normal; }
+/* The top bar already names the page. */
+.dashboard-content .workspace-kicker { display: none; }
+progress { appearance: none; display: block; height: 0.5rem; overflow: hidden; border: 0; border-radius: 999px; background: var(--line); }
+progress::-webkit-progress-bar { background: var(--line); }
+progress::-webkit-progress-value { border-radius: 999px; background: var(--accent); }
+progress::-moz-progress-bar { border-radius: 999px; background: var(--accent); }
 @media (max-width: 1023px) {
   .dashboard-frame { display: flex; flex-direction: column; }
   .dashboard-frame.is-collapsed { display: flex; }

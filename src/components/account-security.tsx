@@ -6,6 +6,7 @@ import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { addPasskey, authenticationError, deviceName, type PasskeySettings } from "@/lib/email-auth";
 import { Button, LinkButton, TextInput } from "./ui";
 import { currentUserOptions } from "@/lib/session";
+import { formatDate, formatDateTime } from "@/lib/format-date";
 
 export function AccountSecurity({ accountId }: { accountId: string }) {
   const client = useQueryClient();
@@ -56,14 +57,14 @@ export function AccountSecurity({ accountId }: { accountId: string }) {
           <Button type="submit" disabled={busy}>Save</Button>
           <Button type="button" variant="ghost" disabled={busy} onClick={() => setRenaming("")}>Cancel</Button>
         </form> : <>
-        <span className="min-w-0 flex-1 break-words text-sm">{passkey.name}<span className="block text-xs text-ink-muted">{passkey.last_used_at ? `Last used ${new Date(passkey.last_used_at).toLocaleDateString()}` : "Not used yet"}</span></span>
+        <span className="min-w-0 flex-1 break-words text-sm">{passkey.name}<span className="block text-xs text-ink-muted">{passkey.last_used_at ? `Last used ${formatDate(passkey.last_used_at)}` : "Not used yet"}</span></span>
         <Button variant="ghost" disabled={busy} aria-label={`Rename ${passkey.name}`} onClick={() => setRenaming(passkey.id)}>Rename</Button>
         <Button variant="secondary" disabled={busy} aria-label={`Remove ${passkey.name}`} onClick={() => void run(async () => { await ensureCsrfCookie(); return apiFetch<PasskeySettings>(`/api/account/passkeys/${passkey.id}`, { method: "DELETE", body: JSON.stringify({ accountId }) }); }, "Passkey removed.")}>Remove</Button>
         </>}
       </li>)}</ul> : <p className="text-sm text-ink-muted">No passkeys added yet.</p>}
     </>}
     {settings.data?.resetAt ? <div className="space-y-2 rounded-md border border-line p-3 text-sm">
-      <p>Every passkey will be removed on {new Date(settings.data.resetAt).toLocaleString()}. After that, sign in with email and add a new passkey.</p>
+      <p>Every passkey will be removed on {formatDateTime(settings.data.resetAt)}. After that, sign in with email and add a new passkey.</p>
       <Button type="button" variant="secondary" disabled={busy} onClick={() => void run(async () => { await ensureCsrfCookie(); return apiFetch<PasskeySettings>("/api/account/passkey-reset", { method: "DELETE" }); }, "Passkey reset cancelled.")}>Cancel reset</Button>
     </div> : settings.data?.passkeys.length ? <p className="text-sm text-ink-muted">Lost your passkey? <button type="button" className="underline" disabled={busy} onClick={() => void run(async () => { await ensureCsrfCookie(); await apiFetch("/api/account/passkey-reset", { method: "POST", body: JSON.stringify({ accountId }) }); }, "Check your email for a reset link.")}>Email me a reset link</button>. Your passkeys are removed 24 hours after you confirm.</p> : null}
     {message && <p role="status" className="text-sm">{message}</p>}
