@@ -690,6 +690,11 @@ export function publicCheckPath(check: Pick<PublicCheck, "slug">): string {
   return `/checks/${check.slug}`;
 }
 
+export function publicCheckPageTitle(check: Pick<PublicCheck, "title">): string {
+  const full = `${check.title} | SkaleAgents review check`;
+  return full.length <= 60 ? full : `${check.title} | SkaleAgents`;
+}
+
 const exactLineSamples: Record<string, { title: string; sample: string }> = {
   "public-database": { title: "Database publicly accessible", sample: "publicly_accessible = true" },
   "container-runs-as-root": { title: "Dockerfile runs as root", sample: "USER root" },

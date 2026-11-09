@@ -1,6 +1,12 @@
 import { expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
-import { publicCheckBySlug, publicCheckProposedChange, publicChecks } from "./public-checks";
+import { publicCheckBySlug, publicCheckPageTitle, publicCheckProposedChange, publicChecks } from "./public-checks";
+
+it("keeps every check page title at 60 characters or fewer, and the full suffix when it fits", () => {
+  for (const check of publicChecks) expect(publicCheckPageTitle(check).length, check.slug).toBeLessThanOrEqual(60);
+  expect(publicCheckPageTitle({ title: "Docker socket" })).toBe("Docker socket | SkaleAgents review check");
+  expect(publicCheckPageTitle({ title: "Package script pipes a download to a shell" })).toBe("Package script pipes a download to a shell | SkaleAgents");
+});
 
 it("publishes each built-in check once, with the image scan kept honest", async () => {
   expect(new Set(publicChecks.map((check) => check.slug)).size).toBe(publicChecks.length);

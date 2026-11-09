@@ -71,7 +71,8 @@ export function PricingPlans() {
 
   return <>
     {catalogError && <p role="alert" className="rounded-lg border border-line bg-canvas-elevated p-5">Plans could not be loaded. Please try again later.</p>}
-    {!plans && !catalogError && <p role="status" className="py-12 text-ink-muted">Loading plans…</p>}
+    {/* Reserves the measured plan grid height so the footer does not jump when the catalog arrives (PageSpeed CLS). */}
+    {!plans && !catalogError && <p role="status" className="min-h-[141rem] py-12 text-ink-muted md:min-h-[84rem] xl:min-h-[58rem]">Loading plans…</p>}
     {plans && <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {plans.map((plan) => <article key={plan.key} className={`relative flex min-h-[23rem] flex-col border p-6 sm:p-7 ${plan.recommended ? "border-accent bg-accent-soft/30" : "border-line bg-canvas-elevated"}`}>
         <div className="flex min-h-7 items-start justify-end gap-3">
