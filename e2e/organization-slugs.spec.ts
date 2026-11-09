@@ -166,13 +166,16 @@ test("account pages share dashboard chrome and keep the organization you came fr
   await page.goto('/org/binary-labs');
   await expect(page.getByRole('heading', { name: 'Binary Labs', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Collapse sidebar' }).click();
+  await page.getByRole('button', { name: /account menu/ }).click();
   await page.locator('.dashboard-sidebar').getByRole('link', { name: 'Passkeys', exact: true }).click();
   await expect(page).toHaveURL('/account/passkeys');
   await expect(page.getByRole('heading', { name: 'Passkeys', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Expand sidebar' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Binary Labs, switch scope' })).toBeVisible();
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Audit retention', exact: true })).toHaveAttribute('href', `/org/${id}/settings/retention`);
+  await page.getByRole('button', { name: /account menu/ }).click();
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Passkeys', exact: true })).toHaveAttribute('aria-current', 'page');
+  await page.getByRole('button', { name: /account menu/ }).click();
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Docs (opens in a new tab)' })).toBeVisible();
   await expect(page.locator('.dashboard-sidebar').getByRole('link', { name: 'Help', exact: true })).toHaveAttribute('href', '/contact');
   await expect(page.locator('.dashboard-footer')).toContainText('Binary Labs LLC');
@@ -188,15 +191,14 @@ test("team settings and personal account settings are separate groups with their
   const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
   await expect(nav.getByRole("button", { name: "Settings" })).toHaveAttribute("aria-expanded", "true");
   await expect(nav.getByRole("button", { name: "Your work" })).toHaveAttribute("aria-expanded", "true");
-  await expect(nav.getByRole("button", { name: "Account", exact: true })).toHaveAttribute("aria-expanded", "false");
   await expect(nav.getByRole("link", { name: "Audit retention", exact: true })).toHaveAttribute("aria-current", "page");
   await expect(nav.getByRole("link", { name: "General", exact: true })).not.toHaveAttribute("aria-current", "page");
   await expect(nav.getByRole("link", { name: "MCP connections", exact: true })).toHaveAttribute("href", `/org/${id}/mcp-config`);
   const groups = await nav.locator(".dashboard-nav-label").allTextContents();
-  expect(groups.map(label => label.replace("⌄", "").trim())).toEqual(["Your work", "Settings", "Organizations", "Account"]);
+  expect(groups.map(label => label.replace("⌄", "").trim())).toEqual(["Your work", "Settings", "Organizations"]);
   await nav.getByRole("button", { name: "Organizations" }).click();
   await expect(nav.getByRole("link", { name: "All organizations", exact: true })).toHaveAttribute("href", "/organizations");
-  await nav.getByRole("button", { name: "Account", exact: true }).click();
+  await nav.getByRole("button", { name: /account menu/ }).click();
   for (const [label, href] of [["Passkeys", "/account/passkeys"], ["Notifications", "/account/notifications"], ["Data and privacy", "/account/data"]]) {
     await expect(nav.getByRole("link", { name: label, exact: true })).toHaveAttribute("href", href);
   }

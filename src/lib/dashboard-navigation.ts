@@ -20,7 +20,7 @@ export function rememberedOrganization(): string | null {
   return sessionStorage.getItem(LAST_ORGANIZATION);
 }
 
-// Personal settings, shown in the sidebar Account group and the profile menu.
+// Personal settings, reached from the profile menu at the sidebar foot.
 export const accountLinks: NavigationItem[] = [
   { href: "/account/profile", label: "Profile" },
   { href: "/account/passkeys", label: "Passkeys" },
@@ -33,21 +33,19 @@ export function navigationSections({ workspace, root }: { workspace?: Navigation
     { href: root, label: "Dashboard" },
     { href: `${root}/jobs`, label: "Audit jobs" },
     { href: `${root}/schedules`, label: "Scheduled audits" },
+    { href: `${root}/mcp-config`, label: "MCP connections" },
   ] };
   const organizations = { label: "Organizations", items: [{ href: "/organizations", label: "All organizations" }] };
-  const account = { label: "Account", items: accountLinks };
   if (workspace?.kind === "team") return [
     yourWork,
     { label: "Settings", items: [
       { href: `${root}/settings`, label: "General" },
-      { href: `${root}/mcp-config`, label: "MCP connections" },
       ...(workspace.role === "owner" ? [
         { href: `${root}/billing`, label: "Billing" },
         { href: `${root}/settings/retention`, label: "Audit retention" },
       ] : []),
     ] },
     organizations,
-    account,
   ];
   return [
     yourWork,
@@ -56,9 +54,8 @@ export function navigationSections({ workspace, root }: { workspace?: Navigation
       { href: `${root}/studio`, label: "Creator Studio" },
       { href: `${root}/prompts`, label: "My prompts" },
     ] },
-    { label: "Settings", items: [{ href: `${root}/mcp-config`, label: "MCP connections" }, { href: `${root}/billing`, label: "Billing" }] },
+    { label: "Settings", items: [{ href: `${root}/billing`, label: "Billing" }] },
     organizations,
-    account,
   ];
 }
 

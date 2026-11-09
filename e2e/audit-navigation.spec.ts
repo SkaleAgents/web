@@ -28,25 +28,24 @@ test("audit creation and job management use separate pages", async ({ page }) =>
   await expect(page.getByText("Audit in progress", { exact: true })).toBeVisible();
 });
 
-test("signed-in navigation puts the theme control at the top of the sidebar and the profile menu at its foot", async ({ page }) => {
+test("signed-in navigation puts the theme control and the profile menu at the sidebar foot", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Test Owner", email: "owner@skaleagents.com" } }));
   await page.goto("/me/jobs");
   const toolbar = page.locator(".dashboard-toolbar");
   await expect(toolbar.getByRole("button", { name: "Color theme" })).toHaveCount(0);
   await expect(toolbar.getByRole("button", { name: /account menu/ })).toHaveCount(0);
   const foot = page.locator(".dashboard-sidebar-account");
-  const top = page.locator(".dashboard-brand");
-  await expect(foot.getByRole("button", { name: "Color theme" })).toHaveCount(0);
-  await expect(top.getByRole("button", { name: "Color theme" })).toBeVisible();
+  await expect(page.locator(".dashboard-brand").getByRole("button", { name: "Color theme" })).toHaveCount(0);
+  await expect(foot.getByRole("button", { name: "Color theme" })).toBeVisible();
   const account = foot.getByRole("button", { name: "Test Owner, account menu" });
   await expect(account).toBeVisible();
   await expect(account).toContainText("Test Owner");
-  await expect(account).toContainText("owner@skaleagents.com");
+  await expect(account).not.toContainText("owner@skaleagents.com");
   // The sidebar foot stays pinned when the page scrolls.
   const before = await account.boundingBox();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   expect((await account.boundingBox())!.y).toBe(before!.y);
-  await top.getByRole("button", { name: "Color theme" }).click();
+  await foot.getByRole("button", { name: "Color theme" }).click();
   const menu = page.getByRole("menu", { name: "Color theme" });
   for (const choice of ["Light", "Dark", "System"]) await expect(menu.getByRole("menuitemradio", { name: choice })).toBeVisible();
   await menu.getByRole("menuitemradio", { name: "Dark" }).click();
@@ -55,6 +54,7 @@ test("signed-in navigation puts the theme control at the top of the sidebar and 
   await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
   await page.getByRole("link", { name: "Profile", exact: true }).click();
   await expect(page).toHaveURL("/account/profile");
+  await expect(page.locator(".dashboard-toolbar")).toContainText("Profile");
   await expect(page.getByLabel("Full name")).toHaveValue("Test Owner");
 });
 
