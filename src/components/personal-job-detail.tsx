@@ -21,6 +21,7 @@ import { currentUserOptions } from "@/lib/session";
 import { organizationPath, scopeFromPath } from "@/lib/dashboard-routes";
 import { formatDateTime } from "@/lib/format-date";
 import { DismissedFindings, DismissFinding } from "@/components/finding-decision";
+import { SourceContextForm } from "@/components/source-context";
 
 function AuditChanges({ comparison, href }: { comparison: AuditComparison; href: string }) {
   return <section className="audit-changes" aria-label="Since the last audit">
@@ -44,6 +45,10 @@ function NewBadge({ finding }: { finding: SwarmFinding }) {
   return finding.change === "new" ? <span className="finding-new">New</span> : null;
 }
 
+function PriorityReasons({ finding }: { finding: SwarmFinding }) {
+  return finding.priorityReasons?.length ? <p className="text-xs text-ink-muted">{finding.priorityReasons.join(". ")}</p> : null;
+}
+
 function FixTheseFirst({ findings, content, decide }: { findings: SwarmFinding[]; content: string | null; decide: (finding: SwarmFinding) => ReactNode }) {
   const { priority } = priorityReview(findings);
   if (priority.length === 0) return null;
@@ -53,6 +58,7 @@ function FixTheseFirst({ findings, content, decide }: { findings: SwarmFinding[]
       <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
       <div>
         <h3>{finding.title}<NewBadge finding={finding} /></h3>
+        <PriorityReasons finding={finding} />
         <p className="finding-detail">{finding.detail}</p>
         <p className="finding-action"><span>Proposed change</span>{proposedChangeText(content, finding.title)}</p>
         <ExactLineChange content={content} title={finding.title} />
@@ -148,6 +154,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
             {job.data.error && <p role="alert" className="mt-3 text-sm text-danger">{job.data.error}</p>}
           </section>}
           {job.data.comparison && <AuditChanges comparison={job.data.comparison} href={`${root}/jobs/${job.data.comparison.previousJobId}`} />}
+          {loadedJob && loadedJob.sourceContext !== undefined && <SourceContextForm key={JSON.stringify(loadedJob.sourceContext)} jobId={id} context={loadedJob.sourceContext} queryKey={jobQueryKey} />}
           {findings && findings.length > 0 && ranked && <FixTheseFirst findings={findings} content={content} decide={decide} />}
           {findings && <CopyReviewButton findings={findings} content={content} />}
           {findings && findings.length > 0 && job.data.error && <p role="alert" className="text-sm text-danger">{job.data.error}</p>}
@@ -157,6 +164,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
               <span className="finding-severity" data-severity={finding.severity}>{finding.severity}</span>
               <div>
                 <h3>{finding.title}<NewBadge finding={finding} /></h3>
+        <PriorityReasons finding={finding} />
                 <p className="finding-detail">{finding.detail}</p>
                 <p className="finding-action"><span>Recommended action</span>{finding.remediation || "No specific fix was recorded. Ask the person responsible for this resource to review the issue before changing it."}</p>
                 {decide(finding)}

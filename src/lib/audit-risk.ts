@@ -1,23 +1,30 @@
 const severityOrder = ["critical", "high", "medium", "low", "info"] as const;
 
-export function rankFindings<T extends { severity: string }>(findings: T[]): T[] {
+type Rankable = { severity: string; priority?: number };
+
+const severityRank = (severity: string) => {
+  const rank = severityOrder.indexOf(severity as typeof severityOrder[number]);
+  return rank === -1 ? severityOrder.length : rank;
+};
+
+// A source context can move a finding above a more severe one; without one, severity decides.
+export function rankFindings<T extends Rankable>(findings: T[]): T[] {
+  const score = (finding: T) => finding.priority ?? severityOrder.length - severityRank(finding.severity);
   return findings
     .map((finding, index) => ({ finding, index }))
-    .sort((left, right) => {
-      const leftRank = severityOrder.indexOf(left.finding.severity as typeof severityOrder[number]);
-      const rightRank = severityOrder.indexOf(right.finding.severity as typeof severityOrder[number]);
-      return (leftRank === -1 ? severityOrder.length : leftRank) - (rightRank === -1 ? severityOrder.length : rightRank) || left.index - right.index;
-    })
+    .sort((left, right) => score(right.finding) - score(left.finding)
+      || severityRank(left.finding.severity) - severityRank(right.finding.severity)
+      || left.index - right.index)
     .map((item) => item.finding);
 }
 
-export function priorityReview<T extends { severity: string }>(findings: T[]): { priority: T[]; remaining: T[] } {
+export function priorityReview<T extends Rankable>(findings: T[]): { priority: T[]; remaining: T[] } {
   const priority = rankFindings(findings).slice(0, 3);
   const chosen = new Set<T>(priority);
   return { priority, remaining: findings.filter((finding) => !chosen.has(finding)) };
 }
 
-export function leadFinding<T extends { severity: string }>(findings: T[]): T {
+export function leadFinding<T extends Rankable>(findings: T[]): T {
   return rankFindings(findings)[0];
 }
 
