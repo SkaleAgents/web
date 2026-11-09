@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/page-metadata";
 import { PromptDetail } from "@/components/prompt-detail";
 import Link from "next/link";
-import { articleJsonLd, jsonLd, productJsonLd } from "@/lib/json-ld";
+import { articleJsonLd, jsonLd } from "@/lib/json-ld";
 import { communityPrompts, loadCommunityPrompt, loadCommunityPrompts } from "@/lib/public-catalog";
 
 export const revalidate = 300;
@@ -24,7 +24,7 @@ export default async function PromptPage({ params }: { params: Promise<{ id: str
   const others = communityPrompts((await loadCommunityPrompts()) ?? []).filter((prompt) => prompt.id !== id).slice(0, 4);
   const page = initialPrompt ? { title: initialPrompt.title, description: initialPrompt.body.slice(0, 300), path: `/prompts/${initialPrompt.id}`, datePublished: initialPrompt.createdAt } : null;
   return <>
-    {page ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd([articleJsonLd(page), productJsonLd(page)]) }} /> : null}
+    {page ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(articleJsonLd(page)) }} /> : null}
     <PromptDetail initialPrompt={initialPrompt} />
     {others.length > 0 ? <div className="mt-10">
       <h2 className="text-lg font-semibold">More prompts</h2>
