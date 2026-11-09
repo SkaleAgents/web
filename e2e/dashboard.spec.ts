@@ -32,8 +32,12 @@ test("login waits for the session, then opens the dashboard without showing the 
     await page.setViewportSize({ width, height: 900 });
     const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
     if (width < 1024) await page.getByRole("button", { name: "Open menu" }).click();
-    if (await nav.getByRole("button", { name: "Account", exact: true }).getAttribute("aria-expanded") === "false") await nav.getByRole("button", { name: "Account", exact: true }).click();
+    const account = nav.getByRole("button", { name: /account menu/ });
+    await expect(page.locator(".dashboard-sidebar-account button").first()).toHaveAccessibleName("Color theme");
+    await expect(page.locator(".dashboard-sidebar-account")).not.toContainText(owner.email);
+    await account.click();
     await expect(nav.getByRole("link", { name: "Passkeys", exact: true })).toHaveAttribute("href", "/account/passkeys");
+    await account.click();
     await expect(nav.getByRole("link", { name: "Dashboard", exact: true })).toHaveAttribute("aria-current", "page");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     if (width < 1024) await page.getByRole("button", { name: "Close menu" }).click();

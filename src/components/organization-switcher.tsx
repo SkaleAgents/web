@@ -21,21 +21,17 @@ export function planLabel(plan?: string): string {
   return plan ? `${plan.charAt(0).toUpperCase()}${plan.slice(1)} plan` : "";
 }
 
-export function OrganizationSwitcher({ scope, pathname, memberships, personName = "" }: {
+export function OrganizationSwitcher({ scope, pathname, memberships }: {
   scope: DashboardScope;
   pathname: string;
   memberships: OrganizationMembership[];
-  personName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const wrapper = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const label = scope.kind === "organization" ? memberships.find(item => item.id === scope.id)?.name ?? "Organization" : "Organization";
   const current = scope.kind === "organization" ? memberships.find(item => item.id === scope.id) : null;
-  // Personal shows the person's own initials in a circle; teams show their initials in a rounded square.
-  const avatar = (item: OrganizationMembership) => item.kind === "personal"
-    ? <Avatar name={personName || item.name} kind="person" className="scope-avatar" />
-    : <Avatar name={item.name} kind="team" className="scope-avatar" />;
+  const avatar = (item: OrganizationMembership) => <Avatar name={item.name} kind="team" className="scope-avatar" />;
   const section = pathname.match(/^\/org\/[^/]+\/([^/]+)/)?.[1] ?? "";
   const targetPath = (item: OrganizationMembership) => {
     if (!section || (item.kind === "team" && !["jobs", "schedules", "settings"].includes(section))) return organizationHref(item);

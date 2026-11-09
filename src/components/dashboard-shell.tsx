@@ -17,7 +17,7 @@ import { OrganizationSwitcher, type OrganizationMembership } from "@/components/
 
 import { OrganizationScopeContext } from "@/components/organization-scope";
 
-import { activeNavigationHref, groupExpanded, homeOrganization, navigationSections, rememberedOrganization, rememberOrganization, type NavigationItem } from "@/lib/dashboard-navigation";
+import { accountLinks, activeNavigationHref, groupExpanded, homeOrganization, navigationSections, rememberedOrganization, rememberOrganization, type NavigationItem } from "@/lib/dashboard-navigation";
 
 const noop = () => () => {};
 
@@ -83,7 +83,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const activeHref = activeNavigationHref(sections, pathname, root);
   const active = (href: string) => href === activeHref;
   const activeGroup = sections.find(section => section.items.some(entry => active(entry.href)))?.label ?? "Your work";
-  const currentSection = sections.flatMap(section => section.items).find(entry => active(entry.href))?.label ?? "Dashboard";
+  const currentSection = sections.flatMap(section => section.items).find(entry => active(entry.href))?.label ??
+    accountLinks.find(link => pathname === link.href || pathname.startsWith(`${link.href}/`))?.label ?? "Dashboard";
   const groupKey = (label: string) => label;
   const isExpanded = (label: string) => groupExpanded(label, activeGroup, expandedGroups);
 
@@ -144,7 +145,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <nav ref={navigation} aria-label="Dashboard navigation" className="dashboard-navigation">
         <div className="dashboard-brand">
           <span className="dashboard-brand-logo"><BrandLogo href={root} /></span>
-          <ThemeSwitcher align="start" side="bottom" />
         </div>
         <div id="dashboard-sections" className={`dashboard-sections ${menuOpen ? "is-open" : ""}`}>
           <div className="dashboard-section-list">
@@ -166,6 +166,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         <div className="dashboard-sidebar-account">
+          <ThemeSwitcher align="start" side="top" />
           <AccountMenu key={user.data.id} user={user.data} showName />
         </div>
       </nav>
@@ -180,7 +181,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </button>
           {collapseToggle}
           {isOrganizations ? <span className="truncate font-semibold">Organizations</span> : <>
-            <OrganizationSwitcher scope={navWorkspace ? { kind: "organization", id: navWorkspace.id } : scope} pathname={pathname} memberships={memberships.data ?? []} personName={user.data.displayName} />
+            <OrganizationSwitcher scope={navWorkspace ? { kind: "organization", id: navWorkspace.id } : scope} pathname={pathname} memberships={memberships.data ?? []} />
             <span aria-hidden="true" className="text-line">{" / "}</span>
             <span className="truncate font-semibold">{currentSection}</span>
           </>}
@@ -209,11 +210,7 @@ function DashboardIcon({ href }: { href: string }) {
     prompts: <><path d="M4 4h16v13H9l-5 4V4Z" /><path d="M8 8h8M8 12h5" /></>,
     "mcp-config": <><path d="M8 2v5m8-5v5M6 7h12v3a6 6 0 0 1-12 0V7Zm6 9v6" /></>,
     retention: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
-    profile: <><circle cx="12" cy="8" r="4" /><path d="M4 21v-1a7 7 0 0 1 16 0v1" /></>,
-    passkeys: <><circle cx="7.5" cy="15.5" r="5.5" /><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3" /></>,
     security: <><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>,
-    notifications: <><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2Zm4 4h4" /></>,
-    data: <><ellipse cx="12" cy="6" rx="8" ry="3" /><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" /></>,
     settings: <><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2" fill="var(--canvas-elevated)" /><circle cx="15" cy="17" r="2" fill="var(--canvas-elevated)" /></>,
   };
   return <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">

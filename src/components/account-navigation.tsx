@@ -43,12 +43,11 @@ export function AccountNavigation({ user, pathname, inquiriesActive = false, sho
         className="account-nav-trigger"
         onClick={() => setOpen(!open)}>
         <Avatar name={name} kind="person" className="account-nav-avatar" />
-        {showName && <span aria-hidden="true" className="account-nav-identity"><span className="truncate font-medium">{name}</span>{user.email && <span className="truncate text-xs text-ink-muted">{user.email}</span>}</span>}
+        {showName && <span aria-hidden="true" className="account-nav-identity"><span className="truncate font-medium">{name}</span></span>}
       </button>
       <div id={panelId} hidden={!open} className="account-nav-panel">
         <div className="mb-1 border-b border-line px-3 pb-3 pt-2">
           <p className="break-words font-semibold text-ink">{name}</p>
-          {user.email && <p className="mt-1 break-all text-xs text-ink-muted">{user.email}</p>}
         </div>
         {accountLinks.map(({ href, label }) => <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined}
           className="account-nav-item" onClick={() => setOpen(false)}>
