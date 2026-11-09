@@ -63,7 +63,7 @@ export function OrganizationSwitcher({ scope, pathname, memberships }: {
       </button>
       {current?.plan && <div className="scope-plan-row">
         <span className="scope-plan">{planLabel(current.plan)}</span>
-        {current.role === "owner" && upgradablePlans.includes(current.plan) &&
+        {current.role === "owner" && upgradablePlans.includes(current.plan) && section !== "billing" &&
           <Link href={organizationHref(current, "billing")} className="scope-upgrade">Upgrade</Link>}
       </div>}
     </div>

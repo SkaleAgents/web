@@ -9,6 +9,7 @@ import { Avatar } from "@/components/avatar";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { workspaceAuditsEnabled } from "@/lib/workspace-audits";
+import { formatDate } from "@/lib/format-date";
 
 type Workspace = {
   id: string;
@@ -123,7 +124,7 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
                   <div className="min-w-0">
                     <h3 className="font-semibold text-ink"><Link href={organizationHref(workspace)} className="hover:underline">{workspace.name}</Link></h3>
                     <p className="text-sm text-ink-muted">
-                      <span className="capitalize">{workspace.role}</span>{workspace.createdAt && ` · Created ${new Date(workspace.createdAt).toLocaleDateString()}`}
+                      <span className="capitalize">{workspace.role}</span>{workspace.createdAt && ` · Created ${formatDate(workspace.createdAt)}`}
                     </p>
                   </div>
                 </div>

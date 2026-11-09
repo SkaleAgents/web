@@ -26,6 +26,7 @@ import {
   type WorkspaceAuditDetail,
 } from "@/lib/workspace-audits";
 import { workspaceSchedulesEnabled } from "@/lib/workspace-schedules";
+import { formatDateTime } from "@/lib/format-date";
 
 export function WorkspaceAuditsView() {
   const { organization } = useOrganizationScope();
@@ -221,7 +222,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
           {audits.data?.jobs.length === 0 && <p className="text-sm text-ink-muted">No shared audits are available yet.</p>}
           <ul className="divide-y divide-line">
             {visibleAudits?.map((audit) => <li key={audit.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
-              <div><p className="font-mono text-xs uppercase tracking-wide text-ink-muted">{audit.status}</p><p className="mt-1 text-sm text-ink">{audit.summary ?? "Waiting for specialist results"}</p><p className="mt-1 text-xs text-ink-muted">{audit.specialists.join(" · ")}{audit.partial ? " · Partial results" : ""}{scheduledRunLabel(audit) ? ` · ${scheduledRunLabel(audit)}` : ""} · {new Date(audit.createdAt).toLocaleString()}</p></div>
+              <div><p className="font-mono text-xs uppercase tracking-wide text-ink-muted">{audit.status}</p><p className="mt-1 text-sm text-ink">{audit.summary ?? "Waiting for specialist results"}</p><p className="mt-1 text-xs text-ink-muted">{audit.specialists.join(" · ")}{audit.partial ? " · Partial results" : ""}{scheduledRunLabel(audit) ? ` · ${scheduledRunLabel(audit)}` : ""} · {formatDateTime(audit.createdAt)}</p></div>
               <div className="flex gap-2"><Button variant="secondary" onClick={() => setSelectedAuditId(audit.id)}>Details</Button>{canManage && <Button variant="secondary" disabled={remove.isPending || audit.status === "queued" || audit.status === "running"} onClick={() => setConfirmation({ kind: "delete", auditId: audit.id })}>Delete</Button>}</div>
             </li>)}
           </ul>
@@ -275,7 +276,7 @@ function AuditDetail({ detail, canManage, onPurge, purgePending, purgeError, onC
   if (detail.isError || !detail.data) return <section className="rounded-[10px] border border-line p-4"><p role="alert" className="text-sm text-danger">{detail.error?.message ?? "Audit details are unavailable."}</p><Button className="mt-3" variant="secondary" onClick={onClose}>Close details</Button></section>;
   const audit = detail.data;
   return <section aria-labelledby="shared-audit-detail" className="space-y-4 rounded-[10px] border border-line bg-canvas-elevated p-5">
-    <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 id="shared-audit-detail" className="text-lg font-semibold text-ink">Audit details</h2><p className="mt-1 text-sm text-ink-muted">{audit.status} · {new Date(audit.createdAt).toLocaleString()}</p></div><Button variant="secondary" onClick={onClose}>Close details</Button></div>
+    <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 id="shared-audit-detail" className="text-lg font-semibold text-ink">Audit details</h2><p className="mt-1 text-sm text-ink-muted">{audit.status} · {formatDateTime(audit.createdAt)}</p></div><Button variant="secondary" onClick={onClose}>Close details</Button></div>
     {audit.summary && <p className="text-sm text-ink">{audit.summary}</p>}{audit.error && <p className="text-sm text-danger">{audit.error}</p>}
     <p className="text-sm text-ink-muted">Source {audit.retention?.inputAvailable ? "is available" : "is unavailable or purged"}. Purge status: {audit.retention?.inputPurgeStatus ?? "unknown"}.</p>
     {canManage && audit.retention?.inputAvailable && <div><Button variant="secondary" disabled={purgePending || audit.status === "queued" || audit.status === "running"} onClick={onPurge}>{purgePending ? "Requesting purge…" : audit.retention.inputPurgeStatus === "pending" || audit.retention.inputPurgeStatus === "failed" ? "Retry source purge" : "Purge source"}</Button>{purgeError && <p role="alert" className="mt-2 text-sm text-danger">{purgeError}</p>}</div>}

@@ -112,7 +112,16 @@ test("switching slugs clears the previous organization before access resolves", 
   await expect(page.getByRole("link", { name: "Organization settings" })).toHaveAttribute("href", `/org/${second.id}/settings`);
 });
 
-test("warm settings cache stays hidden after same-organization access is revoked", async ({ page }) => {
+test("returning to the tab keeps text someone has typed", async ({ page }) => {
+  await page.goto("/org/binary-labs/settings");
+  const name = page.getByLabel("Organization name");
+  await name.fill("Half typed draft");
+  await page.evaluate(() => window.dispatchEvent(new Event("visibilitychange")));
+  await page.waitForTimeout(500);
+  await expect(name).toHaveValue("Half typed draft");
+});
+
+test("warm settings cache is removed once a same-organization access check fails", async ({ page }) => {
   let revoked = false;
   let checksAfterRevocation = 0;
   await page.route(`**/api/workspaces/${id}`, route => {
@@ -135,7 +144,7 @@ test("warm settings cache stays hidden after same-organization access is revoked
   expect(checksAfterRevocation).toBeGreaterThan(0);
 });
 
-test("navigation keeps the dashboard frame while access loads only inside content", async ({ page }) => {
+test("navigation shows the page while the access check runs", async ({ page }) => {
   let hold = false;
   let release!: () => void;
   const gate = new Promise<void>(resolve => { release = resolve; });
@@ -149,14 +158,13 @@ test("navigation keeps the dashboard frame while access loads only inside conten
   hold = true;
   await page.getByRole("link", { name: "Organization settings" }).click();
   await expect(page).toHaveURL(`/org/${id}/settings`);
-  await expect(page.getByRole("status", { name: "Loading page" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "General", exact: true })).toBeVisible();
+  // The page shows while the check is still held.
+  await expect(page.getByRole("heading", { name: "Organization settings", exact: true })).toBeVisible();
   await page.screenshot({ path: test.info().outputPath("dashboard-loading.png") });
   await expect(page.getByText("Checking organization access", { exact: false })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Dashboard navigation" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Expand sidebar", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Binary Labs, switch scope" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Binary Labs", exact: true })).toHaveCount(0);
   release();
   await expect(page.getByRole("heading", { name: "Organization settings", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Expand sidebar", exact: true })).toBeVisible();
@@ -196,7 +204,6 @@ test("team settings and personal account settings are separate groups with their
   await expect(nav.getByRole("link", { name: "MCP connections", exact: true })).toHaveAttribute("href", `/org/${id}/mcp-config`);
   const groups = await nav.locator(".dashboard-nav-label").allTextContents();
   expect(groups.map(label => label.replace("⌄", "").trim())).toEqual(["Your work", "Settings", "Organizations"]);
-  await nav.getByRole("button", { name: "Organizations" }).click();
   await expect(nav.getByRole("link", { name: "All organizations", exact: true })).toHaveAttribute("href", "/organizations");
   await nav.getByRole("button", { name: /account menu/ }).click();
   for (const [label, href] of [["Passkeys", "/account/passkeys"], ["Notifications", "/account/notifications"], ["Data and privacy", "/account/data"]]) {

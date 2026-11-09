@@ -6,6 +6,7 @@ import { Avatar } from "@/components/avatar";
 import { Button, Select, TextInput } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { DeleteOrganization } from "./delete-organization";
+import { formatDate } from "@/lib/format-date";
 
 type Role = "owner" | "member" | "viewer";
 type Organization = { id: string; name: string; role: Role };
@@ -128,7 +129,7 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
         {invitations.isError && <p role="alert">Could not load invitations. <Button type="button" variant="secondary" onClick={() => void invitations.refetch()}>Retry</Button></p>}
         {invitations.data?.length === 0 && <p className="text-sm text-ink-muted">No pending invitations.</p>}
         {invitations.data && <ul className="divide-y divide-line">{invitations.data.map(invitation => <li key={invitation.id} className="flex flex-wrap items-center gap-3 py-3">
-          <div className="min-w-0 flex-1"><p className="break-all font-medium">{invitation.email}</p><p className="text-sm text-ink-muted">{invitation.role} · Expires {new Date(invitation.expiresAt).toLocaleDateString()}</p></div>
+          <div className="min-w-0 flex-1"><p className="break-all font-medium">{invitation.email}</p><p className="text-sm text-ink-muted">{invitation.role} · Expires {formatDate(invitation.expiresAt)}</p></div>
           <Button type="button" variant="secondary" disabled={busy} aria-label={`Revoke invitation for ${invitation.email}`} onClick={() => void change(async () => {
             await apiFetch(`${root}/invitations/${invitation.id}`, { method: "DELETE" });
             client.setQueryData<Invitation[]>(invitationKey, current => current?.filter(item => item.id !== invitation.id));

@@ -9,6 +9,7 @@ import { LinkButton } from "@/components/ui";
 import { currentUserOptions } from "@/lib/session";
 import { planLabel } from "@/components/organization-switcher";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
+import { formatDate } from "@/lib/format-date";
 
 export type PersonalPlanUsage = {
   enforced: boolean;
@@ -38,7 +39,7 @@ export function PersonalPlanNote({ kind }: { kind: "audits" | "schedules" }) {
   if (!data?.enforced) return null;
   const upgrade = <Link href={personalDestinationFromPath(pathname, "billing")} className="underline">Upgrade your plan</Link>;
   if (kind === "audits") {
-    const resets = new Date(data.audits.periodEnd).toLocaleDateString();
+    const resets = formatDate(data.audits.periodEnd);
     const { used, limit, remaining } = data.audits;
     return remaining > 0
       ? <div className="relative min-w-48 max-w-xs">
