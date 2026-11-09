@@ -1,21 +1,22 @@
 import { expect, it } from "vitest";
-import { articleJsonLd, itemListJsonLd, jsonLd, productJsonLd } from "@/lib/json-ld";
+import { articleJsonLd, botJsonLd, itemListJsonLd, jsonLd } from "@/lib/json-ld";
 
 const page = { title: "Threat model </script>", description: "Copy it.", path: "/prompts/1", datePublished: "2026-10-01" };
 
 it("wraps one node with a context and several nodes in a graph", () => {
   expect(JSON.parse(jsonLd(articleJsonLd(page)))).toMatchObject({ "@context": "https://schema.org", "@type": "Article", headline: page.title, datePublished: "2026-10-01" });
-  const graph = JSON.parse(jsonLd([articleJsonLd(page), productJsonLd(page)])) as { "@graph": { "@type": string }[] };
-  expect(graph["@graph"].map((node) => node["@type"])).toEqual(["Article", "Product"]);
+  const graph = JSON.parse(jsonLd([articleJsonLd(page), botJsonLd(page)])) as { "@graph": { "@type": string }[] };
+  expect(graph["@graph"].map((node) => node["@type"])).toEqual(["Article", "CreativeWork"]);
 });
 
 it("escapes < so a title cannot close the script tag", () => {
   expect(jsonLd(articleJsonLd(page))).not.toContain("</script>");
 });
 
-it("omits a missing publish date and prices products at zero", () => {
+it("omits a missing publish date and keeps bots out of merchant listings", () => {
   expect(articleJsonLd({ ...page, datePublished: undefined })).not.toHaveProperty("datePublished");
-  expect(productJsonLd(page).offers).toMatchObject({ price: "0", priceCurrency: "USD", url: "https://skaleagents.com/prompts/1" });
+  expect(botJsonLd(page)).toMatchObject({ "@type": "CreativeWork", isAccessibleForFree: true, url: "https://skaleagents.com/prompts/1" });
+  expect(botJsonLd(page)).not.toHaveProperty("offers");
 });
 
 it("numbers list items from one", () => {

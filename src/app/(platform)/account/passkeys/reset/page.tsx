@@ -6,6 +6,7 @@ import { AccountPage } from "@/components/account-page";
 import { LinkButton } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import type { PasskeySettings } from "@/lib/email-auth";
+import { formatDateTime } from "@/lib/format-date";
 
 export default function PasskeyResetPage() {
   return <AccountPage section="Passkeys" title="Reset your passkeys" description="Confirming the passkey reset you asked for.">
@@ -32,7 +33,7 @@ function ConfirmPasskeyReset({ accountId }: { accountId: string }) {
     {!token ? <p role="alert" className="text-sm text-danger">Open the link from your email again.</p>
       : reset.isPending ? <p role="status" className="text-sm text-ink-muted">Scheduling your passkey reset…</p>
       : reset.isError ? <p role="alert" className="text-sm text-danger">{reset.error.message}</p>
-      : <p role="status" className="text-sm text-ink">Every passkey will be removed on {reset.data.resetAt ? new Date(reset.data.resetAt).toLocaleString() : "the next check"}. Other browsers were signed out. You can cancel in Settings until then.</p>}
+      : <p role="status" className="text-sm text-ink">Every passkey will be removed on {reset.data.resetAt ? formatDateTime(reset.data.resetAt) : "the next check"}. Other browsers were signed out. You can cancel in Settings until then.</p>}
     {(!token || !reset.isPending) && <LinkButton href="/account/passkeys" variant="secondary">Back to passkeys</LinkButton>}
   </section>;
 }

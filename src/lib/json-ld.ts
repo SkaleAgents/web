@@ -23,15 +23,15 @@ export function articleJsonLd(page: Page) {
   };
 }
 
-// Public bots and prompts are free to read and copy, so the offer is a zero price.
-export function productJsonLd(page: Page) {
+// Not Product: Google validates that as a merchant listing and requires an image and shipping details.
+export function botJsonLd(page: Page) {
   return {
-    "@type": "Product",
+    "@type": "CreativeWork",
     name: page.title,
     description: page.description,
     url: `${SITE}${page.path}`,
-    brand: { "@type": "Brand", name: "SkaleAgents" },
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD", availability: "https://schema.org/InStock", url: `${SITE}${page.path}` },
+    isAccessibleForFree: true,
+    publisher,
   };
 }
 

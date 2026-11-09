@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, LinkButton } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie, type WorkspaceRetentionPolicy } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
+import { formatDateTime } from "@/lib/format-date";
 
 export function WorkspaceRetentionNoticeView({ workspaceId }: { workspaceId: string }) {
   const user = useQuery(currentUserOptions);
@@ -74,7 +75,7 @@ function NoticeContent({ accountId, workspaceId }: { accountId: string; workspac
       </ol>
       {policy.data.noticeArchived ? (
         <p role="status" className="text-sm text-ink">
-          Notice recorded {new Date(policy.data.noticeDeliveredAt!).toLocaleString()}. Existing organization records cannot be automatically cleaned up before {new Date(policy.data.legacyNotBefore!).toLocaleString()}. Cleanup is still off.
+          Notice recorded {formatDateTime(policy.data.noticeDeliveredAt!)}. Existing organization records cannot be automatically cleaned up before {formatDateTime(policy.data.legacyNotBefore!)}. Cleanup is still off.
         </p>
       ) : !policy.data.acknowledgementEnabled ? (
         <p role="status" className="text-sm text-ink-muted">Notice recording is not available yet. Organization audits have no automatic cleanup deadline.</p>

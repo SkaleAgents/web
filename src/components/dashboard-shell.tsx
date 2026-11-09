@@ -12,11 +12,12 @@ import { AccountMenu } from "@/components/account-menu";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { apiFetch } from "@/lib/api";
 import { dashboardDestination, organizationHref, resolveOrganization, personalOrganizationId, scopeFromPath } from "@/lib/dashboard-routes";
+import { isStaging, StagingBanner } from "@/components/staging-banner";
 import { OrganizationSwitcher, type OrganizationMembership } from "@/components/organization-switcher";
 
 import { OrganizationScopeContext } from "@/components/organization-scope";
 
-import { activeNavigationHref, groupExpanded, navigationSections, rememberedOrganization, rememberOrganization, type NavigationItem } from "@/lib/dashboard-navigation";
+import { accountLinks, activeNavigationHref, groupExpanded, homeOrganization, navigationSections, rememberedOrganization, rememberOrganization, type NavigationItem, type NavigationSection } from "@/lib/dashboard-navigation";
 
 const noop = () => () => {};
 
@@ -48,6 +49,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     queryFn: async ({ signal }) => (await apiFetch<{ data: OrganizationMembership }>(`/api/workspaces/${scope.kind === "organization" ? scope.id : ""}`, { signal })).data,
     staleTime: 0,
     refetchOnMount: "always",
+    // Keep the page up while the check for the next path runs; a failed check still replaces it below.
+    placeholderData: previous => scope.kind === "organization" && previous?.id === scope.id ? previous : undefined,
+    // Returning to the tab should not re-check: the 60s membership poll already catches revocation.
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
   useEffect(() => {
     if (user.isSuccess && !user.data) {
@@ -62,7 +68,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user.data || !legacy || !memberships.isSuccess || !personalId) return;
     const next = new URLSearchParams(window.location.search).get("next");
-    router.replace(dashboardDestination(next ?? pathname + window.location.search + window.location.hash, personalId, memberships.data));
+    // A bare /dashboard is the sign-in landing: reopen the organization opened last in this browser, if the person still belongs to it.
+    const last = !next && pathname === "/dashboard" ? memberships.data?.find(item => item.id === homeOrganization()) : undefined;
+    router.replace(last ? organizationHref(last) : dashboardDestination(next ?? pathname + window.location.search + window.location.hash, personalId, memberships.data));
   }, [user.data, legacy, memberships.isSuccess, memberships.data, pathname, personalId, router]);
 
   const isOrganizations = pathname === "/organizations";
@@ -80,9 +88,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const activeHref = activeNavigationHref(sections, pathname, root);
   const active = (href: string) => href === activeHref;
   const activeGroup = sections.find(section => section.items.some(entry => active(entry.href)))?.label ?? "Your work";
-  const currentSection = sections.flatMap(section => section.items).find(entry => active(entry.href))?.label ?? "Dashboard";
+  const currentSection = sections.flatMap(section => section.items).find(entry => active(entry.href))?.label ??
+    accountLinks.find(link => pathname === link.href || pathname.startsWith(`${link.href}/`))?.label ?? "Dashboard";
   const groupKey = (label: string) => label;
-  const isExpanded = (label: string) => groupExpanded(label, activeGroup, expandedGroups);
+  const isExpanded = ({ label, items }: NavigationSection) => groupExpanded(label, activeGroup, expandedGroups, items.length === 1);
 
   if (user.isError) return <main className="mx-auto max-w-lg space-y-4 px-6 py-16" role="alert">
     <h1 className="text-xl font-semibold">Could not check your session</h1>
@@ -98,7 +107,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   let content = children;
   if (scope.kind === "organization") {
-    if (access.isPending || access.isFetching) {
+    // A non-canonical URL is about to be replaced, which remounts the page, so nothing typed there would survive.
+    if (access.isPending || (access.isSuccess && routeReference && `/org/${routeReference}` !== root)) {
       content = <DashboardPageLoader title={currentSection} />;
     } else if (access.isError || access.data?.id !== scope.id || access.data?.kind !== workspace?.kind) {
       content = <main role="alert" className="py-8">Organization unavailable. {personalId && <Link href={personalRoot}>Open Personal</Link>}</main>;
@@ -131,7 +141,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     </Link>
   );
 
-  return <div className={`dashboard-frame ${collapsed ? "is-collapsed" : ""} ${menuOpen ? "is-menu-open" : ""}`} onKeyDown={event => {
+  return <div className="dashboard-root" style={isStaging() ? { "--banner-h": "2rem" } as React.CSSProperties : undefined}>
+    <StagingBanner />
+    <div className={`dashboard-frame ${collapsed ? "is-collapsed" : ""} ${menuOpen ? "is-menu-open" : ""}`} onKeyDown={event => {
     if (event.key === "Escape" && menuOpen) { event.preventDefault(); closeMenu(); }
   }}>
     {menuOpen ? <button type="button" className="dashboard-menu-scrim" aria-label="Dismiss menu" onClick={closeMenu} /> : null}
@@ -143,11 +155,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div id="dashboard-sections" className={`dashboard-sections ${menuOpen ? "is-open" : ""}`}>
           <div className="dashboard-section-list">
             {sections.map(section => <div key={section.label} className="dashboard-nav-group">
-              <button type="button" className="dashboard-nav-label" aria-expanded={collapsed || isExpanded(section.label)}
-                onClick={() => { if (collapsed) setCollapsed(false); else setExpandedGroups(current => ({ ...current, [groupKey(section.label)]: !isExpanded(section.label) })); }}>
+              <button type="button" className="dashboard-nav-label" aria-expanded={collapsed || isExpanded(section)}
+                onClick={() => { if (collapsed) setCollapsed(false); else setExpandedGroups(current => ({ ...current, [groupKey(section.label)]: !isExpanded(section) })); }}>
                 {section.label}<span aria-hidden="true" className="dashboard-nav-chevron"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg></span>
               </button>
-              <div className="dashboard-nav-items" hidden={!collapsed && !isExpanded(section.label)}>
+              <div className="dashboard-nav-items" hidden={!collapsed && !isExpanded(section)}>
                 {section.items.map(item)}
               </div>
             </div>)}
@@ -157,12 +169,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <DashboardIcon href="/docs" /><span className="dashboard-nav-text">Docs</span>
             </a>
             <Link href="/contact" onClick={closeMenu} className="dashboard-nav-item" aria-label="Help" title="Help"><DashboardIcon href="/help" /><span className="dashboard-nav-text">Help</span></Link>
-            <a href="/" target="_blank" rel="noopener noreferrer" onClick={closeMenu} className="dashboard-nav-item" aria-label="Visit public site (opens in a new tab)" title="Visit public site (opens in a new tab)"><DashboardIcon href="/site" /><span className="dashboard-nav-text">Visit public site <span aria-hidden="true">↗</span></span></a>
           </div>
         </div>
         <div className="dashboard-sidebar-account">
-          <AccountMenu key={user.data.id} user={user.data} showName />
           <ThemeSwitcher align="start" side="top" />
+          <AccountMenu key={user.data.id} user={user.data} showName />
         </div>
       </nav>
     </aside>
@@ -176,7 +187,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </button>
           {collapseToggle}
           {isOrganizations ? <span className="truncate font-semibold">Organizations</span> : <>
-            <OrganizationSwitcher scope={navWorkspace ? { kind: "organization", id: navWorkspace.id } : scope} pathname={pathname} memberships={memberships.data ?? []} personName={user.data.displayName} />
+            <OrganizationSwitcher scope={navWorkspace ? { kind: "organization", id: navWorkspace.id } : scope} pathname={pathname} memberships={memberships.data ?? []} />
             <span aria-hidden="true" className="text-line">{" / "}</span>
             <span className="truncate font-semibold">{currentSection}</span>
           </>}
@@ -185,6 +196,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div className="dashboard-content" key={`${user.data.id}:${root}`}>{workspace ? <OrganizationScopeContext.Provider value={{ organization: workspace, root }}>{content}</OrganizationScopeContext.Provider> : content}</div>
       <footer className="dashboard-footer"><span>© {new Date().getFullYear()} Binary Labs LLC</span><nav aria-label="Legal"><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></nav></footer>
     </div>
+  </div>
   </div>;
 }
 
@@ -193,7 +205,6 @@ function DashboardIcon({ href }: { href: string }) {
   const paths: Record<string, React.ReactNode> = {
     docs: <><path d="M12 5C8 2 4 3 3 4v15c3-2 6-1 9 1 3-2 6-3 9-1V4c-1-1-5-2-9 1Zm0 0v15" /></>,
     help: <><circle cx="12" cy="12" r="9" /><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 4m0 3h.01" /></>,
-    site: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a18 18 0 0 1 0 18 18 18 0 0 1 0-18Z" /></>,
     dashboard: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>,
     jobs: <><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V2h6v2m-7 8 3 3 5-6" /></>,
     schedules: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 2v6m10-6v6M3 10h18m-13 5h2m4 0h2" /></>,
@@ -205,11 +216,7 @@ function DashboardIcon({ href }: { href: string }) {
     prompts: <><path d="M4 4h16v13H9l-5 4V4Z" /><path d="M8 8h8M8 12h5" /></>,
     "mcp-config": <><path d="M8 2v5m8-5v5M6 7h12v3a6 6 0 0 1-12 0V7Zm6 9v6" /></>,
     retention: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
-    profile: <><circle cx="12" cy="8" r="4" /><path d="M4 21v-1a7 7 0 0 1 16 0v1" /></>,
-    passkeys: <><circle cx="7.5" cy="15.5" r="5.5" /><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3" /></>,
     security: <><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>,
-    notifications: <><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2Zm4 4h4" /></>,
-    data: <><ellipse cx="12" cy="6" rx="8" ry="3" /><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" /></>,
     settings: <><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2" fill="var(--canvas-elevated)" /><circle cx="15" cy="17" r="2" fill="var(--canvas-elevated)" /></>,
   };
   return <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">

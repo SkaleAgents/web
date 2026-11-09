@@ -13,6 +13,7 @@ export const INDEXNOW_KEY = "7c4e9a1b6d2f48e0a5c3b8d71f06e294";
 
 export const PRIVATE_PATHS = [
   "/dashboard",
+  "/account/",
   "/me",
   "/org/",
   "/staff/",
@@ -129,7 +130,7 @@ export function llmsTxt(): string {
     "## Machine-readable catalog",
     `- [JSON catalog](${SITE}/checks.json): the same review checks in JSON. Fetch it occasionally. It is not an account export.`,
     "",
-    "Do not treat /dashboard, /me, /org, /staff, /login, /signup, /auth, or /workspace-invitations as public reference.",
+    "Do not treat /dashboard, /account, /me, /org, /staff, /login, /signup, /auth, or /workspace-invitations as public reference.",
     "",
   ];
   return lines.join("\n");

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { apiFetch, ensureCsrfCookie, type McpConnection } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { Button } from "@/components/ui";
+import { formatDate, formatDateTime } from "@/lib/format-date";
 
 export default function McpConfigPage() {
   const queryClient = useQueryClient();
@@ -46,7 +47,7 @@ export default function McpConfigPage() {
           {connections.isError && <p className="mt-4 text-sm text-danger">{connections.error.message}</p>}
           {connections.data?.length === 0 && <p className="mt-4 text-sm text-ink-muted">No clients connected yet. Add SkaleAgents from the setup guide, then connect and approve the browser request.</p>}
           <ul className="mt-4 divide-y divide-line">{connections.data?.map((connection) => <li key={connection.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
-            <div><p className="font-semibold">{connection.clientName ?? (connection.clientId === "skaleagents-mcp" ? "SkaleAgents MCP" : connection.clientId)}</p><p className="mt-1 text-xs text-ink-muted">Connected {new Date(connection.createdAt).toLocaleDateString()} · Last used {connection.lastUsedAt ? new Date(connection.lastUsedAt).toLocaleString() : "Not yet"}</p></div>
+            <div><p className="font-semibold">{connection.clientName ?? (connection.clientId === "skaleagents-mcp" ? "SkaleAgents MCP" : connection.clientId)}</p><p className="mt-1 text-xs text-ink-muted">Connected {formatDate(connection.createdAt)} · Last used {connection.lastUsedAt ? formatDateTime(connection.lastUsedAt) : "Not yet"}</p></div>
             <Button type="button" variant="secondary" disabled={disconnect.isPending} onClick={() => {
               if (!window.confirm(`Disconnect ${connection.clientName ?? connection.clientId}? That client loses access until it connects again.`)) return;
               disconnect.mutate(connection.id);

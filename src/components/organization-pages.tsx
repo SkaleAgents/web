@@ -66,15 +66,11 @@ export function OrganizationOverview({ workspaceId }: { workspaceId: string }) {
 }
 
 export function OrganizationSettings({ workspaceId }: { workspaceId: string }) {
-  const root = useOrganizationRoot(workspaceId);
   return <OrganizationGate workspaceId={workspaceId}>{(organization, accountId) => <main className="space-y-7">
     <div className="workspace-intro">
       <p className="workspace-kicker">Organization / Settings</p>
       <h1 className="workspace-heading">Organization settings</h1>
     </div>
     <OrganizationSettingsManager key={`${accountId}:${workspaceId}`} organization={organization} accountId={accountId} />
-    {organization.role === "owner" && <Link href={`${root}/settings/retention`} className="inline-flex text-sm font-semibold text-accent underline underline-offset-4">
-      Audit retention notice
-    </Link>}
   </main>}</OrganizationGate>;
 }

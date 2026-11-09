@@ -49,7 +49,7 @@ it("shows payment verification as pending until the organization has a paid plan
 it("explains renewal grace and offers a verified invoice when new checkout is closed", async () => {
   showBilling("pro", false, null, null, null, { status: "grace", graceEndsAt: "2026-10-08T00:00:00Z", paymentUrl: "https://invoice.stripe.com/i/renewal_fixture" });
   expect(await screen.findByText(/Renewal payment is overdue/)).toBeVisible();
-  expect(screen.getByText(/10\/8\/2026 UTC/)).toBeVisible();
+  expect(screen.getByText(/Oct 8, 2026 UTC/)).toBeVisible();
   expect(screen.getByRole("link", { name: "Pay renewal invoice" })).toHaveAttribute("href", "https://invoice.stripe.com/i/renewal_fixture");
 });
 
@@ -119,7 +119,7 @@ it("explains the temporary draft allowance without offering payment", async () =
   });
   expect(await screen.findByText(/Stripe is finalizing your renewal invoice/)).toBeVisible();
   expect(screen.getByText("23 audits remaining")).toBeVisible();
-  expect(screen.getByRole("status", { name: "Renewal payment" })).toHaveTextContent("10/1/2026 UTC");
+  expect(screen.getByRole("status", { name: "Renewal payment" })).toHaveTextContent("Oct 1, 2026 UTC");
   expect(screen.queryByRole("link", { name: "Pay renewal invoice" })).not.toBeInTheDocument();
 });
 
@@ -148,6 +148,8 @@ it("uses the plan name in a scheduled downgrade notice", async () => {
 it("lets an owner replace a scheduled downgrade with cycle-end cancellation", async () => {
   showBilling("pro", true, null, null, "starter");
   fireEvent.click(await screen.findByRole("button", { name: "Cancel at renewal" }));
+  expect(apiFetch).not.toHaveBeenCalledWith("/api/workspaces/org-1/billing/cancel", expect.anything());
+  fireEvent.click(screen.getByRole("button", { name: "Yes, cancel at renewal" }));
   await waitFor(() => expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1/billing/cancel", expect.objectContaining({ method: "POST" })));
   expect(ensureCsrfCookie).toHaveBeenCalledOnce();
 });
@@ -270,7 +272,7 @@ it("keeps an in-flight hosted session with the organization that requested it", 
 
 it("shows UTC renewal dates consistently", async () => {
   showBilling("pro", true, null, null, "free");
-  expect(await screen.findByText(/Free starts at your next renewal on 10\/1\/2026 UTC/)).toBeVisible();
+  expect(await screen.findByText(/Free starts at your next renewal on Oct 1, 2026 UTC/)).toBeVisible();
 });
 
 it("does not substitute another owner's billing when the URL names an unavailable organization", async () => {
@@ -284,4 +286,19 @@ it("does not substitute another owner's billing when the URL names an unavailabl
   render(<QueryClientProvider client={client}><OrganizationBillingView organizationId="org-2" /></QueryClientProvider>);
   expect(await screen.findByRole("alert")).toHaveTextContent("Billing unavailable");
   expect(apiFetch).not.toHaveBeenCalledWith("/api/workspaces/org-1/billing", expect.anything());
+});
+
+const PERSONAL_ID = "0198f0b0-0000-7000-8000-000000000001";
+it("lets the owner of Personal manage its plan without creating another organization", async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
+  vi.mocked(apiFetch).mockImplementation(async (path) => {
+    if (path === "/api/workspaces") return { data: [{ id: PERSONAL_ID, name: "Harun's org", kind: "personal", role: "owner" }] } as never;
+    if (path === "/api/organization-plans") return plans as never;
+    if (path === `/api/workspaces/${PERSONAL_ID}/billing`) return { plan: "free", usage: { used: 0, limit: 2, remaining: 2, periodEnd: "2026-12-01T00:00:00Z" }, pendingChange: null, testModeEnabled: true, checkoutEnvironment: "test", cancellationEnabled: true } as never;
+    throw new Error(`Unexpected request: ${path}`);
+  });
+  render(<QueryClientProvider client={client}><OrganizationBillingView organizationId={PERSONAL_ID} /></QueryClientProvider>);
+  expect(await screen.findByRole("button", { name: "Start Pro" })).toBeEnabled();
+  expect(screen.queryByText(/Plans belong to organizations/)).toBeNull();
 });

@@ -22,6 +22,9 @@ const nextConfig: NextConfig = {
     ] }, { source: "/reviews/s/:token", headers: [
       { key: "Referrer-Policy", value: "no-referrer" },
       { key: "Cache-Control", value: "no-store, private" },
+    ] }, { source: "/github/callback", headers: [
+      { key: "Referrer-Policy", value: "no-referrer" },
+      { key: "Cache-Control", value: "no-store, private" },
     ] }, { source: "/auth/confirm", headers: [
       { key: "Referrer-Policy", value: "no-referrer" },
       { key: "Cache-Control", value: "no-store, private" },

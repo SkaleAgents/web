@@ -6,6 +6,7 @@ import { apiFetch, ensureCsrfCookie, type DeletionPendingResponse, type InputCle
 import { reportToCsv, reportToJson, reportToPdf, type ComplianceReport, type ReportSource } from "@/lib/compliance-report-export";
 import { submittedAuditText } from "@/lib/review-edits";
 import { Button } from "@/components/ui";
+import { formatDateTime } from "@/lib/format-date";
 
 const reportFormats = [
   { id: "json", label: "JSON", filename: (jobId: string) => `audit-${jobId}.json`, type: "application/json" },
@@ -116,8 +117,8 @@ export function JobRetentionControls({ job, accountId, onDeletion }: {
                     : "Audit input is retained."}
           </p>
           <p className="text-xs text-ink-muted">
-            {retention?.inputExpiresAt ? `Input deadline: ${new Date(retention.inputExpiresAt).toLocaleString()}. ` : "Automatic input expiry is not enabled for this audit. "}
-            {retention?.historyExpiresAt && `History deadline: ${new Date(retention.historyExpiresAt).toLocaleString()}.`}
+            {retention?.inputExpiresAt ? `Input deadline: ${formatDateTime(retention.inputExpiresAt)}. ` : "Automatic input expiry is not enabled for this audit. "}
+            {retention?.historyExpiresAt && `History deadline: ${formatDateTime(retention.historyExpiresAt)}.`}
           </p>
           {job.scheduleId && <p className="text-xs text-ink-muted">The recurring schedule keeps a separate input copy. Cleaning this job does not clean its schedule or other runs.</p>}
           <p className="text-sm text-ink-muted">Download a copy as JSON, PDF, or CSV. Findings stay readable on this page. A spreadsheet row with no finding is not a pass.</p>

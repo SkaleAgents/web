@@ -6,6 +6,7 @@ import { apiFetch, ensureCsrfCookie, type RetentionPolicy } from "@/lib/api";
 import { retentionLaterActive, snoozeRetentionNotice, subscribeRetentionLater } from "@/lib/retention-notice-later";
 import { currentUserOptions } from "@/lib/session";
 import { Button } from "@/components/ui";
+import { formatDateTime } from "@/lib/format-date";
 
 export function RetentionNotice({ accountId, presentation = "page", showRecorded = true }: { accountId: string; presentation?: "page" | "dialog"; showRecorded?: boolean }) {
   const client = useQueryClient();
@@ -40,18 +41,11 @@ export function RetentionNotice({ accountId, presentation = "page", showRecorded
   const awaitingAcceptance = acknowledgementOpen && !policy.data?.noticeArchived;
 
   if (presentation === "dialog") {
-    if (!onClient || laterActive) return null;
-    if (!policy.isError && !awaitingAcceptance) return null;
+    // A failed fetch stays out of the way here; Audit jobs and Data and privacy show it inline.
+    if (!onClient || laterActive || !awaitingAcceptance || !policy.data) return null;
     return (
       <RetentionDialog titleId={titleId}>
-        {policy.isError ? (
-          <>
-            <h2 id={titleId} className="font-semibold">Audit retention policy</h2>
-            <RetentionError message={policy.error.message} onReload={() => void policy.refetch()} />
-          </>
-        ) : policy.data ? (
-          <RetentionBody titleId={titleId} policy={policy.data} acknowledge={acknowledge} onReload={() => void policy.refetch()} onLater={() => snoozeRetentionNotice(accountId)} />
-        ) : null}
+        <RetentionBody titleId={titleId} policy={policy.data} acknowledge={acknowledge} onReload={() => void policy.refetch()} onLater={() => snoozeRetentionNotice(accountId)} />
       </RetentionDialog>
     );
   }
@@ -98,7 +92,7 @@ function RetentionBody({ titleId, policy, acknowledge, onReload, onLater }: {
       <h2 id={titleId} className="font-semibold">Audit retention policy</h2>
       {!policy.enabled && <p className="text-sm text-ink-muted">Automatic retention is not active. Recording this notice starts your 30-day legacy grace period but does not activate cleanup.</p>}
       <ul className="list-disc space-y-1 pl-5 text-sm text-ink-muted">{policy.notice.map(line => <li key={line}>{line}</li>)}</ul>
-      {policy.noticeArchived ? <p role="status" className="text-sm">Notice recorded {new Date(policy.noticeDeliveredAt!).toLocaleString()}. Existing records cannot be automatically removed before {new Date(policy.legacyNotBefore!).toLocaleString()}. {policy.enabled ? "Each record shows its effective deadline." : "Deadlines will appear after activation."}</p>
+      {policy.noticeArchived ? <p role="status" className="text-sm">Notice recorded {formatDateTime(policy.noticeDeliveredAt!)}. Existing records cannot be automatically removed before {formatDateTime(policy.legacyNotBefore!)}. {policy.enabled ? "Each record shows its effective deadline." : "Deadlines will appear after activation."}</p>
         : <div className="flex flex-wrap gap-2">
           <Button disabled={acknowledge.isPending} onClick={() => acknowledge.mutate()}>{acknowledge.isPending ? "Recording notice…" : "I've read this retention policy"}</Button>
           {onLater ? <Button type="button" variant="secondary" onClick={onLater}>Do it later</Button> : null}

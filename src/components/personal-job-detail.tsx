@@ -12,11 +12,13 @@ import { leadFinding, plainRisk, priorityReview } from "@/lib/audit-risk";
 import { ExactLineChange } from "@/components/exact-line-change";
 import { proposedChangeText, reviewCopyText, submittedAuditText } from "@/lib/review-edits";
 import { SourceMetadata } from "@/components/source-metadata";
+import { SourceFiles } from "@/components/source-files";
 import { Button, LinkButton } from "@/components/ui";
 import { scheduledRunLabel } from "@/lib/audit-dispatch";
 import { apiFetch, type SwarmJob, type WatchtowerSession, watchtowerFetch } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { organizationPath, scopeFromPath } from "@/lib/dashboard-routes";
+import { formatDateTime } from "@/lib/format-date";
 
 function RiskLead({ findings, partial }: { findings: Array<{ title: string; severity: string }>; partial?: boolean }) {
   const lead = leadFinding(findings);
@@ -143,14 +145,15 @@ export function PersonalJobDetail({ id }: { id: string }) {
             </article>)}
           </section>}
           <PlainCheckList coverage={job.data.coverage} tasks={job.data.tasks} status={job.data.status} />
+          {job.data.sourceFiles && job.data.sourceFiles.length > 0 && <SourceFiles files={job.data.sourceFiles} />}
         </div>
         <div role="tabpanel" id="audit-advanced-panel" aria-labelledby="audit-advanced-tab" hidden={view !== "advanced"} className="space-y-6">
           <section className="audit-overview" aria-label="Audit record">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <p className="break-all font-mono text-xs text-ink-muted">Job {job.data.id}</p>
-                <p className="mt-2 text-sm text-ink-muted">Created {new Date(job.data.createdAt).toLocaleString()}</p>
-                <p className="text-sm text-ink-muted">Updated {new Date(job.data.updatedAt).toLocaleString()}</p>
+                <p className="mt-2 text-sm text-ink-muted">Created {formatDateTime(job.data.createdAt)}</p>
+                <p className="text-sm text-ink-muted">Updated {formatDateTime(job.data.updatedAt)}</p>
               </div>
               <Button type="button" variant="secondary" disabled={openReview.isPending} onClick={() => openReview.mutate()}>Open Watchtower</Button>
             </div>

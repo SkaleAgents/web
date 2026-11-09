@@ -6,26 +6,27 @@ const labels = (sections: ReturnType<typeof navigationSections>) => sections.map
 afterEach(() => sessionStorage.clear());
 
 describe("navigationSections", () => {
-  it("gives team owners organization settings, then Organizations, then personal Account", () => {
+  it("gives team owners organization settings, then Organizations, and leaves personal settings to the profile menu", () => {
     expect(labels(navigationSections({ workspace: { kind: "team", role: "owner" }, root: "/org/acme" }))).toEqual([
-      ["Your work", ["Dashboard", "Audit jobs", "Scheduled audits"]],
-      ["Settings", ["General", "MCP connections", "Billing", "Audit retention"]],
+      ["Your work", ["Dashboard", "Audit jobs", "Scheduled audits", "MCP connections"]],
+      ["Settings", ["General", "Billing", "Audit retention"]],
       ["Organizations", ["All organizations"]],
-      ["Account", ["Profile", "Passkeys", "Notifications", "Data and privacy"]],
     ]);
   });
 
   it("hides owner-only settings from team members", () => {
     const settings = navigationSections({ workspace: { kind: "team", role: "member" }, root: "/org/acme" })[1];
-    expect(settings.items.map(item => item.label)).toEqual(["General", "MCP connections"]);
+    expect(settings.items.map(item => item.label)).toEqual(["General"]);
   });
 
   it("gives Personal its build tools and links Organizations to its own page from any scope", () => {
     const personal = navigationSections({ workspace: { kind: "personal", role: "owner" }, root: "/org/me" });
-    expect(personal.map(section => section.label)).toEqual(["Your work", "Build", "Settings", "Organizations", "Account"]);
+    expect(personal.map(section => section.label)).toEqual(["Your work", "Build", "Settings", "Organizations"]);
+    expect(personal[0].items).toContainEqual({ href: "/org/me/mcp-config", label: "MCP connections" });
+    expect(personal[2].items).toEqual([{ href: "/org/me/billing", label: "Billing" }]);
     const team = navigationSections({ workspace: { kind: "team", role: "owner" }, root: "/org/acme" });
     expect(team[2].items[0].href).toBe("/organizations");
-    expect(team.flatMap(section => section.items).find(item => item.label === "Passkeys")?.href).toBe("/account/passkeys");
+    expect(team.flatMap(section => section.items).find(item => item.label === "Passkeys")).toBeUndefined();
   });
 });
 
@@ -51,6 +52,8 @@ describe("groupExpanded", () => {
     expect(groupExpanded("Account", "Settings", {})).toBe(false);
     expect(groupExpanded("Your work", "Settings", { "Your work": false })).toBe(false);
     expect(groupExpanded("Account", "Settings", { Account: true })).toBe(true);
+    expect(groupExpanded("Organizations", "Settings", {}, true)).toBe(true);
+    expect(groupExpanded("Organizations", "Settings", { Organizations: false }, true)).toBe(false);
   });
 });
 

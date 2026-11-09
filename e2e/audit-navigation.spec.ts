@@ -28,18 +28,19 @@ test("audit creation and job management use separate pages", async ({ page }) =>
   await expect(page.getByText("Audit in progress", { exact: true })).toBeVisible();
 });
 
-test("signed-in navigation keeps the theme control and the profile menu at the foot of the sidebar", async ({ page }) => {
+test("signed-in navigation puts the theme control and the profile menu at the sidebar foot", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Test Owner", email: "owner@skaleagents.com" } }));
   await page.goto("/me/jobs");
   const toolbar = page.locator(".dashboard-toolbar");
   await expect(toolbar.getByRole("button", { name: "Color theme" })).toHaveCount(0);
   await expect(toolbar.getByRole("button", { name: /account menu/ })).toHaveCount(0);
   const foot = page.locator(".dashboard-sidebar-account");
+  await expect(page.locator(".dashboard-brand").getByRole("button", { name: "Color theme" })).toHaveCount(0);
   await expect(foot.getByRole("button", { name: "Color theme" })).toBeVisible();
   const account = foot.getByRole("button", { name: "Test Owner, account menu" });
   await expect(account).toBeVisible();
   await expect(account).toContainText("Test Owner");
-  await expect(account).toContainText("owner@skaleagents.com");
+  await expect(account).not.toContainText("owner@skaleagents.com");
   // The sidebar foot stays pinned when the page scrolls.
   const before = await account.boundingBox();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -53,7 +54,22 @@ test("signed-in navigation keeps the theme control and the profile menu at the f
   await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
   await page.getByRole("link", { name: "Profile", exact: true }).click();
   await expect(page).toHaveURL("/account/profile");
+  await expect(page.locator(".dashboard-toolbar")).toContainText("Profile");
   await expect(page.getByLabel("Full name")).toHaveValue("Test Owner");
+});
+
+test("the collapsed sidebar keeps Docs, Help and the profile inside the window while the navigation scrolls", async ({ page }) => {
+  await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Test Owner", email: "owner@skaleagents.com" } }));
+  await page.setViewportSize({ width: 1280, height: 520 });
+  await page.goto("/me/jobs");
+  await page.getByRole("button", { name: "Collapse sidebar" }).click();
+  const account = page.locator(".dashboard-sidebar-account").getByRole("button", { name: "Test Owner, account menu" });
+  const help = page.locator(".dashboard-sidebar-footer").getByRole("link", { name: "Help" });
+  await expect(account).toBeVisible();
+  const accountBox = (await account.boundingBox())!;
+  expect(accountBox.y + accountBox.height).toBeLessThanOrEqual(520);
+  expect((await help.boundingBox())!.y + (await help.boundingBox())!.height).toBeLessThanOrEqual(accountBox.y);
+  await expect(page.getByRole("link", { name: /Visit public site/ })).toHaveCount(0);
 });
 
 test("public navigation shows Dashboard only after sign-in", async ({ page }) => {

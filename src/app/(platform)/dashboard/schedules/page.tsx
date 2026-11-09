@@ -9,6 +9,7 @@ import { currentUserOptions } from "@/lib/session";
 import { personalDestinationFromPath } from "@/lib/dashboard-routes";
 import { scheduleCadenceLabel } from "@/lib/schedule-cadence";
 import { PersonalPlanNote, schedulesAllowed, usePersonalPlanUsage } from "@/components/personal-plan-note";
+import { formatDateTime } from "@/lib/format-date";
 
 export default function SchedulesPage() {
   const pathname = usePathname();
@@ -63,7 +64,7 @@ export default function SchedulesPage() {
                   </td>
                   <td className="px-4 py-4 text-ink-muted">{scheduleCadenceLabel(schedule.cronExpression)}</td>
                   <td className="px-4 py-4 text-ink-muted">{schedule.enabled ? "Active" : "Paused"}</td>
-                  <td className="px-4 py-4 text-ink-muted">{schedule.enabled && schedule.nextRunAt ? new Date(schedule.nextRunAt).toLocaleString() : "Not scheduled"}</td>
+                  <td className="px-4 py-4 text-ink-muted">{schedule.enabled && schedule.nextRunAt ? formatDateTime(schedule.nextRunAt) : "Not scheduled"}</td>
                 </tr>
               ))}
             </tbody>

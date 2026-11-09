@@ -32,8 +32,12 @@ test("login waits for the session, then opens the dashboard without showing the 
     await page.setViewportSize({ width, height: 900 });
     const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
     if (width < 1024) await page.getByRole("button", { name: "Open menu" }).click();
-    if (await nav.getByRole("button", { name: "Account", exact: true }).getAttribute("aria-expanded") === "false") await nav.getByRole("button", { name: "Account", exact: true }).click();
+    const account = nav.getByRole("button", { name: /account menu/ });
+    await expect(page.locator(".dashboard-sidebar-account button").first()).toHaveAccessibleName("Color theme");
+    await expect(page.locator(".dashboard-sidebar-account")).not.toContainText(owner.email);
+    await account.click();
     await expect(nav.getByRole("link", { name: "Passkeys", exact: true })).toHaveAttribute("href", "/account/passkeys");
+    await account.click();
     await expect(nav.getByRole("link", { name: "Dashboard", exact: true })).toHaveAttribute("aria-current", "page");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     if (width < 1024) await page.getByRole("button", { name: "Close menu" }).click();
@@ -133,18 +137,9 @@ test("dashboard has its own navigation and keeps the public shell on public page
   const before = await sidebar.boundingBox();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   expect((await sidebar.boundingBox())!.y).toBe(before!.y);
-  const publicLink = sidebar.getByRole("link", { name: "Visit public site (opens in a new tab)", exact: true });
-  await expect(publicLink).toHaveAttribute("target", "_blank");
-  await expect(publicLink).toContainText("↗");
-  const popupPromise = page.waitForEvent("popup");
-  await publicLink.click();
-  const publicPage = await popupPromise;
-  await expect(publicPage).toHaveURL(/\/$/);
-  await expect(publicPage.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
-  await expect(publicPage.getByRole("contentinfo")).toBeVisible();
-  await expect(page).toHaveURL(/\/org\/[^/]+$/);
-  await expect(sidebar).toBeVisible();
-  await publicPage.close();
+  await expect(sidebar.getByRole("link", { name: /Visit public site/ })).toHaveCount(0);
+  await expect(sidebar.getByRole("link", { name: "Help", exact: true })).toBeVisible();
+  await expect(sidebar.getByRole("link", { name: /^Docs/ })).toBeVisible();
 });
 
 test("sign-in is a focused entry point with a way back to the public site", async ({ page }) => {
