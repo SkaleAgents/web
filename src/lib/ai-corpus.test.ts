@@ -109,3 +109,10 @@ it("publishes organization structured data and the IndexNow key file", () => {
   expect(INDEXNOW_KEY).toMatch(/^[a-f0-9]{32}$/);
   expect(readFileSync(path.join(process.cwd(), "public", `${INDEXNOW_KEY}.txt`), "utf8").trim()).toBe(INDEXNOW_KEY);
 });
+
+it("keeps signed-in account pages out of robots.txt and markdown", async () => {
+  expect(PRIVATE_PATHS).toContain("/account/");
+  expect(markdownDocument("/account/passkeys")).toBeNull();
+  const { metadata } = await import("../app/(platform)/account/layout");
+  expect(metadata.robots).toEqual({ index: false, follow: false });
+});
