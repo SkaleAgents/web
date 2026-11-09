@@ -1,0 +1,36 @@
+name: IndexNow
+
+# Railway reports each production deploy to GitHub; submit once the new build is live.
+on:
+  deployment_status:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: true
+
+jobs:
+  submit:
+    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'SkaleAgents / production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      ORIGIN: https://skaleagents.com
+      # Public by design: the same key is served at $ORIGIN/$KEY.txt.
+      KEY: 7c4e9a1b6d2f48e0a5c3b8d71f06e294
+    steps:
+      - name: Submit sitemap URLs
+        # shortcut: resubmits every sitemap URL on each deploy, not only changed ones; add a changed-file filter if deploys get frequent.
+        run: |
+          set -euo pipefail
+          test "$(curl -fsS "$ORIGIN/$KEY.txt" | tr -d '[:space:]')" = "$KEY"
+          { curl -fsS "$ORIGIN/sitemap.xml" | grep -oE '<loc>[^<]+</loc>' | sed -E 's#</?loc>##g'; echo "$ORIGIN/llms.txt"; echo "$ORIGIN/index.md"; } \
+            | jq -Rn --arg host skaleagents.com --arg key "$KEY" --arg loc "$ORIGIN/$KEY.txt" '{host:$host,key:$key,keyLocation:$loc,urlList:[inputs|select(length>0)]}' > payload.json
+          echo "submitting $(jq '.urlList|length' payload.json) URLs"
+          for endpoint in https://www.bing.com/indexnow https://api.indexnow.org/indexnow; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$endpoint" -H 'content-type: application/json; charset=utf-8' --data @payload.json)
+            echo "$endpoint $code"
+            case "$code" in 200|202) ;; *) exit 1 ;; esac
+          done
