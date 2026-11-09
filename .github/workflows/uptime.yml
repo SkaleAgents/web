@@ -1,0 +1,24 @@
+name: Uptime
+
+# A 6 Nov outage (no running web deployment for about 4 hours) went unnoticed until an Ahrefs crawl scored 0.
+# A failed scheduled run emails the person who last edited this schedule.
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  homepage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Homepage returns 200 HTML
+        run: |
+          set -euo pipefail
+          for url in https://skaleagents.com/ https://skaleagents.com/robots.txt; do
+            curl -fsS --retry 2 --retry-delay 10 -o /dev/null -w "$url %{http_code} %{content_type}\n" "$url"
+          done
+          curl -fsS -o home.html https://skaleagents.com/
+          grep -qi '<html' home.html
