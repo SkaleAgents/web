@@ -624,6 +624,11 @@ html.dark .dashboard-frame {
 .audit-finding > div { min-width: 0; }
 .audit-finding h3 { margin-top: 12px; font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.4; }
 .audit-finding + .audit-finding { margin-top: 12px; }
+.finding-new { display: inline-block; margin-left: 8px; padding: 0 6px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); font-size: 11px; font-weight: 600; vertical-align: middle; }
+.finding-decision { margin-top: 12px; }
+.audit-changes { padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 14px; }
+.audit-changes a { text-decoration: underline; text-underline-offset: 3px; }
+.audit-changes ul { margin-top: 6px; color: var(--ink-muted); font-size: 13px; }
 .finding-detail { max-width: 65ch; margin-top: 10px; color: var(--ink); font-size: 15px; line-height: 1.55; }
 .finding-place { max-width: 65ch; margin-top: 16px; color: var(--ink-muted); font-size: 13px; line-height: 1.5; }
 .finding-place > span { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 600; }

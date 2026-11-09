@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PersonalJobDetail } from "./personal-job-detail";
@@ -118,4 +118,53 @@ it("lists the files a GitHub scan read and why others were skipped", async () =>
   expect(section).toHaveTextContent("more.tf: over the 2 MiB total");
   expect(section).toHaveTextContent("notes.txt: not a supported format");
   expect(section).toHaveTextContent("gone.tf: could not be read");
+});
+
+it("shows what changed, and dismisses and restores a finding", async () => {
+  const jobId = "00000000-0000-4000-8000-000000000001";
+  const previousId = "00000000-0000-4000-8000-000000000009";
+  const fingerprint = "a".repeat(64);
+  let decision: { kind: "false_positive"; reason: string } | null = null;
+  const job = () => ({
+    id: jobId, status: "completed", requestedBy: "owner", dispatchActor: "user", sourcePurged: false, specialists: ["devsecops"], partial: false,
+    scope: { content: "x" }, createdAt: "2026-09-28T12:00:00Z", updatedAt: "2026-09-28T12:00:00Z",
+    comparison: { previousJobId: previousId, new: 1, stillOpen: 0, fixed: [{ title: "Old problem", severity: "high", resource: "db" }] },
+    findings: [{ severity: "high", title: "Noisy bucket", detail: "Detail.", resource: "bucket", remediation: "Fix.", specialist: "devsecops", fingerprint, change: "new", decision }],
+  }) as SwarmJob;
+  const requests: Array<{ method: string; body: unknown }> = [];
+  vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.endsWith("/sanctum/csrf-cookie")) return new Response(null, { status: 204 });
+    if (url.endsWith(`/api/jobs/${jobId}/findings/${fingerprint}/decision`)) {
+      const body = init?.body ? JSON.parse(String(init.body)) : null;
+      requests.push({ method: String(init?.method), body });
+      decision = body ? { kind: body.decision, reason: body.reason } : null;
+      return Response.json({ decision });
+    }
+    if (url.endsWith(`/api/jobs/${jobId}`)) return Response.json(job());
+    throw new Error(`Unexpected request: ${url}`);
+  }));
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  await setSessionUser(client, { id: "owner", displayName: "Owner", email: null, grokSubject: null });
+
+  render(<QueryClientProvider client={client}><PersonalJobDetail id={jobId} /></QueryClientProvider>);
+
+  const changes = await screen.findByRole("region", { name: "Since the last audit" });
+  expect(changes).toHaveTextContent("1 new, 0 still open, 1 fixed");
+  expect(changes).toHaveTextContent("Fixed: Old problem");
+  expect(screen.getByText("New")).toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+  await userEvent.type(screen.getByLabelText("Reason"), "Internal only");
+  await userEvent.click(screen.getByRole("button", { name: "Save decision" }));
+
+  const dismissed = await screen.findByRole("region", { name: "Dismissed findings" });
+  expect(requests[0]).toEqual({ method: "PUT", body: { decision: "false_positive", reason: "Internal only" } });
+  expect(dismissed).toHaveTextContent("False positive: Internal only");
+  expect(screen.queryByRole("region", { name: "Fix these first" })).not.toBeInTheDocument();
+
+  await userEvent.click(within(dismissed).getByRole("button", { name: "Restore" }));
+  await waitFor(() => expect(screen.queryByRole("region", { name: "Dismissed findings" })).not.toBeInTheDocument());
+  expect(requests[1]).toEqual({ method: "DELETE", body: null });
+  expect(await screen.findByRole("region", { name: "Fix these first" })).toBeInTheDocument();
 });
