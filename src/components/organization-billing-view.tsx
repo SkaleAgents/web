@@ -42,6 +42,15 @@ function approvedInvoiceUrl(value: string): boolean {
   }
 }
 
+function approvedPortalUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname === "billing.stripe.com";
+  } catch {
+    return false;
+  }
+}
+
 function utcDate(value: string): string {
   return `${new Date(value).toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "UTC" })} UTC`;
 }
@@ -125,6 +134,14 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
     onSettled: async (_result, _error, requestedId) => {
       await client.invalidateQueries({ queryKey: ["organization-billing", requestedId] });
       await client.invalidateQueries({ queryKey: ["workspaces"] });
+    },
+  });
+  const portal = useMutation({
+    mutationFn: async (requestedId: string) => {
+      await ensureCsrfCookie();
+      const { url } = await apiFetch<{ url: string }>(`/api/workspaces/${requestedId}/billing/portal`, { method: "POST" });
+      if (!approvedPortalUrl(url)) throw new Error("Payment details are unavailable right now. Please try again.");
+      window.location.assign(url);
     },
   });
   const currentPlan = catalog.data?.find((plan) => plan.key === billing.data?.plan);
@@ -225,6 +242,11 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
         {change.isError ? <p role="alert" className="text-sm text-danger">{change.error.message}</p> : null}
         {checkoutOpen && billing.data.plan === "free" && checkoutLink?.organizationId === organizationId ? <p role="status" className="text-sm text-ink-muted">Opening the secure Stripe payment page. <a className="underline" href={checkoutLink.url}>Continue to Stripe</a></p> : null}
       </section>
+      {billing.data.plan !== "free" ? <div className="space-y-2">
+        <Button type="button" variant="secondary" disabled={portal.isPending} onClick={() => portal.mutate(organizationId)}>{portal.isPending ? "Opening…" : "Manage payment details"}</Button>
+        <p className="text-sm text-ink-muted">Update your card and download invoices on Stripe&apos;s secure page.</p>
+        {portal.isError ? <p role="alert" className="text-sm text-danger">{portal.error.message}</p> : null}
+      </div> : null}
       {billing.data.plan !== "free" && billing.data.pendingChange?.kind !== "cancellation" ? <div className="space-y-2">
         {confirmingCancel ? <div className="flex flex-wrap gap-2">
           <Button type="button" variant="secondary" disabled={cancelBlocked} onClick={() => { setConfirmingCancel(false); cancel.mutate(organizationId); }}>Yes, cancel at renewal</Button>
