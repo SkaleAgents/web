@@ -148,8 +148,8 @@ test("a first visit shows the page without waiting for the access check", async 
   let release!: () => void;
   const held = new Promise<void>(resolve => { release = resolve; });
   await page.route(`**/api/workspaces/${id}`, async route => { await held; await route.fulfill({ json: { data: team } }); });
-  await page.goto(`/org/${id}/settings`);
-  await expect(page.getByRole("heading", { name: "Organization settings", exact: true })).toBeVisible();
+  await page.goto(`/org/${id}/settings/retention`);
+  await expect(page.getByRole("heading", { name: "Organization audit retention", exact: true })).toBeVisible();
   release();
 });
 
