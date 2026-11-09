@@ -85,6 +85,13 @@ function link(name: string, path: string, note: string): string {
   return `- [${name}](${absoluteMarkdown(path)}): ${note}`;
 }
 
+// Public names are user-written. Keep them to one line of plain text so they cannot add links or lines to a markdown list.
+export function markdownInline(value: string, max = 80): string {
+  let text = value.replace(/[\p{Cc}\p{Cf}\u2028\u2029\s]+/gu, " ").trim();
+  if (text.length > max) text = `${text.slice(0, max - 1).trimEnd()}\u2026`;
+  return text.replace(/[\\[\]()]/g, "\\$&");
+}
+
 export function llmsTxt(): string {
   const lines = [
     "# SkaleAgents",
