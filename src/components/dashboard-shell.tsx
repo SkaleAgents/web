@@ -49,8 +49,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     queryFn: async ({ signal }) => (await apiFetch<{ data: OrganizationMembership }>(`/api/workspaces/${scope.kind === "organization" ? scope.id : ""}`, { signal })).data,
     staleTime: 0,
     refetchOnMount: "always",
-    // Keep the page up while the check for the next path runs; a failed check still replaces it below.
-    placeholderData: previous => scope.kind === "organization" && previous?.id === scope.id ? previous : undefined,
+    // The membership list already vouches for this organization, so the page need not wait; a failed check still replaces it below.
+    placeholderData: workspace,
     // Returning to the tab should not re-check: the 60s membership poll already catches revocation.
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

@@ -144,6 +144,15 @@ test("warm settings cache is removed once a same-organization access check fails
   expect(checksAfterRevocation).toBeGreaterThan(0);
 });
 
+test("a first visit shows the page without waiting for the access check", async ({ page }) => {
+  let release!: () => void;
+  const held = new Promise<void>(resolve => { release = resolve; });
+  await page.route(`**/api/workspaces/${id}`, async route => { await held; await route.fulfill({ json: { data: team } }); });
+  await page.goto(`/org/${id}/settings/retention`);
+  await expect(page.getByRole("heading", { name: "Organization audit retention", exact: true })).toBeVisible();
+  release();
+});
+
 test("navigation shows the page while the access check runs", async ({ page }) => {
   let hold = false;
   let release!: () => void;
