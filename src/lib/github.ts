@@ -1,6 +1,6 @@
 import { ApiError } from "@/lib/api";
 
-export type GithubInstallation = { connected: boolean; accountLogin?: string | null; repositorySelection?: "all" | "selected" | null; suspended?: boolean };
+export type GithubInstallation = { connected: boolean; pullRequestReviews?: boolean; accountLogin?: string | null; repositorySelection?: "all" | "selected" | null; suspended?: boolean };
 export type GithubRepository = { id: number; fullName: string; private: boolean; defaultBranch: string };
 export type GithubRepositoryPage = { repositories: GithubRepository[]; nextPage: number | null };
 
