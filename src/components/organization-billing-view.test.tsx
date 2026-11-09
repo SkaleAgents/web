@@ -14,6 +14,8 @@ const plans = { data: [
   { key: "max", name: "Max", monthlyUsd: 499, auditLimit: 2000, checkoutMode: "self_service" },
 ] };
 
+let portalUrl = "https://billing.stripe.com/p/session/fixture";
+
 function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean, paymentUrl: string | null = null, checkoutReturnOrganizationId: string | null = null, pendingCyclePlan: string | null = null, renewalPayment: { status: "grace" | "access_paused"; graceEndsAt: string; paymentUrl: string | null } | null = null, cutoverNoticeAvailable = false, checkoutEnvironment?: "test" | "live" | "closed") {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner", grokSubject: null });
@@ -28,6 +30,7 @@ function showBilling(plan: "free" | "starter" | "pro", testModeEnabled: boolean,
       renewalPayment,
     } as never;
     if (path === "/api/workspaces/org-1/billing/change-plan" && init?.method === "POST") return { id: "change-1", status: "effective" } as never;
+    if (path === "/api/workspaces/org-1/billing/portal" && init?.method === "POST") return { url: portalUrl } as never;
     if (path === "/api/workspaces/org-1/billing/cancel" && init?.method === "POST") return { id: "change-3", status: "pending_cycle" } as never;
     if (path === "/api/workspaces/org-1/billing/checkout" && init?.method === "POST") return { url: "https://checkout.stripe.com/c/pay/cs_test_fixture" } as never;
     throw new Error(`Unexpected request: ${path}`);
@@ -152,6 +155,30 @@ it("lets an owner replace a scheduled downgrade with cycle-end cancellation", as
   fireEvent.click(screen.getByRole("button", { name: "Yes, cancel at renewal" }));
   await waitFor(() => expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1/billing/cancel", expect.objectContaining({ method: "POST" })));
   expect(ensureCsrfCookie).toHaveBeenCalledOnce();
+});
+
+it("opens Stripe's payment details page and refuses any other host", async () => {
+  const assign = vi.fn();
+  vi.stubGlobal("location", { ...window.location, assign });
+  showBilling("pro", true);
+  fireEvent.click(await screen.findByRole("button", { name: "Manage payment details" }));
+  await waitFor(() => expect(assign).toHaveBeenCalledWith("https://billing.stripe.com/p/session/fixture"));
+  cleanup();
+
+  assign.mockClear();
+  portalUrl = "https://evil.example/p/session/fixture";
+  showBilling("pro", true);
+  fireEvent.click(await screen.findByRole("button", { name: "Manage payment details" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("Payment details are unavailable");
+  expect(assign).not.toHaveBeenCalled();
+  portalUrl = "https://billing.stripe.com/p/session/fixture";
+  vi.unstubAllGlobals();
+});
+
+it("offers no payment details on Free", async () => {
+  showBilling("free", true);
+  await screen.findByRole("button", { name: "Start Starter" });
+  expect(screen.queryByRole("button", { name: "Manage payment details" })).not.toBeInTheDocument();
 });
 
 it("lets an upgrade replace a scheduled downgrade but blocks other plan changes", async () => {
