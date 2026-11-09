@@ -43,7 +43,7 @@ export const publicPosts: readonly PublicPost[] = [
     links: [
       { href: "/checks/workflow-permissions-are-broad", label: "Workflow permissions are broad" },
       { href: "/checks/pull-request-target-checkout", label: "Pull request target checkout of PR code" },
-      { href: "/blog/pull-request-target-checks-out-the-pr", label: "pull_request_target should not check out the pull request" },
+      { href: "/blog/pull-request-target-checks-out-the-pr", label: "pull_request_target should not check out the PR" },
     ],
   },
   {
@@ -106,7 +106,7 @@ export const publicPosts: readonly PublicPost[] = [
   },
   {
     slug: "pull-request-target-checks-out-the-pr",
-    title: "pull_request_target should not check out the pull request",
+    title: "pull_request_target should not check out the PR",
     description: "Why a pull_request_target job that checks out the head SHA runs untrusted code with the base repository's secrets.",
     date: "2026-11-09",
     publishAt: "2026-11-09T10:47:00+06:00",
@@ -159,6 +159,7 @@ export const publicPosts: readonly PublicPost[] = [
     links: [
       { href: "/checks/action-pinned-to-main", label: "Action pinned to @main" },
       { href: "/checks/pull-request-target-checkout", label: "Pull request target check" },
+      { href: "/resources/dependency-cve-scan", label: "Dependency CVE scan" },
       { href: "/blog/dockerfile-user-is-not-root", label: "End the Dockerfile on a user" },
     ],
   },

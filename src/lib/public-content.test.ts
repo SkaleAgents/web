@@ -74,3 +74,11 @@ it("publishes free resources and blog posts in the sitemap, llms.txt, and markdo
   expect(markdownDocument("/resources/missing")).toBeNull();
   expect(markdownDocument("/blog/missing")).toBeNull();
 });
+
+it("keeps every post title under the 70 character limit once the site suffix is added", () => {
+  for (const post of publicPosts) expect(`${post.title} | SkaleAgents`.length, post.slug).toBeLessThanOrEqual(70);
+});
+
+it("links the dependency CVE scan from a blog post so it has more than one inbound link", () => {
+  expect(publicPosts.some((post) => post.links.some((link) => link.href === "/resources/dependency-cve-scan"))).toBe(true);
+});
