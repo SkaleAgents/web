@@ -49,7 +49,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     queryFn: async ({ signal }) => (await apiFetch<{ data: OrganizationMembership }>(`/api/workspaces/${scope.kind === "organization" ? scope.id : ""}`, { signal })).data,
     staleTime: 0,
     refetchOnMount: "always",
-    // A refetch swaps the page for the loader, so returning to the tab must not trigger one. The 60s membership poll still catches revocation.
+    // Keep the page up while the check for the next path runs; a failed check still replaces it below.
+    placeholderData: previous => scope.kind === "organization" && previous?.id === scope.id ? previous : undefined,
+    // Returning to the tab should not re-check: the 60s membership poll already catches revocation.
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
@@ -105,7 +107,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   let content = children;
   if (scope.kind === "organization") {
-    if (access.isPending || access.isFetching) {
+    // A non-canonical URL is about to be replaced, which remounts the page, so nothing typed there would survive.
+    if (access.isPending || (access.isSuccess && routeReference && `/org/${routeReference}` !== root)) {
       content = <DashboardPageLoader title={currentSection} />;
     } else if (access.isError || access.data?.id !== scope.id || access.data?.kind !== workspace?.kind) {
       content = <main role="alert" className="py-8">Organization unavailable. {personalId && <Link href={personalRoot}>Open Personal</Link>}</main>;
