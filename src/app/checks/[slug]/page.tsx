@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
 import { articleJsonLd, jsonLd } from "@/lib/json-ld";
 import { notFound } from "next/navigation";
-import { publicCheckBySlug, publicCheckPath, publicCheckProposedChange, publicChecks } from "@/lib/public-checks";
+import { publicCheckBySlug, publicCheckPageTitle, publicCheckPath, publicCheckProposedChange, publicChecks } from "@/lib/public-checks";
 
 export function generateStaticParams() {
   return publicChecks.map((check) => ({ slug: check.slug }));
@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const path = publicCheckPath(check);
   return pageMetadata({
     path,
-    title: `${check.title} | SkaleAgents review check`,
+    title: publicCheckPageTitle(check),
     description: check.looksFor,
     pad: `A SkaleAgents ${check.area} review check: the input it needs and what a result does not prove.`,
   });

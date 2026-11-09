@@ -20,6 +20,12 @@ const catalog = { data: [
 ] };
 
 describe("organization pricing", () => {
+  it("reserves the plan grid height while the catalog loads so the footer does not shift", () => {
+    vi.mocked(apiFetch).mockReturnValueOnce(new Promise(() => {}));
+    render(<PricingPlans />);
+    expect(screen.getByRole("status")).toHaveClass("min-h-[141rem]", "md:min-h-[84rem]", "xl:min-h-[58rem]");
+  });
+
   it("renders the ordered catalog without offering checkout or a trial", async () => {
     vi.mocked(apiFetch).mockResolvedValueOnce(catalog);
     render(<PricingPlans />);

@@ -79,6 +79,11 @@ it("keeps every post title under the 70 character limit once the site suffix is 
   for (const post of publicPosts) expect(`${post.title} | SkaleAgents`.length, post.slug).toBeLessThanOrEqual(70);
 });
 
+it("keeps the pull_request_target post title within the 60 characters Ahrefs flags", () => {
+  const post = publicPosts.find((candidate) => candidate.slug === "pull-request-target-checks-out-the-pr");
+  expect(`${post?.title} | SkaleAgents`.length).toBeLessThanOrEqual(60);
+});
+
 it("links the dependency CVE scan from a blog post so it has more than one inbound link", () => {
   expect(publicPosts.some((post) => post.links.some((link) => link.href === "/resources/dependency-cve-scan"))).toBe(true);
 });
