@@ -23,7 +23,7 @@ describe("navigationSections", () => {
     const personal = navigationSections({ workspace: { kind: "personal", role: "owner" }, root: "/org/me" });
     expect(personal.map(section => section.label)).toEqual(["Your work", "Build", "Settings", "Organizations"]);
     expect(personal[0].items).toContainEqual({ href: "/org/me/mcp-config", label: "MCP connections" });
-    expect(personal[2].items).toEqual([{ href: "/org/me/billing", label: "Billing" }]);
+    expect(personal[2].items).toEqual([{ href: "/org/me/billing", label: "Billing" }, { href: "/org/me/house-rules", label: "House rules" }]);
     const team = navigationSections({ workspace: { kind: "team", role: "owner" }, root: "/org/acme" });
     expect(team[2].items[0].href).toBe("/organizations");
     expect(team.flatMap(section => section.items).find(item => item.label === "Passkeys")).toBeUndefined();
