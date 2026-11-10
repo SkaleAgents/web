@@ -154,7 +154,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
         <div role="tabpanel" id="audit-general-panel" aria-labelledby="audit-general-tab" hidden={view !== "general"} className="space-y-6">
           {findings && findings.length > 0 ? <RiskLead findings={findings} partial={job.data.partial} /> : <section className="audit-overview" aria-label="Audit overview">
             <p className="audit-status text-xs font-semibold capitalize text-ink-muted">{job.data.status}{job.data.partial ? " · Partial results" : ""}{scheduledRunLabel(job.data) ? ` · ${scheduledRunLabel(job.data)}` : ""}</p>
-            <AuditResultSummary job={job.data} />
+            <AuditResultSummary job={job.data} dismissed={dismissed.length} />
             {job.data.summary && <p className="mt-2 text-sm text-ink-muted">{job.data.summary}</p>}
             {job.data.error && <p role="alert" className="mt-3 text-sm text-danger">{job.data.error}</p>}
           </section>}

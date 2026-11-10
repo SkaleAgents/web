@@ -2,6 +2,8 @@ import { ScopedOrganizationOverview } from "@/components/organization-scope-view
 import PersonalOverview from "@/app/(platform)/dashboard/page";
 import { OrganizationScopeContent } from "@/components/organization-scope-content";
 
+export const metadata = { title: "Dashboard | SkaleAgents" };
+
 export default function OrganizationPage() {
   return <OrganizationScopeContent personal={<PersonalOverview />} team={<ScopedOrganizationOverview />} />;
 }
