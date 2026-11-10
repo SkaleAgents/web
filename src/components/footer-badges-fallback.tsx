@@ -15,6 +15,7 @@ export function FooterBadgesFallback() {
             {badge.src ? <span className="sr-only">{badge.alt ?? `Listed on ${badge.name}`}</span> : null}
           </a>
         ))}
+        {directoryBadgeEntries.map((badge) => (badge.script ? <script key={badge.script} async src={badge.script} /> : null))}
         {directoryLinks.map(([name, href, rel = "noopener noreferrer", title]) => (
           <a key={href} href={href} target="_blank" rel={rel || undefined} title={title}>
             {name}

@@ -179,6 +179,8 @@ export function FooterBadges() {
                   {badge.variant === "agenthunter" ? <AgentHunterBadge /> : badge.variant === "ainexfinder" ? <AInexfinderBadge /> : badge.variant === "bowora" ? <BoworaBadge /> : badge.variant === "agentwise" ? <AgentWiseBadge /> : badge.variant === "devtool" ? <DevToolBadge /> : badge.variant === "launchsoar" ? <LaunchSoarBadge /> : badge.variant === "launchvoid" ? <LaunchVoidBadge /> : badge.variant === "ufind" ? <UfindBadge /> : badge.variant === "launchai" ? <LaunchAIBadge /> : <BadgeImage name={badge.name} src={badge.src} width={badge.width} height={badge.height} alt={badge.alt} loading={badge.loading} decoding={badge.decoding} imageStyle={badge.imageStyle} />}
                 </a>
               ))}
+              {/* The badge host's own loader, kept as supplied; React hoists and dedupes it. */}
+              {duplicate ? null : directoryBadgeEntries.map((badge) => (badge.script ? <script key={badge.script} async src={badge.script} /> : null))}
             </div>
           ))}
         </div>
