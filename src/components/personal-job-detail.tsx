@@ -21,6 +21,7 @@ import { currentUserOptions } from "@/lib/session";
 import { organizationPath, scopeFromPath } from "@/lib/dashboard-routes";
 import { formatDateTime } from "@/lib/format-date";
 import { DismissedFindings, DismissFinding } from "@/components/finding-decision";
+import { OpenFixPullRequest } from "@/components/fix-pull-request";
 import { SourceContextForm } from "@/components/source-context";
 
 function AuditChanges({ comparison, href }: { comparison: AuditComparison; href: string }) {
@@ -124,7 +125,11 @@ export function PersonalJobDetail({ id }: { id: string }) {
   const findings = loadedJob?.findings?.filter((finding) => !finding.decision);
   const dismissed = loadedJob?.findings?.filter((finding) => finding.decision) ?? [];
   const jobQueryKey = ["swarm-job", id, accountId ?? "guest"];
-  const decide = (finding: SwarmFinding) => <DismissFinding key={finding.fingerprint} jobId={id} finding={finding} queryKey={jobQueryKey} />;
+  const fromBranch = Boolean(loadedJob?.sourceFiles?.length) && loadedJob?.status === "completed";
+  const decide = (finding: SwarmFinding) => <div key={finding.fingerprint}>
+    {fromBranch ? <OpenFixPullRequest jobId={id} finding={finding} /> : null}
+    <DismissFinding jobId={id} finding={finding} queryKey={jobQueryKey} />
+  </div>;
   const ranked = findings ? priorityReview(findings) : null;
   const content = loadedJob ? submittedAuditText(loadedJob) : null;
 
