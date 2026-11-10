@@ -42,7 +42,14 @@ export function GithubPanel({ onRef, onClose }: { onRef: (ref: string | null) =>
     mutationFn: async () => { await ensureCsrfCookie(); await apiFetch("/api/github/installation", { method: "DELETE" }); },
     onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ["github-installation"] }); onClose(); },
   });
-  const failure = [installation.error, repos.error, branches.error].find(Boolean);
+  const pullReviews = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      await ensureCsrfCookie();
+      await apiFetch("/api/github/installation/pull-reviews", { method: "PUT", body: JSON.stringify({ enabled }) });
+    },
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ["github-installation"] }); },
+  });
+  const failure = [installation.error, repos.error, branches.error, pullReviews.error].find(Boolean);
   const suspended = installation.data?.suspended || (failure instanceof ApiError && failure.code === "github_suspended");
   const notConnected = installation.data?.connected === false || (failure instanceof ApiError && failure.code === "github_not_connected");
 
@@ -58,6 +65,10 @@ export function GithubPanel({ onRef, onClose }: { onRef: (ref: string | null) =>
     {notConnected && <p role="alert" className="text-sm text-danger">{githubErrorMessage(new ApiError("", 409, [], "github_not_connected"))}</p>}
     {failure && !suspended && !notConnected && <p role="alert" className="text-sm text-danger">{githubErrorMessage(failure)} {needsUpgrade(failure) && <Link href={billing} className="underline">Upgrade</Link>}</p>}
     {disconnect.isError && <p role="alert" className="text-sm text-danger">{githubErrorMessage(disconnect.error)}</p>}
+    {usable && <label className="flex items-start gap-2 text-sm text-ink">
+      <input type="checkbox" className="mt-0.5" checked={Boolean(installation.data?.pullRequestReviews)} disabled={pullReviews.isPending} onChange={(event) => pullReviews.mutate(event.target.checked)} />
+      <span>Review pull requests automatically<span className="block text-xs text-ink-muted">Reports findings in changed files on each pull request. Each new commit uses one audit.</span></span>
+    </label>}
     {usable && <div className="grid gap-3 sm:grid-cols-2">
       <div>
         <label className="block text-sm text-ink-muted">Repository
