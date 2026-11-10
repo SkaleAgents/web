@@ -187,7 +187,39 @@ it("lets an upgrade replace a scheduled downgrade but blocks other plan changes"
   expect(max).toBeEnabled();
   expect(screen.getByRole("button", { name: "Schedule Starter at renewal" })).toBeDisabled();
   fireEvent.click(max);
+  fireEvent.click(await screen.findByRole("button", { name: "Yes, upgrade to Max" }));
   await waitFor(() => expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1/billing/change-plan", expect.objectContaining({ method: "POST", body: JSON.stringify({ plan: "max" }) })));
+});
+
+it("asks before a paid plan changes, naming the price and when it starts", async () => {
+  showBilling("pro", true);
+  fireEvent.click(await screen.findByRole("button", { name: "Upgrade to Max" }));
+  const group = await screen.findByRole("group", { name: "Confirm Max" });
+  expect(group).toHaveTextContent("$499 per month");
+  expect(group).toHaveTextContent("It starts now");
+  expect(group).toHaveTextContent("prorated difference");
+  expect(apiFetch).not.toHaveBeenCalledWith("/api/workspaces/org-1/billing/change-plan", expect.anything());
+
+  fireEvent.click(screen.getByRole("button", { name: "Keep my plan" }));
+  expect(screen.queryByRole("group", { name: "Confirm Max" })).not.toBeInTheDocument();
+  expect(apiFetch).not.toHaveBeenCalledWith("/api/workspaces/org-1/billing/change-plan", expect.anything());
+});
+
+it("says a downgrade starts at renewal and charges nothing now", async () => {
+  showBilling("pro", true);
+  fireEvent.click(await screen.findByRole("button", { name: "Schedule Starter at renewal" }));
+  const group = await screen.findByRole("group", { name: "Confirm Starter" });
+  expect(group).toHaveTextContent("starts at renewal");
+  expect(group).toHaveTextContent("Nothing is charged now");
+  fireEvent.click(screen.getByRole("button", { name: "Yes, schedule Starter" }));
+  await waitFor(() => expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1/billing/change-plan", expect.objectContaining({ body: JSON.stringify({ plan: "starter" }) })));
+});
+
+it("goes straight to Stripe checkout from Free, where Stripe is the confirmation", async () => {
+  showBilling("free", true);
+  fireEvent.click(await screen.findByRole("button", { name: "Start Pro" }));
+  expect(screen.queryByRole("group", { name: "Confirm Pro" })).not.toBeInTheDocument();
+  await waitFor(() => expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1/billing/checkout", expect.objectContaining({ method: "POST" })));
 });
 
 it("keeps upgrades closed while a cancellation is scheduled", async () => {
@@ -226,6 +258,7 @@ it("shows the current allowance but keeps checkout closed when the API gate is o
 it("requests a paid upgrade from the owner dashboard in staging", async () => {
   showBilling("starter", true);
   fireEvent.click(await screen.findByRole("button", { name: "Upgrade to Pro" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Yes, upgrade to Pro" }));
   await waitFor(() => expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1/billing/change-plan", expect.objectContaining({ method: "POST", body: JSON.stringify({ plan: "pro" }) })));
   expect(ensureCsrfCookie).toHaveBeenCalledOnce();
 });

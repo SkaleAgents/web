@@ -68,6 +68,7 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
   const [selectedId, setSelectedId] = useState<string | null>(checkoutReturnOrganizationId);
   const [checkoutLink, setCheckoutLink] = useState<Checkout | null>(null);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
+  const [confirmingPlan, setConfirmingPlan] = useState<string | null>(null);
   const redirectedCheckout = useRef<string | null>(null);
   const organizations = useQuery({
     queryKey: ["billing-organizations", user.data?.id],
@@ -234,9 +235,22 @@ export function OrganizationBillingView({ checkoutReturnOrganizationId = null, o
             const label = billing.data.plan === "free" ? `Start ${plan.name}` : isUpgrade ? `Upgrade to ${plan.name}` : `Schedule ${plan.name} at renewal`;
             // An upgrade replaces a scheduled downgrade; every other pending change blocks new ones.
             const blockedByPending = Boolean(billing.data.pendingChange) && !(isUpgrade && billing.data.pendingChange?.kind === "downgrade" && billing.data.pendingChange.status === "pending_cycle");
+            // From Free, Stripe's own payment page is the confirmation. A paid plan changes on one request, so it asks first.
+            const needsConfirmation = billing.data.plan !== "free";
+            const confirming = confirmingPlan === plan.key && needsConfirmation;
+            const renewal = billing.data.usage?.periodEnd ? utcDate(billing.data.usage.periodEnd) : "your next renewal";
+            const run = () => { setConfirmingPlan(null); change.mutate({ plan: plan.key, organizationId, fromPlan: billing.data.plan }); };
             return <div key={plan.key} className="flex flex-wrap items-center justify-between gap-4 py-4">
               <div><h3 className="font-semibold text-ink">{plan.name}</h3><p className="text-sm text-ink-muted">${plan.monthlyUsd} per month · {plan.auditLimit?.toLocaleString()} audits</p></div>
-              {isCurrent ? <span className="text-sm text-ink-muted">Current plan</span> : <Button type="button" variant="secondary" disabled={!checkoutOpen || change.isPending || blockedByPending || Boolean(billing.data.renewalPayment)} onClick={() => change.mutate({ plan: plan.key, organizationId, fromPlan: billing.data.plan })}>{label}</Button>}
+              {isCurrent ? <span className="text-sm text-ink-muted">Current plan</span> : confirming ? <div role="group" aria-label={`Confirm ${plan.name}`} className="w-full space-y-2 sm:w-auto sm:max-w-sm">
+                <p className="text-sm text-ink">{isUpgrade
+                  ? `Upgrade to ${plan.name} for $${plan.monthlyUsd} per month? It starts now, and Stripe charges the prorated difference to your card on file.`
+                  : `Move to ${plan.name} for $${plan.monthlyUsd} per month? It starts at renewal on ${renewal}. Nothing is charged now.`}</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" variant="secondary" disabled={!checkoutOpen || change.isPending} onClick={run}>{isUpgrade ? `Yes, upgrade to ${plan.name}` : `Yes, schedule ${plan.name}`}</Button>
+                  <Button type="button" variant="ghost" onClick={() => setConfirmingPlan(null)}>Keep my plan</Button>
+                </div>
+              </div> : <Button type="button" variant="secondary" disabled={!checkoutOpen || change.isPending || blockedByPending || Boolean(billing.data.renewalPayment)} onClick={() => needsConfirmation ? setConfirmingPlan(plan.key) : run()}>{label}</Button>}
             </div>;
           })}
         </div>
