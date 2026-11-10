@@ -54,7 +54,10 @@ export function navigationSections({ workspace, root }: { workspace?: Navigation
       { href: `${root}/studio`, label: "Creator Studio" },
       { href: `${root}/prompts`, label: "My prompts" },
     ] },
-    { label: "Settings", items: [{ href: `${root}/billing`, label: "Billing" }] },
+    { label: "Settings", items: [
+      { href: `${root}/billing`, label: "Billing" },
+      { href: `${root}/house-rules`, label: "House rules" },
+    ] },
     organizations,
   ];
 }

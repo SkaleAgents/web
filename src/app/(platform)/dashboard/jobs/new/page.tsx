@@ -146,7 +146,7 @@ export default function NewJobPage() {
             value={content}
             onChange={(event) => { setContent(event.target.value); setSampleLoaded(false); }}
             className="min-h-56 w-full rounded-[10px] border border-line bg-canvas px-3 py-2 font-mono text-sm text-ink outline-none focus:border-accent"
-            placeholder={'Paste Terraform, CloudFormation, Kubernetes or Pulumi YAML, a Dockerfile, or a GitHub Actions workflow'}
+            placeholder={'Paste Terraform or a Terraform plan (terraform show -json), CloudFormation, Kubernetes or Pulumi YAML, a Dockerfile, or a GitHub Actions workflow'}
             aria-label="IaC content"
             spellCheck={false}
           />

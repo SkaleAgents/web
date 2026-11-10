@@ -168,3 +168,56 @@ it("shows what changed, and dismisses and restores a finding", async () => {
   expect(requests[1]).toEqual({ method: "DELETE", body: null });
   expect(await screen.findByRole("region", { name: "Fix these first" })).toBeInTheDocument();
 });
+
+it("saves the source context and shows why a finding moved", async () => {
+  const jobId = "00000000-0000-4000-8000-000000000001";
+  let context: { production: boolean | null; internetFacing: boolean | null; sensitiveData: boolean | null } | null = null;
+  const sent: unknown[] = [];
+  const job = () => ({
+    id: jobId, status: "completed", requestedBy: "owner", dispatchActor: "user", sourcePurged: false, specialists: ["devsecops"], partial: false,
+    scope: { content: "x" }, createdAt: "2026-09-28T12:00:00Z", updatedAt: "2026-09-28T12:00:00Z", sourceContext: context,
+    findings: [
+      { severity: "high", title: "Timeout disabled", detail: "D.", resource: "a", remediation: "F.", specialist: "sre", priority: context ? 3 : undefined, priorityReasons: context ? ["Ranked lower: not production"] : undefined },
+      { severity: "medium", title: "Public network", detail: "D.", resource: "b", remediation: "F.", specialist: "sre", priority: context ? 4 : undefined, priorityReasons: context ? ["Ranked higher: internet-facing"] : undefined },
+    ],
+  }) as SwarmJob;
+  vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.endsWith("/sanctum/csrf-cookie")) return new Response(null, { status: 204 });
+    if (url.endsWith(`/api/jobs/${jobId}/source-context`)) {
+      context = JSON.parse(String(init?.body));
+      sent.push(context);
+      return Response.json({ sourceContext: context });
+    }
+    if (url.endsWith(`/api/jobs/${jobId}`)) return Response.json(job());
+    throw new Error(`Unexpected request: ${url}`);
+  }));
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  await setSessionUser(client, { id: "owner", displayName: "Owner", email: null, grokSubject: null });
+
+  render(<QueryClientProvider client={client}><PersonalJobDetail id={jobId} /></QueryClientProvider>);
+
+  const form = await screen.findByRole("form", { name: "About this source" });
+  await userEvent.selectOptions(within(form).getByLabelText("Reachable from the internet?"), "true");
+  await userEvent.click(within(form).getByRole("button", { name: "Save" }));
+
+  expect(await screen.findByText("Ranked higher: internet-facing")).toBeInTheDocument();
+  expect(sent).toEqual([{ production: null, internetFacing: true, sensitiveData: null }]);
+  const text = screen.getByRole("region", { name: "Fix these first" }).textContent ?? "";
+  expect(text.indexOf("Public network")).toBeLessThan(text.indexOf("Timeout disabled"));
+});
+
+it("offers no source context on a pasted audit", async () => {
+  const jobId = "00000000-0000-4000-8000-000000000001";
+  vi.stubGlobal("fetch", vi.fn(async () => Response.json({
+    id: jobId, status: "completed", requestedBy: "owner", dispatchActor: "user", sourcePurged: false, specialists: ["devsecops"], partial: false,
+    scope: { content: "x" }, createdAt: "2026-09-28T12:00:00Z", updatedAt: "2026-09-28T12:00:00Z", findings: [],
+  })));
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  await setSessionUser(client, { id: "owner", displayName: "Owner", email: null, grokSubject: null });
+
+  render(<QueryClientProvider client={client}><PersonalJobDetail id={jobId} /></QueryClientProvider>);
+
+  expect(await screen.findByText("No findings were recorded.")).toBeInTheDocument();
+  expect(screen.queryByRole("form", { name: "About this source" })).not.toBeInTheDocument();
+});

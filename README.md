@@ -39,7 +39,7 @@ pnpm build && pnpm test:e2e
 
 See hub [railway-deploy.md](https://github.com/SkaleAgents/workspace/blob/main/docs/tech-spec/railway-deploy.md).
 
-- `railway.toml`: `pnpm build` / `pnpm start`
+- `.railway/railway.ts`: `pnpm build` / `pnpm start`. Applied with `railway config apply`, not on deploy
 - Variable template: `.env.railway.example` (`NEXT_PUBLIC_*` require redeploy when changed)
 - Point `NEXT_PUBLIC_API_URL` at the Railway `api` public URL
 
