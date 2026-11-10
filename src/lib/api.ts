@@ -253,6 +253,8 @@ export type SwarmJob = {
   sourceContext?: SourceContext | null;
   coverage?: AuditCoverage;
   sourceFiles?: SourceFile[];
+  /** True for a branch audit, the only kind a fix pull request can be opened against. */
+  fixPullRequest?: boolean;
   tasks?: Array<{ specialist: string; status: string; skipReason?: string; checkCoverage?: CheckCoverage | null }>;
   steps?: SwarmStep[];
 };
