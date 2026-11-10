@@ -93,7 +93,7 @@ function AgentWiseBadge() {
 }
 
 function DevToolBadge() {
-  return <span style={{ display: "inline-flex", alignItems: "center", padding: "6px 12px", background: "#10b981", color: "#fff", borderRadius: 6, fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, whiteSpace: "nowrap" }}>Listed on DevTool.io</span>;
+  return <span style={{ display: "inline-flex", alignItems: "center", padding: "6px 12px", background: "#047857", color: "#fff", borderRadius: 6, fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, whiteSpace: "nowrap" }}>Listed on DevTool.io</span>;
 }
 
 function LaunchSoarBadge() {

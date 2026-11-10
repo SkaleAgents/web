@@ -466,7 +466,7 @@ function CatalogTable({ bots }: { bots: Bot[] }) {
             <SpecialtyPill specialty={bot.specialty} href={`/bot-directory/specialties/${bot.specialty}`} />
           </div>
           <div className="directory-tools-cell" role="cell"><ToolNames slugs={bot.integrations} /></div>
-          <Link href={`/bot-directory/${bot.id}`} className="directory-open">Open</Link>
+          <div className="directory-open-cell" role="cell"><Link href={`/bot-directory/${bot.id}`} className="directory-open">Open</Link></div>
         </div>
       ))}
     </div>
