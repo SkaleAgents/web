@@ -190,6 +190,7 @@ export async function watchtowerFetch<T>(
   });
 }
 
+export type HouseRule = { id: string; kind: "require_attribute" | "require_tag" | "forbid_value"; resourceType: string; attribute: string; value: string | null; severity: "low" | "medium" | "high" | "critical" };
 export type SourceContext = { production: boolean | null; internetFacing: boolean | null; sensitiveData: boolean | null };
 
 export type FindingDecisionKind = "false_positive" | "accepted_risk";
