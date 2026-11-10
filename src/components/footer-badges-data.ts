@@ -169,7 +169,6 @@ export type DirectoryBadgeEntry = {
   loading?: "eager" | "lazy" | null;
   decoding?: "async" | "auto" | "sync" | null;
   imageStyle?: CSSProperties;
-  script?: string;
 };
 
 export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
@@ -361,8 +360,8 @@ export const pendingDirectoryBadges: DirectoryBadgeEntry[] = [
   { name: "TheAIToolsDir", href: "https://theaitoolsdir.com/product/skaleagents?ref=badge", src: "https://theaitoolsdir.com/badge/skaleagents.svg", width: 182, height: 46, alt: "Featured on TheAIToolsDir", rel: "dofollow", displayWidth: 151.9 },
   { name: "TheMicroSaaSDir", href: "https://themicrosaasdir.com/product/skaleagents?ref=badge", src: "https://themicrosaasdir.com/badge/skaleagents.svg", width: 182, height: 46, alt: "Featured on TheMicroSaaSDir", rel: "dofollow", displayWidth: 151.9 },
   { name: "TheSaaSDir", href: "https://thesaasdir.com/product/skaleagents?ref=badge", src: "https://thesaasdir.com/badge/skaleagents.svg", width: 182, height: 46, alt: "Featured on TheSaaSDir", rel: "dofollow", displayWidth: 151.9 },
-  { name: "SaaS Directory List", href: "https://saasdirectorylist.com/launch/skaleagents", src: "https://saasdirectorylist.com/badge/skaleagents.svg?kind=listed&shape=standard&mode=light&size=m&v=2", width: 250, height: 54, alt: "Listed on SaaS Directory List", rel: "nofollow", loading: "lazy", decoding: "async", script: "https://saasdirectorylist.com/badge/skaleagents.js", displayWidth: 153.6 },
-  { name: "SaaS Directory Pro", href: "https://saasdirectorypro.com/launch/skaleagents", src: "https://saasdirectorypro.com/badge/skaleagents.svg?kind=listed&shape=standard&mode=light&size=m&v=2", width: 250, height: 54, alt: "Listed on SaaS Directory Pro", rel: "nofollow", loading: "lazy", decoding: "async", script: "https://saasdirectorypro.com/badge/skaleagents.js", displayWidth: 153.6 },
+  { name: "SaaS Directory List", href: "https://saasdirectorylist.com/launch/skaleagents", src: "https://saasdirectorylist.com/badge/skaleagents.svg?kind=listed&shape=standard&mode=light&size=m&v=2", width: 250, height: 54, alt: "Listed on SaaS Directory List", rel: "nofollow", loading: "lazy", decoding: "async", displayWidth: 153.6 },
+  { name: "SaaS Directory Pro", href: "https://saasdirectorypro.com/launch/skaleagents", src: "https://saasdirectorypro.com/badge/skaleagents.svg?kind=listed&shape=standard&mode=light&size=m&v=2", width: 250, height: 54, alt: "Listed on SaaS Directory Pro", rel: "nofollow", loading: "lazy", decoding: "async", displayWidth: 153.6 },
   { name: "AI Webcatalog", href: "https://ai-webcatalog.space/r/359856f8b457a9d7c0e7b293ccf30d1b", src: "https://ai-webcatalog.space/badges/badge-dark-en.svg", width: 240, height: 54, alt: "Featured on AI Webcatalog", rel: "sponsored noopener", title: "AI Webcatalog", displayWidth: 153.6 },
   { name: "EasyDoFollow", href: "https://easydofollow.dev/dev-tools/skaleagents", src: "https://easydofollow.dev/badge/easydofollow-badge-light.svg", width: 188, height: 56, alt: "Featured on EasyDoFollow", rel: "noopener", displayWidth: 128.9 },
   { name: "Findly", href: "https://findly.tools/skaleagents?utm_source=skaleagents", src: "https://findly.tools/badges/findly-tools-badge-light.svg", width: 175, height: 55, alt: "Featured on Findly.tools", rel: "noopener noreferrer", displayWidth: 122.2 },

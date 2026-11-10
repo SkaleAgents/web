@@ -418,7 +418,7 @@ const nov10 = [
 ] as const;
 
 describe("FooterBadges 2026-11-10", () => {
-  it("serves the exact badge snippets once in the initial HTML, with the directory scripts", () => {
+  it("serves the exact badge snippets once in the initial HTML, ", () => {
     const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadgesFallback />), "text/html");
     const links = Array.from(page.querySelectorAll("a[href]"));
 
@@ -430,8 +430,8 @@ describe("FooterBadges 2026-11-10", () => {
       expect(html, href).toContain(`alt="${alt.replaceAll("&", "&amp;")}"`.replaceAll("&amp;", "&"));
     }
     expect(links.filter((link) => link.getAttribute("href") === "https://aixlist.com/")).toHaveLength(1);
-    expect(page.querySelectorAll('script[src="https://saasdirectorylist.com/badge/skaleagents.js"]')).toHaveLength(1);
-    expect(page.querySelectorAll('script[src="https://saasdirectorypro.com/badge/skaleagents.js"]')).toHaveLength(1);
+    // Third-party loaders are deliberately not rendered: the footer is in the shared layout, including signed-in pages.
+    expect(page.querySelectorAll("script[src]")).toHaveLength(0);
   });
 
   it("no longer links the replaced root-level hrefs", () => {
