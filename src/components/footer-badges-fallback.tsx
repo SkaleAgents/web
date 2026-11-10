@@ -8,7 +8,7 @@ export function FooterBadgesFallback() {
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-ink-muted">
         {directoryBadgeEntries.map((badge) => (
-          <a key={badge.href} href={badge.href} target="_blank" rel={badge.rel ?? "noopener noreferrer"} title={badge.title}>
+          <a key={badge.href} href={badge.href} target="_blank" rel={badge.rel} title={badge.title} aria-label={badge.ariaLabel}>
             {/* Real <img> in the served HTML for directory crawlers; <noscript> stops browsers fetching ~180 images that stall the first navigation. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {badge.src ? <noscript><img src={badge.src} alt={badge.alt ?? `Listed on ${badge.name}`} width={badge.width} height={badge.height} loading="lazy" decoding="async" style={{ height: 24, width: "auto" }} /></noscript> : badge.name}
