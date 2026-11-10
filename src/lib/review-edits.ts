@@ -26,6 +26,8 @@ const rules: Record<string, (lines: string[]) => ExactLineEdit | null> = {
   "Pull request target checks out PR code": pullRequestTargetCheckout,
 };
 
+export const FIXABLE_TITLES = Object.keys(rules);
+
 export function exactLineEdit(content: string, title: string): ExactLineEdit | null {
   const rule = rules[title];
   if (!rule) return null;
