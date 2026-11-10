@@ -120,6 +120,23 @@ it("lists the files a GitHub scan read and why others were skipped", async () =>
   expect(section).toHaveTextContent("gone.tf: could not be read");
 });
 
+it.each([[true, 1], [false, 0]])("offers a fix pull request only for a branch audit (fixPullRequest %s)", async (fixPullRequest, buttons) => {
+  const jobId = "00000000-0000-4000-8000-000000000001";
+  const job = {
+    id: jobId, status: "completed", requestedBy: "owner", sourcePurged: false, specialists: ["devsecops"], partial: false,
+    scope: { kind: "repo_ref", ref: "github:acme/infra@main" }, createdAt: "2026-11-04T12:00:00Z", updatedAt: "2026-11-04T12:00:00Z",
+    sourceFiles: [{ path: "main.tf", status: "scanned" }], fixPullRequest,
+    findings: [{ severity: "high", title: "Database publicly accessible", detail: "Detail.", resource: "main.tf:resource.aws_db_instance.main.publicly_accessible", remediation: "Fix.", specialist: "devsecops", fingerprint: "b".repeat(64), change: "new", decision: null }],
+  } as SwarmJob;
+  vi.stubGlobal("fetch", vi.fn(async () => Response.json(job)));
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  await setSessionUser(client, { id: "owner", displayName: "Owner", email: null, grokSubject: null });
+  render(<QueryClientProvider client={client}><PersonalJobDetail id={jobId} /></QueryClientProvider>);
+
+  await screen.findByRole("region", { name: "Files reviewed" });
+  expect(screen.queryAllByRole("button", { name: "Open a fix pull request" })).toHaveLength(buttons);
+});
+
 it("shows what changed, and dismisses and restores a finding", async () => {
   const jobId = "00000000-0000-4000-8000-000000000001";
   const previousId = "00000000-0000-4000-8000-000000000009";

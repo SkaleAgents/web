@@ -125,7 +125,7 @@ export function PersonalJobDetail({ id }: { id: string }) {
   const findings = loadedJob?.findings?.filter((finding) => !finding.decision);
   const dismissed = loadedJob?.findings?.filter((finding) => finding.decision) ?? [];
   const jobQueryKey = ["swarm-job", id, accountId ?? "guest"];
-  const fromBranch = Boolean(loadedJob?.sourceFiles?.length) && loadedJob?.status === "completed";
+  const fromBranch = loadedJob?.fixPullRequest === true && Boolean(loadedJob.sourceFiles?.length) && loadedJob.status === "completed";
   const decide = (finding: SwarmFinding) => <div key={finding.fingerprint}>
     {fromBranch ? <OpenFixPullRequest jobId={id} finding={finding} /> : null}
     <DismissFinding jobId={id} finding={finding} queryKey={jobQueryKey} />
