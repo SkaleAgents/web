@@ -24,4 +24,12 @@ describe("audit result guidance", () => {
     expect(screen.getByRole("heading")).toHaveTextContent("Audit in progress");
     expect(screen.getByText(/Wait/)).toBeVisible();
   });
+  it("does not count dismissed findings as work to review", () => {
+    const findings = [{ title: "a" }, { title: "b" }] as never;
+    const { rerender } = render(<AuditResultSummary job={{ status: "completed", partial: false, findings }} dismissed={1} />);
+    expect(screen.getByRole("heading")).toHaveTextContent("1 finding to review");
+    rerender(<AuditResultSummary job={{ status: "completed", partial: false, findings }} dismissed={2} />);
+    expect(screen.getByRole("heading")).toHaveTextContent("Every finding is dismissed");
+    expect(screen.getByText(/Restore a finding/)).toBeVisible();
+  });
 });

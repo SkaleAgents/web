@@ -2,17 +2,18 @@ import type { SwarmJob } from "@/lib/api";
 
 type Result = Pick<SwarmJob, "status" | "partial" | "findings">;
 
-export function AuditResultSummary({ job }: { job: Result }) {
+export function AuditResultSummary({ job, dismissed = 0 }: { job: Result; dismissed?: number }) {
   const active = job.status === "queued" || job.status === "running";
-  const count = job.findings?.length;
+  const count = job.findings ? job.findings.length - dismissed : undefined;
   const title = active ? "Audit in progress"
     : job.status === "failed" ? "Audit could not finish"
       : count === undefined ? "Findings unavailable"
-        : count === 0 ? "No findings recorded"
+        : count === 0 ? (dismissed > 0 ? "Every finding is dismissed" : "No findings recorded")
           : `${count} ${count === 1 ? "finding" : "findings"} to review`;
   const action = active ? "Wait for the audit to finish before deciding what to change. Results may still change."
     : job.status === "failed" ? "These results are incomplete. Review any findings below, then check the error and supply fresh input for another audit."
       : count === undefined ? "This report cannot tell whether issues were found. Check the audit status and try loading it again."
+        : count === 0 && dismissed > 0 ? "Restore a finding below to review it again. A dismissed finding stays out of future audits of this source."
         : count === 0 ? "Read the check list below before deciding whether more checks are needed. No findings does not confirm that the infrastructure is secure or compliant."
           : "Read each issue and its recommended action below. Review critical and high severity findings first, and confirm the affected resource before making changes.";
   return <div>
