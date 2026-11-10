@@ -13,12 +13,13 @@ export function githubErrorMessage(error: unknown): string {
   if (error.code === "github_not_connected") return "GitHub is not connected. Connect it and try again.";
   if (error.code === "github_unavailable") return "GitHub is unavailable right now. Try again in a minute.";
   if (error.code === "premium_required") return "Scanning GitHub is on paid plans. Upgrade to use it.";
-  if (error.code === "audit_limit_reached" || error.status === 429) return "You've used all your audits this period.";
+  // Only the API's own allowance code means the audits are used up; a bare 429 is a rate limit and keeps its own message.
+  if (error.code === "audit_limit_reached") return "You've used all your audits this period.";
   return error.message;
 }
 
 /** True when the failure should offer the Upgrade link. */
-export const needsUpgrade = (error: unknown) => error instanceof ApiError && (error.code === "premium_required" || error.code === "audit_limit_reached" || error.status === 429);
+export const needsUpgrade = (error: unknown) => error instanceof ApiError && (error.code === "premium_required" || error.code === "audit_limit_reached");
 
 export const githubRef = (fullName: string, branch: string) => `github:${fullName}@${branch}`;
 
