@@ -12,7 +12,7 @@ const requestedBadges = [
   ["https://www.aixuanfeng.com", null],
   ["https://startuptrusted.com?ref=skaleagents.com", "SkaleAgents on StartupTrusted"],
   ["https://neeed.directory/products/skaleagents", "Featured on neeed.directory"],
-  ["https://findly.tools/", "Featured on Findly.tools"],
+  ["https://findly.tools/skaleagents?utm_source=skaleagents", "Featured on Findly.tools"],
   ["https://tools.launchllama.co/products/skaleagents", "Featured on Launch Llama Tools"],
   ["https://www.agenthunter.io", "AgentHunter Badge"],
   ["https://twelve.tools/skaleagents", "Featured on Twelve Tools"],
@@ -22,7 +22,7 @@ const requestedBadges = [
   ["https://sumodir.com/item/skaleagents-skaleagentscom", "Featured on SumoDir"],
   ["https://postmake.io", "Featured on the Postmake directory"],
   ["https://ainexfinder.com", "AInexfinder AI Tools Directory"],
-  ["https://nicklaunches.com/", "Featured on Nick Launches"],
+  ["https://nicklaunches.com/products/skaleagents/?utm_source=skaleagents.com&utm_medium=badge&utm_campaign=featured", "Featured on Nick Launches"],
   ["https://bowora.com/skaleagents.com", null],
   ["https://navfolders.com/", "Featured on NavFolders"],
   ["https://www.aitoolfinder.com/", "#1 Product on www.aitoolfinder.com"],
@@ -41,7 +41,7 @@ const requestedBadges = [
   ["https://shipgrowth.dev", "Featured on ShipGrowth"],
   ["https://aitooldiscovery.com", "Featured on AI Tool Discovery"],
   ["https://launchkiwi.com/p/skaleagents", "Featured on LaunchKiwi"],
-  ["https://toolverified.com/", "SkaleAgents on ToolVerified"],
+  ["https://www.toolverified.com/tool/skaleagents?ref=badge", "SkaleAgents on ToolVerified"],
   ["https://www.promptfrenzy.com/directory", "Featured on PromptFrenzy AI Directory"],
   ["https://mediapronet.com/?utm_source=partner-site&utm_medium=badge", "Listed on MEDIAPRONET"],
   ["https://toolnav.ai/", "ToolNav AI"],
@@ -68,7 +68,7 @@ const addedBadgeImages = [
   ["https://shipgrowth.dev", "https://storage.shipgrowth.dev/badge-light.png", null, "noopener noreferrer"],
   ["https://aitooldiscovery.com", "https://aitooldiscovery.com/badges/featured-1.svg", "54", null],
   ["https://launchkiwi.com/p/skaleagents", "https://launchkiwi.com/badge-light.svg", "62", "noopener"],
-  ["https://toolverified.com/", "https://www.toolverified.com/badge/35703d0a1bdf0158f31b3af7-light.svg", "54", "noopener"],
+  ["https://www.toolverified.com/tool/skaleagents?ref=badge", "https://www.toolverified.com/badge/35703d0a1bdf0158f31b3af7-light.svg", "54", "noopener"],
   ["https://www.promptfrenzy.com/directory", "https://www.promptfrenzy.com/badges/directory.svg", "44", "noopener"],
   ["https://mediapronet.com/?utm_source=partner-site&utm_medium=badge", "https://mediapronet.com/api/badge?style=classic", "54", "nofollow noopener noreferrer"],
   ["https://toolnav.ai/", "https://toolnav.ai/badges/toolnav-dark.svg", "60", "noopener noreferrer"],
@@ -289,7 +289,7 @@ describe("FooterBadges", () => {
     expect(links.find((link) => link.getAttribute("href") === "https://aitooldiscovery.com")?.querySelector("img")).toHaveAttribute("width", "200");
     expect(container.innerHTML).not.toContain("https://tools.cafe/b/light.svg");
     expect(links.find((link) => link.getAttribute("href") === "https://launchkiwi.com/p/skaleagents")?.querySelector("img")).toHaveAttribute("width", "198");
-    const toolVerified = links.find((link) => link.getAttribute("href") === "https://toolverified.com/")?.querySelector("img");
+    const toolVerified = links.find((link) => link.getAttribute("href") === "https://www.toolverified.com/tool/skaleagents?ref=badge")?.querySelector("img");
     expect(toolVerified).toHaveAttribute("width", "220");
     expect(toolVerified?.getAttribute("style")).toContain("width: 220px");
     expect(toolVerified?.getAttribute("style")).toContain("height: 54px");
@@ -389,5 +389,53 @@ describe("FooterBadges 2026-10-21 audit", () => {
 
     expect(links).toHaveLength(1);
     expect(links[0].querySelector("img")?.getAttribute("src")).toBe("https://launchkiwi.com/badge-light.svg");
+  });
+});
+
+const nov10 = [
+  ["https://peeklaunch.com/products/skaleagents?ref=badge", "https://peeklaunch.com/api/badge/skaleagents", "Featured on PeekLaunch"],
+  ["https://theaitoolsdir.com/product/skaleagents?ref=badge", "https://theaitoolsdir.com/badge/skaleagents.svg", "Featured on TheAIToolsDir"],
+  ["https://themicrosaasdir.com/product/skaleagents?ref=badge", "https://themicrosaasdir.com/badge/skaleagents.svg", "Featured on TheMicroSaaSDir"],
+  ["https://thesaasdir.com/product/skaleagents?ref=badge", "https://thesaasdir.com/badge/skaleagents.svg", "Featured on TheSaaSDir"],
+  ["https://saasdirectorylist.com/launch/skaleagents", "https://saasdirectorylist.com/badge/skaleagents.svg?kind=listed&shape=standard&mode=light&size=m&v=2", "Listed on SaaS Directory List"],
+  ["https://saasdirectorypro.com/launch/skaleagents", "https://saasdirectorypro.com/badge/skaleagents.svg?kind=listed&shape=standard&mode=light&size=m&v=2", "Listed on SaaS Directory Pro"],
+  ["https://ai-webcatalog.space/r/359856f8b457a9d7c0e7b293ccf30d1b", "https://ai-webcatalog.space/badges/badge-dark-en.svg", "Featured on AI Webcatalog"],
+  ["https://easydofollow.dev/dev-tools/skaleagents", "https://easydofollow.dev/badge/easydofollow-badge-light.svg", "Featured on EasyDoFollow"],
+  ["https://findly.tools/skaleagents?utm_source=skaleagents", "https://findly.tools/badges/findly-tools-badge-light.svg", "Featured on Findly.tools"],
+  ["https://indiehustles.com", "https://indiehustles.com/badge/featured.svg", "Featured on IndieHustles"],
+  ["https://indielineup.com/product/skaleagents?ref=badge", "https://indielineup.com/badge/skaleagents.svg", "Featured on IndieLineup"],
+  ["https://www.launchandloop.com/product/skaleagents", "https://www.launchandloop.com/api/badge/skaleagents?theme=dark", "SkaleAgents on Launch & Loop"],
+  ["https://launchbuck.com/p/skaleagents", "https://launchbuck.com/badges/card-light.png", "SkaleAgents, Featured on LaunchBuck"],
+  ["https://nicklaunches.com/products/skaleagents/?utm_source=skaleagents.com&utm_medium=badge&utm_campaign=featured", "https://nicklaunches.com/badges/featured.svg", "Featured on Nick Launches"],
+  ["https://saaslineup.com/product/skaleagents?ref=badge", "https://saaslineup.com/badge/skaleagents.svg", "Featured on SaaSLineup"],
+  ["https://sidehunt.io/project/skaleagents", "https://sidehunt.io/badges/sidehunt-badge-light.svg", "Featured on Sidehunt"],
+  ["https://starterbest.com", "https://starterbest.com/badages-awards.svg", "Featured on Starter Best"],
+  ["https://swipetolaunch.com/p/skaleagents?ref=badge", "https://swipetolaunch.com/api/badge/skaleagents", "Featured on SwipeToLaunch"],
+  ["https://www.toolverified.com/tool/skaleagents?ref=badge", "https://www.toolverified.com/badge/35703d0a1bdf0158f31b3af7-light.svg", "SkaleAgents on ToolVerified"],
+  ["https://wallof.tools/dev-tools/skaleagents", "https://wallof.tools/badge/toolwall-badge-light.svg", "Featured on Wall of Tools"],
+  ["https://scrappystartups.com/startup/skaleagents", "https://scrappystartups.com/badge.svg?theme=blue", "Find us on Scrappy Startups"],
+  ["https://votekicker.com/skaleagents?utm_source=votekicker&utm_medium=badge&utm_campaign=skaleagents", "https://api.votekicker.com/api/projects/skaleagents/badge.svg?size=xs", "Featured on Votekicker"],
+] as const;
+
+describe("FooterBadges 2026-11-10", () => {
+  it("serves the exact badge snippets once in the initial HTML, ", () => {
+    const page = new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadgesFallback />), "text/html");
+    const links = Array.from(page.querySelectorAll("a[href]"));
+
+    for (const [href, src, alt] of nov10) {
+      const matches = links.filter((link) => link.getAttribute("href") === href);
+      expect(matches, href).toHaveLength(1);
+      const html = matches[0].innerHTML.replaceAll("&amp;", "&");
+      expect(html, href).toContain(`src="${src}"`);
+      expect(html, href).toContain(`alt="${alt.replaceAll("&", "&amp;")}"`.replaceAll("&amp;", "&"));
+    }
+    expect(links.filter((link) => link.getAttribute("href") === "https://aixlist.com/")).toHaveLength(1);
+    // Third-party loaders are deliberately not rendered: the footer is in the shared layout, including signed-in pages.
+    expect(page.querySelectorAll("script[src]")).toHaveLength(0);
+  });
+
+  it("no longer links the replaced root-level hrefs", () => {
+    const hrefs = Array.from(new DOMParser().parseFromString(renderToStaticMarkup(<FooterBadgesFallback />), "text/html").querySelectorAll("a[href]")).map((a) => a.getAttribute("href"));
+    for (const old of ["https://thesaasdir.com/", "https://sidehunt.io/", "https://wallof.tools/", "https://launchbuck.com/", "https://theaitoolsdir.com/"]) expect(hrefs, old).not.toContain(old);
   });
 });
