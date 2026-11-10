@@ -137,6 +137,22 @@ export async function fetchJobPages<T>(path: string, pages: number, signal?: Abo
   return { jobs, nextCursor: cursor };
 }
 
+const FRIENDLY = {
+  network: "We couldn't reach SkaleAgents. Check your connection and try again.",
+  server: "Something went wrong on our side. Try again in a moment.",
+  session: "Your session has expired. Sign in again, then retry.",
+  rateLimited: "You're going a little fast. Wait a moment and try again.",
+};
+
+/** Keeps a message the API wrote on purpose; replaces the status text and framework defaults a proxy or Laravel puts there. */
+export function friendlyMessage(status: number, message: string, statusText: string): string {
+  const generic = !message || message === statusText || message === "Server Error";
+  if (status === 401 && (generic || message === "Unauthenticated." || message === "Unauthorized")) return FRIENDLY.session;
+  if (status === 429 && (generic || message === "Too Many Attempts.")) return FRIENDLY.rateLimited;
+  if (status >= 500 && generic) return FRIENDLY.server;
+  return message;
+}
+
 async function apiRequest<T>(url: string, init: RequestInit): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
@@ -148,11 +164,18 @@ async function apiRequest<T>(url: string, init: RequestInit): Promise<T> {
     headers.set("X-XSRF-TOKEN", xsrf);
   }
 
-  const res = await fetch(url, {
-    ...init,
-    credentials: init.credentials ?? "include",
-    headers,
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      ...init,
+      credentials: init.credentials ?? "include",
+      headers,
+    });
+  } catch (error) {
+    // A cancelled or timed-out request keeps its own error; only a failed connection is reworded.
+    if (error instanceof TypeError) throw new ApiError(FRIENDLY.network, 0);
+    throw error;
+  }
 
   if (!res.ok) {
     let message = res.statusText;
@@ -167,7 +190,7 @@ async function apiRequest<T>(url: string, init: RequestInit): Promise<T> {
     } catch (error) {
       if (error instanceof PasskeyRequiredError) throw error;
     }
-    throw new ApiError(message, res.status, details, code);
+    throw new ApiError(friendlyMessage(res.status, message, res.statusText), res.status, details, code);
   }
 
   if (res.status === 204) {
