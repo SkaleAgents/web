@@ -173,7 +173,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="dashboard-sidebar-theme">
           <span className="dashboard-nav-text">Theme</span>
-          <ThemeSwitcher align="start" side="top" />
+          <ThemeSwitcher align="end" side="top" />
         </div>
         <div className="dashboard-sidebar-account">
           <AccountMenu key={user.data.id} user={user.data} showName relation={relationLabel(navWorkspace)} />

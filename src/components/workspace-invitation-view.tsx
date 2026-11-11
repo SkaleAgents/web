@@ -48,7 +48,7 @@ export function WorkspaceInvitationView() {
     setError(null);
     try {
       await ensureCsrfCookie();
-      await apiFetch<{ data: { workspaceId: string; role: "member" | "viewer" } }>("/api/workspace-invitations/accept", {
+      await apiFetch<{ data: { workspaceId: string; role: "admin" | "member" | "viewer" } }>("/api/workspace-invitations/accept", {
         method: "POST",
         body: JSON.stringify({ token }),
       });
