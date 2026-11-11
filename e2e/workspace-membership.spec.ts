@@ -128,16 +128,19 @@ test("reports an already-active membership separately", async ({ page }) => {
 test("lists and creates only memberships and leaves personal resources unscoped", async ({ page }) => {
   await mockAccount(page);
   await page.route("**/sanctum/csrf-cookie", (route) => route.fulfill({ status: 204 }));
+  const created = { id: "workspace-2", name: "Platform Team", kind: "team", createdAt: "2026-09-25T12:00:00Z", role: "owner" };
+  let didCreate = false;
   await page.route("**/api/workspaces", (route) => {
     if (route.request().method() === "POST") {
       expect(route.request().postDataJSON()).toEqual({ name: "Platform Team" });
-      return route.fulfill({ json: { data: {
-        id: "workspace-2", name: "Platform Team", kind: "team", createdAt: "2026-09-25T12:00:00Z", role: "owner",
-      } }, status: 201 });
+      didCreate = true;
+      return route.fulfill({ json: { data: created }, status: 201 });
     }
+    // The page refetches after a create, so the server list includes the new organization.
     return route.fulfill({ json: { data: [
       personalOrganization,
       { id: "workspace-1", name: "Infra", kind: "team", createdAt: "2026-09-24T12:00:00Z", role: "member" },
+      ...(didCreate ? [created] : []),
     ] } });
   });
 
