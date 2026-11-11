@@ -127,8 +127,8 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
         <h2 id="organization-invitations-heading" className="font-semibold">Invitations</h2>
         <form onSubmit={sendInvitation} className="flex flex-wrap items-end gap-2">
           <div className="min-w-48 flex-1"><label htmlFor="invite-email" className="block text-sm font-medium">Invite email</label><TextInput id="invite-email" className="mt-2" type="email" value={inviteEmail} onChange={event => setInviteEmail(event.target.value)} required /></div>
-          <div><label htmlFor="invite-role" className="block text-sm font-medium">Invite role</label><Select id="invite-role" className="mt-2" value={inviteRole} onChange={event => setInviteRole(event.target.value as AssignableRole)}>{roleOptions}</Select></div>
-          <Button type="submit" disabled={busy || !inviteEmail.trim()}>Send invitation</Button>
+          <div><label htmlFor="invite-role" className="block text-sm font-medium">Invite role</label><Select id="invite-role" className="mt-2 h-[42px]" value={inviteRole} onChange={event => setInviteRole(event.target.value as AssignableRole)}>{roleOptions}</Select></div>
+          <Button type="submit" className="h-[42px]" disabled={busy || !inviteEmail.trim()}>Send invitation</Button>
         </form>
         {invitations.isPending && <p role="status">Loading invitations…</p>}
         {invitations.isError && <p role="alert">Could not load invitations. <Button type="button" variant="secondary" onClick={() => void invitations.refetch()}>Retry</Button></p>}
