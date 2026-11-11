@@ -9,7 +9,7 @@ import { setSessionUser } from "@/lib/session";
 import { clearWorkspaceInvitation } from "@/lib/workspace-invitations";
 import { AccountNavigation } from "@/components/account-navigation";
 
-export function AccountMenu({ user, showName = false }: { user: ApiUser; showName?: boolean }) {
+export function AccountMenu({ user, showName = false, relation }: { user: ApiUser; showName?: boolean; relation?: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -37,6 +37,7 @@ export function AccountMenu({ user, showName = false }: { user: ApiUser; showNam
     pathname={pathname}
     inquiriesActive={pathname === "/staff/enterprise-inquiries"}
     showName={showName}
+    relation={relation}
     signingOut={signingOut}
     onSignOut={() => void logout()}
   />;

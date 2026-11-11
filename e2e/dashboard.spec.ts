@@ -33,7 +33,7 @@ test("login waits for the session, then opens the dashboard without showing the 
     const nav = page.getByRole("navigation", { name: "Dashboard navigation" });
     if (width < 1024) await page.getByRole("button", { name: "Open menu" }).click();
     const account = nav.getByRole("button", { name: /account menu/ });
-    await expect(page.locator(".dashboard-sidebar-account button").first()).toHaveAccessibleName("Color theme");
+    await expect(page.locator(".dashboard-sidebar-theme button").first()).toHaveAccessibleName("Color theme");
     await expect(page.locator(".dashboard-sidebar-account")).not.toContainText(owner.email);
     await account.click();
     await expect(nav.getByRole("link", { name: "Passkeys", exact: true })).toHaveAttribute("href", "/account/passkeys");

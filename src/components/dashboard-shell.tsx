@@ -171,9 +171,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <Link href="/contact" onClick={closeMenu} className="dashboard-nav-item" aria-label="Help" title="Help"><DashboardIcon href="/help" /><span className="dashboard-nav-text">Help</span></Link>
           </div>
         </div>
-        <div className="dashboard-sidebar-account">
+        <div className="dashboard-sidebar-theme">
+          <span className="dashboard-nav-text">Theme</span>
           <ThemeSwitcher align="start" side="top" />
-          <AccountMenu key={user.data.id} user={user.data} showName />
+        </div>
+        <div className="dashboard-sidebar-account">
+          <AccountMenu key={user.data.id} user={user.data} showName relation={relationLabel(navWorkspace)} />
         </div>
       </nav>
     </aside>
@@ -198,6 +201,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     </div>
   </div>
   </div>;
+}
+
+// Under the profile name: the person's role in the current team, or Personal outside one.
+function relationLabel(workspace?: OrganizationMembership) {
+  if (!workspace || workspace.kind === "personal") return "Personal";
+  return `${workspace.role[0].toUpperCase()}${workspace.role.slice(1)} · ${workspace.name}`;
 }
 
 function DashboardIcon({ href }: { href: string }) {

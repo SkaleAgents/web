@@ -14,3 +14,8 @@ it("lists every personal setting in the profile menu and marks the current one",
   expect(screen.getByRole("link", { name: "Notifications" })).toHaveAttribute("aria-current", "page");
   expect(screen.getByRole("button", { name: "Sign out" })).toBeVisible();
 });
+
+it("shows the role in the current team under the profile name in the sidebar", () => {
+  render(<AccountNavigation user={{ id: "u1", displayName: "Ada Lovelace", email: "ada@example.com", grokSubject: null }} pathname="/dashboard" showName relation="Admin · Acme" signingOut={false} onSignOut={() => undefined} />);
+  expect(screen.getByText("Admin · Acme")).toBeInTheDocument();
+});
