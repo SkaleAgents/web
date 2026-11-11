@@ -125,7 +125,7 @@ body:has(.passkey-prompt-dialog[open]) {
 .avatar { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 2rem; width: 2rem; height: 2rem; background: var(--accent); color: var(--accent-fg); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.02em; }
 .avatar-person { border-radius: 50%; }
 .avatar-team { border-radius: 6px; }
-.scope-avatar { flex-basis: 1.5rem; width: 1.5rem; height: 1.5rem; font-size: 0.6rem; background: var(--accent-soft); color: var(--ink); }
+.scope-avatar { flex-basis: 2.25rem; width: 2.25rem; height: 2.25rem; font-size: 0.8rem; background: var(--accent-soft); color: var(--ink); }
 .scope-switcher-options a { display: flex; align-items: center; gap: 0.6rem; }
 .scope-switcher-text { display: flex; min-width: 0; flex-direction: column; text-align: left; line-height: 1.2; }
 .scope-switcher-main { display: flex; min-width: 0; flex-direction: column; }
@@ -722,6 +722,12 @@ html.dark .finding-severity:is([data-severity="high"], [data-severity="critical"
 .dashboard-sidebar-footer { flex-shrink: 0; padding: 12px; border-top: 1px solid var(--line); }
 .dashboard-frame.is-collapsed .dashboard-sidebar-footer { padding-inline: 8px; }
 /* Profile and theme live at the sidebar foot; the profile menu opens upward from there. */
+.dashboard-sidebar-theme { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; padding: 6px 12px 6px 18px; border-top: 1px solid var(--line); color: var(--ink-muted); font-size: 0.8125rem; }
+.dashboard-frame.is-collapsed .dashboard-sidebar-theme { justify-content: center; padding-inline: 8px; }
+.dashboard-sidebar-account .account-nav-avatar { flex-basis: 2.5rem; width: 2.5rem; height: 2.5rem; font-size: 0.85rem; }
+.account-nav-relation { color: var(--ink-muted); font-size: 0.6875rem; }
+.account-nav-caret { flex-shrink: 0; margin-left: auto; color: var(--ink-muted); }
+.dashboard-frame.is-collapsed .account-nav-caret { display: none; }
 .dashboard-sidebar-account { display: flex; flex-shrink: 0; align-items: center; gap: 4px; padding: 12px; border-top: 1px solid var(--line); }
 .dashboard-sidebar-account .account-navigation { z-index: 70; flex: 1; min-width: 0; }
 .dashboard-sidebar-account .account-nav-trigger { width: 100%; gap: 10px; padding: 6px; border-radius: 8px; }
