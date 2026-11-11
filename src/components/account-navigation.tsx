@@ -45,7 +45,7 @@ export function AccountNavigation({ user, pathname, inquiriesActive = false, sho
         onClick={() => setOpen(!open)}>
         <Avatar name={name} kind="person" className="account-nav-avatar" />
         {showName && <span aria-hidden="true" className="account-nav-identity"><span className="truncate font-medium">{name}</span>{relation && <span className="account-nav-relation truncate">{relation}</span>}</span>}
-        {showName && <svg aria-hidden="true" className="account-nav-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 15 6-6 6 6" /></svg>}
+        {showName && <svg aria-hidden="true" className="account-nav-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5M7 9l5-5 5 5" /></svg>}
       </button>
       <div id={panelId} hidden={!open} className="account-nav-panel">
         <div className="mb-1 border-b border-line px-3 pb-3 pt-2">

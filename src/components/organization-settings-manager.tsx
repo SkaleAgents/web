@@ -109,7 +109,7 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
           <div className="min-w-0 flex-1"><p className="font-medium">{member.name}</p><p className="break-all text-sm text-ink-muted">{member.email}</p></div>
           {member.role === "owner" || (!owner && member.role === "admin") ? <span className="text-sm capitalize text-ink-muted">{member.role}</span> : <>
             <label className="sr-only" htmlFor={`member-role-${member.userId}`}>Role for {member.email}</label>
-            <Select id={`member-role-${member.userId}`} value={member.role} disabled={busy} onChange={event => {
+            <Select id={`member-role-${member.userId}`} className="w-auto!" value={member.role} disabled={busy} onChange={event => {
               const role = event.target.value as AssignableRole;
               void change(async () => {
                 await apiFetch(`${root}/members/${member.userId}`, { method: "PATCH", body: JSON.stringify({ role }) });
