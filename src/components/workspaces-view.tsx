@@ -72,10 +72,11 @@ function WorkspaceManager({ accountId }: { accountId: string }) {
       });
       return response.data;
     },
-    onSuccess: async (workspace) => {
+    onSuccess: async () => {
       if (queryClient.getQueryData(currentUserOptions.queryKey)?.id !== accountId) return;
       setName("");
-      queryClient.setQueryData<Workspace[]>(queryKey, (current) => [workspace, ...(current ?? [])]);
+      // Refetch rather than patch the list by hand: the sidebar switcher shares this key and the list filters on fields a create response may lack.
+      await queryClient.invalidateQueries({ queryKey });
     },
   });
 
