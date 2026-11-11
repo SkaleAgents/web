@@ -58,7 +58,7 @@ function WorkspaceSchedules({ workspaceId }: { workspaceId: string }) {
     },
     refetchInterval: (query) => query.state.data?.some((item) => item.retention?.inputPurgeStatus === "pending") ? 5000 : false,
   });
-  const canEdit = workspace?.role === "owner" || workspace?.role === "member";
+  const canEdit = workspace?.role === "owner" || workspace?.role === "admin" || workspace?.role === "member";
   const canClean = workspace?.role === "owner";
   const create = useMutation({
     mutationFn: async (input: WorkspaceScheduleInput) => createWorkspaceSchedule(workspaceId, input),

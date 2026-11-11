@@ -10,7 +10,7 @@ import { currentUserOptions } from "@/lib/session";
 import { OrganizationSettingsManager } from "@/components/organization-settings-manager";
 import { LinkButton } from "@/components/ui";
 
-type Organization = { id: string; name: string; role: "owner" | "member" | "viewer" };
+type Organization = { id: string; name: string; role: "owner" | "admin" | "member" | "viewer" };
 
 function useOrganization(workspaceId: string) {
   const account = useQuery(currentUserOptions);

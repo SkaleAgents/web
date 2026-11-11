@@ -8,10 +8,11 @@ import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { DeleteOrganization } from "./delete-organization";
 import { formatDate } from "@/lib/format-date";
 
-type Role = "owner" | "member" | "viewer";
+type Role = "owner" | "admin" | "member" | "viewer";
+type AssignableRole = Exclude<Role, "owner">;
 type Organization = { id: string; name: string; role: Role };
 type Member = { userId: string; email: string; name: string; role: Role; joinedAt: string };
-type Invitation = { id: string; email: string; role: "member" | "viewer"; expiresAt: string; status: "pending" };
+type Invitation = { id: string; email: string; role: AssignableRole; expiresAt: string; status: "pending" };
 
 export function OrganizationSettingsManager({ organization, accountId }: { organization: Organization; accountId: string }) {
   const client = useQueryClient();
@@ -20,22 +21,26 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
   const memberKey = ["organization-members", accountId, workspaceId];
   const invitationKey = ["organization-invitations", accountId, workspaceId];
   const owner = organization.role === "owner";
+  // Admins manage people but not the organization itself; the API enforces the same split.
+  const manager = owner || organization.role === "admin";
   const [name, setName] = useState(organization.name);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"member" | "viewer">("member");
+  const [inviteRole, setInviteRole] = useState<AssignableRole>("member");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const members = useQuery({
     queryKey: memberKey,
-    enabled: owner,
+    enabled: manager,
     queryFn: async ({ signal }) => (await apiFetch<{ data: Member[] }>(`${root}/members`, { signal })).data,
   });
   const invitations = useQuery({
     queryKey: invitationKey,
-    enabled: owner,
+    enabled: manager,
     queryFn: async ({ signal }) => (await apiFetch<{ data: Invitation[] }>(`${root}/invitations`, { signal })).data,
   });
+
+  const roleOptions = <>{owner && <option value="admin">Admin</option>}<option value="member">Member</option><option value="viewer">Viewer</option></>;
 
   async function change(action: () => Promise<void>, success: string) {
     setBusy(true);
@@ -93,7 +98,7 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
         </div>
       </form>}
     </section>
-    {owner && <>
+    {manager && <>
       <section className="space-y-4 rounded-lg border border-line bg-canvas-elevated p-5" aria-labelledby="organization-members-heading">
         <h2 id="organization-members-heading" className="font-semibold">Members</h2>
         {members.isPending && <p role="status">Loading members…</p>}
@@ -102,15 +107,15 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
         {members.data && <ul className="divide-y divide-line">{members.data.map(member => <li key={member.userId} className="flex flex-wrap items-center gap-3 py-3">
           <Avatar name={member.name || member.email} kind="person" className="scope-avatar" />
           <div className="min-w-0 flex-1"><p className="font-medium">{member.name}</p><p className="break-all text-sm text-ink-muted">{member.email}</p></div>
-          {member.role === "owner" ? <span className="text-sm text-ink-muted">Owner</span> : <>
+          {member.role === "owner" || (!owner && member.role === "admin") ? <span className="text-sm capitalize text-ink-muted">{member.role}</span> : <>
             <label className="sr-only" htmlFor={`member-role-${member.userId}`}>Role for {member.email}</label>
             <Select id={`member-role-${member.userId}`} value={member.role} disabled={busy} onChange={event => {
-              const role = event.target.value as "member" | "viewer";
+              const role = event.target.value as AssignableRole;
               void change(async () => {
                 await apiFetch(`${root}/members/${member.userId}`, { method: "PATCH", body: JSON.stringify({ role }) });
                 client.setQueryData<Member[]>(memberKey, current => current?.map(item => item.userId === member.userId ? { ...item, role } : item));
               }, "Member role saved.");
-            }}><option value="member">Member</option><option value="viewer">Viewer</option></Select>
+            }}>{roleOptions}</Select>
             <Button type="button" variant="secondary" disabled={busy} aria-label={`Remove ${member.email}`} onClick={() => void change(async () => {
               await apiFetch(`${root}/members/${member.userId}`, { method: "DELETE" });
               client.setQueryData<Member[]>(memberKey, current => current?.filter(item => item.userId !== member.userId));
@@ -122,7 +127,7 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
         <h2 id="organization-invitations-heading" className="font-semibold">Invitations</h2>
         <form onSubmit={sendInvitation} className="flex flex-wrap items-end gap-2">
           <div className="min-w-48 flex-1"><label htmlFor="invite-email" className="block text-sm font-medium">Invite email</label><TextInput id="invite-email" className="mt-2" type="email" value={inviteEmail} onChange={event => setInviteEmail(event.target.value)} required /></div>
-          <div><label htmlFor="invite-role" className="block text-sm font-medium">Invite role</label><Select id="invite-role" className="mt-2" value={inviteRole} onChange={event => setInviteRole(event.target.value as "member" | "viewer")}><option value="member">Member</option><option value="viewer">Viewer</option></Select></div>
+          <div><label htmlFor="invite-role" className="block text-sm font-medium">Invite role</label><Select id="invite-role" className="mt-2" value={inviteRole} onChange={event => setInviteRole(event.target.value as AssignableRole)}>{roleOptions}</Select></div>
           <Button type="submit" disabled={busy || !inviteEmail.trim()}>Send invitation</Button>
         </form>
         {invitations.isPending && <p role="status">Loading invitations…</p>}
@@ -136,7 +141,7 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
           }, "Invitation revoked.")}>Revoke</Button>
         </li>)}</ul>}
       </section>
-      <DeleteOrganization organization={organization} />
+      {owner && <DeleteOrganization organization={organization} />}
     </>}
     {notice && <p role="status" className="text-sm text-success">{notice}</p>}
     {error && <p role="alert" className="text-sm text-danger">{error}</p>}

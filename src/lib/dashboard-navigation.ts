@@ -1,6 +1,6 @@
 export type NavigationItem = { href: string; label: string };
 export type NavigationSection = { label: string; items: NavigationItem[] };
-type NavigationWorkspace = { kind: "personal" | "team"; role: "owner" | "member" | "viewer" };
+type NavigationWorkspace = { kind: "personal" | "team"; role: "owner" | "admin" | "member" | "viewer" };
 
 const LAST_ORGANIZATION = "skale:last-organization";
 const HOME_ORGANIZATION = "skale:home-organization";

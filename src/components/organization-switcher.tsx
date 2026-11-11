@@ -9,7 +9,7 @@ export type OrganizationMembership = {
   id: string;
   slug?: string | null;
   name: string;
-  role: "owner" | "member" | "viewer";
+  role: "owner" | "admin" | "member" | "viewer";
   kind: "personal" | "team";
   plan?: string;
 };
