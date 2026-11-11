@@ -1,6 +1,6 @@
 import { ApiError, apiFetch, ensureCsrfCookie, fetchJobPages, type JobPage, type SwarmJob } from "@/lib/api";
 
-export type WorkspaceRole = "owner" | "member" | "viewer";
+export type WorkspaceRole = "owner" | "admin" | "member" | "viewer";
 
 export type AuditWorkspace = {
   id: string;

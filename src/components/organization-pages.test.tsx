@@ -9,7 +9,7 @@ vi.mock("@/lib/api", async (load) => ({ ...(await load<typeof import("@/lib/api"
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
-function showSettings(role: "owner" | "member" = "owner") {
+function showSettings(role: "owner" | "admin" | "member" = "owner") {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner" });
   vi.mocked(apiFetch).mockImplementation(async (path, init) => {
@@ -18,6 +18,7 @@ function showSettings(role: "owner" | "member" = "owner") {
     if (path === "/api/workspaces/org-1/members" && !init?.method) return { data: [
       { userId: "owner-1", email: "owner@example.test", name: "Owner", role: "owner", joinedAt: "2026-09-01T00:00:00Z" },
       { userId: "member-1", email: "member@example.test", name: "Member", role: "member", joinedAt: "2026-09-02T00:00:00Z" },
+      { userId: "admin-1", email: "admin@example.test", name: "Admin", role: "admin", joinedAt: "2026-09-03T00:00:00Z" },
     ] } as never;
     if (path === "/api/workspaces/org-1/invitations" && !init?.method) return { data: [] } as never;
     if (path === "/api/workspaces/org-1/invitations" && init?.method === "POST") return { data: { id: "invite-1", email: "new@example.test", role: "viewer", status: "pending", expiresAt: "2026-10-06T00:00:00Z" } } as never;
@@ -61,4 +62,19 @@ it("shows organization details without owner controls to a member", async () => 
   expect(screen.queryByRole("button", { name: "Save name" })).not.toBeInTheDocument();
   expect(screen.queryByLabelText("Invite email")).not.toBeInTheDocument();
   expect(apiFetch).not.toHaveBeenCalledWith("/api/workspaces/org-1/members", expect.anything());
+});
+
+it("lets an admin manage members and viewers but not the organization or other admins", async () => {
+  showSettings("admin");
+  expect(await screen.findByText("member@example.test")).toBeVisible();
+  expect(screen.queryByLabelText("Organization name")).toBeNull();
+  expect(screen.queryByRole("heading", { name: "Delete organization" })).toBeNull();
+  expect(screen.queryByLabelText("Role for admin@example.test")).toBeNull();
+  expect(screen.queryByRole("option", { name: "Admin" })).toBeNull();
+  expect(screen.getByLabelText("Role for member@example.test")).toBeVisible();
+});
+
+it("lets an owner promote a member to admin", async () => {
+  showSettings();
+  expect(await screen.findByRole("option", { name: "Admin", selected: false })).toBeInTheDocument();
 });

@@ -62,7 +62,7 @@ export function WorkspaceNewAuditPage({ workspaceId }: { workspaceId: string }) 
     },
   });
   const workspace = workspaceQuery.data?.find((item) => item.id === workspaceId);
-  const canCreate = workspace?.role === "owner" || workspace?.role === "member";
+  const canCreate = workspace?.role === "owner" || workspace?.role === "admin" || workspace?.role === "member";
   const create = useMutation({
     mutationFn: () => createWorkspaceAudit(workspaceId, content.trim()),
     onSuccess: (audit) => {
@@ -119,7 +119,7 @@ function WorkspaceAudits({ workspaceId }: { workspaceId: string }) {
   });
   const workspace = workspaceQuery.data?.find((item) => item.id === workspaceId);
   const role = workspace?.role;
-  const canCreate = workspaceAuditCreationEnabled() && (role === "owner" || role === "member");
+  const canCreate = workspaceAuditCreationEnabled() && (role === "owner" || role === "admin" || role === "member");
   const canManage = role === "owner";
   const auditKey = useMemo(() => ["workspace-audits", accountId ?? "guest", workspaceId] as const, [accountId, workspaceId]);
   const audits = useQuery({

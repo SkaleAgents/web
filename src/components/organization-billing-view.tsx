@@ -8,7 +8,7 @@ import { Button } from "@/components/ui";
 import { apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 
-type Organization = { id: string; name: string; role: "owner" | "member" | "viewer"; kind: "personal" | "team"; cutoverNoticeAvailable?: boolean };
+type Organization = { id: string; name: string; role: "owner" | "admin" | "member" | "viewer"; kind: "personal" | "team"; cutoverNoticeAvailable?: boolean };
 type Plan = { key: string; name: string; monthlyUsd: number | null; auditLimit: number | null; checkoutMode: string };
 type RenewalStatus = "grace" | "access_paused" | "finalizing" | "finalization_paused" | "unpaid" | "verification_unavailable" | "recovered" | "canceled";
 type Billing = {
