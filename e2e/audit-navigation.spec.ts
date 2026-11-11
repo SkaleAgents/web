@@ -35,8 +35,9 @@ test("signed-in navigation puts the theme control and the profile menu at the si
   await expect(toolbar.getByRole("button", { name: "Color theme" })).toHaveCount(0);
   await expect(toolbar.getByRole("button", { name: /account menu/ })).toHaveCount(0);
   const foot = page.locator(".dashboard-sidebar-account");
+  const themeRow = page.locator(".dashboard-sidebar-theme");
   await expect(page.locator(".dashboard-brand").getByRole("button", { name: "Color theme" })).toHaveCount(0);
-  await expect(foot.getByRole("button", { name: "Color theme" })).toBeVisible();
+  await expect(themeRow.getByRole("button", { name: "Color theme" })).toBeVisible();
   const account = foot.getByRole("button", { name: "Test Owner, account menu" });
   await expect(account).toBeVisible();
   await expect(account).toContainText("Test Owner");
@@ -45,7 +46,7 @@ test("signed-in navigation puts the theme control and the profile menu at the si
   const before = await account.boundingBox();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   expect((await account.boundingBox())!.y).toBe(before!.y);
-  await foot.getByRole("button", { name: "Color theme" }).click();
+  await themeRow.getByRole("button", { name: "Color theme" }).click();
   const menu = page.getByRole("menu", { name: "Color theme" });
   for (const choice of ["Light", "Dark", "System"]) await expect(menu.getByRole("menuitemradio", { name: choice })).toBeVisible();
   await menu.getByRole("menuitemradio", { name: "Dark" }).click();
