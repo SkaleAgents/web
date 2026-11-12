@@ -737,7 +737,8 @@ html.dark .finding-severity:is([data-severity="high"], [data-severity="critical"
 .dashboard-sidebar-account .account-nav-panel { top: auto; right: auto; bottom: calc(100% + 0.5rem); left: 0; width: min(16rem, calc(100vw - 3rem)); }
 .dashboard-frame.is-collapsed .dashboard-sidebar-account { flex-direction: column; padding-inline: 8px; }
 .dashboard-frame.is-collapsed .account-nav-identity { display: none; }
-.dashboard-frame.is-collapsed .dashboard-sidebar-account .account-nav-trigger { justify-content: center; }
+/* Collapsed, the trigger is just the avatar, so its hover and open highlight is a circle like the avatar. */
+.dashboard-frame.is-collapsed .dashboard-sidebar-account .account-nav-trigger { justify-content: center; width: auto; padding: 4px; border-radius: 999px; }
 .dashboard-nav-chevron { display: inline-flex; }
 .dashboard-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-inline: 40px; padding-block: 16px; border-top: 1px solid var(--line); color: var(--ink-muted); font-size: 12px; }
 .dashboard-footer nav { display: flex; gap: 20px; }

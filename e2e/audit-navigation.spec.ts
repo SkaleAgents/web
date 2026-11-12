@@ -75,6 +75,10 @@ test("the collapsed sidebar keeps Docs, Help and the profile inside the window w
   await page.locator(".dashboard-sidebar-theme").getByRole("button", { name: "Color theme" }).click();
   const menu = (await page.getByRole("menu", { name: "Color theme" }).boundingBox())!;
   expect(menu.x).toBeGreaterThanOrEqual(0);
+  // The profile highlight stays round around the avatar instead of turning into a rounded square.
+  const box = (await account.boundingBox())!;
+  expect(Math.abs(box.width - box.height)).toBeLessThan(1);
+  expect(await account.evaluate(node => getComputedStyle(node).borderRadius)).toBe("999px");
 });
 
 test("public navigation shows Dashboard only after sign-in", async ({ page }) => {
