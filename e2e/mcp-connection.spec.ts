@@ -46,8 +46,15 @@ test("MCP configuration needs no manual key and connected clients can be disconn
   await expect(page.getByText("You have used all your scans this month.")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Copy MCP config" })).toHaveCount(0);
   await expect(page.locator("p").filter({ hasText: /^Claude Desktop$/ })).toBeVisible();
-  page.once("dialog", dialog => void dialog.accept());
+  // The confirmation is in the page, not a native browser box, so Cancel leaves the client connected.
   await page.getByRole("button", { name: "Disconnect", exact: true }).click();
+  const confirm = page.getByRole("dialog", { name: "Disconnect Claude Desktop?" });
+  await expect(confirm).toBeVisible();
+  await confirm.getByRole("button", { name: "Cancel" }).click();
+  await expect(confirm).toBeHidden();
+  await expect(page.locator("p").filter({ hasText: /^Claude Desktop$/ })).toBeVisible();
+  await page.getByRole("button", { name: "Disconnect", exact: true }).click();
+  await confirm.getByRole("button", { name: "Disconnect", exact: true }).click();
   await expect(page.getByText(/No clients connected yet/)).toBeVisible();
   expect(manualKeyRequests).toBe(0);
 });

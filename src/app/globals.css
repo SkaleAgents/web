@@ -65,12 +65,14 @@ body {
 
 body:has(.get-started-dialog[open]),
 body:has(.retention-notice-dialog[open]),
+body:has(.confirm-dialog[open]),
 body:has(.passkey-prompt-dialog[open]) {
   overflow: hidden;
 }
 
 .get-started-dialog::backdrop,
 .passkey-prompt-dialog::backdrop,
+.confirm-dialog::backdrop,
 .retention-notice-dialog::backdrop {
   background: rgb(3 12 16 / 55%);
   backdrop-filter: blur(4px);
@@ -78,6 +80,7 @@ body:has(.passkey-prompt-dialog[open]) {
 
 .get-started-dialog[open],
 .passkey-prompt-dialog[open],
+.confirm-dialog[open],
 .retention-notice-dialog[open] {
   animation: signal-enter 180ms ease-out;
 }
@@ -86,6 +89,7 @@ body:has(.passkey-prompt-dialog[open]) {
   .motion-enter,
   .get-started-dialog[open],
   .passkey-prompt-dialog[open],
+  .confirm-dialog[open],
   .retention-notice-dialog[open] {
     animation: none !important;
   }

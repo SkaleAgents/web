@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import McpConfigPage from "./page";
@@ -6,6 +6,9 @@ import { apiFetch } from "@/lib/api";
 
 vi.mock("@/lib/api", () => ({ apiFetch: vi.fn(), ensureCsrfCookie: vi.fn() }));
 vi.mock("@/lib/session", () => ({ currentUserOptions: { queryKey: ["user"], queryFn: async () => ({ id: "u1", displayName: "Owner" }) } }));
+// jsdom has no modal dialog support; this is enough for showModal and close to flip the open state.
+HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) { this.open = true; };
+HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) { this.open = false; };
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 function show(scans: unknown) {
@@ -45,5 +48,46 @@ describe("MCP scan usage", () => {
     show("error");
     await screen.findByRole("heading", { name: "MCP connections" });
     expect(screen.queryByRole("heading", { name: "Scans this month" })).not.toBeInTheDocument();
+  });
+});
+
+describe("disconnecting a client", () => {
+  const connection = { id: "7", clientId: "mcp_x", clientName: "MCP Inspector", createdAt: "2026-11-12T00:00:00Z", lastUsedAt: null, expiresAt: "2026-12-12T00:00:00Z" };
+  function showConnection() {
+    vi.mocked(apiFetch).mockImplementation(async (path: string, init?: RequestInit) => {
+      if (path === "/api/account/entitlements") return {};
+      if (init?.method === "DELETE") return { ok: true };
+      return { connections: [connection] };
+    });
+    render(<QueryClientProvider client={new QueryClient()}><McpConfigPage /></QueryClientProvider>);
+  }
+  const deletes = () => vi.mocked(apiFetch).mock.calls.filter(([, init]) => init?.method === "DELETE");
+
+  it("asks in the page first and does nothing until confirmed", async () => {
+    const confirm = vi.spyOn(window, "confirm");
+    showConnection();
+    fireEvent.click(await screen.findByRole("button", { name: "Disconnect" }));
+    const dialog = await screen.findByRole("dialog", { name: "Disconnect MCP Inspector?" });
+    expect(dialog).toHaveTextContent("That client loses access until it connects again.");
+    expect(deletes()).toHaveLength(0);
+    expect(confirm).not.toHaveBeenCalled();
+  });
+
+  it("cancels without calling the API", async () => {
+    showConnection();
+    fireEvent.click(await screen.findByRole("button", { name: "Disconnect" }));
+    const dialog = await screen.findByRole("dialog", { name: "Disconnect MCP Inspector?" });
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(dialog).not.toHaveAttribute("open"));
+    expect(deletes()).toHaveLength(0);
+  });
+
+  it("disconnects the chosen client once the dialog is confirmed", async () => {
+    showConnection();
+    fireEvent.click(await screen.findByRole("button", { name: "Disconnect" }));
+    const dialog = await screen.findByRole("dialog", { name: "Disconnect MCP Inspector?" });
+    fireEvent.click(Array.from(dialog.querySelectorAll("button")).find((button) => button.textContent === "Disconnect")!);
+    await waitFor(() => expect(deletes()).toHaveLength(1));
+    expect(deletes()[0][0]).toBe("/api/oauth/connections/7");
   });
 });
