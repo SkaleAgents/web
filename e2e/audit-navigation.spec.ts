@@ -71,6 +71,14 @@ test("the collapsed sidebar keeps Docs, Help and the profile inside the window w
   expect(accountBox.y + accountBox.height).toBeLessThanOrEqual(520);
   expect((await help.boundingBox())!.y + (await help.boundingBox())!.height).toBeLessThanOrEqual(accountBox.y);
   await expect(page.getByRole("link", { name: /Visit public site/ })).toHaveCount(0);
+  // The theme menu is wider than the rail, so it opens rightward instead of off the window edge.
+  await page.locator(".dashboard-sidebar-theme").getByRole("button", { name: "Color theme" }).click();
+  const menu = (await page.getByRole("menu", { name: "Color theme" }).boundingBox())!;
+  expect(menu.x).toBeGreaterThanOrEqual(0);
+  // The profile highlight stays round around the avatar instead of turning into a rounded square.
+  const box = (await account.boundingBox())!;
+  expect(Math.abs(box.width - box.height)).toBeLessThan(1);
+  expect(await account.evaluate(node => getComputedStyle(node).borderRadius)).toBe("999px");
 });
 
 test("public navigation shows Dashboard only after sign-in", async ({ page }) => {
