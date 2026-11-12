@@ -12,18 +12,18 @@ vi.mock("./turnstile", async () => {
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 const catalog = { data: [
-  { key: "free", name: "Free", monthlyUsd: 0, auditLimit: 2, scheduleLimit: 0, minimumIntervalHours: null, recommended: false, checkoutMode: "included" },
-  { key: "starter", name: "Starter", monthlyUsd: 19, auditLimit: 25, scheduleLimit: 1, minimumIntervalHours: 48, recommended: false, checkoutMode: "self_service" },
-  { key: "pro", name: "Pro", monthlyUsd: 49, auditLimit: 200, scheduleLimit: 10, minimumIntervalHours: 24, recommended: true, checkoutMode: "self_service" },
-  { key: "max", name: "Max", monthlyUsd: 499, auditLimit: 2000, scheduleLimit: 100, minimumIntervalHours: 1, recommended: false, checkoutMode: "self_service" },
-  { key: "enterprise", name: "Enterprise", monthlyUsd: null, auditLimit: null, scheduleLimit: null, minimumIntervalHours: null, recommended: false, checkoutMode: "contact" },
+  { key: "free", name: "Free", monthlyUsd: 0, auditLimit: 2, scheduleLimit: 0, minimumIntervalHours: null, mcpSeats: 1, recommended: false, checkoutMode: "included" },
+  { key: "starter", name: "Starter", monthlyUsd: 19, auditLimit: 25, scheduleLimit: 1, minimumIntervalHours: 48, mcpSeats: 2, recommended: false, checkoutMode: "self_service" },
+  { key: "pro", name: "Pro", monthlyUsd: 49, auditLimit: 200, scheduleLimit: 10, minimumIntervalHours: 24, mcpSeats: 5, recommended: true, checkoutMode: "self_service" },
+  { key: "max", name: "Max", monthlyUsd: 499, auditLimit: 2000, scheduleLimit: 100, minimumIntervalHours: 1, mcpSeats: 25, recommended: false, checkoutMode: "self_service" },
+  { key: "enterprise", name: "Enterprise", monthlyUsd: null, auditLimit: null, scheduleLimit: null, minimumIntervalHours: null, mcpSeats: null, recommended: false, checkoutMode: "contact" },
 ] };
 
 describe("organization pricing", () => {
   it("reserves the plan grid height while the catalog loads so the footer does not shift", () => {
     vi.mocked(apiFetch).mockReturnValueOnce(new Promise(() => {}));
     render(<PricingPlans />);
-    expect(screen.getByRole("status")).toHaveClass("min-h-[141rem]", "md:min-h-[84rem]", "xl:min-h-[58rem]");
+    expect(screen.getByRole("status")).toHaveClass("min-h-[148rem]", "md:min-h-[87.5rem]", "xl:min-h-[61.5rem]");
   });
 
   it("renders the ordered catalog without offering checkout or a trial", async () => {
@@ -34,8 +34,19 @@ describe("organization pricing", () => {
     expect(screen.queryByText(/\/ 05/)).not.toBeInTheDocument();
     expect(screen.getByText("Recommended")).toBeVisible();
     expect(screen.getAllByRole("article")[0]).toHaveTextContent("2 audits / month");
+    expect(screen.getAllByRole("article")[0]).toHaveTextContent("1 AI connection (MCP)");
+    expect(screen.getAllByRole("article")[0]).not.toHaveTextContent("for the owner");
+    expect(screen.getAllByRole("article")[2]).toHaveTextContent("5 AI connections (MCP) for the owner");
+    expect(screen.getAllByRole("article")[4]).not.toHaveTextContent("MCP");
     expect(screen.getAllByText("Enrollment coming soon")).toHaveLength(3);
     expect(screen.queryByText(/free trial/i)).not.toBeInTheDocument();
+  });
+
+  it("leaves the connection line out when the API does not send it", async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce({ data: catalog.data.map((plan) => ({ ...plan, mcpSeats: undefined })) });
+    render(<PricingPlans />);
+    await screen.findByRole("heading", { name: "Enterprise" });
+    expect(screen.queryByText(/MCP/)).not.toBeInTheDocument();
   });
 
   it("links paid plans to organization billing when enrollment is open", async () => {

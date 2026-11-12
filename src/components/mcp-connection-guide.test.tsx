@@ -1,4 +1,4 @@
-import { cleanup, render } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import { WorkflowExplorer } from "@/components/marketing/workflow-explorer";
 import { McpConnectionGuide } from "./mcp-connection-guide";
@@ -27,4 +27,13 @@ it("tells the editor workflow to add the hosted URL and approve OAuth", () => {
   expect(text).not.toContain("npx");
   expect(text).not.toContain("local stdio");
   expect(text).not.toContain("@skaleagents/swarm locally");
+});
+
+it("offers the Claude Code plugin and points to plans for more connections", () => {
+  const { container } = render(<McpConnectionGuide />);
+  expect(container.textContent).not.toContain("/plugin marketplace add");
+  fireEvent.click(screen.getByRole("button", { name: "Claude Code" }));
+  expect(container.textContent).toContain("/plugin marketplace add SkaleAgents/mcp-server");
+  expect(container.textContent).toContain("/plugin install skaleagents@skaleagents");
+  expect(screen.getByRole("link", { name: "See plans" })).toHaveAttribute("href", "/pricing");
 });
