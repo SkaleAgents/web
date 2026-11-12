@@ -20,7 +20,7 @@ export default function PricingPage() {
       <ol className="mt-6 grid gap-4 text-sm leading-relaxed md:grid-cols-3">
         <li className="border border-line bg-canvas-elevated p-5"><strong>1. Connect</strong><p className="mt-2 text-ink-muted">Add <code className="break-all text-ink">https://skaleagents.com/mcp</code> to Claude, Cursor, ChatGPT, or Codex, or install the Claude Code plugin. Sign in with Google and click Allow.</p></li>
         <li className="border border-line bg-canvas-elevated p-5"><strong>2. Ask for a scan</strong><p className="mt-2 text-ink-muted">Your AI sends the files it is working on and gets back each finding with the line to change.</p></li>
-        <li className="border border-line bg-canvas-elevated p-5"><strong>3. Keep your audits</strong><p className="mt-2 text-ink-muted">Scans from your AI do not use your monthly audits.</p></li>
+        <li className="border border-line bg-canvas-elevated p-5"><strong>3. Keep your audits</strong><p className="mt-2 text-ink-muted">Scans from your AI do not use your monthly audits. Each plan has its own monthly allowance of AI scans.</p></li>
       </ol>
       <p className="mt-6 max-w-2xl text-sm leading-relaxed text-ink-muted">Every account connects one AI client. On a paid plan, the organization&apos;s first owner connects more, and other members keep one each. <Link href="/mcp-config" className="font-semibold text-ink underline">Set up your AI</Link></p>
     </section>
