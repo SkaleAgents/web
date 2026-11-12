@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiFetch, ensureCsrfCookie, type McpConnection } from "@/lib/api";
 import { currentUserOptions } from "@/lib/session";
 import { Button } from "@/components/ui";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { formatDate, formatDateTime } from "@/lib/format-date";
 
 type McpScanUsage = { used: number; limit: number | null; enforced: boolean; resetsAt: string };
@@ -28,6 +30,7 @@ export default function McpConfigPage() {
   });
   const scans = usage.data;
   const used = scans?.limit != null && scans.used >= scans.limit;
+  const [leaving, setLeaving] = useState<McpConnection | null>(null);
   const disconnect = useMutation({
     mutationFn: async (id: string) => {
       await ensureCsrfCookie();
@@ -38,6 +41,7 @@ export default function McpConfigPage() {
       toast.success("Client disconnected");
     },
     onError: (error: Error) => toast.error(error.message),
+    onSettled: () => setLeaving(null),
   });
 
   return (
@@ -65,13 +69,13 @@ export default function McpConfigPage() {
           {connections.data?.length === 0 && <p className="mt-4 text-sm text-ink-muted">No clients connected yet. Add SkaleAgents from the setup guide, then connect and approve the browser request.</p>}
           <ul className="mt-4 divide-y divide-line">{connections.data?.map((connection) => <li key={connection.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
             <div><p className="font-semibold">{connection.clientName ?? (connection.clientId === "skaleagents-mcp" ? "SkaleAgents MCP" : connection.clientId)}</p><p className="mt-1 text-xs text-ink-muted">Connected {formatDate(connection.createdAt)} · Last used {connection.lastUsedAt ? formatDateTime(connection.lastUsedAt) : "Not yet"}</p></div>
-            <Button type="button" variant="secondary" disabled={disconnect.isPending} onClick={() => {
-              if (!window.confirm(`Disconnect ${connection.clientName ?? connection.clientId}? That client loses access until it connects again.`)) return;
-              disconnect.mutate(connection.id);
-            }}>Disconnect</Button>
+            <Button type="button" variant="secondary" disabled={disconnect.isPending} onClick={() => setLeaving(connection)}>Disconnect</Button>
           </li>)}</ul>
         </>}
       </section>
+      <ConfirmDialog open={leaving !== null} busy={disconnect.isPending} title={`Disconnect ${leaving?.clientName ?? leaving?.clientId ?? "this client"}?`}
+        description="That client loses access until it connects again." confirmLabel="Disconnect"
+        onConfirm={() => { if (leaving) disconnect.mutate(leaving.id); }} onCancel={() => setLeaving(null)} />
     </main>
   );
 }
