@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui";
 import { ArchitectureReviewBrief } from "@/components/architecture-review-brief";
@@ -27,7 +28,7 @@ export function McpConnectionGuide() {
   }
   return (
     <section className="space-y-7 rounded-xl border border-accent/40 bg-accent-soft p-5 sm:p-7" aria-labelledby="mcp-setup-heading">
-      <div><p className="workspace-kicker">One URL / Connect with OAuth</p><h2 id="mcp-setup-heading" className="text-2xl font-semibold">Choose your MCP client</h2><p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">Connect your assistant to the hosted SkaleAgents MCP server. Sign in with Google and approve access through OAuth. No API keys or local server to install.</p></div>
+      <div><p className="workspace-kicker">One URL / Connect with OAuth</p><h2 id="mcp-setup-heading" className="text-2xl font-semibold">Choose your MCP client</h2><p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">Connect your assistant to the hosted SkaleAgents MCP server. Sign in with Google and approve access through OAuth. No API keys or local server to install.</p><p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">Every account connects one AI client. Paid plans connect more. <Link href="/pricing" className="font-semibold text-ink underline">See plans</Link></p></div>
       <ol className="grid gap-3 text-sm sm:grid-cols-3">
         <li className="rounded-lg border border-line bg-canvas-elevated p-4"><strong>1. Add SkaleAgents</strong><p className="mt-2 text-ink-muted">Choose your client below and add the server URL using its setup steps.</p></li>
         <li className="rounded-lg border border-line bg-canvas-elevated p-4"><strong>2. Connect with OAuth</strong><p className="mt-2 text-ink-muted">Connect in your client, sign in with Google if needed, and approve MCP access.</p></li>
@@ -40,6 +41,7 @@ export function McpConnectionGuide() {
         <div className="space-y-2 text-sm leading-relaxed text-ink-muted">
           {client === "Cursor" && <p>Save this in <code className="text-ink">.cursor/mcp.json</code> at your project root. Open Cursor Settings, then Tools &amp; MCP. Enable skaleagents and use Connect to complete OAuth.</p>}
           {client === "Claude Code" && <p>Run this in your project directory. Start Claude Code, enter <code className="text-ink">/mcp</code>, select skaleagents, and choose Authenticate.</p>}
+          {client === "Claude Code" && <p>Or install the plugin: run <code className="text-ink">/plugin marketplace add SkaleAgents/mcp-server</code>, then <code className="text-ink">/plugin install skaleagents@skaleagents</code>. It connects this server and scans the infrastructure files Claude changed each time it stops.</p>}
           {client === "Claude Desktop" && <><p>Open Customize, then Connectors, and add a custom connector. Name it SkaleAgents and paste this as the remote MCP server URL.</p><p>Leave the advanced OAuth client fields blank. Add the connector, then click Connect to sign in and approve access. Select SkaleAgents in your conversation to use its tools.</p><p className="text-xs">For Team or Enterprise, an owner adds the connector in organization settings first. Custom connector limits depend on your plan.</p></>}
           {client === "ChatGPT" && <><p>Enable Developer mode in Settings, under Security and login. Open <a className="text-ink underline" href="https://chatgpt.com/plugins" target="_blank" rel="noreferrer">ChatGPT Plugins</a>, click the plus button, and name the connection SkaleAgents.</p><p>Paste this as the MCP server URL and choose OAuth authentication. Leave the OAuth client fields blank. Create the connection, approve access, and add it to your conversation from the tools menu.</p><p className="text-xs">Developer mode and custom connections depend on your account and workspace policy.</p></>}
           {client === "Codex" && <p>Add this to <code className="text-ink">~/.codex/config.toml</code>. Run <code className="text-ink">codex mcp login skaleagents</code> to complete OAuth, then use <code className="text-ink">/mcp</code> in Codex to check the connection.</p>}

@@ -13,6 +13,7 @@ type Plan = {
   auditLimit: number | null;
   scheduleLimit: number | null;
   minimumIntervalHours: number | null;
+  mcpSeats?: number | null;
   recommended: boolean;
   checkoutMode: "included" | "self_service" | "contact";
 };
@@ -72,7 +73,7 @@ export function PricingPlans() {
   return <>
     {catalogError && <p role="alert" className="rounded-lg border border-line bg-canvas-elevated p-5">Plans could not be loaded. Please try again later.</p>}
     {/* Reserves the measured plan grid height so the footer does not jump when the catalog arrives (PageSpeed CLS). */}
-    {!plans && !catalogError && <p role="status" className="min-h-[141rem] py-12 text-ink-muted md:min-h-[84rem] xl:min-h-[58rem]">Loading plans…</p>}
+    {!plans && !catalogError && <p role="status" className="min-h-[148rem] py-12 text-ink-muted md:min-h-[87.5rem] xl:min-h-[61.5rem]">Loading plans…</p>}
     {plans && <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {plans.map((plan) => <article key={plan.key} className={`relative flex min-h-[23rem] flex-col border p-6 sm:p-7 ${plan.recommended ? "border-accent bg-accent-soft/30" : "border-line bg-canvas-elevated"}`}>
         <div className="flex min-h-7 items-start justify-end gap-3">
@@ -88,6 +89,7 @@ export function PricingPlans() {
             <p><strong>{plan.auditLimit.toLocaleString()}</strong> audits / month</p>
             <p>{plan.scheduleLimit === 0 ? "No automatic schedules" : <><strong>{plan.scheduleLimit}</strong> automatic {plan.scheduleLimit === 1 ? "schedule" : "schedules"}</>}</p>
             {plan.minimumIntervalHours !== null && <p>Run as often as every {plan.minimumIntervalHours} {plan.minimumIntervalHours === 1 ? "hour" : "hours"}</p>}
+            {plan.mcpSeats != null && <p><strong>{plan.mcpSeats}</strong> AI {plan.mcpSeats === 1 ? "connection" : "connections"} (MCP){plan.monthlyUsd ? " for the owner" : ""}</p>}
           </>}
         </div>
         {plan.checkoutMode === "contact" ? <button type="button" onClick={() => { setFormOpen(true); setSubmitted(false); }} className="w-full bg-accent px-4 py-3 text-sm font-semibold text-accent-fg hover:opacity-90">Contact us</button>
