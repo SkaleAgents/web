@@ -8,6 +8,8 @@ import { currentUserOptions } from "@/lib/session";
 import { Button } from "@/components/ui";
 import { formatDate, formatDateTime } from "@/lib/format-date";
 
+type McpScanUsage = { used: number; limit: number | null; enforced: boolean; resetsAt: string };
+
 export default function McpConfigPage() {
   const queryClient = useQueryClient();
   const user = useQuery(currentUserOptions);
@@ -17,6 +19,15 @@ export default function McpConfigPage() {
     queryFn: async () => (await apiFetch<{ connections: McpConnection[] }>("/api/oauth/connections")).connections,
     refetchInterval: user.data ? 15_000 : false,
   });
+  // A failed or older API answer just hides the usage card, so the connections list still works.
+  const usage = useQuery({
+    queryKey: ["mcp-scan-usage", user.data?.id ?? "guest"],
+    enabled: Boolean(user.data),
+    queryFn: async () => (await apiFetch<{ mcpScans?: McpScanUsage }>("/api/account/entitlements")).mcpScans ?? null,
+    retry: false,
+  });
+  const scans = usage.data;
+  const used = scans?.limit != null && scans.used >= scans.limit;
   const disconnect = useMutation({
     mutationFn: async (id: string) => {
       await ensureCsrfCookie();
@@ -39,6 +50,12 @@ export default function McpConfigPage() {
           <Link href="/mcp-config" className="font-semibold text-accent underline decoration-line underline-offset-4">MCP setup guide</Link>.
         </p>
       </div>
+      {scans && <section aria-labelledby="scan-usage-heading" className="rounded-xl border border-line bg-canvas-elevated p-5">
+        <h2 id="scan-usage-heading" className="text-xl font-semibold">Scans this month</h2>
+        <p className="mt-2 text-sm"><strong>{scans.used.toLocaleString()}</strong>{scans.limit == null ? " used, no monthly limit." : <> of <strong>{scans.limit.toLocaleString()}</strong> used.</>} Resets {new Date(scans.resetsAt).toLocaleDateString(undefined, { dateStyle: "medium", timeZone: "UTC" })} (UTC).</p>
+        <p className="mt-2 text-sm text-ink-muted">Each scan or review your AI runs through MCP counts once. Scans from your AI do not use your monthly audits.</p>
+        {used && scans.enforced && <p role="alert" className="mt-3 text-sm text-danger">You have used all your scans this month. <Link href="/pricing" className="font-semibold underline underline-offset-4">See plans</Link> for a higher allowance.</p>}
+      </section>}
       <section aria-labelledby="connections-heading" className="rounded-xl border border-line bg-canvas-elevated p-5">
         <h2 id="connections-heading" className="text-xl font-semibold">Connected clients</h2>
         <p className="mt-2 text-sm text-ink-muted">Connections appear after OAuth authorization. Disconnecting a client removes its access. Web sign-out does not disconnect your MCP clients.</p>

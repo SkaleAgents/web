@@ -23,6 +23,7 @@ test("MCP configuration needs no manual key and connected clients can be disconn
     manualKeyRequests++;
     return route.fulfill({ status: 500 });
   });
+  await page.route("**/api/account/entitlements", (route) => route.fulfill({ json: { mcpScans: { used: 12, limit: 100, enforced: true, resetsAt: "2026-12-01T00:00:00+00:00" } } }));
   await page.route("**/api/oauth/connections", (route) => route.fulfill({ json: { connections: connected ? [{ id: "1", clientId: "mcp_registered_client", clientName: "Claude Desktop", createdAt: "2026-09-23T00:00:00Z", lastUsedAt: null, expiresAt: "2026-10-23T00:00:00Z" }] : [] } }));
   await page.route("**/api/oauth/connections/1", (route) => {
     expect(route.request().method()).toBe("DELETE");
@@ -40,6 +41,9 @@ test("MCP configuration needs no manual key and connected clients can be disconn
   await expect(page).toHaveURL(/\/mcp-config$/);
   await expect(page.getByRole("heading", { name: "MCP connections", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "MCP setup guide" })).toHaveAttribute("href", "/mcp-config");
+  await expect(page.getByRole("heading", { name: "Scans this month" })).toBeVisible();
+  await expect(page.locator("p").filter({ hasText: /^12 of 100 used\. Resets/ })).toBeVisible();
+  await expect(page.getByText("You have used all your scans this month.")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Copy MCP config" })).toHaveCount(0);
   await expect(page.locator("p").filter({ hasText: /^Claude Desktop$/ })).toBeVisible();
   page.once("dialog", dialog => void dialog.accept());
