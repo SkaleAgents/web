@@ -24,6 +24,7 @@ export default async function BotPage({ params }: { params: Promise<{ id: string
   const { id } = await params;
   if (RESERVED_IDS.has(id)) notFound();
   const [initialBot, initialBots] = await Promise.all([loadPublicBot(id), loadPublicBots()]);
+  if (initialBot === null) notFound();
   const markup = initialBot ? botJsonLd({ title: initialBot.name, description: initialBot.description || "Specialist instructions you can read without an account.", path: `/bot-directory/${initialBot.id}` }) : null;
   return <>
     {markup ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(markup) }} /> : null}

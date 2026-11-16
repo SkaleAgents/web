@@ -26,9 +26,11 @@ export function communityPrompts(prompts: Prompt[]): Prompt[] {
   return prompts.filter((prompt) => !prompt.ownerUserId);
 }
 
-async function readJson<T>(path: string): Promise<T | undefined> {
+// null means the API answered 404; undefined means it could not be reached or failed.
+async function readJson<T>(path: string): Promise<T | null | undefined> {
   try {
     const response = await fetch(`${API_URL}${path}`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(5000) });
+    if (response.status === 404) return null;
     if (!response.ok) return undefined;
     return await response.json() as T;
   } catch {
@@ -41,10 +43,11 @@ export async function loadPublicBots(): Promise<Bot[] | undefined> {
   return data ? publishedPublicBots(data.bots) : undefined;
 }
 
-export async function loadPublicBot(id: string): Promise<Bot | undefined> {
+// null: no such public bot, so the page can 404. undefined: the API is down, so the client retries.
+export async function loadPublicBot(id: string): Promise<Bot | null | undefined> {
   const bot = await readJson<Bot>(`/api/bots/${encodeURIComponent(id)}`);
-  if (!bot || bot.visibility !== "public" || bot.status !== "published") return undefined;
-  return bot;
+  if (!bot) return bot;
+  return bot.visibility === "public" && bot.status === "published" ? bot : null;
 }
 
 export async function loadCommunityPrompts(): Promise<Prompt[] | undefined> {
