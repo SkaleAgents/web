@@ -13,8 +13,11 @@ function showSettings(role: "owner" | "admin" | "member" = "owner") {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   client.setQueryData(["user"], { id: "owner-1", email: "owner@example.test", displayName: "Owner" });
   vi.mocked(apiFetch).mockImplementation(async (path, init) => {
-    if (path === "/api/workspaces/org-1" && init?.method === "PATCH") return { data: { id: "org-1", name: "New Name", role } } as never;
-    if (path === "/api/workspaces/org-1") return { data: { id: "org-1", name: "Old Name", role } } as never;
+    if (path === "/api/workspaces/org-1" && init?.method === "PATCH") {
+      const body = JSON.parse(String(init.body)) as { name?: string; slug?: string };
+      return { data: { id: "org-1", name: body.name ?? "Old Name", slug: body.slug ?? "old-name", role } } as never;
+    }
+    if (path === "/api/workspaces/org-1") return { data: { id: "org-1", name: "Old Name", slug: "old-name", role } } as never;
     if (path === "/api/workspaces/org-1/members" && !init?.method) return { data: [
       { userId: "owner-1", email: "owner@example.test", name: "Owner", role: "owner", joinedAt: "2026-09-01T00:00:00Z" },
       { userId: "member-1", email: "member@example.test", name: "Member", role: "member", joinedAt: "2026-09-02T00:00:00Z" },
@@ -55,11 +58,31 @@ it("lets an owner rename an organization and manage members and invitations", as
   await waitFor(() => expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1/members/member-1", expect.objectContaining({ method: "DELETE" })));
 }, 15000);
 
+it("lets an owner change the organization address and blocks an invalid one locally", async () => {
+  const user = userEvent.setup();
+  const client = showSettings();
+  const input = await screen.findByLabelText("Organization address");
+  expect(input).toHaveValue("old-name");
+  expect(screen.getByRole("button", { name: "Save address" })).toBeDisabled();
+  await user.clear(input);
+  await user.type(input, "bad--slug");
+  await user.click(screen.getByRole("button", { name: "Save address" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("lowercase letters");
+  expect(apiFetch).not.toHaveBeenCalledWith("/api/workspaces/org-1", expect.objectContaining({ method: "PATCH" }));
+  await user.clear(input);
+  await user.type(input, "Binary-HQ");
+  await user.click(screen.getByRole("button", { name: "Save address" }));
+  await waitFor(() => expect(client.getQueryData<{ slug: string }>(["organization", "owner-1", "org-1"])?.slug).toBe("binary-hq"));
+  expect(apiFetch).toHaveBeenCalledWith("/api/workspaces/org-1", expect.objectContaining({ method: "PATCH", body: JSON.stringify({ slug: "binary-hq" }) }));
+  expect(input).toHaveValue("binary-hq");
+});
+
 it("shows organization details without owner controls to a member", async () => {
   showSettings("member");
   expect(await screen.findByText("Old Name")).toBeVisible();
   expect(screen.queryByRole("heading", { name: "Delete organization" })).toBeNull();
   expect(screen.queryByRole("button", { name: "Save name" })).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Organization address")).not.toBeInTheDocument();
   expect(screen.queryByLabelText("Invite email")).not.toBeInTheDocument();
   expect(apiFetch).not.toHaveBeenCalledWith("/api/workspaces/org-1/members", expect.anything());
 });

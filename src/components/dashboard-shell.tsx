@@ -9,7 +9,6 @@ import { currentUserOptions } from "@/lib/session";
 import { Button } from "@/components/ui";
 import { BrandLogo } from "@/components/brand";
 import { AccountMenu } from "@/components/account-menu";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { apiFetch } from "@/lib/api";
 import { dashboardDestination, organizationHref, resolveOrganization, personalOrganizationId, scopeFromPath } from "@/lib/dashboard-routes";
 import { isStaging, StagingBanner } from "@/components/staging-banner";
@@ -170,10 +169,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </a>
             <Link href="/contact" onClick={closeMenu} className="dashboard-nav-item" aria-label="Help" title="Help"><DashboardIcon href="/help" /><span className="dashboard-nav-text">Help</span></Link>
           </div>
-        </div>
-        <div className="dashboard-sidebar-theme">
-          <span className="dashboard-nav-text">Theme</span>
-          <ThemeSwitcher align={collapsed ? "start" : "end"} side="top" />
         </div>
         <div className="dashboard-sidebar-account">
           <AccountMenu key={user.data.id} user={user.data} showName relation={relationLabel(navWorkspace)} />

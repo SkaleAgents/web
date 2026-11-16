@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
     ] }, { source: "/auth/confirm", headers: [
       { key: "Referrer-Policy", value: "no-referrer" },
       { key: "Cache-Control", value: "no-store, private" },
-      { key: "Content-Security-Policy", value: `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; connect-src 'self' ${apiOrigin}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` },
+      { key: "Content-Security-Policy", value: `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https://*.googleusercontent.com; connect-src 'self' ${apiOrigin}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` },
     ] }];
   },
   redirects() {

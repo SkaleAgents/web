@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { ApiUser } from "@/lib/api";
 import { accountLinks } from "@/lib/dashboard-navigation";
 import { Avatar } from "@/components/avatar";
+import { ThemeChoices } from "@/components/theme-switcher";
 
 export function AccountNavigation({ user, pathname, inquiriesActive = false, showName = false, relation, signingOut, onSignOut }: {
   user: ApiUser;
@@ -43,14 +44,20 @@ export function AccountNavigation({ user, pathname, inquiriesActive = false, sho
         aria-expanded={open} aria-controls={panelId}
         className="account-nav-trigger"
         onClick={() => setOpen(!open)}>
-        <Avatar name={name} kind="person" className="account-nav-avatar" />
+        <Avatar name={name} kind="person" className="account-nav-avatar" src={user.avatarUrl} />
         {showName && <span aria-hidden="true" className="account-nav-identity"><span className="truncate font-medium">{name}</span>{relation && <span className="account-nav-relation truncate">{relation}</span>}</span>}
         {showName && <svg aria-hidden="true" className="account-nav-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5M7 9l5-5 5 5" /></svg>}
       </button>
       <div id={panelId} hidden={!open} className="account-nav-panel">
-        <div className="mb-1 border-b border-line px-3 pb-3 pt-2">
-          <p className="break-words font-semibold text-ink">{name}</p>
+        <div className="mb-1 flex items-center gap-3 border-b border-line px-3 pb-3 pt-2">
+          <Avatar name={name} kind="person" className="account-nav-avatar" src={user.avatarUrl} />
+          <div className="min-w-0">
+            <p className="break-words font-semibold text-ink">{name}</p>
+            {user.email && <p className="break-all text-xs text-ink-muted">{user.email}</p>}
+          </div>
         </div>
+        <ThemeChoices />
+        <div className="my-1 border-t border-line" />
         {accountLinks.map(({ href, label }) => <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined}
           className="account-nav-item" onClick={() => setOpen(false)}>
           {label}
