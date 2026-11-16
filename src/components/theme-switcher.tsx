@@ -9,7 +9,7 @@ const serverSnapshot = () => false;
 const choices = ["light", "dark", "system"] as const;
 type Theme = (typeof choices)[number];
 
-function ThemeIcon({ theme }: { theme: Theme }) {
+export function ThemeIcon({ theme }: { theme: Theme }) {
   return (
     <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
       {theme === "light" ? <><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" /></>
@@ -92,6 +92,26 @@ export function ThemeSwitcher({ align = "end", side = "bottom" }: {
           {selected === choice && <svg aria-hidden="true" className="ml-auto text-accent" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 4 4L19 6" /></svg>}
         </button>)}
       </div>}
+    </div>
+  );
+}
+
+// Inline radio group for menus that already own their open/close behaviour, such as the account menu.
+export function ThemeChoices() {
+  const mounted = useSyncExternalStore(subscribe, clientSnapshot, serverSnapshot);
+  const { theme, setTheme } = useTheme();
+  const selected: Theme = mounted && (theme === "light" || theme === "dark") ? theme : "system";
+  return (
+    <div role="radiogroup" aria-label="Color theme" className="flex items-center justify-between gap-2 px-3 py-2 text-sm text-ink-muted">
+      <span>Theme</span>
+      <span className="inline-flex rounded-md border border-line p-0.5">
+        {choices.map(choice => <button key={choice} type="button" role="radio" aria-checked={selected === choice}
+          aria-label={choice[0].toUpperCase() + choice.slice(1)} title={choice[0].toUpperCase() + choice.slice(1)} disabled={!mounted}
+          className={`inline-flex size-7 items-center justify-center rounded ${selected === choice ? "bg-canvas text-ink" : "hover:text-ink"} focus-visible:outline-2 focus-visible:outline-accent`}
+          onClick={() => setTheme(choice)}>
+          <ThemeIcon theme={choice} />
+        </button>)}
+      </span>
     </div>
   );
 }

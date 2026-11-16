@@ -411,6 +411,7 @@ export type ApiUser = {
   agreementRequired?: boolean;
   email: string | null;
   displayName: string;
+  avatarUrl?: string | null;
   googleSubject?: string | null;
   grokSubject: string | null;
   grokLinked?: boolean;

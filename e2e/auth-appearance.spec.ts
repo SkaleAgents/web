@@ -66,7 +66,7 @@ test("theme selection persists and System follows the device while the logo matc
   await expect(page.locator("html")).toHaveClass(/\blight\b/);
 });
 
-test("signed-in users can change theme from the dashboard toolbar", async ({ page }) => {
+test("signed-in users can change theme from the profile menu", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: { id: "appearance-user", displayName: "Appearance User" } }));
   const personalId = "0198f0b0-0000-7000-8000-000000000001";
   const personal = { id: personalId, name: "Personal", kind: "personal", role: "owner" };
@@ -76,10 +76,13 @@ test("signed-in users can change theme from the dashboard toolbar", async ({ pag
     await page.route(`**/api/${resource}`, route => route.fulfill({ json: { [resource]: [] } }));
   }
   await page.goto("/me");
-  await expect(page.getByRole("button", { name: "Appearance User, account menu" })).toBeVisible();
-  await selectTheme(page, "Dark");
+  const account = page.getByRole("button", { name: "Appearance User, account menu" });
+  await expect(account).toBeVisible();
+  await account.click();
+  const themes = page.getByRole("radiogroup", { name: "Color theme" });
+  await themes.getByRole("radio", { name: "Dark" }).click();
   await expect(page.locator("html")).toHaveClass(/\bdark\b/);
-  await selectTheme(page, "Light");
+  await themes.getByRole("radio", { name: "Light" }).click();
   await expect(page.locator("html")).toHaveClass(/\blight\b/);
   await page.setViewportSize({ width: 320, height: 900 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

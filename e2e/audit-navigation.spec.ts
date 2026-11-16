@@ -28,16 +28,14 @@ test("audit creation and job management use separate pages", async ({ page }) =>
   await expect(page.getByText("Audit in progress", { exact: true })).toBeVisible();
 });
 
-test("signed-in navigation puts the theme control and the profile menu at the sidebar foot", async ({ page }) => {
+test("signed-in navigation puts the theme control inside the profile menu at the sidebar foot", async ({ page }) => {
   await page.route("**/api/user", route => route.fulfill({ json: { id: "owner", displayName: "Test Owner", email: "owner@skaleagents.com" } }));
   await page.goto("/me/jobs");
   const toolbar = page.locator(".dashboard-toolbar");
   await expect(toolbar.getByRole("button", { name: "Color theme" })).toHaveCount(0);
   await expect(toolbar.getByRole("button", { name: /account menu/ })).toHaveCount(0);
   const foot = page.locator(".dashboard-sidebar-account");
-  const themeRow = page.locator(".dashboard-sidebar-theme");
-  await expect(page.locator(".dashboard-brand").getByRole("button", { name: "Color theme" })).toHaveCount(0);
-  await expect(themeRow.getByRole("button", { name: "Color theme" })).toBeVisible();
+  await expect(page.locator(".dashboard-sidebar").getByRole("button", { name: "Color theme" })).toHaveCount(0);
   const account = foot.getByRole("button", { name: "Test Owner, account menu" });
   await expect(account).toBeVisible();
   await expect(account).toContainText("Test Owner");
@@ -46,12 +44,13 @@ test("signed-in navigation puts the theme control and the profile menu at the si
   const before = await account.boundingBox();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   expect((await account.boundingBox())!.y).toBe(before!.y);
-  await themeRow.getByRole("button", { name: "Color theme" }).click();
-  const menu = page.getByRole("menu", { name: "Color theme" });
-  for (const choice of ["Light", "Dark", "System"]) await expect(menu.getByRole("menuitemradio", { name: choice })).toBeVisible();
-  await menu.getByRole("menuitemradio", { name: "Dark" }).click();
-  await expect(page.locator("html")).toHaveAttribute("class", /dark/);
   await account.click();
+  await expect(foot.locator(".account-nav-panel")).toContainText("owner@skaleagents.com");
+  const themes = foot.getByRole("radiogroup", { name: "Color theme" });
+  for (const choice of ["Light", "Dark", "System"]) await expect(themes.getByRole("radio", { name: choice })).toBeVisible();
+  await themes.getByRole("radio", { name: "Dark" }).click();
+  await expect(page.locator("html")).toHaveAttribute("class", /dark/);
+  await expect(themes.getByRole("radio", { name: "Dark" })).toHaveAttribute("aria-checked", "true");
   await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
   await page.getByRole("link", { name: "Profile", exact: true }).click();
   await expect(page).toHaveURL("/account/profile");
@@ -71,10 +70,11 @@ test("the collapsed sidebar keeps Docs, Help and the profile inside the window w
   expect(accountBox.y + accountBox.height).toBeLessThanOrEqual(520);
   expect((await help.boundingBox())!.y + (await help.boundingBox())!.height).toBeLessThanOrEqual(accountBox.y);
   await expect(page.getByRole("link", { name: /Visit public site/ })).toHaveCount(0);
-  // The theme menu is wider than the rail, so it opens rightward instead of off the window edge.
-  await page.locator(".dashboard-sidebar-theme").getByRole("button", { name: "Color theme" }).click();
-  const menu = (await page.getByRole("menu", { name: "Color theme" }).boundingBox())!;
-  expect(menu.x).toBeGreaterThanOrEqual(0);
+  // The profile menu, which holds the theme control, stays inside the window from the rail.
+  await account.click();
+  const panel = (await page.getByRole("radiogroup", { name: "Color theme" }).boundingBox())!;
+  expect(panel.x).toBeGreaterThanOrEqual(0);
+  await account.click();
   // The profile highlight stays round around the avatar instead of turning into a rounded square.
   const box = (await account.boundingBox())!;
   expect(Math.abs(box.width - box.height)).toBeLessThan(1);

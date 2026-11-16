@@ -10,7 +10,7 @@ import { formatDate } from "@/lib/format-date";
 
 type Role = "owner" | "admin" | "member" | "viewer";
 type AssignableRole = Exclude<Role, "owner">;
-type Organization = { id: string; name: string; role: Role };
+type Organization = { id: string; name: string; slug?: string | null; role: Role };
 type Member = { userId: string; email: string; name: string; role: Role; joinedAt: string };
 type Invitation = { id: string; email: string; role: AssignableRole; expiresAt: string; status: "pending" };
 
@@ -24,6 +24,8 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
   // Admins manage people but not the organization itself; the API enforces the same split.
   const manager = owner || organization.role === "admin";
   const [name, setName] = useState(organization.name);
+  const [slug, setSlug] = useState(organization.slug ?? "");
+  const [savedSlug, setSavedSlug] = useState(organization.slug ?? "");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<AssignableRole>("member");
   const [busy, setBusy] = useState(false);
@@ -73,6 +75,24 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
     }, "Organization name saved.");
   }
 
+  function saveSlug(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const nextSlug = slug.trim().toLowerCase();
+    // Mirrors the API rule; the API still has the final say on uniqueness.
+    if (!/^(?=.{3,48}$)[a-z0-9]+(?:-[a-z0-9]+)*$/.test(nextSlug)) {
+      setError("Use 3 to 48 lowercase letters, numbers and single hyphens.");
+      return;
+    }
+    void change(async () => {
+      const response = await apiFetch<{ data: Organization }>(root, { method: "PATCH", body: JSON.stringify({ slug: nextSlug }) });
+      if (client.getQueryData<{ id: string }>(["user"])?.id !== accountId) return;
+      client.setQueryData(["organization", accountId, workspaceId], response.data);
+      client.setQueryData<Organization[]>(["workspaces", accountId], current => current?.map(item => item.id === workspaceId ? { ...item, slug: response.data.slug } : item));
+      setSlug(response.data.slug ?? "");
+      setSavedSlug(response.data.slug ?? "");
+    }, "Organization address saved.");
+  }
+
   function sendInvitation(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const email = inviteEmail.trim();
@@ -95,6 +115,15 @@ export function OrganizationSettingsManager({ organization, accountId }: { organ
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <TextInput id="organization-name" value={name} onChange={event => setName(event.target.value)} maxLength={120} required className="min-w-48 flex-1" />
           <Button type="submit" disabled={busy || !name.trim() || name.trim() === organization.name}>Save name</Button>
+        </div>
+      </form>}
+      {owner && <form onSubmit={saveSlug} className="mt-5 max-w-lg">
+        <label htmlFor="organization-slug" className="block text-sm font-medium">Organization address</label>
+        <p id="organization-slug-help" className="mt-1 text-xs text-ink-muted">Picked for you when the organization was created. Links that use the old address stop working after a change.</p>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="text-sm text-ink-muted">/org/</span>
+          <TextInput id="organization-slug" aria-describedby="organization-slug-help" value={slug} onChange={event => setSlug(event.target.value)} minLength={3} maxLength={48} required className="min-w-40 flex-1" />
+          <Button type="submit" disabled={busy || !slug.trim() || slug.trim().toLowerCase() === savedSlug}>Save address</Button>
         </div>
       </form>}
     </section>
