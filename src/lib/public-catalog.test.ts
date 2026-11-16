@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
 import type { Bot, Prompt } from "./api";
-import { communityPrompts, countBotsByIntegration, countBotsBySpecialty, publishedPublicBots } from "./public-catalog";
+import { communityPrompts, countBotsByIntegration, countBotsBySpecialty, loadPublicBot, publishedPublicBots } from "./public-catalog";
 
 const bot = (patch: Partial<Bot>): Bot => ({
   id: "bot",
@@ -91,6 +91,25 @@ it("lists a published public bot in the sitemap and leaves private bots out", as
     expect(urls).toContain("https://skaleagents.com/bot-directory/specialties/mlops");
     expect(urls).toContain("https://skaleagents.com/prompts/community-prompt");
     expect(urls.some((url) => url.includes("private-bot") || url.includes("personal-prompt"))).toBe(false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+it("tells a missing or non-public bot (404 page) apart from an API failure (client retry)", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    if (url.endsWith("/missing")) return Response.json({ error: "Not found" }, { status: 404 });
+    if (url.endsWith("/draft")) return Response.json(bot({ id: "draft", status: "draft" }));
+    if (url.endsWith("/down")) return new Response("", { status: 503 });
+    return Response.json(bot({ id: "public-bot" }));
+  };
+  try {
+    expect(await loadPublicBot("missing")).toBeNull();
+    expect(await loadPublicBot("draft")).toBeNull();
+    expect(await loadPublicBot("down")).toBeUndefined();
+    expect((await loadPublicBot("public-bot"))?.id).toBe("public-bot");
   } finally {
     globalThis.fetch = originalFetch;
   }
