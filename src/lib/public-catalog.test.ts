@@ -98,8 +98,10 @@ it("lists a published public bot in the sitemap and leaves private bots out", as
 
 it("tells a missing or non-public bot (404 page) apart from an API failure (client retry)", async () => {
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async (input) => {
+  const options: Record<string, RequestInit | undefined> = {};
+  globalThis.fetch = async (input, init) => {
     const url = String(input);
+    options[url.split("/").pop()!] = init;
     if (url.endsWith("/missing")) return Response.json({ error: "Not found" }, { status: 404 });
     if (url.endsWith("/draft")) return Response.json(bot({ id: "draft", status: "draft" }));
     if (url.endsWith("/down")) return new Response("", { status: 503 });
@@ -110,6 +112,8 @@ it("tells a missing or non-public bot (404 page) apart from an API failure (clie
     expect(await loadPublicBot("draft")).toBeNull();
     expect(await loadPublicBot("down")).toBeUndefined();
     expect((await loadPublicBot("public-bot"))?.id).toBe("public-bot");
+    // A cached 200 would outlive a deletion, because Next never replaces it with a 404.
+    expect(options["missing"]?.cache).toBe("no-store");
   } finally {
     globalThis.fetch = originalFetch;
   }
