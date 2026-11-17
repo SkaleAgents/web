@@ -27,9 +27,10 @@ export function communityPrompts(prompts: Prompt[]): Prompt[] {
 }
 
 // null means the API answered 404; undefined means it could not be reached or failed.
-async function readJson<T>(path: string): Promise<T | null | undefined> {
+async function readJson<T>(path: string, fresh = false): Promise<T | null | undefined> {
   try {
-    const response = await fetch(`${API_URL}${path}`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(5000) });
+    // Next refreshes a cached fetch only from a 200, so a 404 (deleted or made private) would leave the old copy served forever. Single bots skip the cache.
+    const response = await fetch(`${API_URL}${path}`, { ...(fresh ? { cache: "no-store" as const } : { next: { revalidate: 300 } }), signal: AbortSignal.timeout(5000) });
     if (response.status === 404) return null;
     if (!response.ok) return undefined;
     return await response.json() as T;
@@ -45,7 +46,7 @@ export async function loadPublicBots(): Promise<Bot[] | undefined> {
 
 // null: no such public bot, so the page can 404. undefined: the API is down, so the client retries.
 export async function loadPublicBot(id: string): Promise<Bot | null | undefined> {
-  const bot = await readJson<Bot>(`/api/bots/${encodeURIComponent(id)}`);
+  const bot = await readJson<Bot>(`/api/bots/${encodeURIComponent(id)}`, true);
   if (!bot) return bot;
   return bot.visibility === "public" && bot.status === "published" ? bot : null;
 }
