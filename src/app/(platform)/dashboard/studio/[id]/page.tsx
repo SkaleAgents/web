@@ -119,6 +119,20 @@ export default function StudioEditPage() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const remove = useMutation({
+    mutationFn: async () => {
+      await ensureCsrfCookie();
+      await apiFetch<void>(`/api/bots/${id}`, { method: "DELETE" });
+    },
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: botKey });
+      void queryClient.invalidateQueries({ queryKey: ["bots"] });
+      toast.success("Bot deleted");
+      router.push(personalDestinationFromPath(pathname, "bots"));
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
   if (botQuery.isPending) {
     return <p className="text-sm text-ink-muted">Loading…</p>;
   }
@@ -243,6 +257,17 @@ export default function StudioEditPage() {
               {publish.isPending ? "Publishing…" : "Publish"}
             </button>
           )}
+          <button
+            type="button"
+            disabled={remove.isPending}
+            onClick={() => {
+              const published = bot.status === "published" && bot.visibility === "public";
+              if (window.confirm(`Delete "${bot.name}"? ${published ? "It will disappear from the public directory. " : ""}This cannot be undone.`)) remove.mutate();
+            }}
+            className="ml-auto rounded-[10px] border border-line px-4 py-2 text-sm text-danger"
+          >
+            {remove.isPending ? "Deleting…" : "Delete bot"}
+          </button>
         </div>
       </form>
     </main>
