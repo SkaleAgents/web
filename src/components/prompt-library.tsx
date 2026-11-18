@@ -73,6 +73,18 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      await ensureCsrfCookie();
+      await apiFetch<void>(`/api/prompts/${id}`, { method: "DELETE" });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      toast.success("Prompt deleted");
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
   const prompts = promptsQuery.data?.filter(prompt => manage ? prompt.ownerUserId === userQuery.data?.id : !prompt.ownerUserId);
   const tags = [...new Set(prompts?.flatMap((prompt) => manage ? prompt.tags : promptCategories(prompt.tags)) ?? [])].sort();
   const filteredPrompts = prompts?.filter((prompt) => {
@@ -181,13 +193,21 @@ export function PromptLibrary({ manage = false, initialPrompts }: { manage?: boo
             <details><summary className="cursor-pointer text-sm font-semibold">Read full prompt</summary>
             <pre className="mt-3 whitespace-pre-wrap break-words font-mono text-sm text-ink">{prompt.body}</pre>
             </details>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-wrap items-center gap-2">
               <BotPromptActions
                 title={prompt.title}
                 prompt={prompt.body}
                 align="left"
                 markdownUrl={!manage && !prompt.ownerUserId ? absoluteMarkdown(`/prompts/${prompt.id}`) : undefined}
               />
+              <Button
+                variant="secondary"
+                disabled={remove.isPending}
+                aria-label={`Delete ${prompt.title}`}
+                onClick={() => { if (window.confirm(`Delete "${prompt.title}"? This cannot be undone.`)) remove.mutate(prompt.id); }}
+              >
+                Delete
+              </Button>
             </div>
           </li>
         ))}
