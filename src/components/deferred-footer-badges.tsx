@@ -1,12 +1,22 @@
 "use client";
 
-import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
+import { fetchConsentRequired, optionalCookiesAllowed, subscribeCookieConsent } from "@/lib/cookie-consent";
+import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 
 const FooterBadges = lazy(() => import("@/components/footer-badges").then((module) => ({ default: module.FooterBadges })));
 
 export function DeferredFooterBadges({ fallback }: { fallback: ReactNode }) {
   const root = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
+  const [consentRequired, setConsentRequired] = useState<boolean | null>(null);
+  const accepted = useSyncExternalStore(subscribeCookieConsent, optionalCookiesAllowed, () => false);
+
+  // Badge images come from about 25 third-party hosts, so in Europe they wait for the visitor's Accept.
+  useEffect(() => {
+    let active = true;
+    fetchConsentRequired().then(value => { if (active) setConsentRequired(value); });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const element = root.current;
@@ -38,7 +48,7 @@ export function DeferredFooterBadges({ fallback }: { fallback: ReactNode }) {
 
   return (
     <div ref={root} className="deferred-footer-badges">
-      {ready ? <Suspense fallback={fallback}><FooterBadges /></Suspense> : fallback}
+      {ready && (accepted || consentRequired === false) ? <Suspense fallback={fallback}><FooterBadges /></Suspense> : fallback}
     </div>
   );
 }

@@ -44,3 +44,14 @@ export function saveCookieChoice(choice: CookieChoice) {
   document.cookie = `${COOKIE}=${choice}; Max-Age=${MAX_AGE}; Path=/; SameSite=Lax${secure}`;
   emit();
 }
+
+// Fail closed: only an explicit `required: false` from the region lookup skips the notice.
+export async function fetchConsentRequired(): Promise<boolean> {
+  try {
+    const response = await fetch("/consent-region", { cache: "no-store" });
+    if (!response.ok) return true;
+    return ((await response.json()) as { required?: unknown }).required !== false;
+  } catch {
+    return true;
+  }
+}
