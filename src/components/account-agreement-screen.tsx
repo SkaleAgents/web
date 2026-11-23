@@ -49,7 +49,8 @@ export function AccountAgreementScreen({ next, oauth }: { next: string | null; o
     setError("");
     setAccepted(true);
     try {
-      await finishAccountSetup(user.data.id, withPasskey, name);
+      // shortcut: new email accounts finish setup on /auth/confirm, so a missing Google subject means GitHub here; add githubSubject to the api user if that changes.
+      await finishAccountSetup(user.data.id, withPasskey, name, user.data.googleSubject ? "google" : "github");
       client.setQueryData(currentUserOptions.queryKey, current => current ? { ...current, agreementRequired: false } : current);
       continueToProduct();
     } catch (reason) {

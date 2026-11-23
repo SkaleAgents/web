@@ -13,10 +13,18 @@ export function usePasskeySupport() {
   return useSyncExternalStore(noop, passkeysSupported, () => false);
 }
 
+declare global {
+  interface Window { gtag?: (...args: unknown[]) => void }
+}
+
 // Agreement first: passkey routes require an accepted agreement.
-export async function finishAccountSetup(accountId: string, wantPasskey: boolean, name = ""): Promise<void> {
+export async function finishAccountSetup(accountId: string, wantPasskey: boolean, name = "", method?: "google" | "github" | "email"): Promise<void> {
   const status = await readAgreement();
-  if (status.required && (await acceptAgreement(status)).required) throw new Error("Your agreement was not saved. Try again.");
+  if (status.required) {
+    if ((await acceptAgreement(status)).required) throw new Error("Your agreement was not saved. Try again.");
+    // An account accepts the agreement once, at sign-up. gtag exists only when consent let GA load.
+    if (method) window.gtag?.("event", "sign_up", { method });
+  }
   if (!wantPasskey) return;
   const settings = await apiFetch<PasskeySettings>("/api/account/passkeys");
   if (!settings.passkeys.length) await addPasskey(accountId, name.trim() || deviceName());

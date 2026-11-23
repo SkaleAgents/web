@@ -43,7 +43,7 @@ export default function ConfirmEmailPage() {
         id = (await apiFetch<{ id: string }>("/api/user")).id;
         setAccountId(id);
       }
-      await finishAccountSetup(id, withPasskey && supportsPasskeys, passkeyNameFrom(form));
+      await finishAccountSetup(id, withPasskey && supportsPasskeys, passkeyNameFrom(form), "email");
       enterProduct();
     } catch (err) { setError(authenticationError(err)); setBusy(false); }
   }
