@@ -6,7 +6,7 @@ export const metadata: Metadata = pageMetadata({ path: "/privacy", title: "Priva
 
 export default function PrivacyPage() {
   return <main className="policy-page py-4 text-ink">
-    <p className="text-sm font-semibold uppercase tracking-wide text-ink-muted">Effective October 2, 2026 · Version 2026-10-02</p>
+    <p className="text-sm font-semibold uppercase tracking-wide text-ink-muted">Effective November 23, 2026 · Version 2026-11-23</p>
     <h1 className="font-display text-4xl font-bold">SkaleAgents Privacy Policy</h1>
     <p>Binary Labs LLC, 1309 Coffeen Avenue, Sheridan, WY 82801, USA, operates SkaleAgents. For privacy requests, use our <Link href="/contact">contact page</Link>. This policy covers the SkaleAgents website, account, dashboards, APIs, and MCP connections.</p>
     <h2>Information we process</h2>
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <h2>Why we process it</h2>
     <p>We use this information to create and secure accounts, provide the features you request, deliver invitations and operational email, manage plans and billing, answer support requests, prevent abuse, and comply with legal duties. Where applicable, our bases are performance of a contract, legitimate interests in operating and securing the service, legal obligations, and consent for optional processing that requires it. Acknowledging this policy is not consent to unrelated marketing.</p>
     <h2>Service providers and transfers</h2>
-    <p>Our hosting and database services run on Railway. Resend delivers account and invitation email. Google supplies sign-in identity when you choose Google. Google Analytics 4 counts page visits when the cookie rules below allow it. A payment provider may process checkout when paid plans are available. Connected AI and MCP services may receive the inputs needed for the features you activate. Providers process information under their own terms and our applicable arrangements. Information may be processed in the United States or other countries where these providers operate.</p>
+    <p>Our hosting and database services run on Railway. Resend delivers account and invitation email. Google supplies sign-in identity when you choose Google. Google Analytics 4 counts page visits when the cookie rules below allow it. A payment provider may process checkout when paid plans are available. Connected AI and MCP services may receive the inputs needed for the features you activate. Providers process information under their own terms and our applicable arrangements. Information may be processed in the United States or other countries where these providers operate. Binary Labs LLC keeps the account owner&apos;s name, email, organization name, plan and sign-up source in its internal customer list so it can support you. After an account is deleted it keeps only the email address, so we don&apos;t contact you again.</p>
     <h2>Retention and deletion</h2>
     <p>We keep account and organization data while needed to operate your account and meet security, billing, or legal obligations. You can request deletion or use available product controls to purge eligible audit inputs and history. Deletion of active application data does not necessarily remove the same data immediately from backups or provider logs. Automatic audit retention periods apply only when they are enabled for your account and shown in the product; do not assume every audit is deleted on a fixed timer. We retain a record of which policy versions you accepted for accountability.</p>
     <h2 id="cookies">Cookies</h2>

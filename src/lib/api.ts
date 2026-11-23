@@ -71,6 +71,7 @@ export type McpConnection = {
 export type EmailPreferences = {
   auditCompleted: boolean;
   auditFailed: boolean;
+  binaryLabsProducts?: boolean;
 };
 
 export type NotificationSettings = {
