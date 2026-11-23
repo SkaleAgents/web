@@ -8,6 +8,7 @@ import { Button, LinkButton } from "./ui";
 const preferences: Array<{ key: keyof EmailPreferences; label: string; detail: string }> = [
   { key: "auditCompleted", label: "Completed audits", detail: "A link to your results when a manual or scheduled audit finishes, including partial results." },
   { key: "auditFailed", label: "Failed audits", detail: "A notice when a manual or scheduled audit fails." },
+  { key: "binaryLabsProducts", label: "Tell me about other Binary Labs products", detail: "Occasional news about other products from Binary Labs LLC, the company behind SkaleAgents." },
 ];
 
 export function EmailSettings({ accountId }: { accountId: string }) {
@@ -55,7 +56,7 @@ export function EmailSettings({ accountId }: { accountId: string }) {
         <legend className="sr-only">Email preferences</legend>
         {preferences.map(({ key, label, detail }) => (
           <label key={key} className="flex cursor-pointer items-start gap-3 py-4">
-            <input type="checkbox" className="mt-1 size-4 shrink-0 accent-accent" checked={(update.isPending ? update.variables?.[key] : undefined) ?? settings.data.preferences[key]}
+            <input type="checkbox" className="mt-1 size-4 shrink-0 accent-accent" checked={(update.isPending ? update.variables?.[key] : undefined) ?? settings.data.preferences[key] ?? false}
               onChange={(event) => update.mutate({ [key]: event.target.checked })} aria-describedby={`preference-${key}`} />
             <span>
               <span className="block text-sm font-semibold text-ink">{label}</span>

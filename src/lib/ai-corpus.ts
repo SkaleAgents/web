@@ -295,7 +295,7 @@ function staticPage(path: string): string | null {
 
 function privacyMarkdown(): string {
   return document("SkaleAgents Privacy Policy", [
-    "Effective October 2, 2026. Version 2026-10-02. The HTML page is the binding copy.",
+    "Effective November 23, 2026. Version 2026-11-23. The HTML page is the binding copy.",
     "",
     "Binary Labs LLC, 1309 Coffeen Avenue, Sheridan, WY 82801, USA, operates SkaleAgents. For privacy requests, use the contact page at /contact. This policy covers the SkaleAgents website, account, dashboards, APIs, and MCP connections.",
     "",
@@ -309,7 +309,7 @@ function privacyMarkdown(): string {
     "",
     "## Service providers and transfers",
     "",
-    "Our hosting and database services run on Railway. Resend delivers account and invitation email. Google supplies sign-in identity when you choose Google. Google Analytics 4 counts page visits when the cookie rules below allow it. A payment provider may process checkout when paid plans are available. Connected AI and MCP services may receive the inputs needed for the features you activate. Information may be processed in the United States or other countries where these providers operate.",
+    "Our hosting and database services run on Railway. Resend delivers account and invitation email. Google supplies sign-in identity when you choose Google. Google Analytics 4 counts page visits when the cookie rules below allow it. A payment provider may process checkout when paid plans are available. Connected AI and MCP services may receive the inputs needed for the features you activate. Information may be processed in the United States or other countries where these providers operate. Binary Labs LLC keeps the account owner's name, email, organization name, plan and sign-up source in its internal customer list so it can support you. After an account is deleted it keeps only the email address, so we don't contact you again.",
     "",
     "## Retention and deletion",
     "",
