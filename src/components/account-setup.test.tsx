@@ -29,3 +29,20 @@ it("skips the passkey when declined or one already exists", async () => {
   await finishAccountSetup("u1", true, "x");
   expect(addPasskey).not.toHaveBeenCalled();
 });
+
+it("sends sign_up once, only when the agreement is first accepted and GA is loaded", async () => {
+  const { readAgreement, acceptAgreement } = await import("@/lib/account-agreement");
+  const gtag = vi.fn();
+  window.gtag = gtag;
+  await finishAccountSetup("u1", false, "", "github");
+  expect(gtag).not.toHaveBeenCalled();
+  vi.mocked(readAgreement).mockResolvedValueOnce({ required: true } as never);
+  vi.mocked(acceptAgreement).mockResolvedValueOnce({ required: false } as never);
+  await finishAccountSetup("u1", false, "", "github");
+  expect(gtag.mock.calls).toEqual([["event", "sign_up", { method: "github" }]]);
+  delete window.gtag;
+  vi.mocked(readAgreement).mockResolvedValueOnce({ required: true } as never);
+  vi.mocked(acceptAgreement).mockResolvedValueOnce({ required: false } as never);
+  await expect(finishAccountSetup("u1", false, "", "email")).resolves.toBeUndefined();
+  expect(gtag).toHaveBeenCalledTimes(1);
+});
