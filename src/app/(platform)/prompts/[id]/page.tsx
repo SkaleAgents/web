@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/page-metadata";
 import { PromptDetail } from "@/components/prompt-detail";
 import Link from "next/link";
 import { articleJsonLd, jsonLd } from "@/lib/json-ld";
-import { communityPrompts, loadCommunityPrompt, loadCommunityPrompts } from "@/lib/public-catalog";
+import { communityPrompts, loadCommunityPrompt, loadCommunityPrompts, moreCommunityPrompts } from "@/lib/public-catalog";
 
 export const revalidate = 300;
 
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function PromptPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const initialPrompt = await loadCommunityPrompt(id);
-  const others = communityPrompts((await loadCommunityPrompts()) ?? []).filter((prompt) => prompt.id !== id).slice(0, 4);
+  const others = moreCommunityPrompts(communityPrompts((await loadCommunityPrompts()) ?? []), id);
   const page = initialPrompt ? { title: initialPrompt.title, description: initialPrompt.body.slice(0, 300), path: `/prompts/${initialPrompt.id}`, datePublished: initialPrompt.createdAt } : null;
   return <>
     {page ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(articleJsonLd(page)) }} /> : null}

@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
 import type { Bot, Prompt } from "./api";
-import { communityPrompts, countBotsByIntegration, countBotsBySpecialty, loadPublicBot, publishedPublicBots } from "./public-catalog";
+import { communityPrompts, countBotsByIntegration, countBotsBySpecialty, loadPublicBot, moreCommunityPrompts, publishedPublicBots } from "./public-catalog";
 
 const bot = (patch: Partial<Bot>): Bot => ({
   id: "bot",
@@ -117,4 +117,13 @@ it("tells a missing or non-public bot (404 page) apart from an API failure (clie
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+it("links each community prompt from the next prompts in the list, so none is left with one inlink", () => {
+  const prompts: Prompt[] = ["a", "b", "c", "d", "e", "f"].map((id) => ({ id, ownerUserId: null, title: id, body: "Look.", tags: [], createdAt: "2026-10-01T00:00:00Z" }));
+  const links = prompts.flatMap((prompt) => moreCommunityPrompts(prompts, prompt.id).map((item) => item.id));
+  expect(moreCommunityPrompts(prompts, "e").map((item) => item.id)).toEqual(["f", "a", "b", "c"]);
+  for (const prompt of prompts) expect(links.filter((id) => id === prompt.id)).toHaveLength(4);
+  expect(moreCommunityPrompts(prompts, "missing").map((item) => item.id)).toEqual(["a", "b", "c", "d"]);
+  expect(moreCommunityPrompts(prompts.slice(0, 2), "a").map((item) => item.id)).toEqual(["b"]);
 });
