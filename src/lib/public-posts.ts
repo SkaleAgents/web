@@ -18,6 +18,35 @@ export type PublicPost = {
 
 export const publicPosts: readonly PublicPost[] = [
   {
+    slug: "scan-dependencies-for-cves",
+    title: "How to scan your dependencies for CVEs",
+    description: "Scan the lockfile, not package.json, for known CVEs, fail the build on high severity, and re-run it daily to catch advisories published after you merge.",
+    date: "2026-12-14",
+    publishAt: "2026-12-14T10:05:00+06:00",
+    summary: "An advisory names the versions it affects, so scan the lockfile you ship. One command lists each vulnerable package with its CVE, severity, and fixed version.",
+    sections: [
+      {
+        heading: "Scan the lockfile, not package.json",
+        paragraphs: [
+          "`package.json` holds ranges. The lockfile holds the versions you actually install, and an advisory names the versions it affects. Run `npx -y @skaleagents/swarm scan --cves --fail-on high pnpm-lock.yaml`. It reads `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `composer.lock`, `requirements.txt` with `==` pins, and `go.sum`. No lockfile, no answer, so commit one first.",
+          "Only package names and versions go to api.osv.dev. Your source and the lockfile text stay on your machine. Each finding is a package and version, the CVE, the severity, and the fixed versions. `--fail-on high` exits 1 when a finding is high or critical, which is the line you want in CI. A failed lookup is not a clean run. Treat it as unchecked.",
+        ],
+      },
+      {
+        heading: "Fix inside your major, then schedule it",
+        paragraphs: [
+          "For each critical or high finding, take the smallest upgrade that stays in your current major version, then read what else the lockfile change pulls in. If the only fix is a new major, that's a decision for a pull request. If you accept a CVE for now, record it in `.skaleagents-baseline.json` and put the reason in the pull request. The scan picks that file up on its own. Don't just let it scroll past in the log.",
+          "Add a workflow with a `schedule:` trigger that runs the same command once a day. A pull request check only knows the advisories that exist when you open it, so one published next week stays invisible until the next scan. This reads lockfiles only. Container images, OS packages, Cargo, and Gemfile aren't covered.",
+        ],
+      },
+    ],
+    links: [
+      { href: "/resources/dependency-cve-scan", label: "Dependency CVE scan" },
+      { href: "/checks/dependency-range-is-floating", label: "Dependency range is floating" },
+      { href: "/blog/pin-the-action-to-a-commit", label: "Pin the GitHub Action to a commit" },
+    ],
+  },
+  {
     slug: "replace-permissions-write-all",
     title: "Replace permissions: write-all in GitHub Actions",
     description: "permissions: write-all hands the workflow token write access to every scope. Start from contents: read and add only the write a job needs.",
