@@ -155,7 +155,8 @@ test("purged schedules require fresh input and deletion remains incomplete until
   await page.getByRole("button", { name: "Delete schedule", exact: true }).click();
   await page.getByRole("button", { name: "Confirm schedule deletion" }).click();
   await expect(page.getByText("Schedule deletion incomplete.", { exact: false })).toBeVisible();
-  await expect(page.getByText("Saved review", { exact: true })).toHaveCount(0);
+  // Scoped to main: Next's route announcer (role="alert") can still hold the old heading text.
+  await expect(page.getByRole("main").getByText("Saved review", { exact: true })).toHaveCount(0);
   deleted = true;
   await page.getByRole("button", { name: "Check schedule deletion" }).click();
   await expect(page.getByText("Schedule deletion completed. Dispatched audits remain separate.")).toBeVisible();
