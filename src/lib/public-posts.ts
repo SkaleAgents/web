@@ -18,6 +18,35 @@ export type PublicPost = {
 
 export const publicPosts: readonly PublicPost[] = [
   {
+    slug: "which-dependency-scanner-should-you-use",
+    title: "Which dependency scanner should you use",
+    description: "Test each dependency scanner on one known-vulnerable pin, then break its lookup and read the exit code. Keep the one that fails the build when it should.",
+    date: "2026-12-21",
+    publishAt: "2026-12-21T09:37:00+06:00",
+    summary: "A feature page won't tell you which scanner is right. Two tests will: give each one a pin you know is bad, then cut off its advisory lookup.",
+    sections: [
+      {
+        heading: "Test it on a pin you know is bad",
+        paragraphs: [
+          "Make a throwaway project with `\"lodash\": \"4.17.15\"` in `package.json`, run `npm install --package-lock-only`, and point every scanner at the lockfile. Same input each time. I ran `npm audit --audit-level=high` and it exited 1 with \"1 high severity vulnerability\" and GHSA advisory links.",
+          "I ran `npx -y @skaleagents/swarm scan --cves --fail-on high package-lock.json` on the same lockfile. It also exited 1, but it listed five findings by CVE, three high and two medium, each with a fixed version. Different ID scheme, different count, same pin. Neither is wrong. Advisories change, so rerun it when you test. Pick the output your team will actually triage.",
+        ],
+      },
+      {
+        heading: "Break the lookup, then read the exit code",
+        paragraphs: [
+          "A scanner that can't reach its advisory source shouldn't pass the build. Point `npm audit --registry=http://127.0.0.1:9` at a dead address and it exits 1 with \"audit endpoint returned an error\". `pnpm audit` has an `--ignore-registry-errors` flag, and its help says it uses exit code 0 when the registry responds with an error. That helps a flaky CI job. It also turns an outage into a green build, so keep it off the security gate.",
+          "Then check three more things. What it reads: the lockfile pins, not the ranges in `package.json`. What leaves your machine: the SkaleAgents scan sends package names and versions to api.osv.dev and nothing else. What it skips: the audit command your package manager ships covers that ecosystem only, and this scan reads `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `composer.lock`, `requirements.txt` with `==` pins, and `go.sum`. It does not cover container images, OS packages, Cargo, or Gemfile.",
+        ],
+      },
+    ],
+    links: [
+      { href: "/resources/dependency-cve-scan", label: "Dependency CVE scan" },
+      { href: "/blog/scan-dependencies-for-cves", label: "How to scan your dependencies for CVEs" },
+      { href: "/checks/dependency-range-is-floating", label: "Dependency range is floating" },
+    ],
+  },
+  {
     slug: "scan-dependencies-for-cves",
     title: "How to scan your dependencies for CVEs",
     description: "Scan the lockfile, not package.json, for known CVEs, fail the build on high severity, and re-run it daily to catch advisories published after you merge.",
