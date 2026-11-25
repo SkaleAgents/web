@@ -26,6 +26,12 @@ export function communityPrompts(prompts: Prompt[]): Prompt[] {
   return prompts.filter((prompt) => !prompt.ownerUserId);
 }
 
+// The next prompts after this one, wrapping around, so every prompt page links a different set and none is left with a single inlink.
+export function moreCommunityPrompts(prompts: Prompt[], id: string, count = 4): Prompt[] {
+  const start = prompts.findIndex((prompt) => prompt.id === id) + 1;
+  return [...prompts.slice(start), ...prompts.slice(0, Math.max(start - 1, 0))].slice(0, count);
+}
+
 // null means the API answered 404; undefined means it could not be reached or failed.
 async function readJson<T>(path: string, fresh = false): Promise<T | null | undefined> {
   try {
