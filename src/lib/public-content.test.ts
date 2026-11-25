@@ -6,7 +6,7 @@ import { publicResources } from "./public-resources";
 
 it("publishes free resources and blog posts in the sitemap, llms.txt, and markdown", async () => {
   expect(new Set(publicResources.map((resource) => resource.slug)).size).toBe(4);
-  expect(new Set(publicPosts.map((post) => post.slug)).size).toBe(12);
+  expect(new Set(publicPosts.map((post) => post.slug)).size).toBe(13);
   expect(publishedPosts(new Date("2026-10-07T12:00:00+06:00"))).toHaveLength(4);
   expect(publishedPosts(new Date("2026-11-09T09:00:00+06:00")).some((post) => post.slug === "pull-request-target-checks-out-the-pr")).toBe(false);
   expect(publishedPosts(new Date("2026-11-16T09:40:00+06:00")).some((post) => post.slug === "dont-pipe-curl-to-bash")).toBe(false);
@@ -26,11 +26,15 @@ it("publishes free resources and blog posts in the sitemap, llms.txt, and markdo
   }
   expect(new Set(clocks).size).toBe(clocks.length);
   const latest = new Date(Math.max(...publicPosts.flatMap((post) => post.publishAt ? [Date.parse(post.publishAt)] : [])));
-  expect(publishedPosts(latest)).toHaveLength(12);
+  expect(publishedPosts(latest)).toHaveLength(13);
   const cvePost = publicPosts.find((post) => post.slug === "scan-dependencies-for-cves");
   const cveOpens = new Date(cvePost?.publishAt ?? "");
   expect(postMarkdown("scan-dependencies-for-cves", new Date(cveOpens.getTime() - 1000))).toBeNull();
   expect(postMarkdown("scan-dependencies-for-cves", cveOpens)).toContain("scan --cves --fail-on high");
+  const scannerPost = publicPosts.find((post) => post.slug === "which-dependency-scanner-should-you-use");
+  const scannerOpens = new Date(scannerPost?.publishAt ?? "");
+  expect(postMarkdown("which-dependency-scanner-should-you-use", new Date(scannerOpens.getTime() - 1000))).toBeNull();
+  expect(postMarkdown("which-dependency-scanner-should-you-use", scannerOpens)).toContain("--ignore-registry-errors");
   const memoryLimit = publicPosts.find((post) => post.slug === "set-a-memory-limit");
   const memoryLimitOpens = new Date(memoryLimit?.publishAt ?? "");
   const beforeMemoryLimit = new Date(memoryLimitOpens.getTime() - 1000);
